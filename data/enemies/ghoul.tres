@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/entities/enemy_data.gd" id="1"]
+[resource]
+script = ExtResource("1")
+id = "ghoul"
+title = "Esquecido"
+health = 24.0
+speed = 25.0
+damage = 8.0
+experience = 2
+radius = 8.0
+texture = "res://assets/ghoul.png"
+behavior = "chase"

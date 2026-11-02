@@ -1,0 +1,122 @@
+class_name HordeEnemy
+extends CharacterBody2D
+
+var game
+var data: EnemyData
+var hp: float
+var max_hp: float
+var radius: float
+var alive: bool = true
+var elite: bool = false
+var state: String = "approach"
+var clock: float = 0
+var state_time: float = 0
+var attack_time: float = 2
+var hit_flash: float = 0
+var knockback: Vector2 = Vector2.ZERO
+var charge_direction: Vector2 = Vector2.ZERO
+var sprite: Sprite2D
+var serial: int = 0
+
+func setup(owner_game, stats: EnemyData, is_elite: bool = false) -> void:
+	game = owner_game
+	data = stats
+	elite = is_elite
+	radius = data.radius * (1.2 if elite else 1.0)
+	max_hp = data.health * (1.0 + game.elapsed / 1200.0) * (4.0 if elite else 1.0)
+	if data.behavior == "boss":
+		max_hp = data.health
+	hp = max_hp
+	attack_time = randf_range(1.5, 3.5)
+
+func _ready() -> void:
+	collision_layer = 2
+	collision_mask = 4
+	var collision := CollisionShape2D.new()
+	var circle := CircleShape2D.new()
+	circle.radius = radius
+	collision.shape = circle
+	add_child(collision)
+	sprite = Sprite2D.new()
+	sprite.texture = load(data.texture)
+	sprite.hframes = 4
+	sprite.position.y = -float(sprite.texture.get_height()) * 0.5 + 4
+	if elite:
+		sprite.scale = Vector2(1.2, 1.2)
+	add_child(sprite)
+
+func tick(delta: float) -> void:
+	if not alive:
+		return
+	clock += delta
+	state_time += delta
+	attack_time -= delta
+	hit_flash = maxf(0, hit_flash - delta)
+	var offset: Vector2 = game.player.position - position
+	var direction := offset.normalized()
+	var movement := direction * data.speed
+	if data.behavior == "flank":
+		movement += direction.orthogonal() * sin(clock * 2.5 + serial) * 15
+	if data.behavior == "charge":
+		if state == "approach" and attack_time <= 0 and offset.length() < 165:
+			state = "prepare"
+			state_time = 0
+			charge_direction = direction
+		elif state == "prepare":
+			movement = Vector2.ZERO
+			if state_time > 0.85:
+				state = "attack"
+				state_time = 0
+		elif state == "attack":
+			movement = charge_direction * 165
+			if state_time > 0.65:
+				state = "recovery"
+				state_time = 0
+		elif state == "recovery":
+			movement = Vector2.ZERO
+			if state_time > 1.25:
+				state = "approach"
+				attack_time = 4.0
+	if data.behavior == "boss" and attack_time <= 0:
+		attack_time = 4.5 if hp > max_hp * 0.5 else 3.2
+		# Locked positions before impact. Never follow the player during the warning.
+		game.add_hazard(game.player.position, 42, 1.3, 24)
+		for i in 6:
+			var point := position + Vector2.from_angle(i * TAU / 6 + clock * 0.15) * 95
+			game.add_hazard(point, 22, 1.6, 16)
+		state_time = 0
+	if data.behavior == "boss" and state_time < 0.8:
+		movement *= 0.15
+	velocity = movement + game.separation(self) * 14 + knockback
+	knockback = knockback.move_toward(Vector2.ZERO, delta * 500)
+	move_and_slide()
+	if offset.length() < radius + game.player.radius:
+		game.player.take_damage(data.damage * (1.25 if elite else 1), position)
+	sprite.frame = int(clock * 7) % 4
+	sprite.flip_h = direction.x < 0
+	sprite.modulate = Color(2, 2, 2) if hit_flash > 0 else (Color(1.3, 0.8, 0.6) if elite else Color.WHITE)
+	queue_redraw()
+
+func take_damage(amount: float, force: Vector2 = Vector2.ZERO) -> void:
+	if not alive:
+		return
+	hp -= amount
+	hit_flash = 0.09
+	knockback += force * (0.2 if data.behavior == "boss" else 1.0)
+	game.add_damage_number(position - Vector2(0, 18), int(amount))
+	game.sound.play_cue("hit")
+	if hp <= 0:
+		alive = false
+		game.enemy_killed(self)
+		queue_free()
+
+func _draw() -> void:
+	draw_rect(Rect2(-radius, -1, radius * 2, 5), Color(0, 0, 0, 0.3))
+	if state == "prepare":
+		draw_line(Vector2.ZERO, charge_direction * 110, Color("d9a46a"), 2)
+		draw_arc(Vector2.ZERO, radius + 5, 0, TAU, 20, Color("d9a46a"), 1, false)
+	if elite:
+		draw_arc(Vector2.ZERO, radius + 3, 0, TAU, 20, Color("b65f42"), 1, false)
+	if hp < max_hp and data.behavior != "boss":
+		draw_rect(Rect2(-11, -sprite.texture.get_height() + 1, 22, 2), Color("12191d"))
+		draw_rect(Rect2(-11, -sprite.texture.get_height() + 1, 22 * hp / max_hp, 2), Color("b65f42"))

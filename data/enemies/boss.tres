@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/entities/enemy_data.gd" id="1"]
+[resource]
+script = ExtResource("1")
+id = "boss"
+title = "O Rei sem Brasa"
+health = 1350.0
+speed = 22.0
+damage = 20.0
+experience = 60
+radius = 21.0
+texture = "res://assets/boss.png"
+behavior = "boss"

@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="UpgradeData" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/data/upgrade_data.gd" id="1"]
+[resource]
+script = ExtResource("1")
+id = "heart"
+display_name = "Coração de âmbar"
+description = "Reserva de vida para resistir a uma decisão arriscada."
+icon = "res://assets/icons/heart.png"
+max_level = 2
+level_descriptions = PackedStringArray("+25 de vida máxima e recupera 30 de vida.", "+25 de vida máxima e recupera 30 de vida.")

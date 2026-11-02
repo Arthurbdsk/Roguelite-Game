@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/data/weapon_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "sword"
+display_name = "Lâmina da vigília"
+description = "Arco amplo contra ameaças próximas. Mira no inimigo mais próximo."
+icon = "res://assets/icons/sword.png"
+affinity = "ward"
+evolution_name = "Juramento partido"
+damage = PackedFloat32Array(18, 23, 26, 32, 40)
+cooldown = PackedFloat32Array(0.8, 0.8, 0.76, 0.72, 0.66)
+reach = PackedFloat32Array(58, 65, 67, 76, 88)
+count = PackedInt32Array(1, 1, 2, 2, 2)
+level_descriptions = PackedStringArray("Varre um arco frontal. 18 de dano; alcance 58.", "A lâmina alcança mais longe e causa 23 de dano.", "Adiciona um segundo arco atrás da sentinela.", "Arcos mais amplos, alcance 76 e 32 de dano.", "Evolução: dois arcos de alcance 88; rompe o cerco.")

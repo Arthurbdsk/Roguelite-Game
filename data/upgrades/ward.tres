@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="UpgradeData" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/data/upgrade_data.gd" id="1"]
+[resource]
+script = ExtResource("1")
+id = "ward"
+display_name = "Selo da muralha"
+description = "Reduz dano de contato. Cada golpe ainda causa ao menos 1."
+icon = "res://assets/icons/ward.png"
+max_level = 2
+level_descriptions = PackedStringArray("Bloqueia 2 de dano. Permite a evolução da lâmina.", "Bloqueia mais 2 de dano por contato.")

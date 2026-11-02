@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="UpgradeData" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/data/upgrade_data.gd" id="1"]
+[resource]
+script = ExtResource("1")
+id = "magnet"
+display_name = "Ímã funerário"
+description = "Recolhe experiência sem atravessar o centro da horda."
+icon = "res://assets/icons/magnet.png"
+max_level = 2
+level_descriptions = PackedStringArray("+32 de alcance de coleta. Permite evoluir as brasas.", "+40 de alcance de coleta adicional.")

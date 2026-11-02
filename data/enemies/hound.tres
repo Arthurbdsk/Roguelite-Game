@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/entities/enemy_data.gd" id="1"]
+[resource]
+script = ExtResource("1")
+id = "hound"
+title = "Rasga-bruma"
+health = 15.0
+speed = 48.0
+damage = 6.0
+experience = 2
+radius = 7.0
+texture = "res://assets/hound.png"
+behavior = "flank"
