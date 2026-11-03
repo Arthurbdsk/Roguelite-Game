@@ -37,7 +37,7 @@ func fire_ball(origin: Vector2, direction: Vector2, owner: int, phase: int) -> b
 	if arrows.size() >= game.boss_balance.final_projectile_limit or fire_count() >= game.boss_balance.fire_limit:
 		return false
 	serial += 1
-	arrows.append({"id": serial, "at": origin, "velocity": direction.normalized() * game.boss_balance.fire_speed * (1.08 if phase == 3 else 1), "damage": game.boss_balance.fire_damage, "distance": 0.0, "range": 900.0, "life": game.boss_balance.fire_lifetime, "owner": owner, "kind": "fire", "radius": 5.0})
+	arrows.append({"id": serial, "at": origin, "velocity": direction.normalized() * game.boss_balance.fire_speed * (1.08 if phase == 3 else 1), "damage": game.boss_balance.fire_damage * game.enemy_scale().damage, "distance": 0.0, "range": 900.0, "life": game.boss_balance.fire_lifetime, "owner": owner, "kind": "fire", "radius": 5.0})
 	game.sound.play_cue("fire")
 	queue_redraw()
 	return true
@@ -65,10 +65,10 @@ func tick(delta: float) -> void:
 		var wall: Dictionary = get_world_2d().direct_space_state.intersect_ray(query)
 		if not wall.is_empty():
 			end = wall.position
-		var nearest := Geometry2D.get_closest_point_to_segment(game.player.position, start, end)
-		if nearest.distance_squared_to(game.player.position) <= pow(game.player.radius + arrow.get("radius", game.balance.arrow_radius), 2):
+		var victim = game.projectile_victim(start, end, arrow.get("radius", game.balance.arrow_radius))
+		if victim != null:
 			arrows.remove_at(i)
-			game.player.take_damage(arrow.damage, start)
+			victim.take_damage(arrow.damage, start)
 			if game.state != "running":
 				queue_redraw()
 				return

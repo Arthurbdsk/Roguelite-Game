@@ -36,13 +36,13 @@ func update(delta: float, actors: Dictionary, actions: Dictionary) -> Array[Dict
 					nearest = str(target)
 					distance = candidate
 			if not nearest.is_empty():
-				interactions[id] = {"target": nearest, "origin": actor.position, "hp": actor.hp, "progress": 0.0}
+				interactions[id] = {"target": nearest, "origin": actor.position, "hp": actor.hp, "revision": actor.get("damage_revision", 0), "progress": 0.0}
 				claimed[nearest] = id
 		if not interactions.has(id):
 			continue
 		var interaction: Dictionary = interactions[id]
 		var target: String = interaction.target
-		if not actors.has(target) or not actors[target].get("connected", true) or not actors[target].get("down", false) or actor.position.distance_squared_to(interaction.origin) > 0.000001 or actor.hp < interaction.hp or actor.position.distance_to(actors[target].position) > rules.revive_range:
+		if not actors.has(target) or not actors[target].get("connected", true) or not actors[target].get("down", false) or actor.position.distance_squared_to(interaction.origin) > 0.000001 or actor.hp < interaction.hp or actor.get("damage_revision", 0) != interaction.revision or actor.position.distance_to(actors[target].position) > rules.revive_range:
 			interactions.erase(id)
 			claimed.erase(target)
 			continue

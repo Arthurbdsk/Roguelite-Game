@@ -1,0 +1,20 @@
+import {spawn} from 'node:child_process';
+import {existsSync} from 'node:fs';
+import {fileURLToPath} from 'node:url';
+import {resolve,dirname} from 'node:path';
+import {createRelay} from './server.mjs';
+const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
+const exe=resolve(root,'build/Brasafria-0.4.0.exe');
+if(!existsSync(exe))throw Error('Exporte build/Brasafria-0.4.0.exe primeiro.');
+const relay=createRelay({port:0}),address=await relay.listen();
+const argument=process.argv.find(v=>v.startsWith('--players='));
+const count=argument?Math.min(4,Math.max(2,Number(argument.split('=')[1])||4)):4;
+console.log('Teste local: crie uma sala na primeira janela e entre com o código nas outras.');
+console.log('Marque todos como prontos e inicie. Os perfis deste teste são separados do seu progresso.');
+const children=[];
+await Promise.all(Array.from({length:count},(_,i)=>new Promise(resolve=>{
+ const child=spawn(exe,['--',`--relay=ws://127.0.0.1:${address.port}`,`--profile-slot=coop_local_${i+1}`,'--online',`--name=Jogador${i+1}`],{cwd:root,windowsHide:false});
+ children.push(child);child.on('close',resolve);child.on('error',error=>{console.error(error.message);resolve();});
+})));
+await relay.close();
+console.log('Teste local encerrado.');

@@ -35,7 +35,7 @@ func run() -> void:
 	verify(events.size() == 1 and state.b.hp == 50.0 and not state.b.down, "revive restores exactly forty percent")
 	verify(state.b.invulnerable == 2.0, "revive grants two seconds of protection")
 	verify(reviver.update(10, state, actions).is_empty(), "completion cannot be duplicated")
-	for cancellation in ["release", "move", "displace", "damage", "distance", "down", "disconnect"]:
+	for cancellation in ["release", "move", "displace", "damage", "damage_healed", "distance", "down", "disconnect"]:
 		state = actors()
 		reviver = ReviveAuthority.new()
 		actions = {"a": {"movement": Vector2.ZERO, "revive": true}}
@@ -45,6 +45,7 @@ func run() -> void:
 			"move": actions.a.movement = Vector2.RIGHT
 			"displace": state.a.position += Vector2(0.05, 0)
 			"damage": state.a.hp = 99
+			"damage_healed": state.a.damage_revision = 1
 			"distance": state.b.position = Vector2(200, 0)
 			"down": state.a.down = true
 			"disconnect": state.erase("a")

@@ -47,7 +47,7 @@ func tick(delta: float) -> void:
 	var movement := Vector2.ZERO
 	if state == "chase":
 		var speed: float = game.boss_balance.executioner_speed if is_executioner else game.boss_balance.demon_speed
-		movement = direction * speed * (1.06 if phase >= 2 and is_executioner else 1.0)
+		movement = direction * speed * game.enemy_scale().speed * (1.06 if phase >= 2 and is_executioner else 1.0)
 		if attack_time <= 0:
 			begin_attack(choose_attack())
 			movement = Vector2.ZERO
@@ -60,7 +60,7 @@ func tick(delta: float) -> void:
 		if state_time >= warning_duration():
 			execute_attack()
 	elif state == "charge":
-		movement = charge_direction * (game.boss_balance.executioner_charge_speed if is_executioner else game.boss_balance.demon_charge_speed)
+		movement = charge_direction * (game.boss_balance.executioner_charge_speed if is_executioner else game.boss_balance.demon_charge_speed) * game.enemy_scale().speed
 		if state_time >= game.boss_balance.charge_duration:
 			finish_attack()
 			movement = Vector2.ZERO
@@ -72,10 +72,10 @@ func tick(delta: float) -> void:
 	velocity = movement
 	move_and_slide()
 	if state == "charge":
-		var nearest := Geometry2D.get_closest_point_to_segment(game.player.position, previous_position, position)
-		if not charge_hit and nearest.distance_to(game.player.position) <= radius + game.player.radius:
+		var victim = game.projectile_victim(previous_position, position, radius)
+		if not charge_hit and victim != null:
 			charge_hit = true
-			game.player.take_damage(game.boss_balance.executioner_charge_damage if is_executioner else game.boss_balance.demon_charge_damage, previous_position)
+			victim.take_damage((game.boss_balance.executioner_charge_damage if is_executioner else game.boss_balance.demon_charge_damage) * game.enemy_scale().damage, previous_position)
 		if is_on_wall():
 			finish_attack()
 	sprite.frame = int(clock * 7) % 4
@@ -127,9 +127,7 @@ func execute_attack() -> void:
 		charge_hit = false
 		return
 	if attack_name == "execute":
-		var offset: Vector2 = game.player.position - position
-		if offset.length() <= game.boss_balance.executioner_swing_range + game.player.radius and absf(charge_direction.angle_to(offset.normalized())) <= deg_to_rad(68):
-			game.player.take_damage(game.boss_balance.executioner_swing_damage, position)
+		game.damage_team_cone(position, charge_direction, game.boss_balance.executioner_swing_range, deg_to_rad(68), game.boss_balance.executioner_swing_damage * game.enemy_scale().damage)
 		if game.state == "running":
 			game.boss_arena.swings.append({"at": position, "direction": charge_direction, "life": 0.22})
 	else:

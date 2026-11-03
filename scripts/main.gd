@@ -55,12 +55,17 @@ var executioner_defeated: bool = false
 var reported_deaths: Dictionary = {}
 var boss_balance: BossBalance = preload("res://data/bosses/balance.tres")
 var boss_arena: BossArena
+var coop: CoopSession
 
 func _ready() -> void:
 	test_mode = "--self-test" in OS.get_cmdline_user_args()
 	slice_mode = "--slice" in OS.get_cmdline_user_args()
 	persistence_enabled = not test_mode
 	get_tree().auto_accept_quit = false
+	for argument in OS.get_cmdline_user_args():
+		if argument.begins_with("--profile-slot="):
+			var slot: String = argument.trim_prefix("--profile-slot=").validate_filename()
+			profile = GameProfile.new("user://profile_%s.json" % slot.left(40))
 	register_inputs()
 	if not test_mode:
 		profile.load_profile()
@@ -101,11 +106,18 @@ func _ready() -> void:
 	boss_arena = BossArena.new()
 	add_child(boss_arena)
 	boss_arena.setup(self)
+	coop = CoopSession.new()
+	add_child(coop)
+	coop.setup(self)
 	ui = GameUI.new()
 	add_child(ui)
 	ui.setup(self)
 	apply_settings()
 	show_title()
+	if "--online" in OS.get_cmdline_user_args():
+		for argument in OS.get_cmdline_user_args():
+			if argument.begins_with("--name="): coop.local_name = argument.trim_prefix("--name=")
+		open_online()
 	if "--play" in OS.get_cmdline_user_args():
 		start_run()
 	for argument in OS.get_cmdline_user_args():
@@ -113,6 +125,14 @@ func _ready() -> void:
 			start_boss_test(argument.get_slice("=", 1))
 
 func register_inputs() -> void:
+	if not InputMap.has_action("revive"):
+		InputMap.add_action("revive")
+		var key := InputEventKey.new()
+		key.physical_keycode = KEY_E
+		InputMap.action_add_event("revive", key)
+		var button := InputEventJoypadButton.new()
+		button.button_index = JOY_BUTTON_Y
+		InputMap.action_add_event("revive", button)
 	var bindings := {"move_left": [KEY_A, KEY_LEFT], "move_right": [KEY_D, KEY_RIGHT], "move_up": [KEY_W, KEY_UP], "move_down": [KEY_S, KEY_DOWN]}
 	for action in bindings:
 		if not InputMap.has_action(action):
@@ -138,6 +158,9 @@ func _physics_process(delta: float) -> void:
 		simulate(delta, Input.get_vector("move_left", "move_right", "move_up", "move_down"))
 
 func simulate(delta: float, movement: Vector2 = Vector2.ZERO) -> void:
+	if coop != null and coop.active:
+		coop.tick(delta, movement)
+		return
 	if state != "running":
 		return
 	elapsed += delta
@@ -204,6 +227,8 @@ func start_run(selected_support: String = "none") -> void:
 	player.pickup_radius = 42
 	player.armor = 0
 	player.invulnerable = 1
+	player.down = false
+	player.sprite.rotation = 0
 	player.position = Vector2(900, 630)
 	player.facing = Vector2.DOWN
 	camera.reset_smoothing()
@@ -250,7 +275,54 @@ func show_title() -> void:
 	state = "title"
 	ui.render("title", profile.data)
 
+func open_online() -> void:
+	state = "online"
+	ui.render("online")
+
+func team_players() -> Array:
+	return coop.live_players() if coop != null and coop.active else [player]
+
+func collection_player(at: Vector2):
+	return coop.nearest_player(at) if coop != null and coop.active else player
+
+func enemy_scale() -> Dictionary:
+	return coop.rules.scaling(coop.initial_size) if coop != null and coop.active and coop.hosting else {"health": 1.0, "damage": 1.0, "speed": 1.0, "count": 1.0}
+
+func wave_composition(original: Dictionary) -> Dictionary:
+	return coop.rules.composition(original, coop.initial_size) if coop != null and coop.active and coop.hosting else original
+
+func hidden_spawn(at: Vector2, margin: float) -> bool:
+	for member in team_players():
+		var center: Vector2 = member.position.clamp(Vector2(320, 180), Vector2(1480, 1020))
+		if Rect2(center - Vector2(320, 180), Vector2(640, 360)).grow(margin).has_point(at): return false
+	return true
+
+func players_near(at: Vector2, reach: float) -> bool:
+	for member in team_players():
+		if member.position.distance_to(at) < reach: return true
+	return false
+
+func projectile_victim(start: Vector2, end: Vector2, radius: float):
+	var best = null
+	var distance: float = INF
+	for member in team_players():
+		var nearest := Geometry2D.get_closest_point_to_segment(member.position, start, end)
+		if nearest.distance_to(member.position) <= member.radius + radius:
+			var candidate: float = start.distance_squared_to(nearest)
+			if candidate < distance: best = member; distance = candidate
+	return best
+
+func damage_team_area(at: Vector2, radius: float, amount: float) -> void:
+	for member in team_players():
+		if member.position.distance_to(at) <= radius + member.radius: member.take_damage(amount, at)
+
+func damage_team_cone(at: Vector2, direction: Vector2, reach: float, half_angle: float, amount: float) -> void:
+	for member in team_players():
+		var offset: Vector2 = member.position - at
+		if offset.length() <= reach + member.radius and absf(direction.angle_to(offset.normalized())) <= half_angle: member.take_damage(amount, at)
+
 func enter_hub() -> void:
+	if coop != null and coop.active: coop.leave()
 	state = "hub"
 	ui.render("hub", profile.data)
 
@@ -302,6 +374,10 @@ func start_boss_test(kind: String) -> void:
 	ui.update_hud(snapshot())
 
 func retry() -> void:
+	if coop.active:
+		coop.leave()
+		open_online()
+		return
 	if dev_boss_test:
 		if state in ["running", "paused", "upgrading"]:
 			finish_run(false)
@@ -312,6 +388,9 @@ func retry() -> void:
 	start_run(support)
 
 func abandon() -> void:
+	if coop.active:
+		coop.leave()
+		return
 	# Leaving a live expedition settles it once, just like defeat.
 	if state in ["running", "paused", "upgrading"]:
 		finish_run(false)
@@ -319,6 +398,9 @@ func abandon() -> void:
 		enter_hub()
 
 func finish_run(won: bool) -> void:
+	if coop != null and coop.active:
+		coop.finish(won)
+		return
 	if state not in ["running", "paused", "upgrading"] or run_settled:
 		return
 	state = "result"
@@ -333,6 +415,9 @@ func finish_run(won: bool) -> void:
 	ui.render("result", {"won": won, "elapsed": elapsed, "kills": kills, "earned": banked_reward, "level": level, "gold": banked_gold, "total_gold": profile.data.gold, "wave": director.wave_number(), "dev": dev_boss_test})
 
 func request_quit() -> void:
+	if coop != null and coop.active:
+		coop.finish(false)
+		if coop.connection.socket != null: coop.connection.socket.poll()
 	if state in ["running", "paused", "upgrading"]:
 		finish_run(false)
 	get_tree().quit()
@@ -342,6 +427,12 @@ func _notification(what: int) -> void:
 		request_quit()
 
 func toggle_pause() -> void:
+	if coop.active and not coop.ended:
+		if coop.menu_open: coop.close_menu()
+		else:
+			coop.menu_open = true
+			ui.render("online_pause")
+		return
 	if ui.screen == "settings":
 		ui.render(ui.return_screen, profile.data)
 		return
@@ -354,6 +445,14 @@ func toggle_pause() -> void:
 		ui.update_hud(snapshot())
 
 func _unhandled_input(event: InputEvent) -> void:
+	if coop != null and coop.active:
+		if event is InputEventKey and event.pressed and not event.echo:
+			if event.physical_keycode == KEY_TAB: coop.open_upgrades(); return
+			if ui.screen == "upgrading" and event.physical_keycode >= KEY_1 and event.physical_keycode <= KEY_3:
+				var choices: Array = coop.actors[coop.connection.peer_id].offers if coop.hosting else coop.received_personal.get("offers", [])
+				var index: int = event.physical_keycode - KEY_1
+				if index < choices.size(): coop.choose(choices[index].id)
+				return
 	if event.is_action_pressed("ui_cancel") or (event is InputEventJoypadButton and event.pressed and event.button_index == JOY_BUTTON_START):
 		if state in ["running", "paused"]:
 			toggle_pause()
@@ -378,6 +477,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		set_option("fullscreen", not profile.data.settings.fullscreen)
 
 func add_xp(amount: int) -> void:
+	if coop != null and coop.active:
+		if coop.hosting: coop.share_xp(amount)
+		return
 	if dev_boss_test:
 		return
 	xp += amount
@@ -396,6 +498,9 @@ func check_level() -> void:
 	ui.render("upgrading", {"offers": offers})
 
 func choose_upgrade(id: String) -> void:
+	if coop.active:
+		coop.choose(id)
+		return
 	if state != "upgrading":
 		return
 	var valid := false
@@ -435,7 +540,15 @@ func spawn_enemy(id: String, point: Vector2, elite: bool = false):
 	enemy.position = point
 	enemy.serial = serial
 	serial += 1
-	enemy.setup(self, enemy_data[id], elite)
+	var stats: EnemyData = enemy_data[id].duplicate()
+	var scale: Dictionary = enemy_scale()
+	stats.health *= scale.health
+	stats.damage *= scale.damage
+	stats.speed *= scale.speed
+	enemy.setup(self, stats, elite)
+	if enemy is HordeBoss:
+		enemy.max_hp *= scale.health
+		enemy.hp = enemy.max_hp
 	entities.add_child(enemy)
 	enemies.append(enemy)
 	if id in ["demon", "executioner"]:
@@ -448,7 +561,7 @@ func enemy_killed(enemy) -> void:
 	reported_deaths[enemy.get_instance_id()] = true
 	kills += 1
 	gold_loot.drop(enemy.position, enemy.data.gold_value)
-	pickups.append({"at": enemy.position, "xp": enemy.data.experience, "attracted": false})
+	pickups.append({"id": enemy.serial, "at": enemy.position, "xp": enemy.data.experience, "attracted": false})
 	if pickups.size() > 240:
 		# Merge value rather than discard experience under load.
 		pickups[0].xp += pickups[-1].xp
@@ -524,12 +637,14 @@ func separation(enemy) -> Vector2:
 func update_pickups(delta: float) -> void:
 	for i in range(pickups.size() - 1, -1, -1):
 		var item: Dictionary = pickups[i]
-		var offset: Vector2 = player.position - item.at
-		if offset.length() < player.pickup_radius:
+		var collector = collection_player(item.at)
+		if collector == null: continue
+		var offset: Vector2 = collector.position - item.at
+		if offset.length() < collector.pickup_radius:
 			item.attracted = true
 		if item.attracted:
-			item.at = item.at.move_toward(player.position, delta * 220)
-		if item.at.distance_to(player.position) < 10:
+			item.at = item.at.move_toward(collector.position, delta * 220)
+		if item.at.distance_to(collector.position) < 10:
 			pickups.remove_at(i)
 			sound.play_cue("pickup")
 			add_xp(item.xp)
@@ -547,19 +662,18 @@ func update_hazards(delta: float) -> void:
 		hazard.life -= delta
 		if hazard.age >= hazard.warning and not hazard.hit:
 			hazard.hit = true
-			if player.position.distance_to(hazard.at) < hazard.radius + player.radius:
-				player.take_damage(hazard.damage, hazard.at)
+			damage_team_area(hazard.at, hazard.radius, hazard.damage)
 	hazards = hazards.filter(func(h): return h.life > 0)
 
 func update_event(delta: float) -> void:
 	if elapsed < 120 or event_claimed:
 		return
-	if player.position.distance_to(region) < 42:
+	if players_near(region, 42):
 		event_progress += delta
 		if event_progress >= 6:
 			event_claimed = true
 			earned += 2
-			player.hp = minf(player.max_hp, player.hp + 25)
+			for member in team_players(): member.hp = minf(member.max_hp, member.hp + 25)
 			add_xp(10)
 			announce("BRASAS RECUPERADAS  |  VIDA +25  |  +2 SELOS", 4)
 	else:

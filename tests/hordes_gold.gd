@@ -39,10 +39,16 @@ func run() -> void:
 	await process_frame
 	await create_timer(0.15).timeout
 	print("HORDES_GOLD_%s checks=%d failures=%d metrics=%s" % ["PASS" if failures == 0 else "FAIL", checks, failures, JSON.stringify(metrics)])
-	var summary_path: String = "res://test_output/hordes_gold_summary.json" if OS.has_feature("editor") else "user://export_hordes_gold_summary.json"
+	var summary_path: String = "user://hordes_gold_summary.json"
+	for argument in OS.get_cmdline_user_args():
+		if argument.begins_with("--summary-path="): summary_path = argument.trim_prefix("--summary-path=")
 	var output := FileAccess.open(summary_path, FileAccess.WRITE)
-	output.store_string(JSON.stringify({"checks": checks, "failures": failures, "metrics": metrics}, "\t"))
-	output.close()
+	if output != null:
+		output.store_string(JSON.stringify({"checks": checks, "failures": failures, "metrics": metrics}, "\t"))
+		output.close()
+	else:
+		printerr("FAIL: could not write test summary")
+		failures += 1
 	quit(0 if failures == 0 else 1)
 
 func test_skeletons() -> void:

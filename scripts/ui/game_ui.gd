@@ -26,6 +26,7 @@ var counts_text: Label
 var pressure_text: Label
 var banner_text: Label
 var boss_text: Label
+var pause_hint: Label
 var loadout: HBoxContainer
 var passive_text: Label
 var ui_theme: Theme
@@ -67,6 +68,9 @@ func _build_theme() -> void:
 	ui_theme.set_stylebox("background", "ProgressBar", _bar_style(Color("0c1216"), Color("45514d"), 1))
 	ui_theme.set_stylebox("fill", "ProgressBar", _bar_style(ICE, ICE))
 	ui_theme.set_stylebox("panel", "Panel", _style(PANEL, LINE))
+	ui_theme.set_stylebox("normal", "LineEdit", _style(PANEL, LINE))
+	ui_theme.set_stylebox("focus", "LineEdit", _style(PANEL, ICE))
+	ui_theme.set_color("font_color", "LineEdit", IVORY)
 	ui_theme.set_color("font_color", "LinkButton", MUTED)
 	ui_theme.set_color("font_hover_color", "LinkButton", IVORY)
 	ui_theme.set_color("font_focus_color", "LinkButton", IVORY)
@@ -120,7 +124,7 @@ func _label(parent: Node, text: String, rect: Rect2, font_size: int = 12, color:
 	label.size = rect.size
 	return label
 
-func _grant_focus(control: Control) -> void:
+func _grant_focus(control) -> void:
 	if is_instance_valid(control) and control.is_inside_tree():
 		control.grab_focus()
 
@@ -173,6 +177,7 @@ func render(which: String, data: Dictionary = {}) -> void:
 	menu.visible = which != "running"
 	hud.visible = which in ["running", "paused", "upgrading", "result"]
 	match which:
+		"online", "lobby", "online_pause": CoopMenu.build(self, which)
 		"title": _title()
 		"hub": _hub(data)
 		"upgrading": _upgrades(data)
@@ -208,8 +213,8 @@ func _title() -> void:
 	_label(menu, "BRASAFRIA", Rect2(32, 45, 576, 58), 45)
 	_label(menu, "A muralha caiu.\nA vigília continua.", Rect2(34, 111, 265, 48), 15, MUTED)
 	var play := _button(menu, "Jogar", Rect2(34, 185, 205, 31), func(): game.start_run(), true)
-	_button(menu, "Fortaleza", Rect2(34, 223, 205, 29), func(): game.enter_hub())
-	_button(menu, "Árvore permanente", Rect2(34, 259, 205, 27), game.open_skill_tree)
+	_button(menu, "Cooperativo online", Rect2(34, 221, 205, 27), func(): game.open_online())
+	_button(menu, "Fortaleza / habilidades", Rect2(34, 254, 205, 27), func(): game.enter_hub())
 	_button(menu, "Opções", Rect2(34, 294, 97, 23), func(): _open_settings("title"))
 	_button(menu, "Sair", Rect2(140, 294, 99, 23), func(): get_tree().quit())
 	_label(menu, "WASD / setas: mover    Esc: pausa\nElimine cada horda para avançar.\nDemônio na horda 10. F9: testar chefes.", Rect2(320, 259, 287, 51), 11, MUTED)
@@ -382,9 +387,9 @@ func _legal(kind: String) -> void:
 	_label(menu, "POLÍTICA DE PRIVACIDADE" if privacy else "TERMOS DE SERVIÇO", Rect2(30, 26, 580, 40), 24)
 	var content: String
 	if privacy:
-		content = "Brasafria é um protótipo local e não exige conta. O jogo não envia dados, não possui anúncios e não utiliza serviços de análise.\n\nProgresso e preferências ficam apenas no arquivo de salvamento da Godot no seu computador. Os dados incluem ouro, selos, construções, estatísticas, identificação da tentativa e opções.\n\nO link Socialy abre o Instagram no navegador. Ao acessá-lo, aplicam-se as regras e a política do Instagram."
+		content = "O solo funciona offline, sem conta, anúncios ou análise de uso. Progresso e opções ficam no seu computador.\n\nAo criar ou entrar numa sala, o serviço recebe nome escolhido, código, habilidades e mensagens da partida. O endereço de rede é necessário à conexão. Os dados da sala ficam em memória até seu encerramento; a hospedagem pode manter registros técnicos.\n\nO link Socialy abre o Instagram, sujeito às regras desse serviço."
 	else:
-		content = "Este protótipo é fornecido para teste e avaliação pessoal. Sistemas, arte e balanceamento podem mudar durante a produção.\n\nO progresso é salvo localmente. Mantenha uma cópia do arquivo antes de substituí-lo por versões novas.\n\nO jogo não oferece compras, conta online ou serviços pagos. A autoria e as licenças dos componentes estão documentadas no projeto."
+		content = "Protótipo para teste e avaliação. Sistemas, arte e balanceamento podem mudar. O progresso é local; preserve uma cópia antes de atualizar.\n\nO cooperativo depende do serviço de salas e da conexão dos participantes. A saída do anfitrião encerra a sessão. Não há reconexão, migração de anfitrião ou garantia de disponibilidade.\n\nSem compras, cadastro ou assinatura. Autoria e licenças estão documentadas no projeto."
 	_label(menu, content, Rect2(32, 91, 576, 190), 13, MUTED)
 	var back := _button(menu, "Voltar", Rect2(32, 297, 576, 32), func(): render(back_screen, back_data))
 	call_deferred("_grant_focus", back)
@@ -414,7 +419,8 @@ func _build_hud() -> void:
 	boss_text = _label(hud, "", Rect2(162, 300, 316, 18), 11, IVORY, true)
 	boss_bar = _bar(hud, Rect2(162, 321, 316, 6), COPPER)
 	level_text = _label(hud, "NÍVEL 1", Rect2(12, 322, 130, 16), 10, ICE)
-	_label(hud, "ESC: PAUSA", Rect2(520, 322, 108, 16), 10, MUTED).horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	pause_hint = _label(hud, "ESC: PAUSA", Rect2(520, 322, 108, 16), 10, MUTED)
+	pause_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	experience_bar = _bar(hud, Rect2(12, 343, 616, 5), ICE)
 
 func _bar(parent: Node, rect: Rect2, color: Color) -> ProgressBar:
@@ -433,6 +439,7 @@ func _bar(parent: Node, rect: Rect2, color: Color) -> ProgressBar:
 func update_hud(data: Dictionary) -> void:
 	if hud == null:
 		return
+	pause_hint.text = "ESC: MENU" if game.get("coop") != null and game.coop.active else "ESC: PAUSA"
 	life_bar.max_value = maxf(1.0, float(data.get("max_hp", 100.0)))
 	life_bar.value = float(data.get("hp", 100.0))
 	life_text.text = "VIDA   %d / %d" % [int(data.get("hp", 100)), int(life_bar.max_value)]

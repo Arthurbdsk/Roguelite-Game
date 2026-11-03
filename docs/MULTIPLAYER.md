@@ -1,53 +1,48 @@
-# Cooperativo online: implementação em andamento
+# Cooperativo 0.4.0
 
-O cooperativo jogável ainda não está concluído. O executável 0.3.0 permanece solo. Nenhum botão de sala sem partida sincronizada foi adicionado ao menu publicado.
+Implementação integrada à partida e ao executável. A publicação do serviço de salas continua pendente porque não há hospedagem nem URL WSS configurada.
 
-## Implementado nesta etapa
+## Comportamento
 
-- Relay WebSocket Node.js separado, salas reais com código aleatório de seis caracteres e até quatro participantes.
-- Validação de nomes de um a oito grafemas, normalização de acentos e remoção de espaços externos.
-- Prontidão e início exclusivo pelo criador; sala iniciada rejeita novas entradas.
-- Entrada inválida, sala cheia e falha de conexão têm respostas explícitas.
-- Relay carimba a identidade de origem; apenas o host pode distribuir eventos e deltas de estado. Clientes enviam ações ao host.
-- Saída de cliente notifica os restantes; saída do host encerra a sala. Não há migração de host ou reconexão.
-- Cliente Godot `RoomConnection`, com polling, timeout, configuração de URL pública e TLS normal da Godot. Não usa IP de jogador nem exige portas no roteador.
-- Regras configuráveis para os multiplicadores aditivos pedidos. A quantidade é arredondada no total, com distribuição por maiores restos; um chefe continua sendo um exemplar. Não altera frequência.
-- Autoridade de entrada rejeita sequências repetidas, valores inválidos, movimento excessivo e ações antigas.
-- Modelo de autoridade de reanimação: cinco segundos, alvo mais próximo travado, um socorrista por corpo, cancelamento e reinício do progresso, retorno com 40% de vida e dois segundos de proteção.
+- Até quatro participantes, código aleatório de seis caracteres, nomes normalizados com um a oito grafemas, prontidão de todos e início exclusivo pelo anfitrião. Sem entrada durante a partida.
+- Host controla movimento válido, inimigos, dano, chefes, coletas, escolhas e resgates. O relay carimba a origem e rejeita publicação de estado por clientes.
+- Contextos individuais de personagem, habilidades, armas, nível, experiência e ofertas. Tab abre a seleção sem parar o mundo e sem proteger o personagem. Escolhas pendentes sobrevivem à queda.
+- Dano letal deixa o jogador caído, sem alvo, ataques ou movimento. A câmera acompanha o aliado vivo mais próximo; o corpo permanece no mundo. HUD mostra nomes, vida, corpos fora da tela e resgate com nome e tempo restante.
+- E parado por cinco segundos, alvo mais próximo travado, um socorrista por corpo. Soltar, tentar mover, deslocamento, dano mesmo se curado no mesmo frame, distância, queda ou desconexão zeram o progresso. Segurar E suspende novos ataques e dano orbital; projéteis já disparados continuam. Cair remove os efeitos ofensivos daquele personagem.
+- Resgate devolve exatamente 40% da vida máxima, armas e melhorias, com dois segundos de proteção visual. Eventos repetidos são ignorados. Todos os conectados caídos encerram a tentativa.
+- XP e ouro coletados pelo host chegam integralmente a todos, inclusive caídos. Coleta remove o item para todos. Ouro no chão não é creditado. Cada computador liquida seu próprio perfil uma vez, inclusive ao sair e ao perder o anfitrião, usando o último saldo confirmado.
+- Saída de cliente mantém a partida. Saída/perda do host encerra a sala, mostra o motivo e retorna ao menu. Sem migração ou reconexão. O solo mantém o fluxo de morte, pausa e reinício.
 
-Esses módulos ainda não estão ligados aos personagens e à simulação da partida. O modelo de reanimação é testado com estados do host; não é uma reanimação já disponível no jogo.
+## Balanceamento e rede
 
-## Testado
+`data/network/coop.tres` centraliza os bônus por participante extra: vida +50%, dano +50%, velocidade +20%, quantidade +80%. Em quatro jogadores: 2,5 / 2,5 / 1,6 / 3,4. O tamanho inicial fica congelado mesmo após quedas e desconexões. Chefes permanecem exemplares únicos. Quantidades usam maiores restos e arredondamento do total; o intervalo de surgimento não é multiplicado. Nascimentos ficam fora da visão de todos os vivos e alternam âncoras e direções.
 
-`npm test` em `relay/`: conexões WebSocket reais verificam nomes, criação, código, quatro vagas, prontidão, início, mensagens de erro, rejeição de eventos falsos de cliente, encaminhamento de ações e desconexões.
+Carrasco: 102,4 de velocidade normal e 108,544 enfurecido com quatro pessoas. Demônio: 112. Ambos ultrapassam a velocidade inicial 96. Os percentuais pedidos foram preservados. Testes sem invulnerabilidade demonstram desvio lateral do golpe de execução e das duas investidas com velocidade inicial. Isso não estabelece equilíbrio ou diversão para humanos.
 
-`node godot-test.mjs` em `relay/`: quatro processos reais Godot conectam ao relay local. Um cria o código, três entram, todos ficam prontos, o host inicia, envia um evento e recebe três ações de confirmação. Marcador `FOUR_GODOT_INSTANCES_PASS`. Não testa uma partida com quatro personagens.
+Entradas saem a 20 Hz. Deltas por campo saem a 10 Hz; entidades paradas não repetem todos os campos. Eventos confiáveis são agrupados por frame e o relay filtra os destinados a cada jogador, preservando ofertas privadas. Coletas simultâneas agrupam feedback para não estourar o limite de mensagens. Movimento local usa previsão e correção; demais entidades usam interpolação e projéteis têm avanço visual entre pacotes. O WebSocket usa transporte TCP confiável, inclusive para deltas; não há canal UDP. Perda e latência podem causar atrasos acumulados, ainda sem medição externa.
 
-`tests/network_foundation.gd`: testa a tabela de um a quatro jogadores, arredondamento de composições, exemplar único de chefe, reanimação completa, todas as interrupções, exclusividade, alvo travado, vida exata, proteção, todos caídos, ações repetidas e timeout.
+Limites existentes de inimigos e projéteis continuam ativos. Filas do socket, carga de mensagem, taxa, salas e conexões têm limites. O relay não mantém banco de dados. O host é confiável para o mundo; não há proteção contra um anfitrião alterado nem verificação remota das compras permanentes.
 
-Nenhum teste entre redes físicas diferentes foi realizado. Não houve teste de latência de combate ou desempenho de replicação de hordas.
+## Execução e publicação
 
-## Hospedagem necessária
+Teste visual local: `Testar_Coop_Local.cmd` abre quatro cópias da versão 0.4, com perfis `coop_local_1` a `coop_local_4`, distintos do progresso normal. Fechar todas as janelas encerra o relay do teste. Não exige digitar IP.
 
-Não foi configurado serviço público. O usuário informou que ainda não possui hospedagem.
+Servidor: `cd relay`, `npm ci`, `npm start`. Escuta local em `127.0.0.1:8080`. Container: `docker build -t brasafria-relay relay`. A imagem inicia com `HOST=0.0.0.0` e `PORT=8080`; o provedor pode fornecer outra porta via ambiente.
 
-O relay precisa de um serviço persistente que execute o container `relay/Dockerfile`, aceite upgrade WebSocket e termine TLS em um endereço HTTPS/WSS. Configuração: variável `HOST=0.0.0.0`, variável `PORT=8080` ou a porta atribuída pelo provedor; encaminhar essa porta pelo proxy HTTPS, permitir conexões WebSocket duradouras, expor `/health`, usar certificado válido para o domínio. Não é uma função HTTP que encerra após cada requisição.
+A hospedagem precisa executar continuamente esse container ou Node.js, expor `/health`, suportar conexões WebSocket duradouras e oferecer HTTPS/WSS com certificado válido. Copie `network.cfg.example` para `build/network.cfg` e configure a URL pública. A configuração ao lado do executável tem preferência; também pode ser embutida em `res://network.cfg` ao exportar. Não exige chaves no cliente, IP de jogador nem portas no roteador. Não há conta de provedor ou domínio configurado para publicar nesta entrega.
 
-Construção: `docker build -t brasafria-relay relay`. Execução local: `cd relay`, `npm ci`, `npm start`. A configuração local padrão escuta somente em `127.0.0.1:8080`.
+## Validação executada
 
-Depois de publicar, copiar `network.cfg.example` para `network.cfg` e preencher a URL pública `wss://...`. A URL não é uma credencial privada. O executável futuro deve incluir essa configuração. Não colocar chaves de provedor no jogo.
+- Relay: sockets reais, códigos, nomes, limite, prontidão, início, isolamento de eventos privados em lote, falsificação rejeitada, saída de cliente e host.
+- Fundação: 66 verificações das tabelas de um a quatro participantes, arredondamentos, validação/timeout de entradas, resgates e interrupções.
+- `node match-test.mjs`: quatro processos Godot com a cena e simulação reais. Movimento remoto, composição escalada, chefe e preparação replicados, XP/ofertas, mundo sem pausa, queda na escolha, resgate do host por cliente, resgate com dano e reinício, 40% de vida, proteção, eventos repetidos, carga, coleta simultânea, saída de cliente, derrota e perfis individuais recarregados.
+- Carga da partida em rede: 180 inimigos, 2.000 moedas, 240 itens de XP e 320 flechas. Testes headless no mesmo computador, sem medir FPS renderizado ou latência de internet.
+- `node match-test.mjs --disconnect`: quatro processos, saída do host, mensagem de encerramento, retorno dos clientes ao menu e salvamento do saldo confirmado.
+- `tests/coop_bosses.gd`: 73 verificações, velocidades reais de quatro participantes, três desvios sem invulnerabilidade e 32 surgimentos seguros com equipe dividida.
+- Regressão: combate 224, hordas/ouro 639, árvore/chefes 2.100, integração solo completa 347; menus e textos sem transbordamento.
+- Capturas renderizadas da entrada, lobby, combate, resgate e menus privados em `test_output/coop_*.png`.
+- Executável nativo: smoke de 120 frames. Pacote embutido exercitado pelo runtime correspondente em testes de combate/chefes, ouro e quatro processos cooperativos. O harness externo usa o runtime de editor, não equivale a quatro sessões nativas controladas manualmente.
 
-Túneis temporários podem servir a testes, mas não substituem um endereço permanente: dependem de um processo em execução e a URL pode mudar.
+## Limitações restantes
 
-## Trabalho restante antes de liberar o cooperativo
-
-1. Contexto individual de personagem, armas, escolhas e habilidades dentro da simulação compartilhada do host.
-2. Integração do lobby no menu, nomes e marcadores no mundo.
-3. Aplicação dos multiplicadores congelados no início; validação dos chefes com quatro jogadores. Carrasco a 64 × 1,6 chega a 102,4, acima da velocidade básica 96. Demônio a 70 × 1,6 chega a 112. Os percentuais não foram reduzidos para esconder essa questão.
-4. Replicação incremental, interpolação e separação entre eventos confiáveis e posições frequentes.
-5. Estado caído, interação E, bloqueio de ataques e espectador ligados aos personagens reais.
-6. Coleta autoritativa compartilhada, escolhas individuais sem pausa global e liquidação individual idempotente nos perfis locais.
-7. HUD de equipe, direção de corpos fora da tela e saída de sessão integrada.
-8. Testes de partida com múltiplas instâncias e redes diferentes, carga, desconexões e regressão completa do solo.
-
-Não foi gerado um executável 0.4 nem anunciado multiplayer pronto.
+Não publicado nem testado entre redes físicas diferentes. Falta uma hospedagem pública e, depois, validar WSS, latência real, perda de conexão e avaliação humana em quatro computadores. Não anunciar multiplayer de internet validado. Não há migração de host, reconexão ou retomada de tentativa após encerrar o processo à força.

@@ -1,11 +1,11 @@
 # Termos de serviço
 
-Brasafria 0.3.0 é um protótipo local em desenvolvimento, entregue para jogar, avaliar e editar o projeto. Pode conter falhas e mudanças de balanceamento. Perfis das versões 1 e 2 são migrados para versão 3 preservando o progresso anterior. Não existe serviço online, cobrança, assinatura ou conta nesta versão.
+Brasafria 0.4.0 é um protótipo em desenvolvimento para jogar, avaliar e editar. Pode conter falhas e alterações de balanceamento. Perfis anteriores são migrados para versão 3 preservando o progresso compatível. Não há compras, assinatura ou cadastro.
 
-O perfil é armazenado no computador. Fechar o jogo durante uma expedição perde o estado temporário daquela tentativa. Atualizações futuras podem alterar as regras e o formato do perfil. Preserve uma cópia do projeto e do progresso antes de modificá-los.
+O cooperativo depende de um serviço de salas configurado e da conexão dos participantes. Sua disponibilidade pública ainda depende de hospedagem. A saída ou perda do anfitrião encerra a sessão. Não há reconexão, migração de anfitrião ou garantia de disponibilidade. A implementação foi validada localmente; testes entre redes diferentes permanecem pendentes.
 
-Os scripts e assets originais fazem parte do projeto entregue. A fonte Pixelify Sans possui licença própria em `assets/OFL.txt`. A Godot Engine e outras ferramentas mantêm suas respectivas licenças. Este documento não substitui uma licença comercial de distribuição dos elementos do projeto.
+O perfil é local. Fechamento normal liquida o ouro confirmado uma vez; encerramento à força pode perder progresso ainda não gravado. Atualizações podem alterar regras e formatos. Preserve cópias do projeto e do perfil.
 
-O link [Feito por Socialy](https://www.instagram.com/socialy_webdesign/) abre o Instagram no navegador. Serviços externos têm regras próprias, independentes do jogo.
+Scripts e assets originais acompanham o projeto. Pixelify Sans possui licença em `assets/OFL.txt`; Godot e dependências conservam suas licenças. Este texto não substitui uma licença comercial de distribuição desses componentes.
 
-Ao compartilhar o protótipo, informe que se trata de uma versão em desenvolvimento. Não anuncie compatibilidade, desempenho ou recursos que ainda não tenham sido verificados na versão distribuída.
+O crédito [Feito por Socialy](https://www.instagram.com/socialy_webdesign/) abre um serviço externo com regras próprias. Ao compartilhar, informe que é um protótipo e não anuncie compatibilidade ou desempenho sem verificação.

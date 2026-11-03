@@ -64,11 +64,12 @@ func reset(support_id: String = "none") -> void:
 	queue_redraw()
 
 
-func update_combat(delta: float) -> void:
+func update_combat(delta: float, allow_attacks: bool = true) -> void:
 	if game == null or not is_instance_valid(game.player):
 		return
 	combat_time += delta
 	for id: String in ["sword", "bolt"]:
+		if not allow_attacks: continue
 		if int(levels[id]) <= 0:
 			continue
 		timers[id] = maxf(0.0, float(timers[id]) - delta)
@@ -76,7 +77,7 @@ func update_combat(delta: float) -> void:
 			var fired: bool = _swing_sword() if id == "sword" else _fire_bolts()
 			timers[id] = _interval(id) if fired else 0.08
 	_update_projectiles(delta)
-	_update_orbit(delta)
+	_update_orbit(delta, allow_attacks)
 	for i: int in range(slashes.size() - 1, -1, -1):
 		slashes[i]["remaining"] = float(slashes[i]["remaining"]) - delta
 		if float(slashes[i]["remaining"]) <= 0.0:
@@ -220,7 +221,7 @@ func _bounce_target(origin: Vector2, excluded: Array):
 	return best
 
 
-func _update_orbit(delta: float) -> void:
+func _update_orbit(delta: float, allow_attacks: bool = true) -> void:
 	orbit_positions.clear()
 	if int(levels["orbit"]) <= 0:
 		return
@@ -233,6 +234,7 @@ func _update_orbit(delta: float) -> void:
 	for index: int in count:
 		var angle: float = orbit_phase + TAU * float(index) / float(count)
 		orbit_positions.append(game.player.position + Vector2.from_angle(angle) * reach)
+	if not allow_attacks: return
 	for enemy in game.enemies.duplicate():
 		if not _valid_target(enemy):
 			continue

@@ -9,6 +9,10 @@ extends Resource
 @export var revive_range: float = 34
 @export var revive_health: float = 0.4
 @export var revive_invulnerability: float = 2
+@export var state_interval: float = 0.1
+@export var input_interval: float = 0.05
+@export var interpolation_rate: float = 15
+@export var input_timeout: float = 0.35
 
 func scaling(participants: int) -> Dictionary:
 	var extra: int = clampi(participants, 1, 4) - 1

@@ -1,12 +1,12 @@
 # Brasafria
 
-Protótipo jogável 0.3.0 em Godot 4.7.2 e GDScript. Uma sentinela enfrenta hordas no Pátio dos Esquecidos, investe ouro em habilidades permanentes e enfrenta o Carrasco e o Devorador de Brasas.
+Protótipo jogável 0.4.0 em Godot 4.7.2 e GDScript. Uma sentinela enfrenta hordas no Pátio dos Esquecidos, investe ouro em habilidades permanentes e enfrenta o Carrasco e o Devorador de Brasas.
 
 ## Jogar
 
-Feche a versão anterior e abra `build/Brasafria-0.3.0.exe` ou `Jogar.cmd`. O executável é independente e contém os recursos. Não exige instalar a Godot. Versões e cópias anteriores do perfil estão preservadas em `build/backups/`. As versões compartilham um perfil; não mantenha duas abertas ao mesmo tempo.
+Feche a versão anterior e abra `build/Brasafria-0.4.0.exe` ou `Jogar.cmd`. O executável é independente e contém os recursos. Não exige instalar a Godot. Versões e cópias anteriores do perfil estão preservadas em `build/backups/`. As versões compartilham um perfil; não mantenha duas instâncias normais abertas no mesmo computador. O teste cooperativo local usa quatro perfis separados.
 
-WASD ou setas movem o personagem. Os ataques são automáticos e escolhem o inimigo mais próximo. Esc pausa; 1, 2 e 3 selecionam melhorias. F11 alterna tela cheia. Analógico esquerdo, direcional e navegação de menus estão mapeados para controle, ainda sem teste com hardware físico.
+WASD ou setas movem o personagem. Os ataques são automáticos e escolhem o inimigo mais próximo. Esc pausa no solo; no cooperativo abre um menu individual enquanto a partida continua. Tab abre melhorias individuais online. Segure E, parado junto a um aliado caído, para revivê-lo em cinco segundos. 1, 2 e 3 selecionam melhorias. F11 alterna tela cheia. Analógico esquerdo, direcional e navegação de menus estão mapeados para controle, ainda sem teste com hardware físico.
 
 São três armas com cinco níveis, cinco passivas, cinco tipos de inimigos e dois chefes. A árvore de 16 nós é acessível no título e na fortaleza. Compras usam ouro, possuem pré-requisitos e salvam imediatamente. Os bônus são aplicados uma vez na nova partida. A vaga padrão de três passivas pode virar quatro pela especialização Pacto das três. A fortaleza mantém os dois apoios antigos, comprados com selos.
 
@@ -15,6 +15,12 @@ Não há prazo fixo de partida. A preparação inicial dura 2,5 segundos; entre 
 Todo inimigo deixa ouro. Moedas permanecem por 60 segundos de partida, são atraídas por proximidade e só contam quando chegam ao corpo. A pausa interrompe seu tempo de vida. Ouro dourado e experiência azulada possuem leitura distinta.
 
 Os chefes também concedem um bônus de conclusão único: 30 de ouro pelo Carrasco e 120 pelo demônio. Esses bônus são separados das moedas no chão. Na morte do demônio, ataques, áreas e invocações são retirados, sua animação de morte termina e a vitória salva o saldo uma vez.
+
+## Cooperativo
+
+O menu inclui criação e entrada em salas por código, prontidão e partidas para até quatro pessoas. O host simula o mundo; experiência e ouro são integrais para cada participante, com builds privadas e salvamento individual. Reanimação, espectadores, dificuldade congelada no início e desconexões estão integrados.
+
+A hospedagem pública ainda não foi configurada. O botão online informa a indisponibilidade até existir um endereço WSS. Para jogar e revisar no mesmo computador, abra `Testar_Coop_Local.cmd`: ele executa o relay local e abre quatro janelas do executável, com nomes e perfis separados. Crie uma sala na primeira e use o código nas outras. Precisa do Node.js e das dependências já instaladas em `relay/`. Isso não valida conexão entre redes diferentes. Veja `docs/MULTIPLAYER.md`.
 
 ## Testar os chefes
 
@@ -56,11 +62,11 @@ Defeitos atuais: cenário repetitivo; animações ainda sem conjuntos direcionai
 
 ## Exportar novamente
 
-Execute `python tools/export_windows.py --smoke`. O resultado é `build/Brasafria-0.3.0.exe`. O script utiliza a Godot 4.7.2 instalada em Downloads, aceita `--godot CAMINHO` e obtém o template Windows do repositório oficial se o cache estiver ausente. `python tools/verify_export.py` verifica a árvore e os chefes contra o pacote embutido usando o runtime da mesma versão. A exportação inclui manifesto de hash e licenças.
+Execute `python tools/export_windows.py --smoke`. O resultado é `build/Brasafria-0.4.0.exe`. O script utiliza a Godot 4.7.2 instalada em Downloads, aceita `--godot CAMINHO` e obtém o template Windows do repositório oficial se o cache estiver ausente. `python tools/verify_export.py` verifica a árvore e os chefes contra o pacote embutido usando o runtime da mesma versão. A exportação inclui manifesto de hash e licenças.
 
 ## Privacidade, termos e crédito
 
-O jogo funciona offline, sem conta, anúncios ou telemetria. A política de privacidade e os termos estão nos menus e nos arquivos `docs/PRIVACIDADE.md` e `docs/TERMOS.md`. O link de crédito abre o Instagram no navegador.
+O solo funciona offline, sem conta, anúncios ou telemetria. O cooperativo envia nome escolhido, habilidades e mensagens da partida ao relay. O saldo continua salvo localmente. A política de privacidade e os termos estão nos menus e nos arquivos `docs/PRIVACIDADE.md` e `docs/TERMOS.md`. O link de crédito abre o Instagram no navegador.
 
 Ícone próprio definido. Requisitos de navegação e indexação de sites, como sitemap, robots, llms, scroll e página 404, aplicam-se a uma eventual versão web; esta entrega é um aplicativo Windows nativo.
 

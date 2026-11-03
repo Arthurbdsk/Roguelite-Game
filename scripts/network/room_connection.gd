@@ -15,15 +15,19 @@ var endpoint: String = ""
 
 func _ready() -> void:
 	var config := ConfigFile.new()
-	if config.load("res://network.cfg") == OK:
-		endpoint = config.get_value("relay", "url", "")
+	var candidates: Array[String] = ["res://network.cfg"]
+	if not OS.has_feature("editor"): candidates.push_front(OS.get_executable_path().get_base_dir().path_join("network.cfg"))
+	for path in candidates:
+		if config.load(path) == OK:
+			endpoint = str(config.get_value("relay", "url", ""))
+			break
 	for argument in OS.get_cmdline_user_args():
 		if argument.begins_with("--relay="):
 			endpoint = argument.trim_prefix("--relay=")
 
 func connect_room(create: bool, display_name: String, room_code: String = "", skills: Dictionary = {}) -> void:
 	if endpoint.is_empty():
-		connection_failed.emit("Relay público não configurado. Consulte docs/MULTIPLAYER.md.")
+		connection_failed.emit("O serviço de salas ainda não foi publicado.")
 		return
 	close()
 	pending = {"type": "create" if create else "join", "name": display_name.strip_edges(), "code": room_code.strip_edges().to_upper(), "skills": skills}
@@ -49,7 +53,8 @@ func _process(delta: float) -> void:
 		if not pending.is_empty():
 			send_message(pending)
 			pending = {}
-		while socket.get_available_packet_count() > 0:
+		var polled: WebSocketPeer = socket
+		while socket == polled and polled.get_available_packet_count() > 0:
 			var parsed = JSON.parse_string(socket.get_packet().get_string_from_utf8())
 			if not parsed is Dictionary:
 				continue

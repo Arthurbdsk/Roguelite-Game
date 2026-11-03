@@ -32,6 +32,10 @@ test('real sockets: room codes, four peers, ready, routing, host authority and d
   clients[1].send({type:'event',data:{cheat:true}});await assert.rejects(h.next('event',()=>true,100));
   clients[1].send({type:'action',from:joined.id,data:{sequence:1,movement:[0,1]}});const action=await h.next('action');assert.notEqual(action.from,joined.id);assert.deepEqual(action.data.movement,[0,1]);
   h.send({type:'event',to:action.from,data:{id:'reward-1',gold:10}});assert.equal((await clients[1].next('event')).data.id,'reward-1');await assert.rejects(clients[2].next('event',()=>true,100));
+  clients[1].send({type:'events',data:[{data:{cheat:true}}]});await assert.rejects(h.next('events',()=>true,100));
+  h.send({type:'events',data:[{data:{id:'shared'}},{to:action.from,data:{id:'private'}}]});
+  assert.deepEqual((await clients[1].next('events')).data.map(e=>e.id),['shared','private']);
+  assert.deepEqual((await clients[2].next('events')).data.map(e=>e.id),['shared']);
   clients[1].ws.close();assert.equal((await h.next('left')).id,action.from);
   h.ws.close();assert.match((await clients[2].next('closed')).reason,/criador/);assert.equal(relay.rooms.size,0);
  }finally{for(const c of clients)c.ws.terminate();await relay.close();}

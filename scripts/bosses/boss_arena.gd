@@ -135,7 +135,7 @@ func tick(delta: float) -> void:
 		mark.age += delta
 		if mark.age < game.boss_balance.summon_warning:
 			continue
-		if mark.at.distance_to(game.player.position) < 55 or not game.arena.safe_position(mark.at, 15):
+		if game.players_near(mark.at, 55) or not game.arena.safe_position(mark.at, 15):
 			mark.wait += delta
 			if mark.wait > 1.5:
 				pending_summons.remove_at(i)
@@ -150,10 +150,8 @@ func tick(delta: float) -> void:
 		if area.kind == "lightning" and area.age >= area.warning and not area.hit:
 			area.hit = true
 			game.sound.play_cue("thunder")
-			if game.player.position.distance_to(area.at) <= area.radius + game.player.radius:
-				game.player.take_damage(area.damage, area.at)
-				if game.state != "running":
-					return
+			game.damage_team_area(area.at, area.radius, area.damage)
+			if game.state != "running": return
 	areas = areas.filter(func(area): return area.age < area.warning + area.duration)
 	for swing in swings:
 		swing.life -= delta
@@ -229,7 +227,7 @@ func cast(power: String, boss, direction: Vector2, phase: int) -> bool:
 func add_area(kind: String, at: Vector2, radius: float, warning: float, duration: float, damage: float, owner: int) -> void:
 	if areas.size() >= game.boss_balance.area_limit:
 		return
-	areas.append({"kind": kind, "at": at, "radius": radius, "age": 0.0, "warning": warning, "duration": duration, "damage": damage, "owner": owner, "hit": false})
+	areas.append({"kind": kind, "at": at, "radius": radius, "age": 0.0, "warning": warning, "duration": duration, "damage": damage * game.enemy_scale().damage, "owner": owner, "hit": false})
 	queue_redraw()
 
 func fire_fan(at: Vector2, direction: Vector2, count: int, owner: int, phase: int, offset: bool = false) -> void:

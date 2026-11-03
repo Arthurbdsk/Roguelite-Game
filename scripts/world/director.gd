@@ -59,7 +59,7 @@ func tick(delta: float) -> void:
 	cooldown -= delta
 	var budget: int = 8
 	while cooldown <= 0 and not queue.is_empty() and budget > 0:
-		if game.enemies.size() >= mini(wave.max_alive, game.balance.max_enemies):
+		if game.enemies.size() >= mini(ceili(wave.max_alive * game.enemy_scale().count), game.balance.max_enemies):
 			cooldown = 0.15
 			break
 		var entry: Dictionary = queue.front()
@@ -97,10 +97,12 @@ func begin_wave() -> void:
 		total_spawned += 1
 		game.boss_arena.begin_portal()
 		return
-	for id in wave.composition:
-		for i in int(wave.composition[id]):
+	var composition: Dictionary = game.wave_composition(wave.composition)
+	for id in composition:
+		for i in int(composition[id]):
 			queue.append({"id": id, "elite": false})
-	for i in wave.elite_guards:
+	var elite_count: int = game.coop.rules.wave_count(wave.elite_guards, game.coop.initial_size) if game.coop != null and game.coop.active else wave.elite_guards
+	for i in elite_count:
 		queue.append({"id": "guard", "elite": true})
 	for i in range(queue.size() - 1, 0, -1):
 		var j := rng.randi_range(0, i)
@@ -120,11 +122,14 @@ func spawn(id: String, elite: bool = false) -> bool:
 	# Rotate through sectors. Jitter changes the precise entrance without
 	# allowing every reinforcement to join the same single-file direction.
 	last_sector = (last_sector + 1 + rng.randi_range(0, 1)) % 8
+	var members: Array = game.team_players()
+	if members.is_empty(): return false
 	for attempt in 24:
 		var sector: int = (last_sector + attempt) % 8
 		var angle: float = sector * TAU / 8 + rng.randf_range(-0.22, 0.22)
-		var point: Vector2 = game.player.position + Vector2.from_angle(angle) * rng.randf_range(game.balance.spawn_distance_min, game.balance.spawn_distance_max)
-		if view.has_point(point) or not game.arena.safe_position(point, 20):
+		var anchor: Vector2 = members[(last_sector + attempt) % members.size()].position
+		var point: Vector2 = anchor + Vector2.from_angle(angle) * rng.randf_range(game.balance.spawn_distance_min, game.balance.spawn_distance_max)
+		if view.has_point(point) or not game.hidden_spawn(point, game.balance.spawn_margin) or not game.arena.safe_position(point, 20):
 			continue
 		game.spawn_enemy(id, point, elite)
 		total_spawned += 1

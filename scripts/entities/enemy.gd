@@ -73,7 +73,7 @@ func tick(delta: float) -> void:
 				state = "attack"
 				state_time = 0
 		elif state == "attack":
-			movement = charge_direction * 165
+			movement = charge_direction * 165 * game.enemy_scale().speed
 			if state_time > 0.65:
 				state = "recovery"
 				state_time = 0

@@ -31,6 +31,8 @@ func tick(delta: float) -> void:
 	if game.state != "running":
 		return
 	var attraction: float = game.balance.coin_attraction_radius + maxf(0, game.player.pickup_radius - 42.0)
+	var collected_value: int = 0
+	var collected_at: Vector2 = game.player.position
 	for i in range(coins.size() - 1, -1, -1):
 		var coin: Dictionary = coins[i]
 		coin.age += delta
@@ -39,19 +41,28 @@ func tick(delta: float) -> void:
 			coins.remove_at(i)
 			expired_count += 1
 			continue
-		if coin.at.distance_squared_to(game.player.position) <= attraction * attraction:
+		var collector = game.collection_player(coin.at)
+		if collector == null: continue
+		attraction = game.balance.coin_attraction_radius + maxf(0, collector.pickup_radius - 42.0)
+		if coin.at.distance_squared_to(collector.position) <= attraction * attraction:
 			coin.attracted = true
 		if coin.attracted:
-			coin.at = coin.at.move_toward(game.player.position, game.balance.coin_collect_speed * game.mastery.coin_speed_multiplier() * delta)
-		if coin.at.distance_squared_to(game.player.position) <= pow(game.balance.coin_arrival_radius, 2):
+			coin.at = coin.at.move_toward(collector.position, game.balance.coin_collect_speed * collector.game.mastery.coin_speed_multiplier() * delta)
+		if coin.at.distance_squared_to(collector.position) <= pow(game.balance.coin_arrival_radius, 2):
 			var amount: int = coin.value
 			coins.remove_at(i)
 			game.gold += amount
-			game.mastery.on_gold(amount)
+			if game.coop != null and game.coop.active:
+				game.coop.on_gold(amount)
+				collected_value += amount
+				collected_at = collector.position
+			else: game.mastery.on_gold(amount)
 			collected_count += 1
 			if feedback.size() < 12:
-				feedback.append({"at": game.player.position - Vector2(0, 26), "life": 0.55, "amount": amount})
+				feedback.append({"at": collector.position - Vector2(0, 26), "life": 0.55, "amount": amount})
 			game.sound.play_cue("gold")
+	if collected_value > 0:
+		game.coop.publish({"type": "gold_pickup", "at": collected_at, "amount": collected_value})
 	for effect in feedback:
 		effect.life -= delta
 		effect.at.y -= delta * 13

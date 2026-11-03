@@ -1,11 +1,11 @@
 # Política de privacidade
 
-Brasafria 0.3.0 é um protótipo local. O jogo não exige conta, não possui anúncios, não usa serviços de análise e não envia dados durante a execução normal. O perfil também registra ouro, melhor horda, níveis de habilidades permanentes e o identificador da última tentativa liquidada para evitar crédito duplicado.
+Brasafria 0.4.0 não exige cadastro e não possui anúncios ou análise de uso. O solo funciona offline. Progresso, ouro, selos, habilidades, estatísticas e preferências ficam no computador, em `%APPDATA%\Godot\app_userdata\Brasafria\profile.json`, com possíveis cópias `.tmp` e `.bak`. Testes locais podem usar perfis separados com nomes próprios.
 
-O progresso e as preferências são guardados no computador: versão do perfil, selos, construções desbloqueadas, quantidade de tentativas e vitórias, melhor tempo, volume, intensidade de efeitos, tremor de câmera e tela cheia. O perfil fica em `user://profile.json`, no diretório de dados definido pela Godot para Brasafria. No Windows, o local padrão é `%APPDATA%\Godot\app_userdata\Brasafria\profile.json`. A gravação também pode criar arquivos `.tmp` e `.bak`.
+Ao criar ou entrar em sala, o jogo conecta ao serviço configurado e transmite nome escolhido, código da sala, habilidades permanentes e mensagens de movimento, combate e progressão da tentativa. Os participantes recebem os nomes e o estado necessário ao jogo; ofertas individuais são encaminhadas somente ao jogador correspondente. O endereço de rede é necessário à conexão e pode ser processado pela infraestrutura de hospedagem.
 
-Esses dados não são enviados para nuvem e não há cadastro com nome, e-mail ou outros dados pessoais. Uma tentativa interrompida não é retomada pelo perfil. Para remover o progresso, feche o jogo e remova os arquivos do perfil e sua cópia de segurança no computador.
+O relay desta implementação mantém salas e mensagens em memória, sem banco de perfis ou persistência de histórico. Salas são removidas quando o anfitrião sai. O provedor de hospedagem pode manter registros técnicos conforme suas próprias configurações e regras. A hospedagem pública ainda não foi configurada nesta entrega. Ouro e compras permanentes continuam locais, sem sincronização de conta ou nuvem.
 
-O crédito [Feito por Socialy](https://www.instagram.com/socialy_webdesign/) abre uma página externa no navegador quando acionado. O acesso ao Instagram segue a política e os termos desse serviço. O jogo não controla os dados que o navegador ou o Instagram possam tratar.
+Para remover o progresso, feche o jogo e remova o perfil e suas cópias de segurança. Uma tentativa interrompida não é retomada pelo perfil.
 
-Se futuras versões adicionarem recursos online, esta política deverá ser revisada antes de sua disponibilização.
+O crédito [Feito por Socialy](https://www.instagram.com/socialy_webdesign/) abre o Instagram no navegador, sujeito às regras desse serviço.

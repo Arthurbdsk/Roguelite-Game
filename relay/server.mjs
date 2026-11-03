@@ -55,6 +55,13 @@ export function createRelay({port=8080,host='127.0.0.1',maxRooms=100}={}) {
       }
       if(!room.started)return;
       if(m.type==='action'&&p.id!==room.host){send(room.members.get(room.host).ws,{type:'action',from:p.id,data:m.data});return;}
+      if(m.type==='events'&&p.id===room.host&&Array.isArray(m.data)&&m.data.length<=4096){
+        for(const member of room.members.values())if(member.id!==p.id){
+          const data=m.data.filter(entry=>entry&&typeof entry==='object'&&(!entry.to||entry.to===member.id)).map(entry=>entry.data);
+          if(data.length)send(member.ws,{type:'events',data});
+        }
+        return;
+      }
       if(['event','delta'].includes(m.type)&&p.id===room.host){
         for(const member of room.members.values())if(member.id!==p.id&&(!m.to||m.to===member.id))send(member.ws,{type:m.type,data:m.data});
       }

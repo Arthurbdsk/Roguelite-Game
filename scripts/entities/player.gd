@@ -14,6 +14,10 @@ var animation: float = 0.0
 var sprite: Sprite2D
 var movement_multiplier: float = 1.0
 var time_since_damage: float = 0.0
+var display_name: String = ""
+var marker_color := Color("83c4bd")
+var down: bool = false
+var damage_revision: int = 0
 
 func _ready() -> void:
 	collision_layer = 1
@@ -30,6 +34,8 @@ func _ready() -> void:
 	add_child(sprite)
 
 func tick(delta: float, movement: Vector2) -> void:
+	if down:
+		return
 	invulnerable = maxf(0.0, invulnerable - delta)
 	time_since_damage += delta
 	velocity = movement.limit_length() * speed * movement_multiplier
@@ -47,8 +53,9 @@ func tick(delta: float, movement: Vector2) -> void:
 	queue_redraw()
 
 func take_damage(amount: float, source: Vector2) -> bool:
-	if invulnerable > 0 or hp <= 0 or game.state != "running":
+	if down or invulnerable > 0 or hp <= 0 or game.state != "running":
 		return false
+	damage_revision += 1
 	hp = maxf(0, hp - maxf(1, amount - armor))
 	time_since_damage = 0
 	invulnerable = 0.85
@@ -64,7 +71,11 @@ func take_damage(amount: float, source: Vector2) -> bool:
 func _draw() -> void:
 	draw_ellipse_shadow()
 	# Cold pixels under the sentinel keep them visible in a dense crowd.
-	draw_arc(Vector2(0, 1), 10, 0, TAU, 16, Color("83c4bd"), 1, false)
+	draw_arc(Vector2(0, 1), 10, 0, TAU, 16, Color("b65f42") if down else marker_color, 1, false)
+	if not display_name.is_empty():
+		var font: Font = ThemeDB.fallback_font
+		var width: float = font.get_string_size(display_name, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x
+		draw_string(font, Vector2(-width * 0.5, -34), display_name, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, marker_color)
 
 func draw_ellipse_shadow() -> void:
 	draw_rect(Rect2(-8, -1, 16, 5), Color(0, 0, 0, 0.35))
