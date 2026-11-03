@@ -11,8 +11,9 @@ const harness=packedArgument?resolve(root,'tests/coop_match.gd'):'res://tests/co
 const relay=createRelay({port:0});const address=await relay.listen();
 const externalArgument=process.argv.find(v=>v.startsWith('--relay-url='));
 const endpoint=externalArgument?externalArgument.slice('--relay-url='.length):`ws://127.0.0.1:${address.port}`;
+const endpointArgs=process.argv.includes('--embedded-endpoint')?[]:[`--relay=${endpoint}`];
 await mkdir(resolve(root,'test_output'),{recursive:true});
-function peer(index,args){const child=spawn(godot,['--headless',...runtime,'--script',harness,'--',`--relay=${endpoint}`,`--index=${index}`,`--profile-slot=cooptest${stamp}_${index}`,...args],{cwd:root,windowsHide:true});children.push(child);let out='';child.stdout.on('data',d=>out+=d);child.stderr.on('data',d=>out+=d);return new Promise((ok,bad)=>{child.on('error',bad);child.on('close',async code=>{await writeFile(resolve(root,`test_output/coop-${scenario}-peer-${index}.log`),out);console.log(out.trim());if(code===0&&out.includes('COOP_MATCH_PEER_PASS')&&!out.includes('ERROR:'))ok();else bad(Error(`Match peer ${index} failed ${code}`));});});}
+function peer(index,args){const child=spawn(godot,['--headless',...runtime,'--script',harness,'--',...endpointArgs,`--index=${index}`,`--profile-slot=cooptest${stamp}_${index}`,...args],{cwd:root,windowsHide:true});children.push(child);let out='';child.stdout.on('data',d=>out+=d);child.stderr.on('data',d=>out+=d);return new Promise((ok,bad)=>{child.on('error',bad);child.on('close',async code=>{await writeFile(resolve(root,`test_output/coop-${scenario}-peer-${index}.log`),out);console.log(out.trim());if(code===0&&out.includes('COOP_MATCH_PEER_PASS')&&!out.includes('ERROR:'))ok();else bad(Error(`Match peer ${index} failed ${code}`));});});}
 try{
  const extra=process.argv.includes('--disconnect')?['--disconnect']:[];
  await rm(codeFile,{force:true});const host=peer(0,['--host',`--code-file=${codeFile}`,...extra]);
