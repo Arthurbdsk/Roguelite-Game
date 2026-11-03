@@ -3,3 +3,4 @@ build/
 *.tmp
 test_output/
 tools/.cache/
+relay/node_modules/

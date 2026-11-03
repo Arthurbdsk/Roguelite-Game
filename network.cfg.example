@@ -1,0 +1,4 @@
+; Copy to network.cfg only after deploying the relay with valid HTTPS/WSS.
+; This is a public service address, never a private credential.
+[relay]
+url="wss://YOUR-RELAY-DOMAIN"
