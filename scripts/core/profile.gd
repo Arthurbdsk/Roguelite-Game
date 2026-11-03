@@ -1,7 +1,7 @@
 class_name GameProfile
 extends RefCounted
 
-const VERSION := 2
+const VERSION := 3
 var path: String = "user://profile.json"
 var data: Dictionary
 var last_error: String = ""
@@ -11,7 +11,7 @@ func _init(save_path: String = "user://profile.json") -> void:
 	data = defaults()
 
 func defaults() -> Dictionary:
-	return {"version": VERSION, "gold": 0, "last_settled_run": "", "best_wave": 0, "seals": 0, "buildings": {"arsenal": false, "library": false}, "best_time": 0.0, "wins": 0, "runs": 0, "settings": {"volume": 0.55, "effects": 0.7, "shake": true, "fullscreen": false}}
+	return {"version": VERSION, "skill_ranks": {}, "gold": 0, "last_settled_run": "", "best_wave": 0, "seals": 0, "buildings": {"arsenal": false, "library": false}, "best_time": 0.0, "wins": 0, "runs": 0, "settings": {"volume": 0.55, "effects": 0.7, "shake": true, "fullscreen": false}}
 
 func load_profile() -> bool:
 	if not FileAccess.file_exists(path):
@@ -29,7 +29,7 @@ func load_profile() -> bool:
 		last_error = "Progresso inválido. Arquivo preservado."
 		return false
 	var saved_version = parsed.get("version", 0)
-	if not (saved_version is float or saved_version is int) or (saved_version != 1 and saved_version != VERSION):
+	if not (saved_version is float or saved_version is int) or (saved_version != 1 and saved_version != 2 and saved_version != VERSION):
 		last_error = "Progresso inválido ou versão incompatível. Arquivo preservado."
 		return false
 	for key in ["seals", "best_time", "runs", "wins", "gold", "best_wave"]:
@@ -50,6 +50,11 @@ func load_profile() -> bool:
 	data = defaults()
 	data.seals = clampi(int(parsed.get("seals", 0)), 0, 999999)
 	data.gold = clampi(int(parsed.get("gold", 0)), 0, 9999999999)
+	var ranks = parsed.get("skill_ranks", {})
+	if ranks is Dictionary:
+		for id in ranks:
+			if id is String and (ranks[id] is float or ranks[id] is int):
+				data.skill_ranks[id] = clampi(int(ranks[id]), 0, 10)
 	data.best_wave = clampi(int(parsed.get("best_wave", 0)), 0, 99999)
 	data.last_settled_run = str(parsed.get("last_settled_run", "")) if parsed.get("last_settled_run", "") is String else ""
 	data.best_time = clampf(float(parsed.get("best_time", 0)), 0, 100000)

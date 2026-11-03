@@ -17,6 +17,8 @@ var knockback: Vector2 = Vector2.ZERO
 var charge_direction: Vector2 = Vector2.ZERO
 var sprite: Sprite2D
 var serial: int = 0
+var targetable: bool = true
+var summoner_id: int = 0
 
 func setup(owner_game, stats: EnemyData, is_elite: bool = false) -> void:
 	game = owner_game
@@ -127,7 +129,7 @@ func skeleton_attack(offset: Vector2, direction: Vector2) -> Vector2:
 			state_time = 0
 			attack_time = data.attack_interval
 			if data.behavior == "archer":
-				game.enemy_projectiles.fire(position + charge_direction * 12, charge_direction, data)
+				game.enemy_projectiles.fire(position + charge_direction * 12, charge_direction, data, summoner_id)
 			else:
 				# One damage decision per swing, at its locked direction.
 				if distance <= data.attack_range + game.player.radius and absf(charge_direction.angle_to(direction)) <= deg_to_rad(data.attack_half_angle):

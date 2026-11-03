@@ -12,6 +12,8 @@ var facing: Vector2 = Vector2.DOWN
 var invulnerable: float = 0.0
 var animation: float = 0.0
 var sprite: Sprite2D
+var movement_multiplier: float = 1.0
+var time_since_damage: float = 0.0
 
 func _ready() -> void:
 	collision_layer = 1
@@ -29,7 +31,8 @@ func _ready() -> void:
 
 func tick(delta: float, movement: Vector2) -> void:
 	invulnerable = maxf(0.0, invulnerable - delta)
-	velocity = movement.limit_length() * speed
+	time_since_damage += delta
+	velocity = movement.limit_length() * speed * movement_multiplier
 	if movement.length_squared() > 0.01:
 		facing = movement.normalized()
 		animation += delta * 9
@@ -47,13 +50,15 @@ func take_damage(amount: float, source: Vector2) -> bool:
 	if invulnerable > 0 or hp <= 0 or game.state != "running":
 		return false
 	hp = maxf(0, hp - maxf(1, amount - armor))
+	time_since_damage = 0
 	invulnerable = 0.85
 	game.shake_time = 0.16
 	game.sound.play_cue("hurt")
 	var direction := (position - source).normalized()
 	move_and_collide(direction * 5)
 	if hp <= 0:
-		game.finish_run(false)
+		if not game.mastery.save_from_death():
+			game.finish_run(false)
 	return true
 
 func _draw() -> void:

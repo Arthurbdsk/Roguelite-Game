@@ -31,6 +31,7 @@ var passive_text: Label
 var ui_theme: Theme
 var last_loadout: String = ""
 var previous_data: Dictionary = {}
+var selected_skill: String = "edge"
 
 func setup(game_ref) -> void:
 	game = game_ref
@@ -178,6 +179,19 @@ func render(which: String, data: Dictionary = {}) -> void:
 		"paused": _paused()
 		"settings": _settings()
 		"result": _result(data)
+		"tree":
+			_backdrop()
+			var tree_view := SkillTreeView.new()
+			menu.add_child(tree_view)
+			tree_view.setup(game, self)
+		"lab":
+			_backdrop()
+			_label(menu, "LABORATÓRIO DE COMBATE", Rect2(24, 28, 592, 40), 25, IVORY, true)
+			_label(menu, "Carrasco: armas nível 4. Demônio: armas evoluídas nível 5.\nPasso 2, Selo 2 e Ímã 2. Sem habilidades permanentes.\nO teste não salva nem concede ouro.", Rect2(80, 90, 480, 80), 12, MUTED, true)
+			var first := _button(menu, "Enfrentar o Carrasco", Rect2(160, 184, 320, 32), game.start_boss_test.bind("executioner"), true)
+			_button(menu, "Portal do demônio", Rect2(160, 228, 320, 32), game.start_boss_test.bind("demon"))
+			_button(menu, "Voltar", Rect2(160, 281, 320, 28), game.show_title)
+			call_deferred("_grant_focus", first)
 
 func _title() -> void:
 	_backdrop()
@@ -195,9 +209,10 @@ func _title() -> void:
 	_label(menu, "A muralha caiu.\nA vigília continua.", Rect2(34, 111, 265, 48), 15, MUTED)
 	var play := _button(menu, "Jogar", Rect2(34, 185, 205, 31), func(): game.start_run(), true)
 	_button(menu, "Fortaleza", Rect2(34, 223, 205, 29), func(): game.enter_hub())
-	_button(menu, "Opções", Rect2(34, 259, 97, 27), func(): _open_settings("title"))
-	_button(menu, "Sair", Rect2(140, 259, 99, 27), func(): get_tree().quit())
-	_label(menu, "WASD / setas: mover    Esc: pausa\nElimine cada horda para avançar.\nDerrote o rei na horda 10.", Rect2(320, 259, 287, 51), 11, MUTED)
+	_button(menu, "Árvore permanente", Rect2(34, 259, 205, 27), game.open_skill_tree)
+	_button(menu, "Opções", Rect2(34, 294, 97, 23), func(): _open_settings("title"))
+	_button(menu, "Sair", Rect2(140, 294, 99, 23), func(): get_tree().quit())
+	_label(menu, "WASD / setas: mover    Esc: pausa\nElimine cada horda para avançar.\nDemônio na horda 10. F9: testar chefes.", Rect2(320, 259, 287, 51), 11, MUTED)
 	_footer()
 	call_deferred("_grant_focus", play)
 
@@ -232,6 +247,7 @@ func _hub(data: Dictionary) -> void:
 	library.disabled = not bool(buildings.get("library", false))
 	_label(menu, "Armas, níveis e passivas da partida são temporários.", Rect2(25, 274, 380, 24), 11, MUTED)
 	_button(menu, "Voltar", Rect2(25, 292, 105, 24), func(): game.show_title())
+	_button(menu, "Árvore permanente", Rect2(142, 292, 230, 24), game.open_skill_tree)
 	_button(menu, "Partir", Rect2(425, 278, 188, 35), func(): game.start_run(selected_support), true)
 	_footer()
 	call_deferred("_grant_focus", none)
@@ -342,7 +358,7 @@ func _result(data: Dictionary) -> void:
 	_backdrop(0.94)
 	var won: bool = bool(data.get("won", false))
 	_label(menu, "A AURORA RESISTE" if won else "A VIGÍLIA TERMINOU", Rect2(24, 35, 592, 43), 28, ICE if won else IVORY, true)
-	_label(menu, "O pátio voltou às suas mãos." if won else "As muralhas lembram de cada tentativa.", Rect2(24, 87, 592, 24), 12, MUTED, true)
+	_label(menu, "Modo teste: saldo permanente não alterado." if data.get("dev", false) else ("O pátio voltou às suas mãos." if won else "As muralhas lembram de cada tentativa."), Rect2(24, 87, 592, 24), 12, MUTED, true)
 	_box(menu, Rect2(84, 121, 472, 132))
 	_label(menu, "HORDA %d\n%s" % [int(data.get("wave", 1)), _clock(float(data.get("elapsed", 0)))], Rect2(99, 134, 142, 39), 13)
 	_label(menu, "ABATES\n%d" % int(data.get("kills", 0)), Rect2(252, 134, 135, 39), 13)
@@ -433,7 +449,7 @@ func update_hud(data: Dictionary) -> void:
 	if boss_bar.visible:
 		boss_bar.max_value = max_boss
 		boss_bar.value = float(data.get("boss_hp", 0.0))
-		boss_text.text = "O REI SEM BRASA"
+		boss_text.text = str(data.get("boss_name", "O DEVORADOR DE BRASAS")).to_upper()
 	var weapons: Array = data.get("weapons", [])
 	var serialized: String = JSON.stringify(weapons)
 	if serialized != last_loadout:

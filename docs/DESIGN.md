@@ -1,6 +1,6 @@
 # Brasafria
 
-Proposta e especificação do protótipo 0.2.0. Configuração e validação da expansão em `HORDAS_E_OURO.md`. Resultados da versão original ficam preservados em `VALIDACAO.md`.
+Especificação da base de combate 0.2.0, preservada como referência. A versão atual 0.3 acrescenta a árvore permanente, altera a chegada do Carrasco para 300 s e substitui a horda final pelo demônio. Regras e validação atuais em `ARVORE_E_CHEFES.md`; o prazo antigo de chegada por horda e o Rei sem Brasa descritos abaixo são históricos.
 
 ## 1. Conceito geral
 

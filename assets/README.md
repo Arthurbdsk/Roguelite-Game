@@ -3,6 +3,8 @@
 Arte original gerada em tools/generate_assets.py com Pillow. Sem antialiasing.
 Filtro de importação: Nearest. Spritesheets originais têm 4 quadros horizontais. Os esqueletos da versão 0.2 têm 6 quadros de 32x36 (quatro passos, preparação e ataque), gerados separadamente por `tools/generate_skeletons.py`. A moeda `gold.png` tem 4 quadros de 8x8.
 
+Chefes da versão 0.3: `executioner.png`, oito quadros de 48x64; `demon.png`, 12 quadros de 96x96. O gerador editável é `tools/generate_bosses.py`. Incluem marcha, antecipação, investida, preparações de poderes e morte. O antigo `boss.png` foi preservado como material da versão anterior.
+
 | Arquivo | Quadro | Uso |
 | --- | --- | --- |
 | player.png | 24x32 | Sentinela, caminhada frontal |

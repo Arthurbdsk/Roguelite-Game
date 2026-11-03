@@ -5,21 +5,26 @@ The exported release itself is separately checked by export_windows.py --smoke.
 All test profiles are isolated from the player's save.
 """
 from pathlib import Path
+import argparse
 import subprocess
 import sys
 
 root = Path(__file__).resolve().parents[1]
-target = root / 'build' / 'Brasafria-0.2.0.exe'
-log = root / 'test_output' / 'export_hordes_gold.log'
+parser = argparse.ArgumentParser()
+parser.add_argument('--suite', choices=['hordes_gold', 'skills_bosses'], default='skills_bosses')
+args = parser.parse_args()
+target = root / 'build' / 'Brasafria-0.3.0.exe'
+log = root / 'test_output' / f'export_{args.suite}.log'
 godot = Path.home() / 'Downloads' / 'Godot_v4.7.2-stable_win64_console.exe'
 result = subprocess.run([
-    str(godot), '--headless', '--main-pack', str(target), '--script', str(root / 'tests' / 'hordes_gold.gd'),
+    str(godot), '--headless', '--main-pack', str(target), '--script', str(root / 'tests' / f'{args.suite}.gd'),
     '--log-file', str(log), '--', '--self-test',
 ], cwd=target.parent, capture_output=True, text=True, timeout=90)
 output = result.stdout + result.stderr
 if log.exists():
     output += log.read_text(encoding='utf-8')
 print(output[-4000:])
-if result.returncode or 'HORDES_GOLD_PASS' not in output or 'ERROR:' in output or 'FAIL:' in output:
+marker = 'SKILLS_BOSSES_PASS' if args.suite == 'skills_bosses' else 'HORDES_GOLD_PASS'
+if result.returncode or marker not in output or 'ERROR:' in output or 'FAIL:' in output:
     sys.exit(result.returncode or 1)
-print('PACKED_GAME_VERIFIED: embedded PCK, matching editor runtime, 640 checks, isolated saves')
+print(f'PACKED_GAME_VERIFIED: embedded PCK, matching editor runtime, {args.suite}, isolated saves')

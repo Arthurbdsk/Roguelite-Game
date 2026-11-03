@@ -1,5 +1,7 @@
 # Roteiro de produção
 
+Estado atual: versão 0.3 funcional, com árvore de 16 nós e chefes reformulados. Critérios, arquivos e testes em `ARVORE_E_CHEFES.md`. O roteiro abaixo preserva a evolução da base; o próximo trabalho depende das referências visuais da árvore e da avaliação humana do combate.
+
 Este roteiro descreve critérios, não declara que os testes passaram. O código atual contém os sistemas das etapas 1 a 4; a validação é conduzida na integração. Não ampliar o conteúdo antes de corrigir falhas de combate ou de estado.
 
 ## Etapa 1. Fatia de combate

@@ -6,5 +6,5 @@ title = "O carrasco desperta"
 composition = {"ghoul": 18, "hound": 14, "skeleton_sword": 30, "skeleton_archer": 12, "guard": 18}
 spawn_interval = 0.3
 max_alive = 70
-elite_guards = 1
+elite_guards = 0
 boss = false

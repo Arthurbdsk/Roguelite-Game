@@ -13,6 +13,8 @@ class StubGame extends Node:
 	func set_option(_key: String, _value) -> void: pass
 	func buy_building(_id: String) -> void: pass
 	func show_title() -> void: pass
+	func open_skill_tree() -> void: pass
+	func start_boss_test(_kind: String) -> void: pass
 
 func _initialize() -> void:
 	call_deferred("_validate")
@@ -23,7 +25,7 @@ func _validate() -> void:
 	var ui := GameUI.new()
 	root.add_child(ui)
 	ui.setup(stub)
-	for which in ["title", "hub", "running", "paused", "settings", "result"]:
+	for which in ["title", "hub", "running", "paused", "settings", "result", "lab"]:
 		ui.render(which)
 		await process_frame
 	ui.render("upgrading", {"offers": [

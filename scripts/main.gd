@@ -46,6 +46,15 @@ var enemy_data: Dictionary = {}
 var balance: EncounterBalance = preload("res://data/encounters/default.tres")
 var gold_loot: GoldLoot
 var enemy_projectiles: EnemyProjectiles
+var skills := PermanentSkills.new()
+var mastery := RunMastery.new()
+var tree_return: String = "title"
+var dev_boss_test: bool = false
+var dev_boss_kind: String = "demon"
+var executioner_defeated: bool = false
+var reported_deaths: Dictionary = {}
+var boss_balance: BossBalance = preload("res://data/bosses/balance.tres")
+var boss_arena: BossArena
 
 func _ready() -> void:
 	test_mode = "--self-test" in OS.get_cmdline_user_args()
@@ -55,9 +64,13 @@ func _ready() -> void:
 	register_inputs()
 	if not test_mode:
 		profile.load_profile()
-	for id in ["ghoul", "hound", "guard", "boss", "skeleton_sword", "skeleton_archer"]:
+	skills.setup(self)
+	mastery.setup(self)
+	for id in ["ghoul", "hound", "guard", "demon", "executioner", "skeleton_sword", "skeleton_archer"]:
 		enemy_data[id] = load("res://data/enemies/" + id + ".tres")
+	enemy_data["boss"] = enemy_data.demon
 	arena = RuinedArena.new()
+	arena.z_index = -20
 	add_child(arena)
 	entities = Node2D.new()
 	entities.y_sort_enabled = true
@@ -85,6 +98,9 @@ func _ready() -> void:
 	enemy_projectiles = EnemyProjectiles.new()
 	add_child(enemy_projectiles)
 	enemy_projectiles.setup(self)
+	boss_arena = BossArena.new()
+	add_child(boss_arena)
+	boss_arena.setup(self)
 	ui = GameUI.new()
 	add_child(ui)
 	ui.setup(self)
@@ -92,6 +108,9 @@ func _ready() -> void:
 	show_title()
 	if "--play" in OS.get_cmdline_user_args():
 		start_run()
+	for argument in OS.get_cmdline_user_args():
+		if argument.begins_with("--boss-test="):
+			start_boss_test(argument.get_slice("=", 1))
 
 func register_inputs() -> void:
 	var bindings := {"move_left": [KEY_A, KEY_LEFT], "move_right": [KEY_D, KEY_RIGHT], "move_up": [KEY_W, KEY_UP], "move_down": [KEY_S, KEY_DOWN]}
@@ -122,7 +141,10 @@ func simulate(delta: float, movement: Vector2 = Vector2.ZERO) -> void:
 	if state != "running":
 		return
 	elapsed += delta
+	var previous_position: Vector2 = player.position
+	player.movement_multiplier = boss_arena.slow_multiplier(player.position)
 	player.tick(delta, movement)
+	mastery.tick(delta, previous_position.distance_to(player.position) if movement.length_squared() > 0.01 else 0)
 	director.tick(delta)
 	if state != "running":
 		return
@@ -140,6 +162,7 @@ func simulate(delta: float, movement: Vector2 = Vector2.ZERO) -> void:
 		return
 	enemy_projectiles.tick(delta)
 	update_hazards(delta)
+	boss_arena.tick(delta)
 	if state != "running":
 		queue_redraw()
 		return
@@ -164,6 +187,9 @@ func simulate(delta: float, movement: Vector2 = Vector2.ZERO) -> void:
 	queue_redraw()
 
 func start_run(selected_support: String = "none") -> void:
+	if dev_boss_test and not test_mode:
+		persistence_enabled = true
+	dev_boss_test = false
 	if selected_support not in ["none", "arsenal", "library"]:
 		selected_support = "none"
 	if selected_support != "none" and not profile.data.buildings[selected_support]:
@@ -182,6 +208,7 @@ func start_run(selected_support: String = "none") -> void:
 	player.facing = Vector2.DOWN
 	camera.reset_smoothing()
 	weapon_system.reset(support)
+	mastery.begin()
 	director.reset()
 	state = "running"
 	ui.render("running")
@@ -199,6 +226,8 @@ func clear_run() -> void:
 	grid.clear()
 	gold_loot.reset()
 	enemy_projectiles.reset()
+	boss_arena.reset()
+	reported_deaths.clear()
 	elapsed = 0
 	kills = 0
 	earned = 0
@@ -210,6 +239,7 @@ func clear_run() -> void:
 	xp_needed = 6
 	boss = null
 	boss_defeated = false
+	executioner_defeated = false
 	event_claimed = false
 	event_progress = 0
 	shake_time = 0
@@ -224,7 +254,59 @@ func enter_hub() -> void:
 	state = "hub"
 	ui.render("hub", profile.data)
 
+func open_skill_tree() -> void:
+	if state not in ["title", "hub", "tree"]:
+		return
+	if state != "tree":
+		tree_return = state
+	state = "tree"
+	ui.render("tree", profile.data)
+
+func close_skill_tree() -> void:
+	if tree_return == "hub":
+		enter_hub()
+	else:
+		show_title()
+
+func buy_skill(id: String, expected_rank: int = -1) -> void:
+	if state not in ["title", "hub", "tree"]:
+		return
+	if skills.purchase(id, expected_rank):
+		sound.play_cue("select")
+	ui.render("tree", profile.data)
+
+func weapon_hit(enemy, amount: float, force: Vector2) -> void:
+	mastery.hit(enemy, amount, force)
+
+func start_boss_test(kind: String) -> void:
+	start_run()
+	dev_boss_kind = "executioner" if kind == "executioner" else "demon"
+	dev_boss_test = true
+	persistence_enabled = false
+	mastery.begin(false)
+	for id in ["boots", "ward", "magnet"]:
+		weapon_system.apply_upgrade(id)
+		weapon_system.apply_upgrade(id)
+	var weapon_level: int = 4 if kind == "executioner" else 5
+	weapon_system.levels = {"sword": weapon_level, "bolt": weapon_level, "orbit": weapon_level}
+	level = 18 if kind == "executioner" else 21
+	director.phase = "complete"
+	player.position = Vector2(700, 630)
+	if kind == "executioner":
+		elapsed = 300
+		spawn_enemy("executioner", Vector2(860, 630))
+		announce("TESTE: O CARRASCO", 2.5)
+	else:
+		director.wave_index = 9
+		boss_arena.begin_portal()
+	ui.update_hud(snapshot())
+
 func retry() -> void:
+	if dev_boss_test:
+		if state in ["running", "paused", "upgrading"]:
+			finish_run(false)
+		start_boss_test(dev_boss_kind)
+		return
 	if state in ["running", "paused", "upgrading"]:
 		finish_run(false)
 	start_run(support)
@@ -241,11 +323,14 @@ func finish_run(won: bool) -> void:
 		return
 	state = "result"
 	run_settled = true
+	boss_arena.stop_combat()
 	camera.offset = Vector2.ZERO
-	banked_gold = gold
+	banked_gold = 0 if dev_boss_test else gold
 	banked_reward = profile.reward(elapsed, kills, won, earned, gold, run_id, director.wave_number()) if persistence_enabled else floori(elapsed / 30.0) + floori(kills / 30.0) + earned + (10 if won else 0)
+	if dev_boss_test:
+		banked_reward = 0
 	sound.play_cue("victory" if won else "defeat")
-	ui.render("result", {"won": won, "elapsed": elapsed, "kills": kills, "earned": banked_reward, "level": level, "gold": banked_gold, "total_gold": profile.data.gold, "wave": director.wave_number()})
+	ui.render("result", {"won": won, "elapsed": elapsed, "kills": kills, "earned": banked_reward, "level": level, "gold": banked_gold, "total_gold": profile.data.gold, "wave": director.wave_number(), "dev": dev_boss_test})
 
 func request_quit() -> void:
 	if state in ["running", "paused", "upgrading"]:
@@ -276,6 +361,15 @@ func _unhandled_input(event: InputEvent) -> void:
 			ui.render(ui.return_screen, profile.data)
 		elif state == "hub":
 			show_title()
+		elif state == "tree":
+			close_skill_tree()
+		elif state == "lab":
+			show_title()
+	if event is InputEventKey and event.pressed and event.physical_keycode == KEY_F9 and state in ["title", "hub", "lab"]:
+		state = "lab"
+		ui.render("lab")
+	if state == "tree" and event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_SPACE:
+		buy_skill(ui.selected_skill)
 	if state == "upgrading" and event is InputEventKey and event.pressed and not event.echo:
 		var index: int = event.physical_keycode - KEY_1
 		if index >= 0 and index < offers.size():
@@ -284,6 +378,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		set_option("fullscreen", not profile.data.settings.fullscreen)
 
 func add_xp(amount: int) -> void:
+	if dev_boss_test:
+		return
 	xp += amount
 	check_level()
 
@@ -334,18 +430,22 @@ func apply_settings() -> void:
 		DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN if profile.data.settings.fullscreen else DisplayServer.WINDOW_MODE_WINDOWED)
 
 func spawn_enemy(id: String, point: Vector2, elite: bool = false):
-	var enemy = preload("res://scenes/entities/enemy.tscn").instantiate()
+	id = "demon" if id == "boss" else id
+	var enemy = HordeBoss.new() if id in ["demon", "executioner"] else preload("res://scenes/entities/enemy.tscn").instantiate()
 	enemy.position = point
 	enemy.serial = serial
 	serial += 1
 	enemy.setup(self, enemy_data[id], elite)
 	entities.add_child(enemy)
 	enemies.append(enemy)
-	if id == "boss":
+	if id in ["demon", "executioner"]:
 		boss = enemy
 	return enemy
 
 func enemy_killed(enemy) -> void:
+	if reported_deaths.has(enemy.get_instance_id()):
+		return
+	reported_deaths[enemy.get_instance_id()] = true
 	kills += 1
 	gold_loot.drop(enemy.position, enemy.data.gold_value)
 	pickups.append({"at": enemy.position, "xp": enemy.data.experience, "attracted": false})
@@ -356,19 +456,39 @@ func enemy_killed(enemy) -> void:
 	if enemy.elite:
 		earned += 3
 		announce("CARRASCO ABATIDO  |  +3 SELOS", 3)
-	if enemy.data.behavior == "boss":
+	if enemy is HordeBoss:
+		if enemy.is_executioner:
+			executioner_defeated = true
+			gold += boss_balance.executioner_reward
+			earned += 3
+		else:
+			boss_defeated = true
+			gold += boss_balance.demon_reward
+			earned += 5
+		boss_arena.on_boss_death(enemy)
+	elif enemy.data.behavior == "boss":
 		boss_defeated = true
 		boss = null
 		earned += 5
 		hazards.clear()
 		announce("O REI CAIU. ELIMINE OS RESTANTES.", 4)
 	enemies.erase(enemy)
+	boss_arena.notify_enemy_removed(enemy)
+
+func despawn_enemy(enemy) -> void:
+	if not is_instance_valid(enemy):
+		return
+	enemy.alive = false
+	enemy.targetable = false
+	enemies.erase(enemy)
+	boss_arena.notify_enemy_removed(enemy)
+	enemy.queue_free()
 
 func nearest_enemy(origin: Vector2, max_range: float):
 	var best = null
 	var distance := max_range * max_range
 	for enemy in enemies:
-		if not is_instance_valid(enemy) or not enemy.alive:
+		if not is_instance_valid(enemy) or not enemy.alive or not enemy.targetable:
 			continue
 		var current: float = enemy.position.distance_squared_to(origin)
 		if current < distance or (is_equal_approx(current, distance) and best != null and enemy.serial < best.serial):
@@ -458,7 +578,7 @@ func camera_rect() -> Rect2:
 	return Rect2(center - Vector2(320, 180), Vector2(640, 360))
 
 func snapshot() -> Dictionary:
-	return {"hp": player.hp, "max_hp": player.max_hp, "xp": xp, "xp_needed": xp_needed, "elapsed": elapsed, "level": level, "kills": kills, "gold": gold, "earned": earned + floori(elapsed / 30.0) + floori(kills / 30.0), "wave": director.wave_number(), "weapons": weapon_system.get_loadout(), "passives": weapon_system.get_passives(), "boss_hp": boss.hp if is_instance_valid(boss) else 0, "boss_max": boss.max_hp if is_instance_valid(boss) else 0, "banner": banner, "pressure": director.pressure()}
+	return {"hp": player.hp, "max_hp": player.max_hp, "xp": xp, "xp_needed": xp_needed, "elapsed": elapsed, "level": level, "kills": kills, "gold": gold, "earned": earned + floori(elapsed / 30.0) + floori(kills / 30.0), "wave": director.wave_number(), "weapons": weapon_system.get_loadout(), "passives": weapon_system.get_passives(), "boss_hp": boss.hp if is_instance_valid(boss) else 0, "boss_max": boss.max_hp if is_instance_valid(boss) else 0, "boss_name": boss.data.title if is_instance_valid(boss) else "", "banner": banner, "pressure": director.pressure()}
 
 func _draw() -> void:
 	if state in ["title", "hub"]:

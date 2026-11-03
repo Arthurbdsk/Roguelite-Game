@@ -17,14 +17,34 @@ func clear_shot(origin: Vector2, target: Vector2) -> bool:
 	var query := PhysicsRayQueryParameters2D.create(origin, target, 4)
 	return get_world_2d().direct_space_state.intersect_ray(query).is_empty()
 
-func fire(origin: Vector2, direction: Vector2, stats: EnemyData) -> bool:
-	if arrows.size() >= game.balance.max_enemy_projectiles or direction.length_squared() < 0.1:
+func fire(origin: Vector2, direction: Vector2, stats: EnemyData, owner: int = 0) -> bool:
+	var limit: int = mini(game.balance.max_enemy_projectiles, game.boss_balance.final_projectile_limit) if game.boss_arena.final_active() else game.balance.max_enemy_projectiles
+	if arrows.size() >= limit or direction.length_squared() < 0.1:
 		return false
 	serial += 1
-	arrows.append({"id": serial, "at": origin, "velocity": direction.normalized() * stats.arrow_speed, "damage": stats.damage, "distance": 0.0, "range": stats.arrow_range, "life": stats.arrow_lifetime})
+	arrows.append({"id": serial, "at": origin, "velocity": direction.normalized() * stats.arrow_speed, "damage": stats.damage, "distance": 0.0, "range": stats.arrow_range, "life": stats.arrow_lifetime, "owner": owner, "kind": "arrow", "radius": game.balance.arrow_radius})
 	game.sound.play_cue("arrow")
 	queue_redraw()
 	return true
+
+func fire_count() -> int:
+	var count: int = 0
+	for projectile in arrows:
+		count += int(projectile.get("kind", "arrow") == "fire")
+	return count
+
+func fire_ball(origin: Vector2, direction: Vector2, owner: int, phase: int) -> bool:
+	if arrows.size() >= game.boss_balance.final_projectile_limit or fire_count() >= game.boss_balance.fire_limit:
+		return false
+	serial += 1
+	arrows.append({"id": serial, "at": origin, "velocity": direction.normalized() * game.boss_balance.fire_speed * (1.08 if phase == 3 else 1), "damage": game.boss_balance.fire_damage, "distance": 0.0, "range": 900.0, "life": game.boss_balance.fire_lifetime, "owner": owner, "kind": "fire", "radius": 5.0})
+	game.sound.play_cue("fire")
+	queue_redraw()
+	return true
+
+func remove_owner(owner: int) -> void:
+	arrows = arrows.filter(func(projectile): return projectile.get("owner", 0) != owner)
+	queue_redraw()
 
 func tick(delta: float) -> void:
 	if game.state != "running":
@@ -46,7 +66,7 @@ func tick(delta: float) -> void:
 		if not wall.is_empty():
 			end = wall.position
 		var nearest := Geometry2D.get_closest_point_to_segment(game.player.position, start, end)
-		if nearest.distance_squared_to(game.player.position) <= pow(game.player.radius + game.balance.arrow_radius, 2):
+		if nearest.distance_squared_to(game.player.position) <= pow(game.player.radius + arrow.get("radius", game.balance.arrow_radius), 2):
 			arrows.remove_at(i)
 			game.player.take_damage(arrow.damage, start)
 			if game.state != "running":
@@ -65,6 +85,11 @@ func _draw() -> void:
 	for arrow in arrows:
 		var point: Vector2 = arrow.at.round()
 		var direction: Vector2 = arrow.velocity.normalized()
+		if arrow.get("kind", "arrow") == "fire":
+			draw_rect(Rect2(point - Vector2(5, 4), Vector2(9, 8)), Color("71362c"))
+			draw_rect(Rect2(point - Vector2(3, 3), Vector2(6, 6)), Color("d77745"))
+			draw_rect(Rect2(point - Vector2(1, 2), Vector2(3, 3)), Color("f4d194"))
+			continue
 		draw_line((point - direction * 10).round(), point, Color("b68a55"), 2, false)
 		draw_line((point - direction * 9).round(), (point - direction * 6).round(), Color("eee0b8"), 2, false)
 		var tip: Vector2 = point + direction * 3

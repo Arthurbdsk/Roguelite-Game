@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/entities/enemy_data.gd" id="1"]
+[resource]
+script = ExtResource("1")
+id = "executioner"
+title = "O Carrasco"
+speed = 64.0
+damage = 14.0
+experience = 30
+radius = 18.0
+texture = "res://assets/executioner.png"
+behavior = "executioner"
+frames = 8
+contact_damage = false

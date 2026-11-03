@@ -1,22 +1,28 @@
 # Brasafria
 
-Protótipo jogável 0.2.0 em Godot 4.7.2 e GDScript. Uma sentinela enfrenta dez hordas no Pátio dos Esquecidos. Elimine cada composição para avançar e derrote o Rei sem Brasa na última horda.
+Protótipo jogável 0.3.0 em Godot 4.7.2 e GDScript. Uma sentinela enfrenta hordas no Pátio dos Esquecidos, investe ouro em habilidades permanentes e enfrenta o Carrasco e o Devorador de Brasas.
 
 ## Jogar
 
-Abra `build/Brasafria-0.2.0.exe` ou `Jogar.cmd`. O executável é independente e contém os recursos. Não exige instalar a Godot. A versão anterior está preservada em `build/backups/`.
+Feche a versão anterior e abra `build/Brasafria-0.3.0.exe` ou `Jogar.cmd`. O executável é independente e contém os recursos. Não exige instalar a Godot. Versões e cópias anteriores do perfil estão preservadas em `build/backups/`. As versões compartilham um perfil; não mantenha duas abertas ao mesmo tempo.
 
 WASD ou setas movem o personagem. Os ataques são automáticos e escolhem o inimigo mais próximo. Esc pausa; 1, 2 e 3 selecionam melhorias. F11 alterna tela cheia. Analógico esquerdo, direcional e navegação de menus estão mapeados para controle, ainda sem teste com hardware físico.
 
-São três armas com cinco níveis, cinco passivas com limite de três vagas, cinco tipos de inimigos, uma elite e um chefe. Os novos esqueletos usam espada com preparação e intervalo ou arco com disparo antecipado e flecha desviável. A fortaleza mantém seus dois desbloqueios permanentes e apoios com contrapartida. Subir de nível pausa a ação e oferece três escolhas distintas.
+São três armas com cinco níveis, cinco passivas, cinco tipos de inimigos e dois chefes. A árvore de 16 nós é acessível no título e na fortaleza. Compras usam ouro, possuem pré-requisitos e salvam imediatamente. Os bônus são aplicados uma vez na nova partida. A vaga padrão de três passivas pode virar quatro pela especialização Pacto das três. A fortaleza mantém os dois apoios antigos, comprados com selos.
 
-Não há mais prazo de dez minutos. A preparação inicial dura 2,5 segundos; entre hordas, cinco segundos após eliminar os restantes. Espadachins entram na horda 3, arqueiros na 5, a elite na 7 e o chefe na 10. A dificuldade muda por quantidade, composição e comportamento, sem aumentar atributos por tempo ou nível do jogador. Aos dois minutos, o altar original a sudeste continua disponível.
+Não há prazo fixo de partida. A preparação inicial dura 2,5 segundos; entre hordas, cinco segundos. Espadachins entram na horda 3 e arqueiros na 5. O Carrasco chega aos cinco minutos com 936 de vida, golpe de execução, investida e segunda fase. A última horda espera sua derrota se necessário. O Devorador de Brasas surge por um portal no centro na horda 10, com 1.872 de vida e três fases. Nessa luta, as hordas param e o demônio controla reforços limitados. O altar original permanece disponível após dois minutos.
 
 Todo inimigo deixa ouro. Moedas permanecem por 60 segundos de partida, são atraídas por proximidade e só contam quando chegam ao corpo. A pausa interrompe seu tempo de vida. Ouro dourado e experiência azulada possuem leitura distinta.
 
+Os chefes também concedem um bônus de conclusão único: 30 de ouro pelo Carrasco e 120 pelo demônio. Esses bônus são separados das moedas no chão. Na morte do demônio, ataques, áreas e invocações são retirados, sua animação de morte termina e a vitória salva o saldo uma vez.
+
+## Testar os chefes
+
+Pressione F9 no título ou na fortaleza. Também pode abrir `Testar_Carrasco.cmd` ou `Testar_Demonio.cmd`. O Carrasco usa uma build de armas nível 4; o demônio, três armas evoluídas nível 5. Ambas incluem Passo 2, Selo 2 e Ímã 2, sem habilidades permanentes. Nesse modo, ouro e resultados não são gravados. Reiniciar repete o mesmo chefe; voltar ao título e jogar inicia uma partida normal.
+
 ## Editar
 
-Importe `project.godot` na Godot e pressione F6 na cena principal ou F5 para executar o projeto. Cenas, Resources `.tres`, scripts e PNGs acompanham o projeto. `tools/generate_assets.py` recria a arte original; `tools/generate_skeletons.py` gera os novos esqueletos e o ouro. A fonte possui licença OFL; as licenças da Godot estão incluídas.
+Importe `project.godot` na Godot e pressione F6 na cena principal ou F5 para executar o projeto. Cenas, Resources `.tres`, scripts e PNGs acompanham o projeto. `tools/generate_assets.py` recria a arte original, `tools/generate_skeletons.py` gera esqueletos e ouro, e `tools/generate_bosses.py` gera os chefes. A fonte possui licença OFL; as licenças da Godot estão incluídas.
 
 - `scripts/main.gd`: estados, experiência, coleta, evento e encerramento.
 - `scripts/entities/`: jogador, inimigos e dados de inimigos.
@@ -25,6 +31,10 @@ Importe `project.godot` na Godot e pressione F6 na cena principal ou F5 para exe
 - `scripts/world/gold_loot.gd`: moedas, atração, expiração e coleta.
 - `scripts/world/`: arena e diretor de hordas.
 - `scripts/core/`: salvamento e áudio.
+- `scripts/progression/`: compra de habilidades e aplicação por partida.
+- `scripts/bosses/`: estados dos chefes, portal, poderes e limpeza.
+- `data/skills/catalog.tres`: custos, níveis, efeitos e pré-requisitos dos 16 nós.
+- `data/bosses/balance.tres`: vida, velocidades, dano, intervalos, entrada e limites dos chefes.
 - `scripts/ui/`: interface nativa e menus.
 - `data/`: valores editáveis de armas, melhorias e inimigos.
 - `scenes/`: cenas nativas do jogo e dos sistemas.
@@ -34,19 +44,19 @@ Importe `project.godot` na Godot e pressione F6 na cena principal ou F5 para exe
 
 O arquivo local fica em `%APPDATA%\Godot\app_userdata\Brasafria\profile.json`. Ouro, selos, construções e preferências permanecem. Armas, níveis, passivas, experiência e vida da tentativa são temporários. Morte, vitória, reinício, abandono e fechamento normal da janela liquidam a tentativa uma vez. Só ouro já coletado vai ao saldo. Moedas no chão não são creditadas. Encerrar o processo à força não permite salvar.
 
-O perfil passou para versão 2. Perfis da versão 1 são migrados com ouro inicial zero, mantendo selos, construções e opções. Um identificador persistido impede repetir o crédito da mesma tentativa. Ouro ainda não possui loja, construção ou melhoria comprável.
+O perfil passou para versão 3. Perfis das versões 1 e 2 são migrados preservando ouro, selos, construções e opções. A parte da árvore começa vazia quando ausente. Um identificador persistido impede repetir o crédito da mesma tentativa. As compras da árvore têm limite de nível, proteção contra botão antigo e reversão de saldo se a gravação falhar.
 
 Selos recebidos: `floor(segundos / 30) + floor(abates / 30) + selos coletados + 10 se vencer`. Arsenal e Biblioteca custam oito selos cada. Os apoios ampliam a preparação, sem bônus numéricos permanentes obrigatórios. Arquivos ausentes ou inválidos têm tratamento; a gravação preserva uma cópia anterior `.bak`.
 
 ## Validação e próximos passos
 
-Veja `docs/HORDAS_E_OURO.md` para configuração e resultados da versão 0.2. `docs/DESIGN.md` apresenta as 11 seções originais, atualizadas. `docs/VALIDACAO.md` preserva a validação histórica da versão 0.1. O protótipo ainda exige avaliação humana da dificuldade e do prazer de jogar.
+Veja `docs/ARVORE_E_CHEFES.md` para regras, balanceamento e validação da versão 0.3. `docs/HORDAS_E_OURO.md` e `docs/VALIDACAO.md` preservam os registros anteriores. O protótipo ainda exige avaliação humana da dificuldade e do prazer de jogar. O layout da árvore é provisório, preparado para receber as referências visuais futuras.
 
-Defeitos atuais: cenário repetitivo; animações curtas sem conjuntos direcionais ou morte; efeitos sonoros simples; falta de ajustes de dificuldade após sessões reais. Equipamentos persistentes, outros personagens, regiões e famílias de armas estão fora desta primeira versão.
+Defeitos atuais: cenário repetitivo; animações ainda sem conjuntos direcionais completos; efeitos sonoros simples; dificuldade sem avaliação humana suficiente. Os chefes possuem poses de preparação e morte. Equipamentos persistentes, outros personagens e regiões continuam fora desta versão.
 
 ## Exportar novamente
 
-Execute `python tools/export_windows.py --output build/Brasafria-0.2.0.exe --smoke`. O script utiliza a Godot 4.7.2 instalada em Downloads, aceita `--godot CAMINHO` e obtém o template Windows do repositório oficial se o cache estiver ausente. A exportação inclui recursos embutidos, manifesto de hash e licenças.
+Execute `python tools/export_windows.py --smoke`. O resultado é `build/Brasafria-0.3.0.exe`. O script utiliza a Godot 4.7.2 instalada em Downloads, aceita `--godot CAMINHO` e obtém o template Windows do repositório oficial se o cache estiver ausente. `python tools/verify_export.py` verifica a árvore e os chefes contra o pacote embutido usando o runtime da mesma versão. A exportação inclui manifesto de hash e licenças.
 
 ## Privacidade, termos e crédito
 

@@ -1,7 +1,7 @@
 param(
     [string]$Godot = (Join-Path $env:USERPROFILE 'Downloads\Godot_v4.7.2-stable_win64_console.exe'),
     [switch]$Smoke,
-    [string]$Output = (Join-Path $PSScriptRoot '..\build\Brasafria-0.2.0.exe')
+    [string]$Output = (Join-Path $PSScriptRoot '..\build\Brasafria-0.3.0.exe')
 )
 $ErrorActionPreference = 'Stop'
 $exportScript = Join-Path $PSScriptRoot 'export_windows.py'

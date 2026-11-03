@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/entities/enemy_data.gd" id="1"]
+[resource]
+script = ExtResource("1")
+id = "demon"
+title = "O Devorador de Brasas"
+speed = 70.0
+damage = 17.0
+experience = 80
+radius = 25.0
+texture = "res://assets/demon.png"
+behavior = "demon"
+frames = 12
+contact_damage = false

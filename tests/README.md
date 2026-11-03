@@ -7,6 +7,7 @@ Execute a partir da pasta que contém `project.godot`, com Godot 4.7.2:
 & 'C:\Users\Arthur\Downloads\Godot_v4.7.2-stable_win64_console.exe' --headless --path . --script res://tests/integration.gd -- --self-test
 & 'C:\Users\Arthur\Downloads\Godot_v4.7.2-stable_win64_console.exe' --headless --path . --script res://scenes/combat/combat_contract_test.gd
 & 'C:\Users\Arthur\Downloads\Godot_v4.7.2-stable_win64_console.exe' --headless --path . --script res://tests/hordes_gold.gd -- --self-test
+& 'C:\Users\Arthur\Downloads\Godot_v4.7.2-stable_win64_console.exe' --headless --path . --script res://tests/skills_bosses.gd -- --self-test
 ```
 
 O modo slice cobre movimento com frames reais de física, velocidade diagonal, colisão com pilar, dano, invulnerabilidade, morte, reinício, ataque automático, experiência, seleção de três melhorias, pausa e preservação de dados permanentes.
@@ -19,4 +20,6 @@ O percurso completo atravessa as dez hordas em passos 1/60. Um bot escolhe melho
 
 Critério: terminar com `INTEGRATION_PASS` ou `COMBAT_CONTRACT_PASS` e código de saída 0. Erros e avisos do motor devem ser investigados mesmo se as verificações funcionais passarem.
 
-Após exportar, `python tools/verify_export.py` roda a suíte de hordas e ouro contra o PCK embutido em `Brasafria-0.2.0.exe`, usando o runtime de editor Godot 4.7.2 e `--main-pack`. Esse comando distingue o teste dos recursos empacotados do smoke nativo de 120 frames realizado pela própria exportação.
+`skills_bosses.gd` cobre a árvore, migração, compras inválidas, salvamento, compra pela interface com Espaço e efeitos sem duplicação. Exercita o Carrasco em frames reais, o portal completo, fases, limites, limpeza e vitória com ouro persistido. Mede os chefes com builds de referência sem habilidades permanentes, usando um bot invulnerável a 4x de tempo em 240 ticks de física por segundo. O tempo de simulação continua em passos de 1/60; os resultados não demonstram dificuldade justa para humanos ou FPS renderizado.
+
+Após exportar, `python tools/verify_export.py` roda a suíte de árvore e chefes contra o PCK embutido em `Brasafria-0.3.0.exe`, usando o runtime de editor Godot 4.7.2 e `--main-pack`. `--suite hordes_gold` seleciona a outra suíte. Esse comando distingue o teste dos recursos empacotados do smoke nativo de 120 frames realizado pela própria exportação.

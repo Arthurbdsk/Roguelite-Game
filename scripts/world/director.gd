@@ -42,6 +42,14 @@ func tick(delta: float) -> void:
 		return
 	if phase == "complete":
 		return
+	if not elite_spawned and game.elapsed >= game.boss_balance.executioner_arrival and phase != "boss":
+		spawn("executioner")
+	if phase == "boss":
+		return
+	if phase == "waiting_executioner":
+		if game.executioner_defeated:
+			begin_wave()
+		return
 	if phase == "preparing":
 		preparation_left = maxf(0, preparation_left - delta)
 		if preparation_left <= 0:
@@ -76,16 +84,24 @@ func tick(delta: float) -> void:
 func begin_wave() -> void:
 	if wave_index + 1 >= game.balance.waves.size():
 		return
+	var next_wave: WaveData = game.balance.waves[wave_index + 1]
+	if next_wave.boss and not game.executioner_defeated:
+		phase = "waiting_executioner"
+		return
 	wave_index += 1
 	var wave: WaveData = game.balance.waves[wave_index]
 	queue.clear()
+	if wave.boss:
+		phase = "boss"
+		boss_spawned = true
+		total_spawned += 1
+		game.boss_arena.begin_portal()
+		return
 	for id in wave.composition:
 		for i in int(wave.composition[id]):
 			queue.append({"id": id, "elite": false})
 	for i in wave.elite_guards:
 		queue.append({"id": "guard", "elite": true})
-	if wave.boss:
-		queue.append({"id": "boss", "elite": false})
 	for i in range(queue.size() - 1, 0, -1):
 		var j := rng.randi_range(0, i)
 		var swap: Dictionary = queue[i]
@@ -113,7 +129,7 @@ func spawn(id: String, elite: bool = false) -> bool:
 		game.spawn_enemy(id, point, elite)
 		total_spawned += 1
 		last_sector = sector
-		if elite:
+		if id == "executioner":
 			elite_spawned = true
 			game.announce("O CARRASCO DESPERTOU", 3)
 			game.sound.play_cue("elite")
@@ -126,6 +142,10 @@ func spawn(id: String, elite: bool = false) -> bool:
 	return false
 
 func pressure() -> String:
+	if phase == "waiting_executioner":
+		return "DERROTE O CARRASCO" if elite_spawned else "CARRASCO AOS 5 MIN"
+	if phase == "boss":
+		return "PORTAL NO CENTRO" if game.boss_arena.stage == "portal" else "ÚLTIMA HORDA"
 	if phase == "preparing":
 		return "HORDA %d EM %ds" % [wave_index + 2, ceili(preparation_left)]
 	if phase == "complete":

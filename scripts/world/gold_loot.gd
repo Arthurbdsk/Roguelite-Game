@@ -42,11 +42,12 @@ func tick(delta: float) -> void:
 		if coin.at.distance_squared_to(game.player.position) <= attraction * attraction:
 			coin.attracted = true
 		if coin.attracted:
-			coin.at = coin.at.move_toward(game.player.position, game.balance.coin_collect_speed * delta)
+			coin.at = coin.at.move_toward(game.player.position, game.balance.coin_collect_speed * game.mastery.coin_speed_multiplier() * delta)
 		if coin.at.distance_squared_to(game.player.position) <= pow(game.balance.coin_arrival_radius, 2):
 			var amount: int = coin.value
 			coins.remove_at(i)
 			game.gold += amount
+			game.mastery.on_gold(amount)
 			collected_count += 1
 			if feedback.size() < 12:
 				feedback.append({"at": game.player.position - Vector2(0, 26), "life": 0.55, "amount": amount})

@@ -1,5 +1,7 @@
 # Brasafria 0.2.0
 
+Registro histórico da versão 0.2. Na versão 0.3, a árvore usa o ouro e a horda final foi substituída pelo demônio, com Carrasco aos cinco minutos. Veja `ARVORE_E_CHEFES.md` para as regras atuais.
+
 ## Regras implementadas
 
 A progressão depende da limpeza de hordas. Não existe mais derrota por prazo de dez minutos. A preparação inicial dura 2,5 segundos; entre hordas dura cinco segundos, com moedas ainda disponíveis para coleta. Flechas e áreas hostis restantes são retiradas durante a preparação. A horda final inclui o Rei sem Brasa; eliminar toda sua composição com o chefe derrotado vence.

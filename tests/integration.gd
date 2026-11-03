@@ -162,45 +162,27 @@ func _test_director() -> void:
 
 func _test_boss_and_outcome() -> void:
 	g.start_run()
-	g.elapsed = 540.0
-	g.director.cooldown = 10000.0
-	g.director.elite_spawned = true
-	g.director.boss_spawned = true
-	g.player.invulnerable = 0.0
-	var enemy = g.spawn_enemy("boss", g.player.position + Vector2(140, 0))
-	enemy.attack_time = 0.0
-	g.rebuild_grid()
-	enemy.tick(STEP)
-	check(g.hazards.size() == 7, "boss creates one aimed warning and six surrounding warnings")
-	var aimed_at: Vector2 = g.hazards[0]["at"] if not g.hazards.is_empty() else Vector2.ZERO
-	var health: float = g.player.hp
-	g.update_hazards(0.5)
-	check(g.player.hp == health, "boss warning does not damage before its timer")
+	g.director.phase = "boss"
+	g.boss_arena.begin_portal()
+	var enemy = g.boss
+	var health: float = enemy.hp
+	enemy.take_damage(10000)
+	check(enemy.hp == health and not enemy.targetable, "portal boss is protected during its entrance")
+	g.boss_arena.tick(g.boss_balance.portal_duration() + 0.01)
+	check(enemy.combat_enabled and enemy.targetable, "complete portal enables the boss")
+	g.boss_arena.cast("lightning", enemy, Vector2.LEFT, 2)
+	check(g.boss_arena.areas.size() == 3, "new boss creates three marked lightning positions")
+	var aimed_at: Vector2 = g.boss_arena.areas[0].at
 	g.player.position += Vector2(0, 175)
-	enemy.tick(STEP)
-	check(Vector2(g.hazards[0]["at"]) == aimed_at, "boss telegraph locks impact position instead of tracking movement")
-	g.update_hazards(1.0)
-	check(g.player.hp == health, "moving out of the marked area avoids the boss strike")
-	enemy.take_damage(10000.0)
-	check(g.boss_defeated and g.boss == null, "boss death records the victory prerequisite")
-	check(g.state == "running", "killing boss early does not skip remaining survival time")
-	g.director.wave_index = g.balance.waves.size() - 1
-	g.director.phase = "active"
-	g.director.queue.clear()
-	g.simulate(STEP)
-	check(g.state == "result" and bool(g.ui.previous_data.get("won", false)), "clearing final wave after boss death yields victory")
+	check(g.boss_arena.areas[0].at == aimed_at, "boss mark stays fixed after player moves")
+	enemy.take_damage(10000)
+	check(g.boss_defeated and g.state == "running", "boss death records prerequisite while death animation plays")
+	check(g.boss_arena.areas.is_empty(), "boss death clears dangerous areas")
+	g.boss_arena.tick(g.boss_balance.death_duration + 0.01)
+	check(g.state == "result" and bool(g.ui.previous_data.get("won", false)), "death animation ends in victory")
 	var reward: int = g.banked_reward
 	g.finish_run(true)
 	check(g.banked_reward == reward, "result cannot settle rewards twice")
-	g.start_run()
-	g.director.cooldown = 10000.0
-	g.director.elite_spawned = true
-	g.director.boss_spawned = true
-	g.director.wave_index = g.balance.waves.size() - 1
-	g.director.phase = "active"
-	g.director.queue.clear()
-	g.simulate(STEP)
-	check(g.state == "result" and not bool(g.ui.previous_data.get("won", true)), "clearing final wave without defeating its boss cannot grant victory")
 
 
 func _write(path: String, content: String) -> void:

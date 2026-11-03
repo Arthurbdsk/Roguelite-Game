@@ -1,5 +1,17 @@
 # Atualizações
 
+## 0.3.0
+
+- Árvore permanente de 16 nós, pré-requisitos, níveis limitados e custos em ouro.
+- Salvamento versão 3 com migração das versões 1 e 2, compra imediata e reversão em falha.
+- Efeitos reconstruídos em cada partida, sem acúmulo por reinício.
+- Carrasco aos cinco minutos, vida triplicada, execução, investida e segunda fase.
+- Demônio original com portal no centro, três fases, fogo, invocações, raios, gelo e investida.
+- Reforços normais suspensos na luta final; limites e limpeza de ataques e invocações.
+- Animações de preparação e morte, sons dos poderes e recompensa única.
+- Laboratório F9 e atalhos de teste direto sem alterar o saldo permanente.
+- Layout da árvore provisório, separado dos dados para receber referências futuras.
+
 ## 0.2.0
 
 - Esqueletos com espada e arco, antecipação e recuperação próprias.

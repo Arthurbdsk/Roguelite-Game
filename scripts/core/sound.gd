@@ -18,6 +18,11 @@ func _ready() -> void:
 	cues.gold = synth(980, 0.045)
 	cues.arrow = synth(310, 0.06)
 	cues.wave = synth(160, 0.28)
+	cues.portal = synth(46, 0.95)
+	cues.summon = synth(210, 0.22)
+	cues.fire = synth(180, 0.12)
+	cues.thunder = synth(75, 0.23)
+	cues.ice = synth(990, 0.18)
 
 func _process(delta: float) -> void:
 	clock += delta

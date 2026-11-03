@@ -1,0 +1,182 @@
+[gd_resource type="Resource" script_class="SkillCatalog" load_steps=19 format=3]
+[ext_resource type="Script" path="res://scripts/data/skill_catalog.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/data/skill_definition.gd" id="2"]
+[sub_resource type="Resource" id="edge"]
+script = ExtResource("2")
+id = "edge"
+title = "Aço temperado"
+branch = 0
+depth = 0
+description = "Dano de armas +6%."
+costs = PackedInt32Array(12, 24)
+values = PackedFloat32Array(0.06, 0.12)
+benefits = PackedStringArray("Dano de armas +6%.", "Dano de armas +12% no total.")
+prerequisites = {}
+[sub_resource type="Resource" id="tempo"]
+script = ExtResource("2")
+id = "tempo"
+title = "Ritmo de ferro"
+branch = 0
+depth = 1
+description = "Intervalo de ataques -5%."
+costs = PackedInt32Array(26, 42)
+values = PackedFloat32Array(0.05, 0.1)
+benefits = PackedStringArray("Intervalo de ataques -5%.", "Intervalo de ataques -10% no total.")
+prerequisites = {"edge": 1}
+[sub_resource type="Resource" id="critical"]
+script = ExtResource("2")
+id = "critical"
+title = "Fenda na guarda"
+branch = 0
+depth = 2
+description = "5% de crítico. Crítico causa 160% do dano."
+costs = PackedInt32Array(40, 65)
+values = PackedFloat32Array(0.05, 0.1)
+benefits = PackedStringArray("5% de crítico. Crítico causa 160% do dano.", "10% de crítico. Crítico causa 160% do dano.")
+prerequisites = {"tempo": 1}
+[sub_resource type="Resource" id="opening"]
+script = ExtResource("2")
+id = "opening"
+title = "Passo decisivo"
+branch = 0
+depth = 3
+description = "Mover 48 px prepara um crítico garantido. Intervalo mínimo de 4 s."
+costs = PackedInt32Array(100)
+values = PackedFloat32Array(1)
+benefits = PackedStringArray("Mover 48 px prepara um crítico garantido. Intervalo mínimo de 4 s.")
+prerequisites = {"critical": 1}
+[sub_resource type="Resource" id="vigor"]
+script = ExtResource("2")
+id = "vigor"
+title = "Vigor da vigília"
+branch = 1
+depth = 0
+description = "Vida máxima +15."
+costs = PackedInt32Array(12, 24)
+values = PackedFloat32Array(15, 30)
+benefits = PackedStringArray("Vida máxima +15.", "Vida máxima +30 no total.")
+prerequisites = {}
+[sub_resource type="Resource" id="armor"]
+script = ExtResource("2")
+id = "armor"
+title = "Malha recuperada"
+branch = 1
+depth = 1
+description = "Defesa +1: reduz cada dano recebido em 1."
+costs = PackedInt32Array(26, 42)
+values = PackedFloat32Array(1, 2)
+benefits = PackedStringArray("Defesa +1: reduz cada dano recebido em 1.", "Defesa +2 no total. Dano mínimo recebido: 1.")
+prerequisites = {"vigor": 1}
+[sub_resource type="Resource" id="recovery"]
+script = ExtResource("2")
+id = "recovery"
+title = "Fôlego teimoso"
+branch = 1
+depth = 2
+description = "Após 4 s sem dano, recupera 1 de vida a cada 6 s."
+costs = PackedInt32Array(40, 65)
+values = PackedFloat32Array(1, 2)
+benefits = PackedStringArray("Após 4 s sem dano, recupera 1 de vida a cada 6 s.", "Após 4 s sem dano, recupera 2 de vida a cada 6 s.")
+prerequisites = {"armor": 1}
+[sub_resource type="Resource" id="last_stand"]
+script = ExtResource("2")
+id = "last_stand"
+title = "Última centelha"
+branch = 1
+depth = 3
+description = "Uma vez por partida, um golpe letal deixa 15 de vida e concede 2 s de proteção."
+costs = PackedInt32Array(120)
+values = PackedFloat32Array(1)
+benefits = PackedStringArray("Uma vez por partida, um golpe letal deixa 15 de vida e concede 2 s de proteção.")
+prerequisites = {"recovery": 1}
+[sub_resource type="Resource" id="stride"]
+script = ExtResource("2")
+id = "stride"
+title = "Passo do exílio"
+branch = 2
+depth = 0
+description = "Velocidade de movimento +6."
+costs = PackedInt32Array(12, 24)
+values = PackedFloat32Array(6, 12)
+benefits = PackedStringArray("Velocidade de movimento +6.", "Velocidade de movimento +12 no total.")
+prerequisites = {}
+[sub_resource type="Resource" id="magnet"]
+script = ExtResource("2")
+id = "magnet"
+title = "Chamado do ouro"
+branch = 2
+depth = 1
+description = "Raio de atração de ouro e experiência +14."
+costs = PackedInt32Array(26, 42)
+values = PackedFloat32Array(14, 28)
+benefits = PackedStringArray("Raio de atração de ouro e experiência +14.", "Raio de atração de ouro e experiência +28 no total.")
+prerequisites = {"stride": 1}
+[sub_resource type="Resource" id="forager"]
+script = ExtResource("2")
+id = "forager"
+title = "Passo entre ruínas"
+branch = 2
+depth = 2
+description = "Moedas atraídas viajam 60% mais rápido durante a preparação entre hordas."
+costs = PackedInt32Array(50)
+values = PackedFloat32Array(1)
+benefits = PackedStringArray("Moedas atraídas viajam 60% mais rápido durante a preparação entre hordas.")
+prerequisites = {"magnet": 1}
+[sub_resource type="Resource" id="salvager"]
+script = ExtResource("2")
+id = "salvager"
+title = "Coletor de brasas"
+branch = 2
+depth = 3
+description = "Coletar 10 moedas recupera 3 de vida, uma vez por horda."
+costs = PackedInt32Array(90)
+values = PackedFloat32Array(1)
+benefits = PackedStringArray("Coletar 10 moedas recupera 3 de vida, uma vez por horda.")
+prerequisites = {"forager": 1}
+[sub_resource type="Resource" id="sword_echo"]
+script = ExtResource("2")
+id = "sword_echo"
+title = "Contraguarda"
+branch = 3
+depth = 0
+description = "A espada ganha seu arco traseiro desde o nível 1. Não duplica arcos já existentes."
+costs = PackedInt32Array(50)
+values = PackedFloat32Array(1)
+benefits = PackedStringArray("A espada ganha seu arco traseiro desde o nível 1. Não duplica arcos já existentes.")
+prerequisites = {"edge": 1}
+[sub_resource type="Resource" id="bolt_pierce"]
+script = ExtResource("2")
+id = "bolt_pierce"
+title = "Ponta partida"
+branch = 3
+depth = 1
+description = "Cada virote atravessa um inimigo adicional."
+costs = PackedInt32Array(50)
+values = PackedFloat32Array(1)
+benefits = PackedStringArray("Cada virote atravessa um inimigo adicional.")
+prerequisites = {"stride": 1}
+[sub_resource type="Resource" id="orbit_extra"]
+script = ExtResource("2")
+id = "orbit_extra"
+title = "Brasa desperta"
+branch = 3
+depth = 2
+description = "Uma brasa orbital adicional em todos os níveis."
+costs = PackedInt32Array(50)
+values = PackedFloat32Array(1)
+benefits = PackedStringArray("Uma brasa orbital adicional em todos os níveis.")
+prerequisites = {"magnet": 1}
+[sub_resource type="Resource" id="pact"]
+script = ExtResource("2")
+id = "pact"
+title = "Pacto das três"
+branch = 3
+depth = 3
+description = "Equipar as três armas abre a quarta vaga de passiva nesta partida."
+costs = PackedInt32Array(120)
+values = PackedFloat32Array(1)
+benefits = PackedStringArray("Equipar as três armas abre a quarta vaga de passiva nesta partida.")
+prerequisites = {"sword_echo": 1, "bolt_pierce": 1, "orbit_extra": 1}
+[resource]
+script = ExtResource("1")
+nodes = Array[Resource]([SubResource("edge"), SubResource("tempo"), SubResource("critical"), SubResource("opening"), SubResource("vigor"), SubResource("armor"), SubResource("recovery"), SubResource("last_stand"), SubResource("stride"), SubResource("magnet"), SubResource("forager"), SubResource("salvager"), SubResource("sword_echo"), SubResource("bolt_pierce"), SubResource("orbit_extra"), SubResource("pact")])

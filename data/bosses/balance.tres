@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="BossBalance" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/data/boss_balance.gd" id="1"]
+[resource]
+script = ExtResource("1")
+executioner_arrival = 300.0
+executioner_previous_health = 312.0
+executioner_health_multiplier = 3.0
+demon_health_multiplier = 2.0
+executioner_speed = 64.0
+demon_speed = 70.0
+summon_limit = 14
+fire_limit = 72
+final_projectile_limit = 120

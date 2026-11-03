@@ -1,6 +1,6 @@
 # Termos de serviço
 
-Brasafria 0.2.0 é um protótipo local em desenvolvimento, entregue para jogar, avaliar e editar o projeto. Pode conter falhas e mudanças de balanceamento. Perfis da versão 1 são migrados para versão 2 preservando o progresso anterior. Não existe serviço online, cobrança, assinatura ou conta nesta versão.
+Brasafria 0.3.0 é um protótipo local em desenvolvimento, entregue para jogar, avaliar e editar o projeto. Pode conter falhas e mudanças de balanceamento. Perfis das versões 1 e 2 são migrados para versão 3 preservando o progresso anterior. Não existe serviço online, cobrança, assinatura ou conta nesta versão.
 
 O perfil é armazenado no computador. Fechar o jogo durante uma expedição perde o estado temporário daquela tentativa. Atualizações futuras podem alterar as regras e o formato do perfil. Preserve uma cópia do projeto e do progresso antes de modificá-los.
 

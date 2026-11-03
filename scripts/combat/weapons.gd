@@ -95,7 +95,24 @@ func _interval(id: String) -> float:
 	var multiplier: float = 1.0 - 0.12 * int(passives.get("cadence", 0))
 	if support == "library" and id == "bolt":
 		multiplier *= 1.15
-	return _stat(id, "cooldown") * multiplier
+	return _stat(id, "cooldown") * multiplier * (_mastery().interval_multiplier if _mastery() != null else 1.0)
+
+func _mastery():
+	return game.get("mastery") if game != null else null
+
+func _valid_target(enemy) -> bool:
+	return is_instance_valid(enemy) and enemy.alive and enemy.get("targetable") != false
+
+func _hit(enemy, amount: float, force: Vector2) -> void:
+	if not _valid_target(enemy):
+		return
+	if game.has_method("weapon_hit"):
+		game.weapon_hit(enemy, amount, force)
+	else:
+		enemy.take_damage(amount, force)
+
+func passive_limit() -> int:
+	return _mastery().passive_limit() if _mastery() != null else MAX_PASSIVES
 
 
 func _swing_sword() -> bool:
@@ -108,17 +125,19 @@ func _swing_sword() -> bool:
 		direction = game.player.facing
 	var half_angle: float = deg_to_rad(62.0 if int(levels["sword"]) < 4 else 78.0)
 	var arcs: int = int(_stat("sword", "count"))
+	if _mastery() != null and _mastery().rank("sword_echo") > 0:
+		arcs = maxi(2, arcs)
 	for arc_index: int in arcs:
 		var angle: float = direction.angle() + float(arc_index) * PI
 		var origin: Vector2 = game.player.position
 		slashes.append({"origin": origin, "angle": angle, "half": half_angle,
 			"reach": reach, "remaining": 0.16, "evolved": int(levels["sword"]) == 5})
 		for enemy in game.enemies.duplicate():
-			if not is_instance_valid(enemy) or not enemy.alive:
+			if not _valid_target(enemy):
 				continue
 			var offset: Vector2 = enemy.position - origin
 			if offset.length() <= reach + enemy.radius and absf(wrapf(offset.angle() - angle, -PI, PI)) <= half_angle:
-				enemy.take_damage(_stat("sword", "damage"), offset.normalized() * 105.0)
+				_hit(enemy, _stat("sword", "damage"), offset.normalized() * 105.0)
 	_play("sword")
 	return true
 
@@ -137,7 +156,7 @@ func _fire_bolts() -> bool:
 		var velocity: Vector2 = direction.rotated(angle_offset) * 275.0
 		projectiles.append({"position": game.player.position, "velocity": velocity,
 			"distance": 0.0, "reach": reach, "damage": _stat("bolt", "damage"),
-			"pierce": 2 if int(levels["bolt"]) >= 2 else 1,
+			"pierce": (2 if int(levels["bolt"]) >= 2 else 1) + (_mastery().rank("bolt_pierce") if _mastery() != null else 0),
 			"bounce": 1 if int(levels["bolt"]) >= 5 else 0, "hits": []})
 	_play("bolt")
 	return true
@@ -153,7 +172,7 @@ func _update_projectiles(delta: float) -> void:
 		var consumed: bool = false
 		var collisions: Array[Dictionary] = []
 		for enemy in game.enemies:
-			if not is_instance_valid(enemy) or not enemy.alive or shot["hits"].has(enemy.get_instance_id()):
+			if not _valid_target(enemy) or shot["hits"].has(enemy.get_instance_id()):
 				continue
 			var closest: Vector2 = Geometry2D.get_closest_point_to_segment(enemy.position, start, end)
 			if closest.distance_squared_to(enemy.position) > pow(enemy.radius + 3.0, 2.0):
@@ -166,10 +185,10 @@ func _update_projectiles(delta: float) -> void:
 			return float(a["distance"]) < float(b["distance"]))
 		for collision: Dictionary in collisions:
 			var enemy = collision["enemy"]
-			if not is_instance_valid(enemy) or not enemy.alive:
+			if not _valid_target(enemy):
 				continue
 			shot["hits"].append(enemy.get_instance_id())
-			enemy.take_damage(float(shot["damage"]), Vector2(shot["velocity"]).normalized() * 65.0)
+			_hit(enemy, float(shot["damage"]), Vector2(shot["velocity"]).normalized() * 65.0)
 			shot["pierce"] = int(shot["pierce"]) - 1
 			if int(shot["pierce"]) > 0:
 				continue
@@ -192,7 +211,7 @@ func _bounce_target(origin: Vector2, excluded: Array):
 	var best = null
 	var distance: float = 170.0 * 170.0
 	for enemy in game.enemies:
-		if not is_instance_valid(enemy) or not enemy.alive or excluded.has(enemy.get_instance_id()):
+		if not _valid_target(enemy) or excluded.has(enemy.get_instance_id()):
 			continue
 		var candidate: float = origin.distance_squared_to(enemy.position)
 		if candidate < distance or (is_equal_approx(candidate, distance) and is_instance_valid(best) and enemy.get_instance_id() < best.get_instance_id()):
@@ -209,12 +228,13 @@ func _update_orbit(delta: float) -> void:
 	var angular_speed: float = (2.0 + 0.18 * int(levels["orbit"])) * multiplier
 	orbit_phase = fmod(orbit_phase + delta * angular_speed, TAU)
 	var count: int = int(_stat("orbit", "count"))
+	count += _mastery().rank("orbit_extra") if _mastery() != null else 0
 	var reach: float = _stat("orbit", "reach")
 	for index: int in count:
 		var angle: float = orbit_phase + TAU * float(index) / float(count)
 		orbit_positions.append(game.player.position + Vector2.from_angle(angle) * reach)
 	for enemy in game.enemies.duplicate():
-		if not is_instance_valid(enemy) or not enemy.alive:
+		if not _valid_target(enemy):
 			continue
 		var enemy_id: int = enemy.get_instance_id()
 		if combat_time < float(orbit_hits.get(enemy_id, -1.0)):
@@ -222,8 +242,8 @@ func _update_orbit(delta: float) -> void:
 		for point: Vector2 in orbit_positions:
 			if point.distance_squared_to(enemy.position) <= pow(enemy.radius + 7.0, 2.0):
 				var impulse: Vector2 = (enemy.position - game.player.position).normalized() * 25.0
-				enemy.take_damage(_stat("orbit", "damage"), impulse)
-				orbit_hits[enemy_id] = combat_time + _stat("orbit", "cooldown")
+				_hit(enemy, _stat("orbit", "damage"), impulse)
+				orbit_hits[enemy_id] = combat_time + _interval("orbit")
 				break
 	# Expired object IDs must not accumulate across an entire ten-minute run.
 	if orbit_hits.size() > 256:
@@ -280,7 +300,7 @@ func get_offers() -> Array[Dictionary]:
 		var data = passive_data[id]
 		pool.append({"id": id, "name": data.display_name,
 			"description": data.level_descriptions[current],
-			"detail": "PASSIVA  %d/2 · Só nesta expedição. %d/3 vagas ocupadas." % [current + 1, passives.size()],
+			"detail": "PASSIVA  %d/2 · Só nesta expedição. %d/%d vagas ocupadas." % [current + 1, passives.size(), passive_limit()],
 			"icon": data.icon, "level": current + 1, "weapon": false})
 	var result: Array[Dictionary] = []
 	var weapons_pool: Array[Dictionary] = []
@@ -349,7 +369,7 @@ func _passive_available(id: String) -> bool:
 	var current: int = int(passives.get(id, 0))
 	if current >= passive_data[id].max_level:
 		return false
-	return current > 0 or passives.size() < MAX_PASSIVES
+	return current > 0 or passives.size() < passive_limit()
 
 
 func apply_upgrade(id: String) -> bool:
@@ -381,11 +401,11 @@ func apply_upgrade(id: String) -> bool:
 		game.earned += 2
 	elif id == "repulse":
 		for enemy in game.enemies.duplicate():
-			if not is_instance_valid(enemy) or not enemy.alive:
+			if not _valid_target(enemy):
 				continue
 			var offset: Vector2 = enemy.position - game.player.position
 			if offset.length_squared() <= 160.0 * 160.0:
-				enemy.take_damage(80.0, offset.normalized() * 210.0)
+				_hit(enemy, 80.0, offset.normalized() * 210.0)
 		slashes.append({"origin": game.player.position, "angle": 0.0,
 			"half": PI, "reach": 160.0, "remaining": 0.22, "evolved": true})
 	else:

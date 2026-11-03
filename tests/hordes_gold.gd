@@ -141,7 +141,8 @@ func test_gold() -> void:
 	var elite = g.spawn_enemy("guard", Vector2(220, 150), true)
 	elite.take_damage(99999)
 	verify(g.gold_loot.coins.size() == count + 1, "elite also drops gold")
-	verify(g.gold == 0, "drops do not credit gold before reaching the player")
+	var boss_rewards: int = g.boss_balance.executioner_reward + g.boss_balance.demon_reward * 2
+	verify(g.gold == boss_rewards, "coin drops do not credit before arrival; only explicit boss rewards are immediate")
 	g.gold_loot.tick(59.99)
 	verify(g.gold_loot.coins.size() == count + 1, "coins remain until sixty seconds")
 	g.toggle_pause()
@@ -150,7 +151,7 @@ func test_gold() -> void:
 	verify(g.gold_loot.coins.size() == count + 1 and g.gold_loot.coins[0].age < 60, "pause freezes coin lifetime")
 	g.toggle_pause()
 	g.gold_loot.tick(0.02)
-	verify(g.gold_loot.coins.is_empty() and g.gold == 0, "expired coins disappear without granting gold")
+	verify(g.gold_loot.coins.is_empty() and g.gold == boss_rewards, "expired coins disappear without granting gold")
 	fresh()
 	g.gold_loot.drop(g.player.position + Vector2(40, 0), 3)
 	g.gold_loot.tick(0.01)
@@ -186,7 +187,7 @@ func test_persistence() -> void:
 	var fixture := FileAccess.open(old.path, FileAccess.WRITE)
 	fixture.store_string(JSON.stringify({"version": 1, "seals": 21, "runs": 3, "wins": 1, "buildings": {"arsenal": true, "library": false}, "settings": {"volume": 0.3}}))
 	fixture.close()
-	verify(old.load_profile() and old.data.version == 2 and old.data.gold == 0, "version one migrates to version two with zero gold")
+	verify(old.load_profile() and old.data.version == 3 and old.data.gold == 0, "version one migrates to current profile with zero gold")
 	verify(old.data.seals == 21 and old.data.buildings.arsenal and old.data.settings.volume == 0.3, "migration preserves old currency, buildings and settings")
 	var saved_profile = g.profile
 	g.profile = GameProfile.new(base_path + "_actual.json")
@@ -230,6 +231,9 @@ func test_waves() -> void:
 	var last_interval: float = 10
 	var last_heavy: float = 0
 	for wave in g.balance.waves:
+		if wave.boss:
+			verify(wave.composition.is_empty(), "final wave suspends normal reinforcement composition")
+			continue
 		verify(wave.count() > last_count, "wave quantity increases")
 		verify(wave.spawn_interval <= last_interval and wave.spawn_interval >= g.balance.minimum_spawn_interval, "spawn intervals decrease within configured limit")
 		var resistant: float = float(wave.composition.get("skeleton_sword", 0) + wave.composition.get("guard", 0)) / wave.count()
@@ -264,13 +268,17 @@ func test_waves() -> void:
 	fresh()
 	g.director.reset()
 	var actual: Dictionary = {}
-	var total: int = 0
+	var total: int = 1 # The executioner is scheduled by time, outside normal wave composition.
 	for wave in g.balance.waves:
 		total += wave.count()
 	var steps: int = 0
-	while g.state == "running" and steps < 15000:
+	while g.state in ["running", "upgrading"] and steps < 15000:
+		while g.state == "upgrading":
+			g.choose_upgrade(g.offers[0].id)
 		g.simulate(0.25)
 		for enemy in g.enemies.duplicate():
+			if not enemy.targetable:
+				continue
 			var key: String = "%d:%s:%s" % [g.director.wave_index, enemy.data.id, enemy.elite]
 			actual[key] = int(actual.get(key, 0)) + 1
 			enemy.take_damage(99999)
@@ -284,7 +292,7 @@ func test_waves() -> void:
 		for id in wave.composition:
 			verify(actual.get("%d:%s:false" % [index, id], 0) == wave.composition[id], "exact composition matches wave %d %s" % [index + 1, id])
 		verify(actual.get("%d:guard:true" % index, 0) == wave.elite_guards, "elite quantity matches wave definition")
-		verify(actual.get("%d:boss:false" % index, 0) == int(wave.boss), "boss quantity matches wave definition")
+		verify(actual.get("%d:demon:false" % index, 0) == int(wave.boss), "boss quantity matches wave definition")
 	metrics.wave_traversal = {"waves": g.director.wave_number(), "enemies": total, "steps": steps, "simulated_seconds": g.elapsed, "method": "Scheduled enemies are killed by test damage to verify exact counts and transitions, not balance."}
 
 func test_load() -> void:
