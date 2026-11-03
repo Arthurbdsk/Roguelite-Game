@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="WaveData" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/data/wave_data.gd" id="1"]
+[resource]
+script = ExtResource("1")
+title = "Cordas na escuridao"
+composition = {"ghoul": 12, "hound": 8, "skeleton_sword": 18, "skeleton_archer": 6, "guard": 4}
+spawn_interval = 0.5
+max_alive = 36
+elite_guards = 0
+boss = false

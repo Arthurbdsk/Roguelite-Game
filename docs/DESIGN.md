@@ -1,16 +1,16 @@
 # Brasafria
 
-Proposta e especificação do protótipo 0.1.0. O comportamento descrito está no código atual; esta documentação não comprova teste de execução ou equilíbrio. Resultados de validação devem ser registrados separadamente.
+Proposta e especificação do protótipo 0.2.0. Configuração e validação da expansão em `HORDAS_E_OURO.md`. Resultados da versão original ficam preservados em `VALIDACAO.md`.
 
 ## 1. Conceito geral
 
-Uma sentinela mantém a última vigília em um pátio tomado por mortos. O objetivo é resistir dez minutos e derrotar o Rei sem Brasa antes do amanhecer.
+Uma sentinela mantém a última vigília em um pátio tomado por mortos. O objetivo é limpar dez hordas e derrotar o Rei sem Brasa. O avanço depende das eliminações, sem prazo fixo.
 
 Pilares: posicionamento legível, armas com funções distintas, escolhas com limites e tentativas curtas. A fantasia sombria usa ferro gasto, pedra com musgo, brasa oxidada e luz fria.
 
 O diferencial proposto é o apoio da fortaleza. O Arsenal prepara a besta para a próxima tentativa, mas reduz a rotação das brasas. A Biblioteca prepara as brasas, mas atrasa os disparos da besta. Apenas um apoio pode ser escolhido. As construções mudam a preparação e favorecem a progressão da família escolhida; não acumulam bônus permanentes de dano ou vida.
 
-Decisões abertas: nome Brasafria, paleta, relação entre construções e armas, severidade das trocas e balanceamento dos dez minutos. As imagens citadas no pedido não foram recebidas; a direção visual usa somente o texto como referência. A arte atual é original e provisória.
+Decisões abertas: nome Brasafria, paleta, relação entre construções e armas, severidade das trocas e balanceamento das hordas. As imagens citadas no pedido não foram recebidas; a direção visual usa somente o texto como referência. A arte atual é original e provisória.
 
 ## 2. Gameplay loop
 
@@ -20,7 +20,7 @@ Decisões abertas: nome Brasafria, paleta, relação entre construções e armas
 4. Subir de nível, pausar a ação e escolher uma entre três melhorias.
 5. Decidir entre manter distância, abrir caminho e ocupar o anel das brasas.
 6. Arriscar o altar, enfrentar o Carrasco e preparar a luta final.
-7. Vencer aos 600 segundos com o chefe derrotado, ou encerrar por morte, abandono ou prazo sem derrotá-lo.
+7. Vencer ao limpar a horda 10 com o chefe derrotado, ou encerrar por morte, reinício ou abandono.
 8. Receber selos, comprar uma construção e tentar novamente.
 
 | Camada | Conteúdo | Após a tentativa |
@@ -89,7 +89,9 @@ Vida dos inimigos comuns cresce com o tempo da tentativa. A elite usa o Carrasco
 
 O chefe fixa uma área na posição observada do jogador, avisa por 1,3 segundo e atinge depois. Seis áreas ao redor dele avisam por 1,6 segundo. Ele desacelera ao preparar o padrão e reduz o intervalo dos padrões abaixo de metade da vida. As áreas não seguem o jogador durante o aviso. Ao morrer, o chefe concede cinco selos e remove suas áreas restantes.
 
-O diretor aumenta frequência e tamanho dos lotes. Começa com Esquecidos, introduz feras após 90 segundos e pesados após 210. A elite aparece a partir de 300 segundos e o chefe a partir de 540. O limite é 180 inimigos. Pontos de surgimento são rejeitados quando estão na câmera ampliada por 40 pixels ou em posição insegura. Caso não encontre um ponto válido, o surgimento é adiado.
+O diretor usa dez Resources de horda com quantidades exatas, intervalo e limite de vivos. Feras entram na horda 2, esqueletos de espada na 3, guardas na 4, arqueiros na 5, elite na 7 e chefe na 10. O limite global é 180. Todos os inimigos da composição e da arena precisam morrer para avançar, com cinco segundos de preparação. Pontos na câmera ampliada por 36 pixels ou em posição insegura são rejeitados; setores alternados distribuem o cerco. Atributos dos inimigos não escalam com tempo ou melhorias do jogador.
+
+Esqueletos de espada têm 48 de vida, antecipação de 0,55 s, golpe de 12 de dano e intervalo de 1,7 s. Arqueiros têm 38 de vida, recuam quando próximos, fixam a direção na antecipação de 0,75 s e disparam a cada 2,8 s. Flechas andam a 155 pixels/s, alcançam 310 pixels e expiram em três segundos; colidem com pilares. As duas variantes possuem seis frames e não causam dano automático por contato.
 
 Atiradores, outros modificadores de elite e novos chefes ficam fora do protótipo.
 
@@ -174,9 +176,9 @@ Forja, equipamentos persistentes, Tesouraria, Quartel e Bestiário são futuros.
 
 Experiência, coleta, áreas de dano e resultado são coordenados em `main.gd`. Os atributos de armas, melhorias e inimigos ficam em Resources, sem duplicar os comportamentos.
 
-O perfil tem versão 1 e guarda selos, construções, estatísticas e opções em `user://profile.json`. Arquivo ausente mantém valores iniciais. JSON inválido ou versão incompatível não são carregados; a leitura preserva o arquivo. A gravação usa arquivo temporário e cópia `.bak` do anterior. Não existe continuação de tentativa interrompida nem salvamento na nuvem.
+O perfil tem versão 2 e guarda ouro, selos, construções, estatísticas, melhor horda, identificador de liquidação e opções em `user://profile.json`. A versão 1 migra preservando seus campos, com ouro zero. Arquivo ausente mantém valores iniciais; inválidos ou incompatíveis são preservados. A gravação usa arquivo temporário e cópia `.bak`. Morte, vitória, reinício, abandono e fechamento normal creditam somente o ouro já coletado e apenas uma vez.
 
-Limites explícitos: 180 inimigos, 100 projéteis, 240 fragmentos de experiência, 32 áreas de dano e oito vozes. Ao atingir o limite de fragmentos, o valor de experiência é agregado. Os números de dano dependem da intensidade de efeitos. Uma grade espacial auxilia a separação dos inimigos; a seleção de alvos consulta a lista mantida pelo controlador. Virotes usam teste de segmento entre posições para reduzir atravessamento de alvos.
+Limites explícitos: 180 inimigos, 100 projéteis do jogador, 320 flechas inimigas, 240 fragmentos de experiência, 32 áreas de dano e oito vozes. Ao atingir o limite de fragmentos, a experiência é agregada. Moedas usam arrays sem um nó físico por item e expiram após 60 segundos de partida; não são descartadas para impor um limite artificial. Uma grade auxilia a separação. Flechas usam segmento contra jogador e cenário, com descarte por impacto, alcance e tempo.
 
 Não foi introduzido reaproveitamento de objetos sem medição. Taxa de quadros, uso de CPU, seleção de alvos e colisões sob carga precisam de evidência de execução. O código possuir limites não comprova desempenho em qualquer máquina.
 

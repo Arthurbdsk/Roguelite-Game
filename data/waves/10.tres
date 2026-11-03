@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="WaveData" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/data/wave_data.gd" id="1"]
+[resource]
+script = ExtResource("1")
+title = "O Rei sem Brasa"
+composition = {"ghoul": 26, "hound": 30, "skeleton_sword": 68, "skeleton_archer": 32, "guard": 64}
+spawn_interval = 0.12
+max_alive = 180
+elite_guards = 1
+boss = true

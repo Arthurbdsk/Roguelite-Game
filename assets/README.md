@@ -1,7 +1,7 @@
 # Assets de Brasafria
 
 Arte original gerada em tools/generate_assets.py com Pillow. Sem antialiasing.
-Filtro de importação: Nearest. Todas as spritesheets têm 4 quadros horizontais.
+Filtro de importação: Nearest. Spritesheets originais têm 4 quadros horizontais. Os esqueletos da versão 0.2 têm 6 quadros de 32x36 (quatro passos, preparação e ataque), gerados separadamente por `tools/generate_skeletons.py`. A moeda `gold.png` tem 4 quadros de 8x8.
 
 | Arquivo | Quadro | Uso |
 | --- | --- | --- |

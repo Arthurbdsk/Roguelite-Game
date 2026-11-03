@@ -1,0 +1,24 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/entities/enemy_data.gd" id="1"]
+[resource]
+script = ExtResource("1")
+id = "skeleton_archer"
+title = "Arqueiro da cripta"
+health = 38.0
+speed = 28.0
+damage = 10.0
+experience = 5
+radius = 8.0
+texture = "res://assets/skeleton_archer.png"
+behavior = "archer"
+frames = 6
+contact_damage = false
+attack_range = 245.0
+attack_interval = 2.8
+windup = 0.75
+recovery = 0.40
+preferred_distance = 150.0
+retreat_distance = 110.0
+arrow_speed = 155.0
+arrow_range = 310.0
+arrow_lifetime = 3.0

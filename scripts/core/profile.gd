@@ -1,7 +1,7 @@
 class_name GameProfile
 extends RefCounted
 
-const VERSION := 1
+const VERSION := 2
 var path: String = "user://profile.json"
 var data: Dictionary
 var last_error: String = ""
@@ -11,7 +11,7 @@ func _init(save_path: String = "user://profile.json") -> void:
 	data = defaults()
 
 func defaults() -> Dictionary:
-	return {"version": VERSION, "seals": 0, "buildings": {"arsenal": false, "library": false}, "best_time": 0.0, "wins": 0, "runs": 0, "settings": {"volume": 0.55, "effects": 0.7, "shake": true, "fullscreen": false}}
+	return {"version": VERSION, "gold": 0, "last_settled_run": "", "best_wave": 0, "seals": 0, "buildings": {"arsenal": false, "library": false}, "best_time": 0.0, "wins": 0, "runs": 0, "settings": {"volume": 0.55, "effects": 0.7, "shake": true, "fullscreen": false}}
 
 func load_profile() -> bool:
 	if not FileAccess.file_exists(path):
@@ -25,10 +25,14 @@ func load_profile() -> bool:
 		last_error = "Progresso inválido. Arquivo preservado."
 		return false
 	var parsed = parser.data
-	if not parsed is Dictionary or parsed.get("version", 0) != VERSION:
+	if not parsed is Dictionary:
+		last_error = "Progresso inválido. Arquivo preservado."
+		return false
+	var saved_version = parsed.get("version", 0)
+	if not (saved_version is float or saved_version is int) or (saved_version != 1 and saved_version != VERSION):
 		last_error = "Progresso inválido ou versão incompatível. Arquivo preservado."
 		return false
-	for key in ["seals", "best_time", "runs", "wins"]:
+	for key in ["seals", "best_time", "runs", "wins", "gold", "best_wave"]:
 		if parsed.has(key) and not (parsed[key] is float or parsed[key] is int):
 			last_error = "Progresso com campos inválidos. Arquivo preservado."
 			return false
@@ -45,6 +49,9 @@ func load_profile() -> bool:
 			return false
 	data = defaults()
 	data.seals = clampi(int(parsed.get("seals", 0)), 0, 999999)
+	data.gold = clampi(int(parsed.get("gold", 0)), 0, 9999999999)
+	data.best_wave = clampi(int(parsed.get("best_wave", 0)), 0, 99999)
+	data.last_settled_run = str(parsed.get("last_settled_run", "")) if parsed.get("last_settled_run", "") is String else ""
 	data.best_time = clampf(float(parsed.get("best_time", 0)), 0, 100000)
 	data.runs = clampi(int(parsed.get("runs", 0)), 0, 999999)
 	data.wins = clampi(int(parsed.get("wins", 0)), 0, data.runs)
@@ -82,9 +89,14 @@ func purchase(id: String) -> bool:
 	data.buildings[id] = true
 	return save()
 
-func reward(seconds: float, kills: int, victory: bool, collected: int) -> int:
+func reward(seconds: float, kills: int, victory: bool, collected: int, run_gold: int = 0, run_id: String = "", wave: int = 0) -> int:
+	if not run_id.is_empty() and data.last_settled_run == run_id:
+		return 0
 	var total := floori(seconds / 30.0) + floori(kills / 30.0) + collected + (10 if victory else 0)
 	data.seals += total
+	data.gold += maxi(0, run_gold)
+	data.best_wave = maxi(data.best_wave, wave)
+	data.last_settled_run = run_id
 	data.runs += 1
 	data.wins += int(victory)
 	data.best_time = maxf(data.best_time, seconds)

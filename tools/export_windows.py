@@ -138,6 +138,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--godot", type=Path, default=Path.home() / "Downloads" / "Godot_v4.7.2-stable_win64_console.exe")
     parser.add_argument("--template-only", action="store_true")
+    parser.add_argument("--output", type=Path, default=BUILD / "Brasafria.exe")
     parser.add_argument("--smoke", action="store_true", help="Run exported executable headlessly for 120 frames")
     args = parser.parse_args()
     ensure_template()
@@ -147,7 +148,8 @@ def main():
         raise SystemExit(f"Godot not found: {args.godot}; pass --godot PATH")
     BUILD.mkdir(parents=True, exist_ok=True)
     ensure_license()
-    target = BUILD / "Brasafria.exe"
+    target = args.output.resolve()
+    target.parent.mkdir(parents=True, exist_ok=True)
     export_result = subprocess.run([
         str(args.godot), "--headless", "--path", str(ROOT),
         "--export-release", "Windows Desktop", str(target),
@@ -157,7 +159,8 @@ def main():
         raise SystemExit(f"Export failed; see {BUILD / 'export.log'}")
     payload = target.read_bytes()
     manifest = {
-        "file": "Brasafria.exe",
+        "file": target.name,
+        "game_version": "0.2.0",
         "godot_version": VERSION,
         "size_bytes": len(payload),
         "sha256": hashlib.sha256(payload).hexdigest(),

@@ -18,11 +18,11 @@ Critérios: cada arma muda alcance e posicionamento; virote atravessa alvos na o
 
 Saída esperada: comparar pelo menos uma tentativa de combate próximo com outra de controle à distância. Ajustar números se uma escolha tornar as demais dispensáveis. Não considerar equilíbrio provado apenas pela ausência de erros de script.
 
-## Etapa 3. Expedição de dez minutos
+## Etapa 3. Expedição por dez hordas
 
 Entrega jogável: três inimigos comuns, elite, altar e chefe final.
 
-Critérios: surgimentos fora da câmera e em local seguro; feras após 90 s; altar após 120 s; pesados após 210 s; elite após 300 s; chefe após 540 s. Investidas e áreas fixam a direção ou posição antes do impacto. O altar exige seis segundos e só paga uma vez. Aos 600 s, chefe morto gera vitória; chefe vivo gera derrota. Morte do jogador também encerra a tentativa.
+Critérios atuais: surgimentos seguros e distribuídos; feras na horda 2, esqueletos de espada na 3, guardas na 4, arqueiros na 5, elite na 7 e chefe na 10. Eliminar todos os restantes inicia preparação de cinco segundos. Investidas, golpes, flechas e áreas têm antecipação fixa. O altar original continua após 120 segundos. Limpar a horda final com o chefe morto gera vitória; a morte do jogador encerra a tentativa. Ouro e testes da expansão estão em `HORDAS_E_OURO.md`.
 
 Saída esperada: executar o fluxo completo e testar os dois resultados. Simulação acelerada pode verificar regras, mas não substitui uma sessão para avaliar ritmo e legibilidade.
 
@@ -36,7 +36,7 @@ Saída esperada: validar com um perfil de teste separado. Não usar o progresso 
 
 ## Etapa 5. Validação da versão mínima
 
-Entrega jogável: candidato local 0.1.0, pronto para avaliação do usuário.
+Entrega jogável: candidato local 0.2.0, com hordas e ouro, pronto para avaliação do usuário.
 
 Critérios: importar sem erros de sintaxe; testar pausa, troca de tela, foco de teclado, seleção e reinício; inspecionar HUD, avisos e personagem sob carga; medir a configuração testada; verificar limite de sons e ajuste de volume; conferir documentos legais e crédito. Exportação e compatibilidade exigem execução do artefato correspondente.
 

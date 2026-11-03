@@ -25,6 +25,11 @@ var slice_mode: bool = false
 var hud_clock: float = 0
 var serial: int = 0
 var banked_reward: int = 0
+var gold: int = 0
+var banked_gold: int = 0
+var run_id: String = ""
+var run_settled: bool = false
+var persistence_enabled: bool = true
 var event_claimed: bool = false
 var event_progress: float = 0
 var region: Vector2 = Vector2(1260, 810)
@@ -38,14 +43,19 @@ var ui: GameUI
 var entities: Node2D
 var camera: Camera2D
 var enemy_data: Dictionary = {}
+var balance: EncounterBalance = preload("res://data/encounters/default.tres")
+var gold_loot: GoldLoot
+var enemy_projectiles: EnemyProjectiles
 
 func _ready() -> void:
 	test_mode = "--self-test" in OS.get_cmdline_user_args()
 	slice_mode = "--slice" in OS.get_cmdline_user_args()
+	persistence_enabled = not test_mode
+	get_tree().auto_accept_quit = false
 	register_inputs()
 	if not test_mode:
 		profile.load_profile()
-	for id in ["ghoul", "hound", "guard", "boss"]:
+	for id in ["ghoul", "hound", "guard", "boss", "skeleton_sword", "skeleton_archer"]:
 		enemy_data[id] = load("res://data/enemies/" + id + ".tres")
 	arena = RuinedArena.new()
 	add_child(arena)
@@ -69,6 +79,12 @@ func _ready() -> void:
 	director.setup(self)
 	sound = GameSound.new()
 	add_child(sound)
+	gold_loot = GoldLoot.new()
+	add_child(gold_loot)
+	gold_loot.setup(self)
+	enemy_projectiles = EnemyProjectiles.new()
+	add_child(enemy_projectiles)
+	enemy_projectiles.setup(self)
 	ui = GameUI.new()
 	add_child(ui)
 	ui.setup(self)
@@ -105,9 +121,12 @@ func _physics_process(delta: float) -> void:
 func simulate(delta: float, movement: Vector2 = Vector2.ZERO) -> void:
 	if state != "running":
 		return
-	elapsed = minf(600, elapsed + delta)
+	elapsed += delta
 	player.tick(delta, movement)
 	director.tick(delta)
+	if state != "running":
+		return
+	gold_loot.tick(delta)
 	rebuild_grid()
 	for enemy in enemies.duplicate():
 		if is_instance_valid(enemy) and enemy.alive:
@@ -116,7 +135,14 @@ func simulate(delta: float, movement: Vector2 = Vector2.ZERO) -> void:
 				return
 	weapon_system.update_combat(delta)
 	update_pickups(delta)
+	if state != "running":
+		queue_redraw()
+		return
+	enemy_projectiles.tick(delta)
 	update_hazards(delta)
+	if state != "running":
+		queue_redraw()
+		return
 	update_event(delta)
 	for number in numbers:
 		number.life -= delta
@@ -135,8 +161,6 @@ func simulate(delta: float, movement: Vector2 = Vector2.ZERO) -> void:
 	if hud_clock <= 0:
 		ui.update_hud(snapshot())
 		hud_clock = 0.1
-	if not slice_mode and elapsed >= 600:
-		finish_run(boss_defeated)
 	queue_redraw()
 
 func start_run(selected_support: String = "none") -> void:
@@ -146,6 +170,8 @@ func start_run(selected_support: String = "none") -> void:
 		selected_support = "none"
 	support = selected_support
 	clear_run()
+	run_id = "%d_%d_%d" % [Time.get_unix_time_from_system(), Time.get_ticks_usec(), randi()]
+	run_settled = false
 	player.hp = 100
 	player.max_hp = 100
 	player.speed = 96
@@ -160,7 +186,7 @@ func start_run(selected_support: String = "none") -> void:
 	state = "running"
 	ui.render("running")
 	ui.update_hud(snapshot())
-	announce("PÁTIO DOS ESQUECIDOS", 3)
+	announce("PREPARE-SE PARA A PRIMEIRA HORDA", 2.5)
 
 func clear_run() -> void:
 	for enemy in enemies:
@@ -171,9 +197,14 @@ func clear_run() -> void:
 	hazards.clear()
 	numbers.clear()
 	grid.clear()
+	gold_loot.reset()
+	enemy_projectiles.reset()
 	elapsed = 0
 	kills = 0
 	earned = 0
+	gold = 0
+	banked_gold = 0
+	banked_reward = 0
 	level = 1
 	xp = 0
 	xp_needed = 6
@@ -194,6 +225,8 @@ func enter_hub() -> void:
 	ui.render("hub", profile.data)
 
 func retry() -> void:
+	if state in ["running", "paused", "upgrading"]:
+		finish_run(false)
 	start_run(support)
 
 func abandon() -> void:
@@ -204,13 +237,24 @@ func abandon() -> void:
 		enter_hub()
 
 func finish_run(won: bool) -> void:
-	if state not in ["running", "paused", "upgrading"]:
+	if state not in ["running", "paused", "upgrading"] or run_settled:
 		return
 	state = "result"
+	run_settled = true
 	camera.offset = Vector2.ZERO
-	banked_reward = profile.reward(elapsed, kills, won, earned) if not test_mode else floori(elapsed / 30.0) + floori(kills / 30.0) + earned + (10 if won else 0)
+	banked_gold = gold
+	banked_reward = profile.reward(elapsed, kills, won, earned, gold, run_id, director.wave_number()) if persistence_enabled else floori(elapsed / 30.0) + floori(kills / 30.0) + earned + (10 if won else 0)
 	sound.play_cue("victory" if won else "defeat")
-	ui.render("result", {"won": won, "elapsed": elapsed, "kills": kills, "earned": banked_reward, "level": level})
+	ui.render("result", {"won": won, "elapsed": elapsed, "kills": kills, "earned": banked_reward, "level": level, "gold": banked_gold, "total_gold": profile.data.gold, "wave": director.wave_number()})
+
+func request_quit() -> void:
+	if state in ["running", "paused", "upgrading"]:
+		finish_run(false)
+	get_tree().quit()
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_CLOSE_REQUEST and is_instance_valid(ui):
+		request_quit()
 
 func toggle_pause() -> void:
 	if ui.screen == "settings":
@@ -303,6 +347,7 @@ func spawn_enemy(id: String, point: Vector2, elite: bool = false):
 
 func enemy_killed(enemy) -> void:
 	kills += 1
+	gold_loot.drop(enemy.position, enemy.data.gold_value)
 	pickups.append({"at": enemy.position, "xp": enemy.data.experience, "attracted": false})
 	if pickups.size() > 240:
 		# Merge value rather than discard experience under load.
@@ -316,7 +361,7 @@ func enemy_killed(enemy) -> void:
 		boss = null
 		earned += 5
 		hazards.clear()
-		announce("O REI CAIU. RESISTA ATÉ O AMANHECER.", 4)
+		announce("O REI CAIU. ELIMINE OS RESTANTES.", 4)
 	enemies.erase(enemy)
 
 func nearest_enemy(origin: Vector2, max_range: float):
@@ -413,7 +458,7 @@ func camera_rect() -> Rect2:
 	return Rect2(center - Vector2(320, 180), Vector2(640, 360))
 
 func snapshot() -> Dictionary:
-	return {"hp": player.hp, "max_hp": player.max_hp, "xp": xp, "xp_needed": xp_needed, "elapsed": elapsed, "level": level, "kills": kills, "earned": earned + floori(elapsed / 30.0) + floori(kills / 30.0), "weapons": weapon_system.get_loadout(), "passives": weapon_system.get_passives(), "boss_hp": boss.hp if is_instance_valid(boss) else 0, "boss_max": boss.max_hp if is_instance_valid(boss) else 0, "banner": banner, "pressure": director.pressure()}
+	return {"hp": player.hp, "max_hp": player.max_hp, "xp": xp, "xp_needed": xp_needed, "elapsed": elapsed, "level": level, "kills": kills, "gold": gold, "earned": earned + floori(elapsed / 30.0) + floori(kills / 30.0), "wave": director.wave_number(), "weapons": weapon_system.get_loadout(), "passives": weapon_system.get_passives(), "boss_hp": boss.hp if is_instance_valid(boss) else 0, "boss_max": boss.max_hp if is_instance_valid(boss) else 0, "banner": banner, "pressure": director.pressure()}
 
 func _draw() -> void:
 	if state in ["title", "hub"]:

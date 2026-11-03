@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="WaveData" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/data/wave_data.gd" id="1"]
+[resource]
+script = ExtResource("1")
+title = "Cerco de ossos"
+composition = {"ghoul": 14, "hound": 10, "skeleton_sword": 22, "skeleton_archer": 10, "guard": 12}
+spawn_interval = 0.38
+max_alive = 50
+elite_guards = 0
+boss = false

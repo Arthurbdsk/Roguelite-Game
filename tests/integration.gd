@@ -141,7 +141,7 @@ func _test_director() -> void:
 		for _attempt: int in 10:
 			if g.director.spawn("ghoul"):
 				var enemy = g.enemies.back()
-				check(not g.camera_rect().grow(40).has_point(enemy.position), "director spawn remains outside camera plus margin")
+				check(not g.camera_rect().grow(g.balance.spawn_margin).has_point(enemy.position), "director spawn remains outside camera plus margin")
 				check(g.arena.safe_position(enemy.position, 20), "director spawn avoids obstacles and world edges")
 				successes += 1
 				corner_spawns += 1
@@ -184,9 +184,11 @@ func _test_boss_and_outcome() -> void:
 	enemy.take_damage(10000.0)
 	check(g.boss_defeated and g.boss == null, "boss death records the victory prerequisite")
 	check(g.state == "running", "killing boss early does not skip remaining survival time")
-	g.elapsed = 599.99
+	g.director.wave_index = g.balance.waves.size() - 1
+	g.director.phase = "active"
+	g.director.queue.clear()
 	g.simulate(STEP)
-	check(g.state == "result" and bool(g.ui.previous_data.get("won", false)), "surviving 600 seconds after boss death yields victory")
+	check(g.state == "result" and bool(g.ui.previous_data.get("won", false)), "clearing final wave after boss death yields victory")
 	var reward: int = g.banked_reward
 	g.finish_run(true)
 	check(g.banked_reward == reward, "result cannot settle rewards twice")
@@ -194,9 +196,11 @@ func _test_boss_and_outcome() -> void:
 	g.director.cooldown = 10000.0
 	g.director.elite_spawned = true
 	g.director.boss_spawned = true
-	g.elapsed = 599.99
+	g.director.wave_index = g.balance.waves.size() - 1
+	g.director.phase = "active"
+	g.director.queue.clear()
 	g.simulate(STEP)
-	check(g.state == "result" and not bool(g.ui.previous_data.get("won", true)), "600 seconds without defeating boss yields defeat")
+	check(g.state == "result" and not bool(g.ui.previous_data.get("won", true)), "clearing final wave without defeating its boss cannot grant victory")
 
 
 func _write(path: String, content: String) -> void:
@@ -315,7 +319,7 @@ func _test_full_run() -> void:
 	var started_us: int = Time.get_ticks_usec()
 	var simulate_us: int = 0
 	var last_report: int = 0
-	while g.state in ["running", "upgrading"] and steps < 36100:
+	while g.state in ["running", "upgrading"] and steps < 120000:
 		while g.state == "upgrading":
 			_pick_upgrade()
 		if g.state != "running":
@@ -336,7 +340,7 @@ func _test_full_run() -> void:
 		if minute > last_report:
 			last_report = minute
 			print("TRAVERSAL_PROGRESS seconds=%d entities=%d kills=%d level=%d" % [g.elapsed, g.enemies.size(), g.kills, g.level])
-	check(g.elapsed >= 600.0 and g.state == "result", "entire ten-minute timer reaches a defined result")
+	check(g.state == "result" and g.director.phase == "complete", "entire sequence of hordes reaches a defined result")
 	check(maximum_entities <= 180, "entity count stays within cap over full run")
 	check(saw_elite, "elite event occurs during full traversal")
 	check(saw_boss, "boss event occurs during full traversal")
@@ -349,5 +353,6 @@ func _test_full_run() -> void:
 		"maximum_entities": maximum_entities, "kills": g.kills,
 		"level": g.level, "spawned": g.director.total_spawned,
 		"boss_defeated": g.boss_defeated,
+		"waves": g.director.wave_number(), "gold_collected": g.gold,
 		"method": "Invulnerable bot; synchronous 1/60 calls; yield every 30 steps. Not real-time FPS, balance or physics validation."
 	}

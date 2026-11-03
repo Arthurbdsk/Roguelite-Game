@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="WaveData" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/data/wave_data.gd" id="1"]
+[resource]
+script = ExtResource("1")
+title = "A muralha cede"
+composition = {"ghoul": 22, "hound": 20, "skeleton_sword": 40, "skeleton_archer": 18, "guard": 30}
+spawn_interval = 0.23
+max_alive = 95
+elite_guards = 0
+boss = false

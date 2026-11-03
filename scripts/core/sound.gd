@@ -15,6 +15,9 @@ func _ready() -> void:
 	var notes := {"sword": [130, 0.08], "bolt": [380, 0.055], "orbit": [220, 0.07], "hit": [80, 0.065], "hurt": [65, 0.14], "pickup": [650, 0.04], "level": [540, 0.22], "select": [420, 0.08], "elite": [85, 0.55], "boss": [55, 0.75], "victory": [700, 0.65], "defeat": [90, 0.65]}
 	for id in notes:
 		cues[id] = synth(float(notes[id][0]), float(notes[id][1]))
+	cues.gold = synth(980, 0.045)
+	cues.arrow = synth(310, 0.06)
+	cues.wave = synth(160, 0.28)
 
 func _process(delta: float) -> void:
 	clock += delta
@@ -44,7 +47,7 @@ func synth(hz: float, length: float) -> AudioStreamWAV:
 func play_cue(id: String) -> void:
 	if not cues.has(id) or volume <= 0:
 		return
-	var interval := 0.10 if id in ["hit", "pickup", "orbit"] else 0.04
+	var interval := 0.10 if id in ["hit", "pickup", "orbit", "gold", "arrow"] else 0.04
 	if clock - float(limits.get(id, -99.0)) < interval:
 		return
 	for voice in voices:

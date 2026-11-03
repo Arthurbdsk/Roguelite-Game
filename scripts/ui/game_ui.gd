@@ -197,7 +197,7 @@ func _title() -> void:
 	_button(menu, "Fortaleza", Rect2(34, 223, 205, 29), func(): game.enter_hub())
 	_button(menu, "Opções", Rect2(34, 259, 97, 27), func(): _open_settings("title"))
 	_button(menu, "Sair", Rect2(140, 259, 99, 27), func(): get_tree().quit())
-	_label(menu, "WASD / setas: mover    Esc: pausa\nAtaques automáticos.\nDerrote o rei e resista por 10 min.", Rect2(320, 259, 287, 51), 11, MUTED)
+	_label(menu, "WASD / setas: mover    Esc: pausa\nElimine cada horda para avançar.\nDerrote o rei na horda 10.", Rect2(320, 259, 287, 51), 11, MUTED)
 	_footer()
 	call_deferred("_grant_focus", play)
 
@@ -220,7 +220,7 @@ func _hub(data: Dictionary) -> void:
 	if selected_support != "none" and not bool(buildings.get(selected_support, false)):
 		selected_support = "none"
 	_label(menu, "A FORTALEZA", Rect2(24, 14, 420, 38), 28)
-	_label(menu, "%d SELOS" % int(p.get("seals", 0)), Rect2(477, 22, 140, 24), 16, ICE)
+	_label(menu, "%d SELOS  |  %d OURO" % [int(p.get("seals", 0)), int(p.get("gold", 0))], Rect2(370, 22, 247, 24), 13, ICE)
 	_label(menu, "Construções e selos permanecem após a morte.", Rect2(25, 55, 590, 20), 12, MUTED)
 	_building_card("arsenal", "ARSENAL", "Virote inicial.\nBrasas atacam 15% mais devagar.", bool(buildings.get("arsenal", false)), Vector2(25, 84))
 	_building_card("library", "BIBLIOTECA", "Brasas iniciais.\nVirotes atacam 15% mais devagar.", bool(buildings.get("library", false)), Vector2(331, 84))
@@ -343,11 +343,13 @@ func _result(data: Dictionary) -> void:
 	var won: bool = bool(data.get("won", false))
 	_label(menu, "A AURORA RESISTE" if won else "A VIGÍLIA TERMINOU", Rect2(24, 35, 592, 43), 28, ICE if won else IVORY, true)
 	_label(menu, "O pátio voltou às suas mãos." if won else "As muralhas lembram de cada tentativa.", Rect2(24, 87, 592, 24), 12, MUTED, true)
-	_box(menu, Rect2(130, 128, 380, 112))
-	_label(menu, "TEMPO\n" + _clock(float(data.get("elapsed", 0.0))), Rect2(146, 143, 170, 37), 13)
-	_label(menu, "ABATES\n%d" % int(data.get("kills", 0)), Rect2(335, 143, 150, 37), 13)
-	_label(menu, "NÍVEL\n%d" % int(data.get("level", 1)), Rect2(146, 191, 170, 37), 13)
-	_label(menu, "SELOS MANTIDOS\n+%d" % int(data.get("earned", 0)), Rect2(335, 191, 160, 37), 13, ICE)
+	_box(menu, Rect2(84, 121, 472, 132))
+	_label(menu, "HORDA %d\n%s" % [int(data.get("wave", 1)), _clock(float(data.get("elapsed", 0)))], Rect2(99, 134, 142, 39), 13)
+	_label(menu, "ABATES\n%d" % int(data.get("kills", 0)), Rect2(252, 134, 135, 39), 13)
+	_label(menu, "NÍVEL\n%d" % int(data.get("level", 1)), Rect2(405, 134, 136, 39), 13)
+	_label(menu, "OURO RECEBIDO\n+%d" % int(data.get("gold", 0)), Rect2(99, 193, 142, 42), 12, Color("dfb969"))
+	_label(menu, "OURO TOTAL\n%d" % int(data.get("total_gold", 0)), Rect2(252, 193, 135, 42), 12, Color("dfb969"))
+	_label(menu, "SELOS\n+%d" % int(data.get("earned", 0)), Rect2(405, 193, 136, 42), 12, ICE)
 	var again := _button(menu, "Tentar novamente", Rect2(130, 268, 182, 34), func(): game.retry(), true)
 	_button(menu, "Fortaleza", Rect2(326, 268, 184, 34), func(): game.enter_hub())
 	_label(menu, "Armas e melhorias temporárias foram encerradas.", Rect2(24, 323, 592, 20), 11, MUTED, true)
@@ -364,7 +366,7 @@ func _legal(kind: String) -> void:
 	_label(menu, "POLÍTICA DE PRIVACIDADE" if privacy else "TERMOS DE SERVIÇO", Rect2(30, 26, 580, 40), 24)
 	var content: String
 	if privacy:
-		content = "Brasafria é um protótipo local e não exige conta. O jogo não envia dados, não possui anúncios e não utiliza serviços de análise.\n\nProgresso e preferências ficam apenas no arquivo de salvamento da Godot no seu computador. Os dados incluem selos, construções, estatísticas e opções.\n\nO link Socialy abre o Instagram no navegador. Ao acessá-lo, aplicam-se as regras e a política do Instagram."
+		content = "Brasafria é um protótipo local e não exige conta. O jogo não envia dados, não possui anúncios e não utiliza serviços de análise.\n\nProgresso e preferências ficam apenas no arquivo de salvamento da Godot no seu computador. Os dados incluem ouro, selos, construções, estatísticas, identificação da tentativa e opções.\n\nO link Socialy abre o Instagram no navegador. Ao acessá-lo, aplicam-se as regras e a política do Instagram."
 	else:
 		content = "Este protótipo é fornecido para teste e avaliação pessoal. Sistemas, arte e balanceamento podem mudar durante a produção.\n\nO progresso é salvo localmente. Mantenha uma cópia do arquivo antes de substituí-lo por versões novas.\n\nO jogo não oferece compras, conta online ou serviços pagos. A autoria e as licenças dos componentes estão documentadas no projeto."
 	_label(menu, content, Rect2(32, 91, 576, 190), 13, MUTED)
@@ -422,7 +424,7 @@ func update_hud(data: Dictionary) -> void:
 	experience_bar.value = float(data.get("xp", 0))
 	level_text.text = "NÍVEL %d" % int(data.get("level", 1))
 	time_text.text = _clock(float(data.get("elapsed", 0.0)))
-	counts_text.text = "%d abates  |  %d selos" % [int(data.get("kills", 0)), int(data.get("earned", 0))]
+	counts_text.text = "%d abates  |  %d ouro" % [int(data.get("kills", 0)), int(data.get("gold", 0))]
 	pressure_text.text = str(data.get("pressure", "PÁTIO ESQUECIDO"))
 	banner_text.text = str(data.get("banner", ""))
 	var max_boss: float = float(data.get("boss_max", 0.0))

@@ -1,4 +1,6 @@
-# Validação do protótipo 0.1.0
+# Validação histórica do protótipo 0.1.0
+
+Este registro preserva os testes da primeira entrega. A versão 0.2 substitui o prazo de dez minutos por hordas; sua validação está em `HORDAS_E_OURO.md`.
 
 Executado em 2 de novembro de 2026, Windows x64, Godot 4.7.2 stable. Este registro separa execução técnica de avaliação de diversão e dificuldade.
 

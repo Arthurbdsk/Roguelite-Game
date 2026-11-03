@@ -25,13 +25,23 @@ func run() -> void:
 	game.weapon_system.apply_upgrade("orbit")
 	game.weapon_system.apply_upgrade("magnet")
 	game.weapon_system.apply_upgrade("ward")
-	game.elapsed = 546
-	game.banner = "O REI SEM BRASA"
+	game.elapsed = 146
+	game.gold = 17
+	game.director.wave_index = 4
+	game.director.phase = "active"
+	game.banner = "HORDA 5  |  CORDAS NA ESCURIDÃO"
 	for i in 26:
 		var point: Vector2 = game.player.position + Vector2.from_angle(i * TAU / 26) * (85 + (i % 4) * 21)
-		game.spawn_enemy(["ghoul", "hound", "guard"][i % 3], point)
-	game.spawn_enemy("boss", game.player.position + Vector2(170, -54))
-	game.add_hazard(game.player.position + Vector2(-50, 48), 42, 1.3, 24)
+		var enemy = game.spawn_enemy(["ghoul", "skeleton_sword", "skeleton_archer", "hound", "skeleton_archer"][i % 5], point)
+		if i % 5 == 2:
+			enemy.state = "prepare"
+			enemy.sprite.frame = 4
+			enemy.charge_direction = (game.player.position - point).normalized()
+	for i in 12:
+		game.gold_loot.drop(game.player.position + Vector2.from_angle(i * TAU / 12) * 66)
+		game.pickups.append({"at": game.player.position + Vector2.from_angle((i + 0.5) * TAU / 12) * 90, "xp": 2, "attracted": false})
+	game.enemy_projectiles.fire(game.player.position + Vector2(115, 37), Vector2(-1, 0.25), game.enemy_data.skeleton_archer)
+	game.enemy_projectiles.fire(game.player.position + Vector2(-125, -64), Vector2(1, 0.25), game.enemy_data.skeleton_archer)
 	game.weapon_system.update_combat(0.12)
 	game.ui.update_hud(game.snapshot())
 	await capture("arena")
@@ -41,7 +51,7 @@ func run() -> void:
 	await capture("upgrades")
 	game.ui.render("settings")
 	await capture("settings")
-	game.ui.render("result", {"won": true, "elapsed": 600, "kills": 412, "level": 18, "earned": 43})
+	game.ui.render("result", {"won": true, "elapsed": 906, "kills": 811, "level": 18, "earned": 43, "gold": 217, "total_gold": 439, "wave": 10})
 	await capture("victory")
 	game.queue_free()
 	await process_frame

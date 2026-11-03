@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="WaveData" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/data/wave_data.gd" id="1"]
+[resource]
+script = ExtResource("1")
+title = "A ultima porta"
+composition = {"ghoul": 28, "hound": 24, "skeleton_sword": 54, "skeleton_archer": 24, "guard": 44}
+spawn_interval = 0.17
+max_alive = 130
+elite_guards = 0
+boss = false

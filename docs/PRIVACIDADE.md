@@ -1,6 +1,6 @@
 # Política de privacidade
 
-Brasafria 0.1.0 é um protótipo local. O jogo não exige conta, não possui anúncios, não usa serviços de análise e não envia dados durante a execução normal.
+Brasafria 0.2.0 é um protótipo local. O jogo não exige conta, não possui anúncios, não usa serviços de análise e não envia dados durante a execução normal. O perfil também registra ouro, melhor horda e o identificador da última tentativa liquidada para evitar crédito duplicado.
 
 O progresso e as preferências são guardados no computador: versão do perfil, selos, construções desbloqueadas, quantidade de tentativas e vitórias, melhor tempo, volume, intensidade de efeitos, tremor de câmera e tela cheia. O perfil fica em `user://profile.json`, no diretório de dados definido pela Godot para Brasafria. No Windows, o local padrão é `%APPDATA%\Godot\app_userdata\Brasafria\profile.json`. A gravação também pode criar arquivos `.tmp` e `.bak`.
 

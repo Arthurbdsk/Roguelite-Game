@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="EncounterBalance" load_steps=13 format=3]
+[ext_resource type="Script" path="res://scripts/data/encounter_balance.gd" id="1"]
+[ext_resource type="Resource" path="res://data/waves/01.tres" id="2"]
+[ext_resource type="Resource" path="res://data/waves/02.tres" id="3"]
+[ext_resource type="Resource" path="res://data/waves/03.tres" id="4"]
+[ext_resource type="Resource" path="res://data/waves/04.tres" id="5"]
+[ext_resource type="Resource" path="res://data/waves/05.tres" id="6"]
+[ext_resource type="Resource" path="res://data/waves/06.tres" id="7"]
+[ext_resource type="Resource" path="res://data/waves/07.tres" id="8"]
+[ext_resource type="Resource" path="res://data/waves/08.tres" id="9"]
+[ext_resource type="Resource" path="res://data/waves/09.tres" id="10"]
+[ext_resource type="Resource" path="res://data/waves/10.tres" id="11"]
+[resource]
+script = ExtResource("1")
+waves = Array[Resource]([ExtResource("2"), ExtResource("3"), ExtResource("4"), ExtResource("5"), ExtResource("6"), ExtResource("7"), ExtResource("8"), ExtResource("9"), ExtResource("10"), ExtResource("11")])
+initial_preparation = 2.5
+preparation_seconds = 5.0
+minimum_spawn_interval = 0.12
+max_enemies = 180
+coin_lifetime = 60.0
+coin_value = 1
+coin_attraction_radius = 44.0
+coin_collect_speed = 230.0
