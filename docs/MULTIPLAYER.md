@@ -1,6 +1,6 @@
 # Cooperativo 0.4.0
 
-Implementação integrada à partida e ao executável. A publicação do serviço de salas continua pendente porque não há hospedagem nem URL WSS configurada.
+Implementação integrada à partida e ao executável. Em 03/11/2026 foi iniciado um serviço temporário via Cloudflare Quick Tunnel. A configuração atual está em `build/network.cfg` e a cópia para amigos em `build/Configuracao-Online.zip`. O endereço depende dos processos locais e muda ao reiniciar o túnel. Não há hospedagem permanente.
 
 ## Comportamento
 
@@ -45,4 +45,6 @@ A hospedagem precisa executar continuamente esse container ou Node.js, expor `/h
 
 ## Limitações restantes
 
-Não publicado nem testado entre redes físicas diferentes. Falta uma hospedagem pública e, depois, validar WSS, latência real, perda de conexão e avaliação humana em quatro computadores. Não anunciar multiplayer de internet validado. Não há migração de host, reconexão ou retomada de tentativa após encerrar o processo à força.
+O túnel temporário foi testado com quatro processos pelo endereço WSS público, incluindo combate, carga, coleta e persistência. Todos os processos ainda estavam no mesmo computador. Falta testar com os amigos em redes físicas diferentes e providenciar hospedagem permanente. Não anunciar validação entre quatro redes independentes. Não há migração de host, reconexão ou retomada de tentativa após encerrar o processo à força.
+
+Teste externo: em `relay/`, `node match-test.mjs --packed=../build/Brasafria-0.4.0.exe --relay-url=wss://ENDERECO` permite exercitar o pacote pelo serviço público. O teste de 03/11 passou com 83 verificações distribuídas em quatro processos, sem erros do motor.
