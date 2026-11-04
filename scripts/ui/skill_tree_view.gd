@@ -1,101 +1,90 @@
 class_name SkillTreeView
 extends Control
-
 var game
 var ui
-var buttons: Dictionary = {}
-
-func setup(owner_game, interface) -> void:
-	game = owner_game
-	ui = interface
-	size = Vector2(640, 360)
-	ui._label(self, "HABILIDADES PERMANENTES", Rect2(18, 14, 405, 38), 26)
-	ui._label(self, "Permanente. Aplicado ao iniciar uma nova partida.", Rect2(20, 48, 400, 14), 9, ui.MUTED)
-	ui._label(self, "%d OURO" % game.profile.data.gold, Rect2(430, 21, 194, 24), 16, Color("dfb969"), true)
-	var branch_names := ["COMBATE", "SOBREVIVÊNCIA", "MOVIMENTO", "ESPECIALIZAÇÕES"]
-	for branch in 4:
-		ui._label(self, branch_names[branch], Rect2(18 + branch * 100, 64, 94, 20), 10, ui.MUTED, true)
-	var lines := Node2D.new()
-	add_child(lines)
-	for definition in game.skills.definitions:
-		var destination := point(definition)
-		for prerequisite in definition.prerequisites:
-			var start := point(game.skills.by_id[prerequisite])
-			var edge := Line2D.new()
-			if definition.id == "pact":
-				edge.points = PackedVector2Array([start + Vector2(47, 0), Vector2(419, start.y), Vector2(419, destination.y), destination + Vector2(47, 0)])
-			elif is_equal_approx(start.y, destination.y):
-				edge.points = PackedVector2Array([start - Vector2(0, 20), Vector2(start.x, 86), Vector2(destination.x, 86), destination - Vector2(0, 20)])
-			else:
-				var middle: float = (start.y + destination.y) * 0.5
-				edge.points = PackedVector2Array([start + Vector2(0, 20), Vector2(start.x, middle), Vector2(destination.x, middle), destination - Vector2(0, 20)])
-			edge.width = 1
-			edge.default_color = ui.ICE if game.skills.rank(prerequisite) > 0 else ui.LINE
-			lines.add_child(edge)
-	for definition in game.skills.definitions:
-		var info: Dictionary = game.skills.state(definition.id)
-		var level: int = game.skills.rank(definition.id)
-		var position_in_tree := Vector2(18 + definition.branch * 100, 91 + definition.depth * 51)
-		var button: Button = ui._button(self, "", Rect2(position_in_tree, Vector2(94, 40)), _select.bind(definition.id))
-		var labels := {"locked": "Bloqueado", "unaffordable": "Sem ouro", "available": "Disponível", "owned": "Comprado", "maxed": "Máximo"}
-		var color: Color = ui.ICE if level > 0 else (ui.COPPER if info.can_buy else ui.LINE)
-		button.add_theme_stylebox_override("normal", ui._style(ui.PANEL, color, 2 if definition.id == ui.selected_skill else 1))
-		ui._label(button, definition.title, Rect2(5, 3, 84, 23), 10, ui.IVORY if info.status != "locked" else ui.MUTED, true)
-		ui._label(button, "%d/%d  %s" % [level, definition.max_rank(), labels[info.status]], Rect2(2, 27, 90, 12), 8, color, true)
-		button.focus_entered.connect(_focus.bind(definition.id))
-		button.gui_input.connect(_node_input.bind(definition.id, level, button))
-		buttons[definition.id] = button
-	for definition in game.skills.definitions:
-		var button: Button = buttons[definition.id]
-		for candidate in game.skills.definitions:
-			if candidate.depth == definition.depth and candidate.branch == definition.branch + 1:
-				button.focus_neighbor_right = buttons[candidate.id].get_path()
-			if candidate.depth == definition.depth and candidate.branch == definition.branch - 1:
-				button.focus_neighbor_left = buttons[candidate.id].get_path()
-			if candidate.branch == definition.branch and candidate.depth == definition.depth + 1:
-				button.focus_neighbor_bottom = buttons[candidate.id].get_path()
-			if candidate.branch == definition.branch and candidate.depth == definition.depth - 1:
-				button.focus_neighbor_top = buttons[candidate.id].get_path()
-	show_details()
-	ui._button(self, "Voltar", Rect2(18, 309, 394, 24), game.close_skill_tree)
-	ui._label(self, game.skills.last_error if not game.skills.last_error.is_empty() else "Setas: navegar   Espaço: comprar   Esc: voltar", Rect2(18, 338, 606, 18), 10, ui.COPPER if not game.skills.last_error.is_empty() else ui.MUTED, true)
-	ui.call_deferred("_grant_focus", buttons[ui.selected_skill])
-
-func point(definition: SkillDefinition) -> Vector2:
-	return Vector2(65 + definition.branch * 100, 111 + definition.depth * 51)
-
-func _focus(id: String) -> void:
-	if id != ui.selected_skill:
-		call_deferred("_select", id)
-
-func _node_input(event: InputEvent, id: String, level: int, button: Button) -> void:
-	if event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_SPACE:
-		button.accept_event()
-		game.buy_skill(id, level)
-
-func _select(id: String) -> void:
-	if not is_inside_tree() or id == ui.selected_skill:
-		return
-	ui.selected_skill = id
-	game.skills.last_error = ""
-	ui.render("tree", game.profile.data)
-
-func show_details() -> void:
-	var definition: SkillDefinition = game.skills.by_id[ui.selected_skill]
-	var info: Dictionary = game.skills.state(definition.id)
-	var level: int = game.skills.rank(definition.id)
-	ui._box(self, Rect2(426, 69, 198, 263))
-	ui._label(self, definition.title, Rect2(438, 81, 174, 40), 16)
-	var names := {"locked": "Pré-requisito pendente", "unaffordable": "Ouro insuficiente", "available": "Disponível para compra", "owned": "Comprado: %d/%d" % [level, definition.max_rank()], "maxed": "Maximizado"}
-	ui._label(self, names[info.status], Rect2(438, 126, 174, 22), 11, ui.ICE)
-	var effect: String = "Efeito:\n" + definition.benefits[0] if level == 0 else "Atual: " + definition.benefits[level - 1]
-	if level > 0 and level < definition.max_rank():
-		effect += "\n\nPróximo: " + definition.benefits[level]
-	ui._label(self, effect, Rect2(438, 153, 174, 100), 11, ui.MUTED)
-	var required: Array[String] = []
-	for id in definition.prerequisites:
-		required.append("%s %d" % [game.skills.by_id[id].title, definition.prerequisites[id]])
-	ui._label(self, "Exige: " + ", ".join(required) if not required.is_empty() else "Sem pré-requisitos.", Rect2(438, 255, 174, 34), 9, ui.MUTED)
-	var buy: Button = ui._button(self, "Comprar: %d ouro" % info.cost if level < definition.max_rank() else "Maximizado", Rect2(438, 294, 174, 27), game.buy_skill.bind(definition.id, level), true)
-	buy.disabled = not info.can_buy
-	buy.tooltip_text = info.reason
+var buttons:Dictionary={}
+var grid:GridContainer
+var details:VBoxContainer
+var gold_label:Label
+var title_label:Label
+var refund_button:Button
+var scroll:ScrollContainer
+var last_purchase:int=-1000
+const BG=Color("494c70")
+const CARD=Color("898b88")
+const GOLD=Color("d9b454")
+func frame(color:Color,border:Color=GOLD,width:int=2)->StyleBoxFlat:
+ var s:=StyleBoxFlat.new();s.bg_color=color;s.border_color=border;s.set_border_width_all(width);s.set_content_margin_all(5);return s
+func label(parent,text:String,font_size:int=12)->Label:
+ var l:=Label.new();l.text=text;l.add_theme_font_size_override("font_size",font_size);l.add_theme_color_override("font_color",Color("f7f3e5"));parent.add_child(l);return l
+func icon(parent,path:String,size_px:int=26):
+ var n:=TextureRect.new();n.texture=load(path);n.custom_minimum_size=Vector2(size_px,size_px);n.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;n.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;n.texture_filter=CanvasItem.TEXTURE_FILTER_NEAREST;parent.add_child(n);return n
+func setup(owner_game,interface):
+ game=owner_game;ui=interface
+ set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+ var panel:=Panel.new();panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);panel.add_theme_stylebox_override("panel",frame(BG));add_child(panel)
+ var margin:=MarginContainer.new();margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+ for side in ["left","right","top","bottom"]:margin.add_theme_constant_override("margin_"+side,10)
+ add_child(margin)
+ var column:=VBoxContainer.new();column.add_theme_constant_override("separation",6);margin.add_child(column)
+ var head:=HBoxContainer.new();column.add_child(head)
+ title_label=label(head,"Seleção de aprimoramentos",20);title_label.size_flags_horizontal=Control.SIZE_EXPAND_FILL;title_label.clip_text=true
+ gold_label=label(head,"",14);gold_label.name="GoldBalance"
+ var bar:=HBoxContainer.new();column.add_child(bar)
+ refund_button=Button.new();refund_button.text="Reembolsar aprimoramentos";refund_button.size_flags_horizontal=Control.SIZE_EXPAND_FILL;refund_button.add_theme_stylebox_override("normal",frame(Color("405fff")));refund_button.pressed.connect(confirm_refund);bar.add_child(refund_button)
+ var back:=Button.new();back.text="Voltar";back.pressed.connect(game.close_skill_tree);bar.add_child(back)
+ scroll=ScrollContainer.new();scroll.name="PermanentScroll";scroll.size_flags_vertical=Control.SIZE_EXPAND_FILL;scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;column.add_child(scroll)
+ grid=GridContainer.new();grid.name="PermanentGrid";grid.columns=4;grid.size_flags_horizontal=Control.SIZE_EXPAND_FILL;grid.add_theme_constant_override("h_separation",8);grid.add_theme_constant_override("v_separation",8);scroll.add_child(grid)
+ for d in game.skills.definitions:
+  var card:=Button.new();card.name=d.id;card.custom_minimum_size=Vector2(0,80);card.size_flags_horizontal=Control.SIZE_EXPAND_FILL;grid.add_child(card)
+  card.pressed.connect(select.bind(d.id));card.focus_entered.connect(select.bind(d.id))
+  var stack:=VBoxContainer.new();stack.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);stack.offset_left=4;stack.offset_right=-4;stack.offset_top=4;stack.offset_bottom=-3;stack.mouse_filter=Control.MOUSE_FILTER_IGNORE;card.add_child(stack)
+  var name_label:=label(stack,d.title,11);name_label.name="CardTitle";name_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;name_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;name_label.mouse_filter=Control.MOUSE_FILTER_IGNORE
+  icon(stack,d.icon,27).mouse_filter=Control.MOUSE_FILTER_IGNORE
+  var dots:=HBoxContainer.new();dots.name="Levels";dots.alignment=BoxContainer.ALIGNMENT_CENTER;dots.mouse_filter=Control.MOUSE_FILTER_IGNORE;stack.add_child(dots)
+  for i in d.max_rank():
+   var box:=Panel.new();box.custom_minimum_size=Vector2(9,7);box.mouse_filter=Control.MOUSE_FILTER_IGNORE;dots.add_child(box)
+  buttons[d.id]=card
+ var fixed:=PanelContainer.new();fixed.name="PermanentDetails";fixed.custom_minimum_size=Vector2(0,98);fixed.add_theme_stylebox_override("panel",frame(CARD));column.add_child(fixed)
+ var row:=HBoxContainer.new();fixed.add_child(row)
+ details=VBoxContainer.new();details.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(details)
+ resized.connect(responsive)
+ if not game.skills.by_id.has(ui.selected_skill):ui.selected_skill="damage"
+ refresh();call_deferred("responsive")
+func responsive():
+ if not is_instance_valid(grid):return
+ grid.columns=4 if size.x>=590 else (3 if size.x>=440 else 2)
+ title_label.text="Seleção de aprimoramentos" if size.x>=590 else "Aprimoramentos"
+func select(id:String):
+ ui.selected_skill=id;game.skills.last_error="";refresh()
+func refresh():
+ gold_label.text="%d ouro"%game.profile.data.gold
+ refund_button.disabled=game.skills.refund_total()==0
+ for id in buttons:
+  var card:Button=buttons[id];var n:int=game.skills.rank(id);var d=game.skills.by_id[id]
+  card.add_theme_stylebox_override("normal",frame(CARD,Color("fff0a4") if id==ui.selected_skill else GOLD,3 if id==ui.selected_skill else 1))
+  card.add_theme_stylebox_override("focus",frame(Color(0,0,0,0),Color("fff0a4"),2))
+  card.find_child("CardTitle",true,false).text=d.title+(" | MÁX" if n==d.max_rank() else "")
+  card.tooltip_text=d.title+(" | Nível máximo" if n==d.max_rank() else " | %d/%d"%[n,d.max_rank()])
+  var dots=card.find_child("Levels",true,false)
+  for i in dots.get_child_count():dots.get_child(i).add_theme_stylebox_override("panel",frame(Color("eed270") if i<n else Color("342342"),GOLD,1))
+ for child in details.get_children():details.remove_child(child);child.queue_free()
+ var d=game.skills.by_id[ui.selected_skill];var n:int=game.skills.rank(d.id);var info:Dictionary=game.skills.state(d.id)
+ var title_row:=HBoxContainer.new();details.add_child(title_row);icon(title_row,d.icon,22)
+ label(title_row,d.title+(" | MÁXIMO" if n==d.max_rank() else " | %d/%d"%[n,d.max_rank()]),12)
+ var desc:=label(details,d.description,9);desc.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+ var effect:=label(details,"Atual: "+game.skills.effect(d.id,n)+( "   Após: "+game.skills.effect(d.id,n+1) if n<d.max_rank() else ""),10)
+ var action:=HBoxContainer.new();details.add_child(action)
+ var price:=label(action,"Próximo: %d ouro"%info.cost if info.status!="maxed" else "Nível máximo",11);price.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+ if not game.skills.last_error.is_empty():price.text=game.skills.last_error;price.add_theme_color_override("font_color",Color("722a20"))
+ if d.id=="challenge":
+  label(action,"Ativos:",10);var spin:=SpinBox.new();spin.min_value=0;spin.max_value=n;spin.value=game.profile.data.challenge_active;spin.custom_minimum_size=Vector2(62,22);spin.value_changed.connect(func(v):game.skills.set_challenge(int(v)));action.add_child(spin)
+ var buy:=Button.new();buy.name="BuyPermanent";buy.text="Comprar";buy.custom_minimum_size=Vector2(84,22);buy.add_theme_stylebox_override("normal",frame(Color("3aaf52")));buy.disabled=not info.can_buy;buy.pressed.connect(purchase.bind(d.id,n));action.add_child(buy)
+func purchase(id:String,n:int):
+ if Time.get_ticks_msec()-last_purchase<350:return
+ last_purchase=Time.get_ticks_msec()
+ game.skills.purchase(id,n);refresh()
+func confirm_refund():
+ var revision:int=game.profile.data.upgrade_revision
+ var dialog:=ConfirmationDialog.new();dialog.title="Reembolsar aprimoramentos";dialog.dialog_text="Devolver %d de ouro e remover todos os níveis comprados?"%game.skills.refund_total();dialog.ok_button_text="Reembolsar";dialog.cancel_button_text="Cancelar";add_child(dialog)
+ dialog.confirmed.connect(func():game.skills.refund(revision);refresh();dialog.queue_free());dialog.canceled.connect(dialog.queue_free);dialog.popup_centered(Vector2i(350,110))

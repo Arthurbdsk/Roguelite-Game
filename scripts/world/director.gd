@@ -102,6 +102,7 @@ func begin_wave() -> void:
 		for i in int(composition[id]):
 			queue.append({"id": id, "elite": false})
 	var elite_count: int = game.coop.rules.wave_count(wave.elite_guards, game.coop.initial_size) if game.coop != null and game.coop.active else wave.elite_guards
+	elite_count=roundi(elite_count*(1+.05*game.run_challenge))
 	for i in elite_count:
 		queue.append({"id": "guard", "elite": true})
 	for i in range(queue.size() - 1, 0, -1):

@@ -77,7 +77,7 @@ func tick(delta:float):
 		for player in game.team_players():
 			if player.position.distance_to(area.at)<=balance.pool_radius+player.radius:
 				inside.append(player.get_instance_id())
-				if not area.inside.has(player.get_instance_id()):player.apply_poison(balance.poison_duration,balance.poison_damage)
+				if not area.inside.has(player.get_instance_id()):player.apply_poison(balance.poison_duration,balance.poison_damage*(1+.05*game.run_challenge))
 		area.inside=inside
 	areas=areas.filter(func(a):return a.age<balance.flask_warning+balance.pool_duration)
 	for i in range(bolts.size()-1,-1,-1):

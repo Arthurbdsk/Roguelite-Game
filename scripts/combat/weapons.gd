@@ -122,8 +122,9 @@ func _stat(id: String, field: String) -> float:
 	var values = data.get(field)
 	var index: int = clampi(int(levels.get(id,0)) - 1, 0, values.size() - 1)
 	var value:float=float(values[index])
-	if (field=="reach" and id in ["sword","sludge","holy_water","ice_wave"]) or field=="area_radius" or (field=="beam_width" and id=="clock"):value*=area_factor()
-	if field=="duration" and id in ["sludge","holy_water","ice_wave"]:value*=1+.08*int(passives.get("hourglass",0))
+	if (field=="reach" and id in ["sword","sludge","holy_water","ice_wave"]) or field=="area_radius" or (field=="beam_width" and id=="clock"):value*=area_factor()*(sqrt(1+permanent("area")) if id in ["sword","sludge","holy_water","ice_wave","bombs"] else 1)
+	if field=="duration" and id in ["sludge","holy_water","ice_wave"]:value*=1+.08*int(passives.get("hourglass",0))+permanent("duration")
+	if field=="count" and id in ["bolt","axe","boomerang","bombs","holy_water"]:value+=permanent("amount")
 	return value
 
 
@@ -190,7 +191,7 @@ func _fire_bolts() -> bool:
 		if projectiles.size() >= MAX_PROJECTILES:
 			break
 		var angle_offset: float = (float(index) - float(count - 1) * 0.5) * 0.18
-		var velocity: Vector2 = direction.rotated(angle_offset) * 275.0
+		var velocity: Vector2 = direction.rotated(angle_offset) * 275.0 * projectile_factor()
 		projectiles.append({"position": game.player.position, "velocity": velocity,
 			"distance": 0.0, "reach": reach, "damage": _stat("bolt", "damage"),
 			"pierce": (2 if int(levels.get("bolt",0)) >= 2 else 1) + (_mastery().rank("bolt_pierce") if _mastery() != null else 0),
@@ -232,7 +233,7 @@ func _update_projectiles(delta: float) -> void:
 			if int(shot["bounce"]) > 0:
 				var next_target = _bounce_target(enemy.position, shot["hits"])
 				if is_instance_valid(next_target):
-					shot["velocity"] = (next_target.position - enemy.position).normalized() * 275.0
+					shot["velocity"] = (next_target.position - enemy.position).normalized() * 275.0 * projectile_factor()
 					shot["position"] = enemy.position
 					shot["bounce"] = 0
 					shot["pierce"] = 1
@@ -351,7 +352,8 @@ func get_offers() -> Array[Dictionary]:
 		var selected: Dictionary = _weighted_pick(weapons_pool)
 		result.append(selected)
 		pool.erase(selected)
-	while result.size() < 3 and not pool.is_empty():
+	var option_count:int=4 if rng.randf()<permanent("luck") else 3
+	while result.size() < option_count and not pool.is_empty():
 		var selected: Dictionary = _weighted_pick(pool)
 		result.append(selected)
 		pool.erase(selected)
@@ -531,9 +533,10 @@ func offer_stat(id:String,field:String,index:int)->float:
 	if field=="cooldown":
 		value*=(1-.06*int(passives.get("cadence",0)))*(_mastery().interval_multiplier if _mastery()!=null else 1)
 		if support=="library" and id=="bolt":value*=1.15
-	if (field=="reach" and id in ["sword","sludge","holy_water","ice_wave"]) or field=="area_radius":value*=area_factor()
-	if field=="duration" and id in ["sludge","holy_water","ice_wave"]:value*=1+.08*int(passives.get("hourglass",0))
+	if (field=="reach" and id in ["sword","sludge","holy_water","ice_wave"]) or field=="area_radius":value*=area_factor()*(sqrt(1+permanent("area")) if id in ["sword","sludge","holy_water","ice_wave","bombs"] else 1)
+	if field=="duration" and id in ["sludge","holy_water","ice_wave"]:value*=1+.08*int(passives.get("hourglass",0))+permanent("duration")
 	if field=="cooldown":value=maxf(.15,value)
+	if field=="count" and id in ["bolt","axe","boomerang","bombs","holy_water"]:value+=permanent("amount")
 	return value
 func upgrade_values(id:String,current:int)->String:
 	var data=weapon_data[id]
@@ -573,10 +576,14 @@ func build_stats()->String:
 	var p=game.player
 	var damage:float=(_mastery().damage_multiplier-1)*100 if _mastery()!=null else 0
 	var interval:float=(1-.06*int(passives.get("cadence",0)))*(_mastery().interval_multiplier if _mastery()!=null else 1)
-	var text:String="Vida: %d/%d | Defesa: %.2f\nMovimento: %.2f px/s\nDano: +%.2f%% | Vel. ataque: %.2fx\nColeta XP: %.2f | Ouro: %.2f\nExperiência: +%d%%"%[p.hp,p.max_hp,p.armor,p.speed,damage,1/interval,p.pickup_radius,game.balance.coin_attraction_radius+maxf(0,p.pickup_radius-42),7*int(passives.get("crown",0))]
+	var text:String="Vida: %d/%d | Defesa: %.2f\nMovimento: %.2f px/s\nDano: +%.2f%% | Vel. ataque: %.2fx\nColeta XP: %.2f | Ouro: %.2f\nExperiência: +%d%%"%[p.hp,p.max_hp,p.armor,p.speed,damage,1/interval,p.pickup_radius,p.gold_collection_radius(),7*int(passives.get("crown",0))+roundi(100*permanent("experience"))]
 	for id in weapon_data:
 		if int(levels.get(id,0))>0:text+="\n%s: %s dano | %ss | %spx"%[weapon_data[id].display_name,number_text(_stat(id,"damage")*(1+damage/100)),number_text(_interval(id)),number_text(_stat(id,"reach"))]
+	text+="\nÁrea permanente: +%.0f%% | Duração: +%.0f%%\nProjéteis: %.2fx | Redução: %.0f%%\nRegen: %.1f/s | Ouro: +%.0f%%"%[100*permanent("area"),100*permanent("duration"),projectile_factor(),100*p.damage_reduction,permanent("regen"),100*permanent("gold")]
 	return text
 
 func area_factor()->float:
 	return 1+.05*int(passives.get("lens",0))
+
+func permanent(id:String)->float:return _mastery().value(id) if _mastery()!=null else 0.0
+func projectile_factor()->float:return 1+permanent("projectile_speed")

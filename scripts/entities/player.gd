@@ -12,6 +12,7 @@ var max_hp: float = 100.0
 var speed: float = 96.0
 var pickup_radius: float = 42.0
 var armor: float = 0.0
+var damage_reduction:float=0
 var radius: float = 7.0
 var facing: Vector2 = Vector2.DOWN
 var invulnerable: float = 0.0
@@ -72,7 +73,7 @@ func take_damage(amount: float, source: Vector2) -> bool:
   return false
  hurt_remaining=.2
  damage_revision += 1
- hp = maxf(0, hp - maxf(1,maxf(amount*.2,amount-armor)))
+ hp = maxf(0, hp - received_damage(amount))
  time_since_damage = 0
  invulnerable = 0.85
  game.shake_time = 0.16
@@ -119,7 +120,7 @@ func tick_status(delta:float):
  while poison_clock>=0.999999 and not down:
   poison_clock=maxf(0,poison_clock-1)
   damage_revision+=1
-  hp=maxf(0,hp-maxf(1,maxf(poison_damage*.2,poison_damage-armor)))
+  hp=maxf(0,hp-received_damage(poison_damage))
   time_since_damage=0
   if hp<=0:
    if not game.mastery.save_from_death():game.finish_run(false)
@@ -141,3 +142,8 @@ func tick_visual(delta:float,moving:bool=false):
  elif not (game.coop.active and not game.coop.hosting) and game.weapon_system.levels.get("sword",0)>0 and float(game.weapon_system.timers.get("sword",1))<.12 and game.nearest_enemy(position,game.weapon_system._stat("sword","reach")+25)!=null:sprite.frame=8+int(float(game.weapon_system.timers.get("sword",1))<.06)
  elif moving:sprite.frame=16+int(visual_clock*10)%8
  else:sprite.frame=int(visual_clock*4)%4
+
+func received_damage(amount:float)->float:
+ return maxf(amount*.2,maxf(0,amount-armor)*(1-clampf(damage_reduction,0,.8)))
+func gold_collection_radius()->float:
+ return game.balance.coin_attraction_radius*(1+game.mastery.value("pickup"))+14*int(game.weapon_system.passives.get("magnet",0))

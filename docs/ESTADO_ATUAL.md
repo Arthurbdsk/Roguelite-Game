@@ -11,3 +11,5 @@ O executável 0.8.0 inclui essa remodelação. Foi exportado com os recursos emb
 Pendente: nova sequência da explosão da bomba e medição final de desempenho da remodelação com efeitos simultâneos. A explosão anterior foi preservada nesta entrega.
 
 O saldo e a árvore permanente ficam no perfil local do jogador. O perfil pessoal, configurações de túnel, caches, dependências instaladas e executáveis não fazem parte do repositório.
+
+A versão atual é 0.9.0, com a grade de 16 aprimoramentos permanentes, migração, compras, reembolso, Desafio e Reviver. Consulte `APRIMORAMENTOS_0_9.md` para preços, regras e validação.

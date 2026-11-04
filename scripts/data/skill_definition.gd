@@ -13,3 +13,5 @@ extends Resource
 
 func max_rank() -> int:
 	return costs.size()
+
+@export var icon:String=""

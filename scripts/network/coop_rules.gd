@@ -23,12 +23,12 @@ func wave_count(original: int, participants: int, boss: bool = false) -> int:
 		return original
 	return floori(original * scaling(participants).count + 0.5)
 
-func composition(original: Dictionary, participants: int) -> Dictionary:
+func composition(original: Dictionary, participants: int, challenge:float=1.0) -> Dictionary:
 	var result: Dictionary = {}
 	var fractions: Array[Dictionary] = []
 	var total: int = 0
 	var allocated: int = 0
-	var multiplier: float = scaling(participants).count
+	var multiplier: float = scaling(participants).count*challenge
 	for id in original:
 		var amount: int = maxi(0, int(original[id]))
 		total += amount
@@ -37,7 +37,7 @@ func composition(original: Dictionary, participants: int) -> Dictionary:
 		allocated += result[id]
 		fractions.append({"id": str(id), "fraction": raw - floorf(raw)})
 	fractions.sort_custom(func(a, b): return a.fraction > b.fraction if not is_equal_approx(a.fraction, b.fraction) else a.id < b.id)
-	var remaining: int = wave_count(total, participants) - allocated
+	var remaining: int = floori(total*multiplier+.5) - allocated
 	for i in remaining:
 		result[fractions[i % fractions.size()].id] += 1
 	return result

@@ -12,7 +12,7 @@ export function createRelay({port=8080,host='127.0.0.1',maxRooms=100,onDiagnosti
   const send=(ws,msg)=>{if(ws.readyState!==WebSocket.OPEN)return;if(ws.bufferedAmount>=1048576){onDiagnostic({event:'slow_connection',buffered:ws.bufferedAmount});ws.close(1013,'Slow connection');return;}ws.send(JSON.stringify(msg));};
   server.maxConnections=512;
   const broadcast=(room,msg)=>{for(const p of room.members.values())send(p.ws,msg);};
-  const lobby=room=>broadcast(room,{type:'lobby',map:room.map||'courtyard',code:room.code,host:room.host,players:[...room.members.values()].map(p=>({id:p.id,name:p.name,ready:p.ready,skills:p.skills}))});
+  const lobby=room=>broadcast(room,{type:'lobby',challenge:room.challenge||0,map:room.map||'courtyard',code:room.code,host:room.host,players:[...room.members.values()].map(p=>({id:p.id,name:p.name,ready:p.ready,skills:p.skills,gold_remainder:p.goldRemainder||0}))});
   function leave(p) {
     if(!p.room)return;
     const room=p.room;p.room=null;room.members.delete(p.id);
@@ -49,19 +49,21 @@ export function createRelay({port=8080,host='127.0.0.1',maxRooms=100,onDiagnosti
           room=rooms.get(code);if(room.started||room.loading)return fail('A partida já começou.');if(room.members.size>=4)return fail('Sala cheia.');
           if(room.build!==(typeof m.game_version==='string'?m.game_version:'legacy'))return fail('Versões diferentes. Todos devem usar o mesmo executável atualizado.');
         }
-        p.name=name;p.skills=Object.fromEntries(Object.entries(m.skills||{}).filter(([k,v])=>/^[a-z_]{1,30}$/.test(k)&&Number.isInteger(v)&&v>=0&&v<=2).slice(0,16));
+        p.name=name;p.goldRemainder=Number.isFinite(m.gold_remainder)?Math.max(0,Math.min(.999999,m.gold_remainder)):0;p.skills=Object.fromEntries(Object.entries(m.skills||{}).filter(([k,v])=>/^[a-z_]{1,30}$/.test(k)&&Number.isInteger(v)&&v>=0&&v<=5).slice(0,16));
+        if(m.type==='create')room.challenge=Math.max(0,Math.min(Number.isInteger(m.challenge)?m.challenge:0,p.skills.challenge||0,5));
         p.room=room;p.ready=false;room.members.set(p.id,p);send(ws,{type:'joined',id:p.id,code:room.code,host:room.host});lobby(room);return;
       }
       const room=p.room;if(!room)return fail('Entre em uma sala primeiro.');
       if(m.type==='leave'){leave(p);return;}
       if(m.type==='map'&&p.id===room.host&&!room.started&&!room.loading){if(['courtyard','library','fields'].includes(m.map)){room.map=m.map;for(const member of room.members.values())member.ready=false;lobby(room);}return;}
-      if(m.type==='loaded'&&room.loading){p.loaded=true;if([...room.members.values()].every(member=>member.loaded)){room.loading=false;room.started=true;broadcast(room,{type:'start',map:room.map||'courtyard',run:room.run,players:[...room.members.values()].map(member=>({id:member.id,name:member.name,skills:member.skills}))});}return;}
+      if(m.type==='challenge'&&p.id===room.host&&!room.started&&!room.loading){room.challenge=Math.max(0,Math.min(Number.isInteger(m.value)?m.value:0,p.skills.challenge||0,5));for(const member of room.members.values())member.ready=false;lobby(room);return;}
+      if(m.type==='loaded'&&room.loading){p.loaded=true;if([...room.members.values()].every(member=>member.loaded)){room.loading=false;room.started=true;broadcast(room,{type:'start',challenge:room.challenge||0,map:room.map||'courtyard',run:room.run,players:[...room.members.values()].map(member=>({id:member.id,name:member.name,skills:member.skills,gold_remainder:member.goldRemainder||0}))});}return;}
       if(m.type==='ready'&&!room.started){p.ready=m.ready===true;lobby(room);return;}
       if(m.type==='start'){
         if(p.id!==room.host)return fail('Somente o criador pode iniciar.');
         if(room.started)return fail('A partida já começou.');
         if([...room.members.values()].some(member=>!member.ready))return fail('Todos precisam estar prontos.');
-        if(!['0.7.0','0.8.0'].includes(room.build)){room.started=true;room.run=randomUUID();broadcast(room,{type:'start',map:room.map||'courtyard',run:room.run,players:[...room.members.values()].map(member=>({id:member.id,name:member.name,skills:member.skills}))});return;}
+        if(!['0.7.0','0.8.0','0.9.0'].includes(room.build)){room.started=true;room.run=randomUUID();broadcast(room,{type:'start',challenge:room.challenge||0,map:room.map||'courtyard',run:room.run,players:[...room.members.values()].map(member=>({id:member.id,name:member.name,skills:member.skills,gold_remainder:member.goldRemainder||0}))});return;}
         if(room.loading)return;room.loading=true;room.run=randomUUID();for(const member of room.members.values())member.loaded=false;broadcast(room,{type:'prepare',map:room.map||'courtyard'});return;
       }
       if(!room.started)return;

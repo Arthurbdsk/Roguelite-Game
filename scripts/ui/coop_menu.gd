@@ -7,6 +7,8 @@ static func build(ui, screen: String) -> void:
 	if screen == "online_pause":
 		ui._label(ui.menu, "PARTIDA ONLINE", Rect2(40, 62, 560, 40), 27, ui.IVORY, true)
 		ui._label(ui.menu, "A partida continua enquanto este menu está aberto.", Rect2(70, 115, 500, 42), 13, ui.MUTED, true)
+		if session.actors.has(session.connection.peer_id) and session.actors[session.connection.peer_id].down and (session.actors[session.connection.peer_id].mastery.can_revive() if session.hosting else session.received_personal.get("revive_available",false)):
+			ui._button(ui.menu,"Usar Reviver",Rect2(180,146,280,26),func():session.request_self_revive();session.close_menu())
 		ui._button(ui.menu, "Continuar", Rect2(180, 178, 280, 34), session.close_menu, true)
 		ui._button(ui.menu, "Sair da partida", Rect2(180, 229, 280, 34), session.leave)
 		return
@@ -28,6 +30,11 @@ static func build(ui, screen: String) -> void:
 		map_choice.select(["courtyard","library","fields"].find(session.lobby_map));map_choice.disabled=not session.hosting
 		map_choice.item_selected.connect(func(index):session.connection.send_message({"type":"map","map":["courtyard","library","fields"][index]}))
 		ui.menu.add_child(map_choice)
+		var challenge_choice:=OptionButton.new();challenge_choice.position=Vector2(392,228);challenge_choice.size=Vector2(220,24)
+		var cap:int=session.game.skills.rank("challenge") if session.hosting else session.lobby_challenge
+		for i in cap+1:challenge_choice.add_item("Desafio %d: +%d%% vida/dano/quant."%[i,i*5])
+		challenge_choice.select(session.lobby_challenge);challenge_choice.disabled=not session.hosting
+		challenge_choice.item_selected.connect(func(i):session.connection.send_message({"type":"challenge","value":i}));ui.menu.add_child(challenge_choice)
 		ui._button(ui.menu, "Cancelar prontidão" if local_ready else "Estou pronto", Rect2(26, 260, 215, 32), func(): session.connection.send_message({"type": "ready", "ready": not local_ready}), true)
 		if session.hosting:
 			var start: Button = ui._button(ui.menu, "Iniciar partida", Rect2(256, 260, 215, 32), func(): session.connection.send_message({"type": "start"}))

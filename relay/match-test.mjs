@@ -7,7 +7,8 @@ const children=[],stamp=Date.now(),scenario=process.argv.includes('--disconnect'
 const codeFile=resolve(root,`test_output/coop-match-${stamp}-${scenario}.txt`);
 const packedArgument=process.argv.find(v=>v.startsWith('--packed='));
 const runtime=packedArgument?['--main-pack',resolve(packedArgument.slice('--packed='.length))]:['--path',root];
-const harness=packedArgument?resolve(root,'tests/coop_match.gd'):'res://tests/coop_match.gd';
+const harnessName=process.argv.includes('--permanent')?'permanent_network9':'coop_match';
+const harness=packedArgument?resolve(root,`tests/${harnessName}.gd`):`res://tests/${harnessName}.gd`;
 const relay=createRelay({port:0});const address=await relay.listen();
 const externalArgument=process.argv.find(v=>v.startsWith('--relay-url='));
 const endpoint=externalArgument?externalArgument.slice('--relay-url='.length):`ws://127.0.0.1:${address.port}`;
@@ -21,5 +22,5 @@ try{
  if(!code)throw Error('Host did not publish a room code');
  const results=await Promise.allSettled([host,...Array.from({length:3},(_,i)=>peer(i+1,[`--room=${code}`,...extra]))]);
  for(const result of results)if(result.status==='rejected')throw result.reason;
- console.log('FOUR_PLAYER_MATCH_PASS: real game, movement, scaling, private choices, shared loot, rescue, load, team defeat and persisted gold');
+ console.log(harnessName==='permanent_network9'?'FOUR_PLAYER_PERMANENT_PASS: individual bonuses, lobby challenge, host-authorized return, individual banked gold':'FOUR_PLAYER_MATCH_PASS: real game, movement, scaling, private choices, shared loot, rescue, load, team defeat and persisted gold');
 }finally{for(const child of children)if(child.exitCode===null)child.kill();await relay.close();await rm(codeFile,{force:true});}

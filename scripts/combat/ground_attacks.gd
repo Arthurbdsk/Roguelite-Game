@@ -17,7 +17,7 @@ func world():
 	return weapons.game.world if weapons.game is CoopActor else weapons.game
 func add_pool(id:String,at:Vector2,source:Vector2,flight:float=0)->bool:
 	if pools.size()>=weapons.weapon_data[id].pool_limit:return false
-	pools.append({"kind":id,"at":at,"source":source,"age":0.0,"flight":flight,"duration":weapons._stat(id,"duration"),"radius":weapons._stat(id,"reach"),"damage":weapons._stat(id,"damage"),"interval":weapons.weapon_data[id].tick_interval})
+	pools.append({"kind":id,"at":at,"source":source,"age":0.0,"flight":flight/weapons.projectile_factor(),"duration":weapons._stat(id,"duration"),"radius":weapons._stat(id,"reach"),"damage":weapons._stat(id,"damage"),"interval":weapons.weapon_data[id].tick_interval})
 	return true
 func tick(delta:float,allow_creation:bool=true):
 	trail_clock=maxf(0,trail_clock-delta)

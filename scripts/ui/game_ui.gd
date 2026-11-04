@@ -185,6 +185,12 @@ func render(which: String, data: Dictionary = {}) -> void:
   "maps": _map_selection()
   "hub": _hub(data)
   "upgrading": _upgrades(data)
+  "revive_offer":
+   _backdrop(.9)
+   _label(menu,"Reviver",Rect2(80,70,480,40),28,IVORY,true)
+   _label(menu,"Retorne com 40% da vida e 2 segundos de proteção.\nUma utilização por partida. Sua build será preservada.",Rect2(70,122,500,55),13,IVORY,true)
+   _button(menu,"Usar retorno",Rect2(175,197,290,32),game.use_solo_revive,true)
+   _button(menu,"Encerrar partida",Rect2(175,239,290,30),func():game.finish_run(false))
   "paused": _paused()
   "settings": _settings()
   "result": _result(data)
@@ -302,7 +308,7 @@ func _hub(data: Dictionary) -> void:
  library.disabled = not bool(buildings.get("library", false))
  _label(menu, "Armas, níveis e passivas da partida são temporários.", Rect2(25, 274, 380, 24), 11, MUTED)
  _button(menu, "Voltar", Rect2(25, 292, 105, 24), func(): game.show_title())
- _button(menu, "Árvore permanente", Rect2(142, 292, 230, 24), game.open_skill_tree)
+ _button(menu, "Aprimoramentos", Rect2(142, 292, 230, 24), game.open_skill_tree)
  _button(menu, "Partir", Rect2(425, 278, 188, 35), func(): game.open_map_select(), true)
  _footer()
  call_deferred("_grant_focus", none)
@@ -334,9 +340,10 @@ func _upgrades(data: Dictionary) -> void:
  for spec in [["left",20],["right",20],["top",52],["bottom",28]]:margin.add_theme_constant_override("margin_"+str(spec[0]),int(spec[1]))
  menu.add_child(margin)
  var row:=HBoxContainer.new();row.add_theme_constant_override("separation",12);margin.add_child(row)
- var choices:=VBoxContainer.new();choices.name="UpgradeList";choices.size_flags_horizontal=Control.SIZE_EXPAND_FILL;choices.add_theme_constant_override("separation",6);row.add_child(choices)
+ var choice_scroll:=ScrollContainer.new();choice_scroll.name="ChoiceScroll";choice_scroll.size_flags_horizontal=Control.SIZE_EXPAND_FILL;choice_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;row.add_child(choice_scroll)
+ var choices:=VBoxContainer.new();choices.name="UpgradeList";choices.size_flags_horizontal=Control.SIZE_EXPAND_FILL;choices.add_theme_constant_override("separation",6);choice_scroll.add_child(choices)
  var offers:Array=data.get("offers",[])
- for i in mini(3,offers.size()):
+ for i in mini(4,offers.size()):
   var offer:Dictionary=offers[i]
   var button:=_button(choices,"",Rect2(),func():game.choose_upgrade(offer.id))
   button.custom_minimum_size.y=88
@@ -368,7 +375,7 @@ func _upgrades(data: Dictionary) -> void:
     var icon:=TextureRect.new();icon.texture=load(item.icon);icon.custom_minimum_size=Vector2(18,18);icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;stack.add_child(icon)
     var level_label:=Label.new();level_label.text=("MÁX" if item.level==8 else "Nv.%d"%item.level);level_label.add_theme_font_size_override("font_size",8);stack.add_child(level_label)
   build_stats_label=Label.new();build_stats_label.text=game.weapon_system.build_stats();build_stats_label.add_theme_font_size_override("font_size",9);build_stats_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;build.add_child(build_stats_label)
- _label(menu,"1 / 2 / 3: escolher. Esc: fechar no cooperativo.",Rect2(20,338,600,18),9,MUTED,true)
+ _label(menu,"1 / 2 / 3 / 4: escolher. Esc: fechar no cooperativo.",Rect2(20,338,600,18),9,MUTED,true)
 
 func _paused() -> void:
  _backdrop(0.91)

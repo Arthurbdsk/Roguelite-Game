@@ -138,7 +138,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--godot", type=Path, default=Path.home() / "Downloads" / "Godot_v4.7.2-stable_win64_console.exe")
     parser.add_argument("--template-only", action="store_true")
-    parser.add_argument("--output", type=Path, default=BUILD / "Hordas-0.8.0" / "Hordas-0.8.0.exe")
+    parser.add_argument("--output", type=Path, default=BUILD / "Hordas-0.9.0" / "Hordas-0.9.0.exe")
     parser.add_argument("--smoke", action="store_true", help="Run exported executable headlessly for 120 frames")
     args = parser.parse_args()
     ensure_template()
@@ -160,7 +160,7 @@ def main():
     payload = target.read_bytes()
     manifest = {
         "file": target.name,
-        "game_version": "0.8.0",
+        "game_version": "0.9.0",
         "godot_version": VERSION,
         "size_bytes": len(payload),
         "sha256": hashlib.sha256(payload).hexdigest(),

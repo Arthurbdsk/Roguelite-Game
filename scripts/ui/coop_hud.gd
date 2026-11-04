@@ -30,6 +30,7 @@ func _draw() -> void:
 	var hint: String = "Caído. Aguarde um aliado." if local.down else "E: segurar para reviver    Tab: melhorias"
 	var offers: Array = local.offers if session.hosting else session.received_personal.get("offers", [])
 	if not offers.is_empty(): hint = "Tab: melhoria disponível" + (" após reviver" if local.down else "")
+	if local.down and (local.mastery.can_revive() if session.hosting else session.received_personal.get("revive_available",false)):hint="R: usar retorno (40% de vida) ou aguarde um aliado"
 	var body_id: String = session.nearby_body(local.id)
 	if not body_id.is_empty() and session.actors.has(body_id): hint = "Segure E para reanimar %s (parado, %ds)" % [session.actors[body_id].display_name, ceili(session.rules.revive_seconds)]
 	draw_string(font, Vector2(173, 317), hint, HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color("d7c9a1"))

@@ -31,7 +31,7 @@ func tick(delta: float) -> void:
 	if game.state != "running":
 		return
 	var bounds:Rect2=game.collection_bounds(true)
-	var attraction: float = game.balance.coin_attraction_radius + maxf(0, game.player.pickup_radius - 42.0)
+	var attraction: float = game.player.gold_collection_radius()
 	var collected_value: int = 0
 	var collected_at: Vector2 = game.player.position
 	for i in range(coins.size() - 1, -1, -1):
@@ -45,7 +45,7 @@ func tick(delta: float) -> void:
 		if not coin.get("attracted",false) and not bounds.has_point(coin.at):continue
 		var collector = game.collection_player(coin.at)
 		if collector == null: continue
-		attraction = game.balance.coin_attraction_radius + maxf(0, collector.pickup_radius - 42.0)
+		attraction = collector.gold_collection_radius()
 		if coin.at.distance_squared_to(collector.position) <= attraction * attraction:
 			coin.attracted = true
 		if coin.attracted:
@@ -58,7 +58,10 @@ func tick(delta: float) -> void:
 				game.coop.on_gold(amount)
 				collected_value += amount
 				collected_at = collector.position
-			else: game.mastery.on_gold(amount)
+			else:
+				var before_bonus:int=game.mastery.gold_bonus
+				game.mastery.on_gold(amount)
+				game.gold+=game.mastery.gold_bonus-before_bonus
 			collected_count += 1
 			if feedback.size() < 12:
 				feedback.append({"at": collector.position - Vector2(0, 26), "life": 0.55, "amount": amount})

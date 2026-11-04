@@ -1,2 +1,2 @@
 @echo off
-start "" "%~dp0build\Hordas-0.8.0\Hordas-0.8.0.exe" -- --boss-test=executioner
+start "" "%~dp0build\Hordas-0.9.0\Hordas-0.9.0.exe" -- --boss-test=executioner

@@ -2,7 +2,11 @@
 
 Projeto editável em Godot 4.7.2. Inclui código, cenas, mapas, dados de balanceamento, sprites e testes. Não precisa instalar Python ou Node.js para jogar no modo solo pelo editor.
 
-Para jogar no Windows sem instalar o Godot, baixe [Hordas 0.8.0](https://github.com/Arthurbdsk/Roguelite-Game/releases/tag/v0.8.0). O arquivo `.exe` contém todos os recursos. Essa versão inclui a remodelação atual; a nova explosão da bomba e a medição final de desempenho ainda estão pendentes.
+Para jogar no Windows sem instalar o Godot, baixe [Hordas 0.9.0](https://github.com/Arthurbdsk/Roguelite-Game/releases/tag/v0.9.0). O arquivo `.exe` contém todos os recursos. Essa versão inclui a remodelação atual; a nova explosão da bomba e a medição final de desempenho ainda estão pendentes.
+
+## Aprimoramentos permanentes 0.9.0
+
+A árvore foi substituída pela grade com 16 aprimoramentos, compra com ouro, reembolso confirmado, migração do save, Desafio configurável e Reviver individual. Baixe [Hordas 0.9.0 para Windows](https://github.com/Arthurbdsk/Roguelite-Game/releases/tag/v0.9.0). Preços, efeitos, regras de migração e testes estão em [docs/APRIMORAMENTOS_0_9.md](docs/APRIMORAMENTOS_0_9.md). Online, use R enquanto caído para consumir seu retorno; a reanimação por aliado não consome esse uso.
 
 ## Abrir em outra máquina
 

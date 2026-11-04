@@ -253,7 +253,13 @@ func host_scenario() -> void:
 	var second: CoopActor = actor_named("Peer2")
 	second.player.position = local.player.position + Vector2(20,0)
 	command("rescue_host")
-	await wait_seconds(5.4)
+	# Begin timing the five-second hold after the host receives it. Public WSS
+	# may take more than the old fixed 0.4-second delivery allowance.
+	for attempt in 60:
+		if session.revives.interactions.has(second.id):break
+		await wait_seconds(.05)
+	check(session.revives.interactions.has(second.id), "remote rescue input reaches host")
+	await wait_seconds(5.2)
 	command("stop")
 	check(not local.down and not local.offers.is_empty(), "client rescues host and preserves pending private choice")
 	# Real downing, interruption by damage, then a full five-second rescue.

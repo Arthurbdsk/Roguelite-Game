@@ -37,19 +37,20 @@ func setup(owner_world, owner_session, metadata: Dictionary, local: bool) -> voi
 	display_name = metadata.name
 	profile = world.profile if local else GameProfile.new("user://unused_remote_actor.json")
 	if not local:
-		profile.data.skill_ranks = metadata.get("skills", {}).duplicate(true)
+		profile.data.upgrade_ranks = metadata.get("skills", {}).duplicate(true)
+		profile.data.gold_remainder=clampf(float(metadata.get("gold_remainder",0)),0,.999999)
 	skills.setup(self)
 	# Do not trust out-of-range or prerequisite-breaking remote ranks.
 	var accepted: Dictionary = {}
 	for definition in skills.definitions:
-		var rank_value: int = clampi(int(profile.data.skill_ranks.get(definition.id, 0)), 0, definition.max_rank())
+		var rank_value: int = clampi(int(profile.data.upgrade_ranks.get(definition.id, 0)), 0, definition.max_rank())
 		var valid: bool = true
 		for required in definition.prerequisites:
 			valid = valid and int(accepted.get(required, 0)) >= int(definition.prerequisites[required])
 		if valid and rank_value > 0:
 			accepted[definition.id] = rank_value
 	if not local:
-		profile.data.skill_ranks = accepted
+		profile.data.upgrade_ranks = accepted
 	if local:
 		player = world.player
 		weapon_system = world.weapon_system
@@ -85,7 +86,7 @@ func announce(message: String, duration: float) -> void:
 		world.announce(message, duration)
 
 func award_xp(amount: int) -> void:
-	xp += amount * (1.0+.07*int(weapon_system.passives.get("crown",0)))
+	xp += amount * (1.0+.07*int(weapon_system.passives.get("crown",0))+mastery.value("experience"))
 	prepare_offer()
 
 func prepare_offer() -> void:
@@ -108,7 +109,7 @@ func choose(id_value: String, expected_generation: int) -> bool:
 	return false
 
 func personal() -> Dictionary:
-	return {"level": level, "xp": xp, "xp_needed": xp_needed, "offers": offers, "generation": generation, "levels": weapon_system.levels, "passives": weapon_system.passives,"stats":{"hp":player.hp,"max_hp":player.max_hp,"speed":player.speed,"armor":player.armor,"pickup_radius":player.pickup_radius}}
+	return {"level": level, "xp": xp, "xp_needed": xp_needed, "offers": offers, "generation": generation, "levels": weapon_system.levels, "passives": weapon_system.passives,"gold_bonus":mastery.gold_bonus,"gold_remainder":mastery.gold_fraction,"revive_available":mastery.can_revive(),"stats":{"hp":player.hp,"max_hp":player.max_hp,"speed":player.speed,"armor":player.armor,"pickup_radius":player.pickup_radius,"damage_reduction":player.damage_reduction}}
 
 func release() -> void:
 	mastery.game = null

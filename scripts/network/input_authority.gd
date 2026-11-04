@@ -18,7 +18,7 @@ func accept(peer: String, payload: Dictionary, now: float) -> bool:
 			return false
 	last_sequence[peer] = int(sequence)
 	last_received[peer] = now
-	actions[peer] = {"movement": Vector2(float(movement[0]), float(movement[1])).limit_length(), "revive": payload.get("revive", false) == true}
+	actions[peer] = {"movement": Vector2(float(movement[0]), float(movement[1])).limit_length(), "revive": payload.get("revive", false) == true,"self_revive":payload.get("self_revive",false)==true}
 	return true
 
 func current(peer: String, now: float) -> Dictionary:

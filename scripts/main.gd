@@ -50,6 +50,7 @@ var balance: EncounterBalance = preload("res://data/encounters/default.tres")
 var gold_loot: GoldLoot
 var enemy_projectiles: EnemyProjectiles
 var skills := PermanentSkills.new()
+var run_challenge:int=0
 var mastery := RunMastery.new()
 var tree_return: String = "title"
 var dev_boss_test: bool = false
@@ -238,6 +239,7 @@ func start_run(selected_support: String = "none") -> void:
  support = selected_support
  clear_run()
  arena.apply_map(selected_map)
+ run_challenge=clampi(int(profile.data.challenge_active),0,skills.rank("challenge"))
  run_id = "%d_%d_%d" % [Time.get_unix_time_from_system(), Time.get_ticks_usec(), randi()]
  run_settled = false
  player.poison_remaining = 0
@@ -314,10 +316,12 @@ func collection_player(at: Vector2):
  return coop.nearest_player(at) if coop != null and coop.active else player
 
 func enemy_scale() -> Dictionary:
- return coop.rules.scaling(coop.initial_size) if coop != null and coop.active and coop.hosting else {"health": 1.0, "damage": 1.0, "speed": 1.0, "count": 1.0}
+ var scale:Dictionary=coop.rules.scaling(coop.initial_size) if coop != null and coop.active and coop.hosting else {"health":1.0,"damage":1.0,"speed":1.0,"count":1.0}
+ for key in ["health","damage","count"]:scale[key]*=1+.05*run_challenge
+ return scale
 
 func wave_composition(original: Dictionary) -> Dictionary:
- return coop.rules.composition(original, coop.initial_size) if coop != null and coop.active and coop.hosting else original
+ return coop.rules.composition(original,coop.initial_size if coop.active and coop.hosting else 1,1+.05*run_challenge)
 
 func hidden_spawn(at: Vector2, margin: float) -> bool:
  for member in team_players():
@@ -380,6 +384,7 @@ func weapon_hit(enemy, amount: float, force: Vector2) -> void:
 
 func start_boss_test(kind: String) -> void:
  start_run()
+ run_challenge=0
  dev_boss_kind = "executioner" if kind == "executioner" else "demon"
  dev_boss_test = true
  persistence_enabled = false
@@ -438,7 +443,7 @@ func finish_run(won: bool) -> void:
  boss_arena.stop_combat()
  camera.offset = Vector2.ZERO
  banked_gold = 0 if dev_boss_test else gold
- banked_reward = profile.reward(elapsed, kills, won, earned, gold, run_id, director.wave_number()) if persistence_enabled else floori(elapsed / 30.0) + floori(kills / 30.0) + earned + (10 if won else 0)
+ banked_reward = profile.reward(elapsed, kills, won, earned, gold, run_id, director.wave_number(), mastery.gold_fraction) if persistence_enabled else floori(elapsed / 30.0) + floori(kills / 30.0) + earned + (10 if won else 0)
  if dev_boss_test:
   banked_reward = 0
  sound.play_cue("victory" if won else "defeat")
@@ -478,7 +483,7 @@ func _unhandled_input(event: InputEvent) -> void:
  if coop != null and coop.active:
   if event is InputEventKey and event.pressed and not event.echo:
    if event.physical_keycode == KEY_TAB: coop.open_upgrades(); return
-   if ui.screen == "upgrading" and event.physical_keycode >= KEY_1 and event.physical_keycode <= KEY_3:
+   if ui.screen == "upgrading" and event.physical_keycode >= KEY_1 and event.physical_keycode <= KEY_4:
     var choices: Array = coop.actors[coop.connection.peer_id].offers if coop.hosting else coop.received_personal.get("offers", [])
     var index: int = event.physical_keycode - KEY_1
     if index < choices.size(): coop.choose(choices[index].id)
@@ -497,8 +502,6 @@ func _unhandled_input(event: InputEvent) -> void:
  if event is InputEventKey and event.pressed and event.physical_keycode == KEY_F9 and state in ["title", "hub", "lab"]:
   state = "lab"
   ui.render("lab")
- if state == "tree" and event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_SPACE:
-  buy_skill(ui.selected_skill)
  if state == "upgrading" and event is InputEventKey and event.pressed and not event.echo:
   var index: int = event.physical_keycode - KEY_1
   if index >= 0 and index < offers.size():
@@ -512,7 +515,7 @@ func add_xp(amount: int) -> void:
   return
  if dev_boss_test:
   return
- xp += amount * (1.0+.07*int(weapon_system.passives.get("crown",0)))
+ xp += amount * (1.0+.07*int(weapon_system.passives.get("crown",0))+mastery.value("experience"))
  check_level()
 
 func check_level() -> void:
@@ -736,7 +739,7 @@ func camera_rect() -> Rect2:
  return Rect2(center - Vector2(320, 180), Vector2(640, 360))
 
 func snapshot() -> Dictionary:
- return {"hp": player.hp, "max_hp": player.max_hp, "xp": xp, "xp_needed": xp_needed, "elapsed": elapsed, "level": level, "kills": kills, "gold": gold, "earned": earned + floori(elapsed / 30.0) + floori(kills / 30.0), "wave": director.wave_number(), "weapons": weapon_system.get_loadout(), "passives": weapon_system.get_passives(), "boss_hp": boss.hp if is_instance_valid(boss) else 0, "boss_max": boss.max_hp if is_instance_valid(boss) else 0, "boss_name": (boss.data.title+" | Fase %d"%boss.form) if is_instance_valid(boss) and boss is HordeBoss and not boss.is_executioner else (boss.data.title if is_instance_valid(boss) else ""), "banner": banner, "pressure": director.pressure()}
+ return {"hp": player.hp, "max_hp": player.max_hp, "xp": xp, "xp_needed": xp_needed, "elapsed": elapsed, "level": level, "kills": kills, "gold": gold+coop.local_gold_bonus(), "earned": earned + floori(elapsed / 30.0) + floori(kills / 30.0), "wave": director.wave_number(), "weapons": weapon_system.get_loadout(), "passives": weapon_system.get_passives(), "boss_hp": boss.hp if is_instance_valid(boss) else 0, "boss_max": boss.max_hp if is_instance_valid(boss) else 0, "boss_name": (boss.data.title+" | Fase %d"%boss.form) if is_instance_valid(boss) and boss is HordeBoss and not boss.is_executioner else (boss.data.title if is_instance_valid(boss) else ""), "banner": banner, "pressure": director.pressure()}
 
 func _draw() -> void:
  if state in ["title", "hub"]:
@@ -771,7 +774,7 @@ func collection_bounds(gold_items:bool=false)->Rect2:
  var bounds:=Rect2()
  var first:bool=true
  for collector in team_players():
-  var reach:float=balance.coin_attraction_radius+maxf(0,collector.pickup_radius-42) if gold_items else collector.pickup_radius
+  var reach:float=collector.gold_collection_radius() if gold_items else collector.pickup_radius
   reach=maxf(reach,balance.coin_arrival_radius if gold_items else 10)+1
   var area:=Rect2(collector.position-Vector2.ONE*reach,Vector2.ONE*reach*2)
   bounds=area if first else bounds.merge(area);first=false
@@ -779,3 +782,8 @@ func collection_bounds(gold_items:bool=false)->Rect2:
 
 func open_map_select():
  state="maps";ui.render("maps")
+
+func show_revive_offer():
+ state="revive_offer";ui.render("revive_offer")
+func use_solo_revive():
+ if state=="revive_offer" and mastery.use_revive():state="running";ui.render("running")
