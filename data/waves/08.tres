@@ -2,9 +2,9 @@
 [ext_resource type="Script" path="res://scripts/data/wave_data.gd" id="1"]
 [resource]
 script = ExtResource("1")
-title = "A muralha cede"
-composition = {"ghoul": 22, "hound": 20, "skeleton_sword": 40, "skeleton_archer": 18, "guard": 30}
-spawn_interval = 0.23
-max_alive = 95
+title = "Horda 8"
+composition = {"ghoul": 310, "hound": 20, "skeleton_sword": 40, "skeleton_archer": 18, "guard": 30, "beast": 3, "plague": 3, "shadow": 3, "slime_large": 3, "devourer": 2}
+spawn_interval = 0.12
+max_alive = 240
 elite_guards = 0
 boss = false

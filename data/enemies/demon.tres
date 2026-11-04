@@ -3,12 +3,12 @@
 [resource]
 script = ExtResource("1")
 id = "demon"
-title = "O Devorador de Brasas"
+title = "Demônio"
 speed = 70.0
 damage = 17.0
 experience = 80
 radius = 25.0
-texture = "res://assets/demon.png"
+texture = "res://assets/v08/demon_1.png"
 behavior = "demon"
-frames = 12
+frames = 32
 contact_damage = false

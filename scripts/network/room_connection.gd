@@ -36,6 +36,7 @@ func connect_room(create: bool, display_name: String, room_code: String = "", sk
 		return
 	close()
 	pending = {"type": "create" if create else "join", "name": display_name.strip_edges(), "code": room_code.strip_edges().to_upper(), "skills": skills}
+	pending.game_version=ProjectSettings.get_setting("application/config/version","0.5.0")
 	socket = WebSocketPeer.new()
 	socket.inbound_buffer_size = 1048576
 	socket.outbound_buffer_size = 1048576

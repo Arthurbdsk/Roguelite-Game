@@ -2,7 +2,7 @@
 [ext_resource type="Script" path="res://scripts/data/wave_data.gd" id="1"]
 [resource]
 script = ExtResource("1")
-title = "O Rei sem Brasa"
+title = "Horda 10"
 composition = {}
 spawn_interval = 0.12
 max_alive = 15

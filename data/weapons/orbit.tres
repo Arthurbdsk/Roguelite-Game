@@ -5,13 +5,15 @@
 [resource]
 script = ExtResource("1")
 id = "orbit"
-display_name = "Brasas votivas"
-description = "Brasas orbitam a sentinela. Posicione o anel sobre as hordas."
+display_name = "Orbes"
+description = "Orbes giram ao seu redor e causam dano ao tocar inimigos."
 icon = "res://assets/icons/orbit.png"
-affinity = "magnet"
-evolution_name = "Coroa de cinzas"
-damage = PackedFloat32Array(9, 13, 15, 19, 25)
-cooldown = PackedFloat32Array(0.42, 0.4, 0.38, 0.36, 0.32)
-reach = PackedFloat32Array(42, 46, 48, 53, 60)
-count = PackedInt32Array(3, 3, 4, 4, 5)
-level_descriptions = PackedStringArray("Três brasas orbitam a 42 pixels. 9 de dano por contato.", "Brasas maiores, mais distantes e 13 de dano.", "Adiciona uma quarta brasa ao anel.", "Anel mais rápido e amplo; 19 de dano.", "Evolução: cinco brasas; alcance 60 e 25 de dano.")
+affinity = ""
+evolution_name = "Orbes maiores"
+damage = PackedFloat32Array(9.0,13.0,15.0,19.0,25.0,28.0,28.0,31.36)
+cooldown = PackedFloat32Array(0.42,0.4,0.38,0.36,0.32,0.3,0.3,0.28)
+reach = PackedFloat32Array(42.0,46.0,48.0,53.0,60.0,67.2,67.2,75.26)
+count = PackedInt32Array(3,3,4,4,5,5,6,6)
+level_descriptions = PackedStringArray("Dano: 9. Intervalo: 0.42 s. Alcance: 42. Quantidade: 3.", "Dano: 9 → 13. Intervalo: 0.42 s → 0.4 s. Alcance: 42 → 46. Quantidade: 3 → 3.", "Dano: 13 → 15. Intervalo: 0.4 s → 0.38 s. Alcance: 46 → 48. Quantidade: 3 → 4.", "Dano: 15 → 19. Intervalo: 0.38 s → 0.36 s. Alcance: 48 → 53. Quantidade: 4 → 4.", "Dano: 19 → 25. Intervalo: 0.36 s → 0.32 s. Alcance: 53 → 60. Quantidade: 4 → 5.")
+
+max_level = 8

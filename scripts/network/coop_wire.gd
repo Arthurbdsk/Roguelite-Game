@@ -20,7 +20,7 @@ static func vector(value) -> Vector2:
 	return Vector2(float(value[0]), float(value[1])) if value is Array and value.size() == 2 else Vector2.ZERO
 
 static func decode(value, key: String = ""):
-	if value is Array and key in ["at", "position", "velocity", "origin", "direction", "charge_direction", "sprite_position"]:
+	if value is Array and key in ["at", "position", "velocity", "origin", "direction", "charge_direction", "sprite_position", "ambush_at", "source", "end", "size", "ring_center"]:
 		return vector(value)
 	if value is Dictionary:
 		var result := {}
@@ -30,6 +30,6 @@ static func decode(value, key: String = ""):
 	if value is Array:
 		var result: Array = []
 		for item in value:
-			result.append(vector(item) if key == "orbit_positions" else decode(item))
+			result.append(vector(item) if key in ["orbit_positions","points","blade_points"] else decode(item))
 		return result
 	return value

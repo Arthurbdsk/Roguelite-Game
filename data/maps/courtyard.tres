@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="MapDefinition" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/data/map_definition.gd" id="1"]
+[resource]
+script = ExtResource("1")
+title = "Pátio"
+style = "courtyard"
+floor_color = Color(0.4666666666666667,0.4627450980392157,0.4235294117647059,1)
+blocks = Array[Rect2]([Rect2(688,462,24,16),Rect2(1088,462,24,16),Rect2(688,782,24,16),Rect2(1088,782,24,16),Rect2(388,612,24,16),Rect2(1388,612,24,16),Rect2(888,252,24,16),Rect2(888,992,24,16)])

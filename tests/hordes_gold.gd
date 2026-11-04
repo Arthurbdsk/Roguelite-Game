@@ -139,6 +139,9 @@ func test_gold() -> void:
 		var at := Vector2(100 + count * 25, 150)
 		var enemy = g.spawn_enemy(id, at)
 		enemy.take_damage(99999)
+		if enemy is HordeBoss and not enemy.is_executioner and enemy.state=="transform":
+			enemy.tick(g.boss_balance.transformation_duration+.1)
+			enemy.take_damage(99999)
 		count += 1
 		verify(g.gold_loot.coins.size() == count, "every enemy drops gold: " + id)
 		verify(g.gold_loot.coins[-1].at == at and g.gold_loot.coins[-1].value >= 1, "gold appears at death position: " + id)
@@ -242,7 +245,7 @@ func test_waves() -> void:
 			continue
 		verify(wave.count() > last_count, "wave quantity increases")
 		verify(wave.spawn_interval <= last_interval and wave.spawn_interval >= g.balance.minimum_spawn_interval, "spawn intervals decrease within configured limit")
-		var resistant: float = float(wave.composition.get("skeleton_sword", 0) + wave.composition.get("guard", 0)) / wave.count()
+		var resistant: float = float(wave.composition.get("skeleton_sword",0)+wave.composition.get("guard",0)+wave.composition.get("necromancer",0)+wave.composition.get("beast",0)+wave.composition.get("plague",0)+wave.composition.get("shadow",0))/wave.count()
 		verify(resistant >= last_heavy, "resistant share grows with wave composition")
 		last_count = wave.count()
 		last_interval = wave.spawn_interval
@@ -286,13 +289,16 @@ func test_waves() -> void:
 			if not enemy.targetable:
 				continue
 			var key: String = "%d:%s:%s" % [g.director.wave_index, enemy.data.id, enemy.elite]
-			actual[key] = int(actual.get(key, 0)) + 1
+			var previous_kills:int=g.kills
 			enemy.take_damage(99999)
+			if g.kills>previous_kills:actual[key] = int(actual.get(key, 0)) + 1
 		steps += 1
 		if steps % 30 == 0:
 			await process_frame
 	verify(g.state == "result" and g.ui.previous_data.won, "all ten cleared waves lead to victory")
-	verify(g.kills == total and g.director.total_spawned == total, "wave traversal spawns exactly the defined total")
+	var children:int=0
+	for wave in g.balance.waves:children+=int(wave.composition.get("slime_large",0))*g.balance.slime_children
+	verify(g.kills == total+children and g.director.total_spawned == total, "scheduled total plus exactly fifteen children per large slime")
 	for index in g.balance.waves.size():
 		var wave = g.balance.waves[index]
 		for id in wave.composition:

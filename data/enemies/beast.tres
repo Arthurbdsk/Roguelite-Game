@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/entities/enemy_data.gd" id="1"]
+[resource]
+script = ExtResource("1")
+id = "beast"
+title = "Besta"
+health = 120.0
+speed = 47.5
+damage = 22.0
+radius = 15.0
+experience = 6
+texture = "res://assets/v08/beast.png"
+behavior = "special"
+frames = 16
+contact_damage = false
+attack_range = 40.0
+attack_interval = 2.8
+windup = 0.65
+recovery = 0.9

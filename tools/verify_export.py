@@ -11,8 +11,9 @@ import sys
 
 root = Path(__file__).resolve().parents[1]
 parser = argparse.ArgumentParser()
-parser.add_argument('--suite', choices=['hordes_gold', 'skills_bosses', 'network_foundation', 'network_backpressure', 'coop_bosses'], default='skills_bosses')
-parser.add_argument('--target', type=Path, default=root / 'build' / 'Online-Atualizado' / 'Brasafria-Online-0.4.1.exe')
+markers = {name: name.upper() + '_PASS' for name in ['hordes_gold', 'skills_bosses', 'network_foundation', 'network_backpressure', 'coop_bosses', 'special_enemies', 'lightning', 'clock', 'crown', 'two_phase_boss', 'boss_patterns', 'devourer', 'slimes', 'lodo', 'holy_water', 'difficulty_v2', 'progression8', 'limits7']}
+parser.add_argument('--suite', choices=list(markers), default='skills_bosses')
+parser.add_argument('--target', type=Path, default=root / 'build' / 'Hordas-0.7.0' / 'Hordas-0.7.0.exe')
 args = parser.parse_args()
 target = args.target.resolve()
 log = root / 'test_output' / f'export_{args.suite}.log'
@@ -25,7 +26,7 @@ output = result.stdout + result.stderr
 if log.exists():
     output += log.read_text(encoding='utf-8')
 print(output[-4000:])
-marker = {'skills_bosses':'SKILLS_BOSSES_PASS', 'hordes_gold':'HORDES_GOLD_PASS', 'network_foundation':'NETWORK_FOUNDATION_PASS', 'network_backpressure':'NETWORK_BACKPRESSURE_PASS', 'coop_bosses':'COOP_BOSSES_PASS'}[args.suite]
+marker = {'slimes':'SLIME_PASS','lodo':'LODO_PASS','holy_water':'WATER_PASS','difficulty_v2':'DIFFICULTY_PASS'}.get(args.suite, markers[args.suite])
 if result.returncode or marker not in output or 'ERROR:' in output or 'FAIL:' in output:
     sys.exit(result.returncode or 1)
 print(f'PACKED_GAME_VERIFIED: embedded PCK, matching editor runtime, {args.suite}, isolated saves')

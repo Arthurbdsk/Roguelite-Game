@@ -2,9 +2,9 @@
 [ext_resource type="Script" path="res://scripts/data/wave_data.gd" id="1"]
 [resource]
 script = ExtResource("1")
-title = "O patio desperta"
-composition = {"ghoul": 8}
-spawn_interval = 1.35
-max_alive = 8
+title = "Horda 1"
+composition = {"ghoul": 12}
+spawn_interval = 0.9
+max_alive = 12
 elite_guards = 0
 boss = false

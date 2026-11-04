@@ -5,6 +5,8 @@ var session: CoopSession
 var hosting: bool = false
 var index: int = 0
 var code_file: String = ""
+var fixture_map:String="courtyard"
+var map_sent:bool=false
 var started: bool = false
 var checks: int = 0
 var failures: int = 0
@@ -26,6 +28,7 @@ func run() -> void:
 	var code: String = ""
 	for argument in OS.get_cmdline_user_args():
 		if argument == "--host": hosting = true
+		if argument.begins_with("--map="):fixture_map=argument.trim_prefix("--map=")
 		if argument == "--disconnect": disconnect_scenario = true
 		if argument.begins_with("--soak-seconds="): soak_seconds = int(argument.trim_prefix("--soak-seconds="))
 		if argument.begins_with("--index="): index = int(argument.trim_prefix("--index="))
@@ -53,6 +56,9 @@ func receive(packet: Dictionary) -> void:
 				file.close()
 		"lobby":
 			if packet.players.size() == 4:
+				if hosting and not map_sent:
+					map_sent=true
+					session.connection.send_message({"type":"map","map":fixture_map});return
 				var ready: bool = true
 				for member in packet.players:
 					ready = ready and member.ready
@@ -61,6 +67,7 @@ func receive(packet: Dictionary) -> void:
 					started = true
 					session.connection.send_message({"type": "start"})
 		"start":
+			check(game.arena.map_id==packet.get("map","courtyard"),"selected map loaded before run")
 			check(session.actors.size() == 4, "four real player contexts created")
 			check(session.initial_size == 4, "initial party frozen at four")
 			if hosting:
@@ -87,6 +94,8 @@ func command(name_value: String) -> void:
 
 func client_command(data: Dictionary) -> void:
 	match data.command:
+		"soak_move":
+			session.local_input_override={"movement":Vector2.from_angle(game.elapsed*.25+index*TAU/4),"revive":false}
 		"soak_finish":
 			check(session.active and not session.ended, "long-running public connection remains active")
 			finish_peer.call_deferred()
@@ -105,6 +114,22 @@ func client_command(data: Dictionary) -> void:
 		"verify_boss":
 			check(is_instance_valid(game.boss) and game.boss is HordeBoss, "boss replica created")
 			if is_instance_valid(game.boss): check(game.boss.attack_name == "execute" and game.boss.state == "windup", "boss attack telegraph replicated")
+		"verify_ecology":
+			var eaters=game.enemies.filter(func(e):return e is Devourer)
+			check(eaters.size()==1 and eaters[0].meals==2 and eaters[0].sprite.scale.x>1,"devourer growth replicated")
+			check(not actor_named("Peer0").weapon_system.ground.pools.is_empty(),"owner pools replicated")
+			check(not actor_named("Peer2").weapon_system.ground.pools.is_empty(),"independent remote pools replicated")
+		"verify_division":
+			check(game.enemies.filter(func(e):return e.data.id=="slime_small").size()==15,"exactly fifteen replicated children")
+		"verify_specials":
+			for species in ["necromancer","beast","plague","shadow"]:
+				check(game.enemies.any(func(e):return e.data.id==species and e.frozen_remaining>0),"new enemy and control replicated: "+species)
+			check(not game.specials.areas.is_empty() and not game.specials.bolts.is_empty(),"poison warning and magic replicated")
+			check(actor_named("Peer0").weapon_system.beams.size()==1 and actor_named("Peer0").weapon_system.lightning_fx.size()==1,"new weapon effects replicated")
+			check(actor_named("Peer0").player.poison_remaining>0 and actor_named("Peer0").player.root_remaining>0,"player status replicated")
+		"verify_form":
+			check(game.boss.form==2 and game.boss.state=="transform" and not game.boss.targetable,"boss transformation replicated")
+			check(is_equal_approx(game.boss.max_hp,game.boss_balance.demon_health()*2.5*game.balance.enemy_health_multiplier*5),"phase two health replicated without double scaling")
 		"verify_replicas":
 			check(game.enemies.size() >= 170, "replicated enemies under load")
 			check(game.gold_loot.coins.size() >= 1990, "replicated gold under load")
@@ -153,17 +178,17 @@ func host_scenario() -> void:
 	var scale: Dictionary = game.enemy_scale()
 	check(is_equal_approx(scale.health, 2.5) and is_equal_approx(scale.damage, 2.5) and is_equal_approx(scale.speed, 1.6) and is_equal_approx(scale.count, 3.4), "four-player enemy multipliers")
 	var enemy = game.spawn_enemy("skeleton_archer", Vector2(1400, 900))
-	check(is_equal_approx(enemy.hp, game.enemy_data.skeleton_archer.health * 2.5), "real spawned archer scales health")
+	check(is_equal_approx(enemy.hp, game.enemy_data.skeleton_archer.health * 2.5 * game.balance.enemy_health_multiplier), "real spawned archer scales health")
 	check(is_equal_approx(enemy.data.damage, game.enemy_data.skeleton_archer.damage * 2.5), "real spawned archer scales damage")
 	var boss = game.spawn_enemy("demon", Vector2(1500, 950))
-	check(is_equal_approx(boss.hp, game.boss_balance.demon_health() * 2.5), "single boss scales health")
+	check(is_equal_approx(boss.hp, game.boss_balance.demon_health() * 2.5 * game.balance.enemy_health_multiplier), "single boss scales health")
 	check(game.enemies.size() == 2, "boss has not been multiplied")
 	game.despawn_enemy(boss)
 	game.despawn_enemy(enemy)
 	game.boss = null
 	game.director.wave_index = -1
 	game.director.begin_wave()
-	check(game.director.queue.size() == 27, "first cooperative horde uses rounded scaled total")
+	check(game.director.queue.size() == 41, "first cooperative horde uses rounded scaled total")
 	game.director.queue.clear()
 	game.director.phase = "complete"
 	var executioner = game.spawn_enemy("executioner", Vector2(1200, 750))
@@ -173,6 +198,35 @@ func host_scenario() -> void:
 	await wait_seconds(0.2)
 	game.despawn_enemy(executioner)
 	game.boss = null
+	for i in 4:
+		var special=game.spawn_enemy(["necromancer","beast","plague","shadow"][i],Vector2(1400+i*40,950))
+		special.frozen_remaining=10
+	game.specials.flask(Vector2(1400,900),Vector2(1450,950))
+	game.specials.magic(Vector2(1400,900),Vector2.RIGHT,12)
+	local.player.apply_poison(10,2);local.player.root_remaining=2
+	local.weapon_system.beams.append({"origin":local.player.position,"end":local.player.position+Vector2(0,-160),"width":8,"life":2.0})
+	local.weapon_system.lightning_fx.append({"at":Vector2(1400,950),"life":2.0})
+	await wait_seconds(.3);command("verify_specials");await wait_seconds(.2)
+	for actor in session.actors.values():actor.player.clear_status();actor.player.hp=actor.player.max_hp
+	for special in game.enemies.duplicate():game.despawn_enemy(special)
+	game.specials.reset();local.weapon_system.beams.clear();local.weapon_system.lightning_fx.clear()
+	var final_boss=game.spawn_enemy("demon",Vector2(1500,950));final_boss.take_damage(100000)
+	await wait_seconds(.2);command("verify_form");await wait_seconds(.2)
+	game.despawn_enemy(final_boss);game.boss=null
+	var eater=game.spawn_enemy("devourer",Vector2(1400,950))
+	game.gold_loot.drop(eater.position,5);game.drop_xp(eater.position,7)
+	game.food_index.tick(1);eater.tick(.01);eater.tick(.01)
+	check(eater.meals==2 and eater.swallowed_gold==5 and eater.swallowed_xp==7,"host consumes objects exactly once")
+	local.weapon_system.levels.sludge=1
+	local.weapon_system.ground.add_pool("sludge",Vector2(1100,700),local.player.position)
+	second_actor_pool()
+	await wait_seconds(.3);command("verify_ecology");await wait_seconds(.2)
+	game.despawn_enemy(eater)
+	var parent=game.spawn_enemy("slime_large",Vector2(1400,950));parent.take_damage(99999)
+	await wait_seconds(.9);command("verify_division");await wait_seconds(.2)
+	for node in game.enemies.duplicate():game.despawn_enemy(node)
+	for actor in session.actors.values():actor.weapon_system.ground.reset()
+	game.gold_loot.coins.clear();game.pickups.clear()
 	game.add_xp(6)
 	check(session.actors.values().all(func(actor): return actor.level == 2), "experience levels every actor")
 	var elapsed_before: float = game.elapsed
@@ -228,7 +282,7 @@ func host_scenario() -> void:
 		game.spawn_enemy("ghoul", Vector2(1450 + (i % 10) * 8, 950 + (i / 10) * 8))
 	for i in 2000: game.gold_loot.drop(Vector2(1350 + i % 50, 1050 + i / 50))
 	for i in 240: game.pickups.append({"id": 10000 + i, "at": Vector2(1400 + i % 40, 1080), "xp": 1, "attracted": false})
-	for i in 320: game.enemy_projectiles.fire(Vector2(1400, 800 + i), Vector2.RIGHT, game.enemy_data.skeleton_archer)
+	for i in 320: game.enemy_projectiles.fire(Vector2(860, 520 + i%50*.5), Vector2.RIGHT, game.enemy_data.skeleton_archer)
 	await wait_seconds(0.3)
 	command("verify_replicas")
 	await wait_seconds(0.25)
@@ -244,7 +298,9 @@ func host_scenario() -> void:
 	game.pickups.clear()
 	game.enemy_projectiles.reset()
 	command("client_leave")
-	await wait_seconds(0.3)
+	for attempt in 60:
+		if session.actors.size()==3:break
+		await wait_seconds(.05)
 	check(session.actors.size() == 3 and game.state == "running", "client disconnect keeps remaining party running")
 	check(session.initial_size == 4 and is_equal_approx(game.enemy_scale().health, 2.5), "disconnect does not lower frozen difficulty")
 	for actor in session.actors.values():
@@ -272,8 +328,8 @@ func host_disconnect() -> void:
 func host_soak() -> void:
 	game.director.reset()
 	for actor in session.actors.values():
-		actor.weapon_system.levels = {"sword":5,"bolt":5,"orbit":5}
-		actor.weapon_system.passives = {"boots":2,"magnet":2,"ward":2}
+		actor.weapon_system.levels = {"sludge":8,"holy_water":8,"clock":8,"axe":8,"boomerang":8,"blades":8}
+		actor.weapon_system.passives = {"crown":1,"magnet":2,"ward":2}
 		actor.player.pickup_radius = 114
 	var started_at: int = Time.get_ticks_msec()
 	var last_second: int = -1
@@ -288,15 +344,18 @@ func host_soak() -> void:
 			await process_frame
 			continue
 		last_second = second
+		command("soak_move")
+		session.local_input_override={"movement":Vector2.from_angle(game.elapsed*.25),"revive":false}
 		if not session.active or session.ended: check(false,"soak ended early"); break
 		for actor in session.actors.values():
 			actor.player.invulnerable = 100
+			actor.player.hp=actor.player.max_hp
 			if not actor.offers.is_empty(): actor.choose(actor.offers[0].id,actor.generation)
 		if second >= load_at and not stress_started:
 			stress_started = true
 			game.director.phase = "complete"
-			for i in maxi(0,180-game.enemies.size()):
-				var enemy = game.spawn_enemy("skeleton_archer" if i % 3 == 0 else "skeleton_sword",Vector2(900,630)+Vector2.from_angle(i*TAU/180)*220)
+			for i in maxi(0,160-game.enemies.size()):
+				var enemy = game.spawn_enemy(["devourer","beast","plague","shadow","skeleton_archer","slime_small"][i%6],Vector2(900,630)+Vector2.from_angle(i*TAU/180)*220)
 				enemy.max_hp = 100000
 				enemy.hp = enemy.max_hp
 			for i in 240: game.pickups.append({"id":10000+i,"at":Vector2(1450+i%40,1000),"xp":1,"attracted":false})
@@ -335,3 +394,8 @@ func _process(delta: float) -> bool:
 		check(false, "actual match timed out")
 		finish_peer.call_deferred()
 	return false
+
+func second_actor_pool():
+	var actor=actor_named("Peer2")
+	actor.weapon_system.levels.holy_water=1
+	actor.weapon_system.ground.add_pool("holy_water",Vector2(1120,760),actor.player.position,.7)

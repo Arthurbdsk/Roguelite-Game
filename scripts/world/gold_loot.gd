@@ -11,7 +11,7 @@ var collected_count: int = 0
 
 func setup(owner_game) -> void:
 	game = owner_game
-	texture = load("res://assets/gold.png")
+	texture = load("res://assets/effects/coin.png")
 	z_index = 3
 
 func reset() -> void:
@@ -30,6 +30,7 @@ func drop(at: Vector2, value: int = 1) -> int:
 func tick(delta: float) -> void:
 	if game.state != "running":
 		return
+	var bounds:Rect2=game.collection_bounds(true)
 	var attraction: float = game.balance.coin_attraction_radius + maxf(0, game.player.pickup_radius - 42.0)
 	var collected_value: int = 0
 	var collected_at: Vector2 = game.player.position
@@ -41,6 +42,7 @@ func tick(delta: float) -> void:
 			coins.remove_at(i)
 			expired_count += 1
 			continue
+		if not coin.get("attracted",false) and not bounds.has_point(coin.at):continue
 		var collector = game.collection_player(coin.at)
 		if collector == null: continue
 		attraction = game.balance.coin_attraction_radius + maxf(0, collector.pickup_radius - 42.0)
@@ -72,10 +74,16 @@ func tick(delta: float) -> void:
 func _draw() -> void:
 	if game == null or game.state in ["title", "hub"]:
 		return
+	var visible:=Rect2(game.camera.get_screen_center_position()-Vector2(336,196),Vector2(672,392))
 	for coin in coins:
+		if not visible.has_point(coin.at):continue
 		if coin.age > game.balance.coin_lifetime - 5 and int(coin.age * 6) % 2 == 0:
 			continue
-		var frame: int = int(coin.age * 6) % 4
-		draw_texture_rect_region(texture, Rect2(coin.at.round() - Vector2(4, 6), Vector2(8, 8)), Rect2(frame * 8, 0, 8, 8))
+		var frame: int = int(coin.age * 10) % 8
+		draw_texture_rect_region(texture, Rect2(coin.at.round() - Vector2(8, 9), Vector2(16, 16)), Rect2(frame * 16, 0, 16, 16))
 	for effect in feedback:
 		draw_string(ThemeDB.fallback_font, effect.at, "+%d" % effect.amount, HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color("dfb969"))
+
+func refund(at:Vector2,amount:int):
+	serial+=1
+	coins.append({"id":serial,"at":at,"age":0.0,"value":amount,"attracted":false,"protected":true})

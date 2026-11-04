@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/data/weapon_data.gd" id="1"]
+[resource]
+script = ExtResource("1")
+id = "lightning"
+display_name = "Raio"
+evolution_name = "Raio forte"
+affinity = ""
+icon = "res://assets/icons/lightning.png"
+damage = PackedFloat32Array(42.0,52.0,64.0,78.0,95.0,106.4,106.4,119.17)
+cooldown = PackedFloat32Array(2.6,2.5,2.4,2.2,2.0,1.88,1.88,1.77)
+reach = PackedFloat32Array(150.0,175.0,200.0,225.0,250.0,280.0,280.0,313.6)
+count = PackedInt32Array(1,2,3,4,5,5,6,6)
+level_descriptions = PackedStringArray("Dano 42. 1 alvo. Alcance 150. Intervalo 2,6 s.","Dano 52. 2 alvos. Alcance 175. Intervalo 2,5 s.","Dano 64. 3 alvos. Alcance 200. Intervalo 2,4 s.","Dano 78. 4 alvos. Alcance 225. Intervalo 2,2 s.","Dano 95. 5 alvos. Alcance 250. Intervalo 2 s.")
+
+max_level = 8

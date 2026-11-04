@@ -29,7 +29,7 @@ func value(id: String) -> float:
 
 func begin(use_skills: bool = true) -> void:
 	enabled = use_skills
-	game.player.max_hp = 100 + value("vigor")
+	game.player.max_hp = 100 + value("vigor") + 10*rank("pact")
 	game.player.hp = game.player.max_hp
 	game.player.speed = 96 + value("stride")
 	game.player.pickup_radius = 42 + value("magnet")
@@ -78,7 +78,7 @@ func save_from_death() -> bool:
 	last_stand_spent = true
 	game.player.hp = 15
 	game.player.invulnerable = 2
-	game.announce("ÚLTIMA CENTELHA", 2)
+	game.announce("SOBREVIVÊNCIA ATIVADA", 2)
 	return true
 
 func on_gold(amount: int) -> void:
@@ -95,7 +95,7 @@ func on_gold(amount: int) -> void:
 		game.player.hp = minf(game.player.max_hp, game.player.hp + 3)
 
 func passive_limit() -> int:
-	return 4 if rank("pact") > 0 and game.weapon_system.get_loadout().size() == 3 else 3
+	return 4
 
 func coin_speed_multiplier() -> float:
 	return 1.6 if rank("forager") > 0 and game.director.phase == "preparing" else 1.0

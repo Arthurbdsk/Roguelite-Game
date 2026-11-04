@@ -3,7 +3,7 @@
 [resource]
 script = ExtResource("1")
 id = "hound"
-title = "Rasga-bruma"
+title = "Cão"
 health = 15.0
 speed = 48.0
 damage = 6.0

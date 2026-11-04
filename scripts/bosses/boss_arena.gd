@@ -2,6 +2,7 @@ class_name BossArena
 extends Node2D
 
 var game
+var ice_texture=preload("res://assets/effects/demon_ice.png")
 var stage: String = "idle"
 var portal_age: float = 0
 var portal_sound_played: bool = false
@@ -35,6 +36,9 @@ func reset() -> void:
 
 func stop_combat() -> void:
 	stage = "idle"
+	if game.get("specials")!=null:
+		game.specials.areas.clear();game.specials.bolts.clear();game.specials.marks.clear()
+		game.specials.casters.clear()
 	areas.clear()
 	pending_summons.clear()
 	bursts.clear()
@@ -69,7 +73,7 @@ func begin_portal() -> void:
 	demon.velocity = Vector2.ZERO
 	game.enemy_projectiles.reset()
 	game.hazards.clear()
-	game.announce("O DEVORADOR DE BRASAS", 3.0)
+	game.announce("DEMÔNIO", 3.0)
 	queue_redraw()
 
 func on_boss_death(boss: HordeBoss) -> void:
@@ -101,8 +105,8 @@ func tick(delta: float) -> void:
 		if is_instance_valid(demon) and portal_age >= emerge_start:
 			var progress := clampf((portal_age - emerge_start) / timing.portal_emerge, 0, 1)
 			demon.sprite.visible = true
-			demon.sprite.frame = 4
-			demon.sprite.position.y = -44 + roundf((1 - progress) * 28)
+			demon.sprite.frame = 12 if demon.data.frames>=32 else 4
+			demon.sprite.position.y = -float(demon.sprite.texture.get_height())*.5+4 + roundf((1 - progress) * 28)
 			demon.sprite.modulate = Color(1, 1, 1, progress)
 		if portal_age >= timing.portal_duration() and is_instance_valid(demon):
 			stage = "combat"
@@ -147,6 +151,9 @@ func tick(delta: float) -> void:
 			summons[minion.get_instance_id()] = minion
 	for area in areas.duplicate():
 		area.age += delta
+		if area.kind=="ring":
+			area.at=area.ring_center+Vector2.from_angle(area.ring_angle)*maxf(0,game.boss_balance.ring_radius-maxf(0,area.age-area.warning)*game.boss_balance.ring_speed)
+			if area.age>=area.warning:game.damage_team_area(area.at,area.radius,area.damage)
 		if area.kind == "lightning" and area.age >= area.warning and not area.hit:
 			area.hit = true
 			game.sound.play_cue("thunder")
@@ -159,12 +166,14 @@ func tick(delta: float) -> void:
 	queue_redraw()
 
 func can_cast(power: String) -> bool:
+	if power in ["ice","lightning","ring"] and has_area("ring"):return false
+	if power == "ring":return areas.is_empty()
 	if power == "lightning":
 		return not has_area("ice") and not has_area("lightning") and areas.size() < game.boss_balance.area_limit - 3
 	if power == "ice":
 		return not has_area("lightning") and not has_area("ice") and areas.size() < game.boss_balance.area_limit - 2
 	if power == "summon":
-		return summons.size() + pending_summons.size() < game.boss_balance.summon_limit
+		return game.boss_balance.summon_limit-summons.size()-pending_summons.size() >= (game.boss_balance.second_summon_batch if is_instance_valid(demon) and demon.form==2 else game.boss_balance.first_summon_batch)
 	if power == "fire":
 		return game.enemy_projectiles.fire_count() < game.boss_balance.fire_limit - 14
 	return true
@@ -184,50 +193,54 @@ func cast(power: String, boss, direction: Vector2, phase: int) -> bool:
 	var owner: int = boss.get_instance_id()
 	if power == "fire":
 		fire_fan(boss.position, direction, 5 if phase == 1 else (6 if phase == 2 else 7), owner, phase)
-		if phase == 3:
-			bursts.append({"at": boss.position, "direction": direction, "count": 6, "owner": owner, "phase": phase, "delay": game.boss_balance.second_fire_delay})
+		var volleys:int=game.boss_balance.second_fire_volleys if boss.form==2 else game.boss_balance.first_fire_volleys
+		for volley in range(1,volleys):
+			bursts.append({"at":boss.position,"direction":direction,"count":6,"owner":owner,"phase":phase,"delay":game.boss_balance.second_fire_delay*volley})
 	elif power == "summon":
-		var count: int = mini(game.boss_balance.summon_batch + int(phase == 3), game.boss_balance.summon_limit - summons.size() - pending_summons.size())
+		var count:int=game.boss_balance.second_summon_batch if boss.form==2 else game.boss_balance.first_summon_batch
+		if game.boss_balance.summon_limit-summons.size()-pending_summons.size()<count:return false
+		var points:Array[Vector2]=[]
 		for i in count:
-			for attempt in 32:
-				var at: Vector2 = boss.position + Vector2.from_angle(rng.randf() * TAU) * rng.randf_range(115, 190)
-				if at.distance_to(game.player.position) < 95 or not game.arena.safe_position(at, 15):
-					continue
-				var clear: bool = true
-				for mark in pending_summons:
-					if mark.at.distance_to(at) < 44:
-						clear = false
-				if not clear:
-					continue
-				pending_summons.append({"at": at, "id": ["ghoul", "skeleton_sword", "skeleton_archer"][i % 3], "age": 0.0, "wait": 0.0, "owner": owner})
-				break
+			for attempt in 80:
+				var at:Vector2=boss.position+Vector2.from_angle(rng.randf()*TAU)*rng.randf_range(170,310)
+				if game.players_near(at,95) or not game.arena.safe_position(at,15):continue
+				if points.any(func(p):return p.distance_to(at)<36):continue
+				points.append(at);break
+		if points.size()!=count:return false
+		var types:Array=["ghoul","skeleton_sword","skeleton_archer"] if boss.form==1 else ["skeleton_sword","skeleton_archer","beast","plague"]
+		for i in points.size():pending_summons.append({"at":points[i],"id":types[i%types.size()],"age":0.0,"wait":0.0,"owner":owner})
 		game.sound.play_cue("summon")
 	elif power == "lightning":
-		var aim: Vector2 = game.player.position
-		var escape: Vector2 = (center - aim).normalized()
-		if escape.length_squared() < 0.1:
-			escape = game.player.facing
-		var positions: Array[Vector2] = [aim, aim + escape.orthogonal() * 66, aim - escape.orthogonal() * 66]
-		if phase == 3:
-			positions.append(aim - escape * 66)
-		for at in positions:
-			add_area("lightning", at, game.boss_balance.lightning_radius, game.boss_balance.lightning_warning, 0.3, game.boss_balance.lightning_damage, owner)
+		var count:int=game.boss_balance.second_lightning_count if boss.form==2 else game.boss_balance.first_lightning_count
+		var axis:Vector2=Vector2.RIGHT.rotated((boss.attack_index%6)*PI/6)
+		var aim:Vector2=game.player.position
+		for i in count:
+			var at:Vector2=aim+axis*(i-(count-1)*.5)*70
+			add_area("lightning",at,game.boss_balance.sector_radius,game.boss_balance.sector_warning,.3,game.boss_balance.lightning_damage,owner)
+			areas.back().age=-i*game.boss_balance.sector_delay
 	elif power == "ice":
-		var aim: Vector2 = game.player.position
-		var escape: Vector2 = (center - aim).normalized()
-		if escape.length_squared() < 0.1:
-			escape = Vector2.UP
-		for side in [-1, 1]:
-			var at: Vector2 = aim + escape.orthogonal() * 78 * side
-			if game.arena.safe_position(at, 12):
-				add_area("ice", at, game.boss_balance.ice_radius, game.boss_balance.ice_warning, game.boss_balance.ice_duration, 0, owner)
+		var vertical:bool=boss.attack_index%2==0
+		var size:Vector2=Vector2(game.boss_balance.ice_band_width,game.boss_balance.ice_band_length) if vertical else Vector2(game.boss_balance.ice_band_length,game.boss_balance.ice_band_width)
+		var spacing:float=(game.boss_balance.ice_corridor+game.boss_balance.ice_band_width)/2
+		for side in [-1,1]:
+			var at:Vector2=center+(Vector2.RIGHT if vertical else Vector2.DOWN)*spacing*side
+			add_area("ice",at,game.boss_balance.ice_radius,game.boss_balance.ice_warning,game.boss_balance.ice_duration,0,owner)
+			areas.back().size=size
 		game.sound.play_cue("ice")
+	elif power == "ring":
+		var gap:int=boss.attack_index%12
+		for i in 12:
+			if i==gap or i==(gap+1)%12:continue
+			var at:Vector2=game.player.position+Vector2.from_angle(i*TAU/12)*game.boss_balance.ring_radius
+			add_area("ring",at,game.boss_balance.ring_hit_radius,1.5,game.boss_balance.ring_radius/game.boss_balance.ring_speed,game.boss_balance.lightning_damage,owner)
+			areas.back().ring_center=game.player.position
+			areas.back().ring_angle=i*TAU/12
 	return true
 
 func add_area(kind: String, at: Vector2, radius: float, warning: float, duration: float, damage: float, owner: int) -> void:
 	if areas.size() >= game.boss_balance.area_limit:
 		return
-	areas.append({"kind": kind, "at": at, "radius": radius, "age": 0.0, "warning": warning, "duration": duration, "damage": damage * game.enemy_scale().damage, "owner": owner, "hit": false})
+	areas.append({"kind": kind, "at": at, "radius": radius, "age": 0.0, "warning": warning, "duration": duration, "damage": damage * game.enemy_scale().damage * (game.boss_balance.second_damage_multiplier if is_instance_valid(demon) and demon.form==2 else 1), "owner": owner, "hit": false})
 	queue_redraw()
 
 func fire_fan(at: Vector2, direction: Vector2, count: int, owner: int, phase: int, offset: bool = false) -> void:
@@ -240,8 +253,9 @@ func fire_fan(at: Vector2, direction: Vector2, count: int, owner: int, phase: in
 
 func slow_multiplier(at: Vector2) -> float:
 	for area in areas:
-		if area.kind == "ice" and area.age >= area.warning and area.age < area.warning + area.duration and at.distance_squared_to(area.at) < area.radius * area.radius:
-			return game.boss_balance.ice_slow_multiplier
+		if area.kind!="ice" or area.age<area.warning or area.age>=area.warning+area.duration:continue
+		var inside:bool=Rect2(area.at-area.size/2,area.size).has_point(at) if area.has("size") else at.distance_squared_to(area.at)<area.radius*area.radius
+		if inside:return game.boss_balance.ice_slow_multiplier
 	return 1.0
 
 func _draw() -> void:
@@ -275,6 +289,9 @@ func _draw() -> void:
 	for area in areas:
 		var active: bool = area.age >= area.warning
 		if area.kind == "ice":
+			if area.has("size"):
+				draw_ice_barrier(area,active)
+				continue
 			var color := Color("83c4bd")
 			draw_circle(area.at, area.radius, Color(color, 0.20 if active else 0.06))
 			draw_arc(area.at, area.radius, 0, TAU, 32, color, 1)
@@ -284,8 +301,36 @@ func _draw() -> void:
 		else:
 			draw_circle(area.at, area.radius, Color(0.85, 0.68, 0.4, 0.30 if active else 0.06))
 			draw_arc(area.at, area.radius, 0, TAU, 30, Color("dfb969"), 2 if active else 1)
-			if active:
+			if active and area.kind=="lightning":
 				draw_polyline(PackedVector2Array([area.at - Vector2(0, 90), area.at + Vector2(-8, -49), area.at + Vector2(7, -35), area.at]), Color("f4e6be"), 3, false)
 	for swing in swings:
 		var angle: float = swing.direction.angle()
 		draw_arc(swing.at, game.boss_balance.executioner_swing_range, angle - 1.18, angle + 1.18, 30, Color("e3c9a1"), 3, false)
+
+func clear_for_transform():
+	areas.clear();pending_summons.clear();bursts.clear();swings.clear()
+	for minion in summons.values():
+		if is_instance_valid(minion):game.despawn_enemy(minion)
+	summons.clear()
+	game.enemy_projectiles.reset()
+	game.hazards.clear()
+	game.specials.areas.clear();game.specials.bolts.clear();game.specials.marks.clear()
+	game.specials.casters.clear()
+	queue_redraw()
+
+func draw_ice_barrier(area:Dictionary,active:bool):
+	var bounds:=Rect2(area.at-area.size/2,area.size)
+	draw_rect(bounds,Color(0.3,0.65,0.8,.14 if active else .06))
+	draw_rect(bounds,Color("9bdcec"),false,1)
+	var vertical:bool=area.size.y>area.size.x
+	var count:int=int((area.size.y if vertical else area.size.x)/24)
+	for i in count:
+		var base:Vector2=bounds.position+(Vector2(area.size.x/2,12+i*24) if vertical else Vector2(12+i*24,area.size.y/2))
+		if not active:
+			draw_line(base-Vector2(6,0),base+Vector2(6,0),Color("a7e2f2"),1)
+			continue
+		var age:float=area.age-area.warning
+		var remaining:float=area.warning+area.duration-area.age
+		var frame:int=mini(2,int(age*12)) if age<.25 else 3+int(age*7+i)%4
+		if remaining<.3:frame=mini(9,7+int((.3-remaining)*10))
+		draw_texture_rect_region(ice_texture,Rect2(base.round()-Vector2(16,48),Vector2(32,56)),Rect2(frame*32,0,32,56))

@@ -2,6 +2,10 @@ class_name EnemyProjectiles
 extends Node2D
 
 var game
+var fire_texture=preload("res://assets/effects/fire.png")
+var impact_texture=preload("res://assets/effects/impact.png")
+var visual_fire:Dictionary={}
+var fire_impacts:Array[Dictionary]=[]
 var arrows: Array[Dictionary] = []
 var serial: int = 0
 
@@ -10,6 +14,7 @@ func setup(owner_game) -> void:
 	z_index = 4
 
 func reset() -> void:
+	visual_fire.clear();fire_impacts.clear()
 	arrows.clear()
 	queue_redraw()
 
@@ -37,7 +42,7 @@ func fire_ball(origin: Vector2, direction: Vector2, owner: int, phase: int) -> b
 	if arrows.size() >= game.boss_balance.final_projectile_limit or fire_count() >= game.boss_balance.fire_limit:
 		return false
 	serial += 1
-	arrows.append({"id": serial, "at": origin, "velocity": direction.normalized() * game.boss_balance.fire_speed * (1.08 if phase == 3 else 1), "damage": game.boss_balance.fire_damage * game.enemy_scale().damage, "distance": 0.0, "range": 900.0, "life": game.boss_balance.fire_lifetime, "owner": owner, "kind": "fire", "radius": 5.0})
+	arrows.append({"id": serial, "at": origin, "velocity": direction.normalized() * game.boss_balance.fire_speed * (1.08 if phase == 3 else 1), "damage": game.boss_balance.fire_damage * game.enemy_scale().damage * (game.boss_balance.second_damage_multiplier if is_instance_valid(game.boss_arena.demon) and game.boss_arena.demon.form==2 else 1), "distance": 0.0, "range": 900.0, "life": game.boss_balance.fire_lifetime, "owner": owner, "kind": "fire", "radius": 5.0})
 	game.sound.play_cue("fire")
 	queue_redraw()
 	return true
@@ -82,13 +87,24 @@ func tick(delta: float) -> void:
 func _draw() -> void:
 	if game == null or game.state in ["title", "hub"]:
 		return
+	var current:Dictionary={}
+	for arrow in arrows:
+		if arrow.get("kind","")=="fire":current[str(arrow.id)]={"at":arrow.at,"angle":arrow.velocity.angle()}
+	for id in visual_fire:
+		if not current.has(id):fire_impacts.append({"at":visual_fire[id].at,"angle":visual_fire[id].angle,"start":game.elapsed})
+	visual_fire=current
+	fire_impacts=fire_impacts.filter(func(f):return game.elapsed-f.start<.4)
+	for fx in fire_impacts:
+		draw_set_transform(fx.at.round(),fx.angle)
+		draw_texture_rect_region(impact_texture,Rect2(-12,-12,24,24),Rect2(mini(6,int((game.elapsed-fx.start)*18))*24,0,24,24))
+		draw_set_transform(Vector2.ZERO)
 	for arrow in arrows:
 		var point: Vector2 = arrow.at.round()
 		var direction: Vector2 = arrow.velocity.normalized()
 		if arrow.get("kind", "arrow") == "fire":
-			draw_rect(Rect2(point - Vector2(5, 4), Vector2(9, 8)), Color("71362c"))
-			draw_rect(Rect2(point - Vector2(3, 3), Vector2(6, 6)), Color("d77745"))
-			draw_rect(Rect2(point - Vector2(1, 2), Vector2(3, 3)), Color("f4d194"))
+			draw_set_transform(point,direction.angle())
+			draw_texture_rect_region(fire_texture,Rect2(-25,-12,32,24),Rect2(int(game.elapsed*14)%6*32,0,32,24))
+			draw_set_transform(Vector2.ZERO)
 			continue
 		draw_line((point - direction * 10).round(), point, Color("b68a55"), 2, false)
 		draw_line((point - direction * 9).round(), (point - direction * 6).round(), Color("eee0b8"), 2, false)

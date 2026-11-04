@@ -2,9 +2,9 @@
 [ext_resource type="Script" path="res://scripts/data/wave_data.gd" id="1"]
 [resource]
 script = ExtResource("1")
-title = "Cordas na escuridao"
-composition = {"ghoul": 12, "hound": 8, "skeleton_sword": 18, "skeleton_archer": 6, "guard": 4}
-spawn_interval = 0.5
-max_alive = 36
+title = "Horda 5"
+composition = {"ghoul": 62, "hound": 8, "skeleton_sword": 18, "skeleton_archer": 6, "guard": 4, "necromancer": 1, "devourer": 1}
+spawn_interval = 0.25
+max_alive = 72
 elite_guards = 0
 boss = false

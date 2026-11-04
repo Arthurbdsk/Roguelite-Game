@@ -2,9 +2,9 @@
 [ext_resource type="Script" path="res://scripts/data/wave_data.gd" id="1"]
 [resource]
 script = ExtResource("1")
-title = "O carrasco desperta"
-composition = {"ghoul": 18, "hound": 14, "skeleton_sword": 30, "skeleton_archer": 12, "guard": 18}
-spawn_interval = 0.3
-max_alive = 70
+title = "Horda 7"
+composition = {"ghoul": 216, "hound": 14, "skeleton_sword": 30, "skeleton_archer": 12, "guard": 18, "shadow": 2, "necromancer": 2, "slime_large": 2, "devourer": 1}
+spawn_interval = 0.12
+max_alive = 210
 elite_guards = 0
 boss = false

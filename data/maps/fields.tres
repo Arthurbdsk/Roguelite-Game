@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="MapDefinition" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/data/map_definition.gd" id="1"]
+[resource]
+script = ExtResource("1")
+title = "Campos"
+style = "fields"
+floor_color = Color(0.40784313725490196,0.47058823529411764,0.3058823529411765,1)
+blocks = Array[Rect2]([Rect2(300,300,32,24),Rect2(500,850,32,24),Rect2(1250,350,32,24),Rect2(1400,900,32,24),Rect2(260,980,32,24),Rect2(1500,280,32,24)])

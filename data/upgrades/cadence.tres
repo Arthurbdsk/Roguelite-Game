@@ -3,8 +3,8 @@
 [resource]
 script = ExtResource("1")
 id = "cadence"
-display_name = "Sino rachado"
-description = "Acelera os ataques, ocupando uma vaga de passiva."
-icon = "res://assets/icons/crown.png"
-max_level = 2
-level_descriptions = PackedStringArray("Lâmina e besta atacam 12% mais depressa.", "Lâmina e besta atacam mais 12% depressa.")
+display_name = "Luvas"
+description = "Reduz o intervalo dos ataques em 12%."
+icon = "res://assets/icons/cadence.png"
+max_level = 8
+level_descriptions = PackedStringArray("Total: Reduz o intervalo base em 6%. Intervalo mínimo: 0,15 s.","Total: Reduz o intervalo base em 12%. Intervalo mínimo: 0,15 s.","Total: Reduz o intervalo base em 18%. Intervalo mínimo: 0,15 s.","Total: Reduz o intervalo base em 24%. Intervalo mínimo: 0,15 s.","Total: Reduz o intervalo base em 30%. Intervalo mínimo: 0,15 s.","Total: Reduz o intervalo base em 36%. Intervalo mínimo: 0,15 s.","Total: Reduz o intervalo base em 42%. Intervalo mínimo: 0,15 s.","Total: Reduz o intervalo base em 48%. Intervalo mínimo: 0,15 s.")

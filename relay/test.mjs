@@ -58,3 +58,16 @@ test('buffered network burst stays connected; sustained flood is still bounded',
   assert.equal(await closed,1008);
  }finally{h.ws.terminate();c.ws.terminate();await relay.close();}
 });
+
+test('room refuses incompatible game builds before play',async()=>{
+ const relay=createRelay({port:0});const address=await relay.listen();
+ const h=await client(`ws://127.0.0.1:${address.port}`),c=await client(`ws://127.0.0.1:${address.port}`);
+ try{
+  h.send({type:'create',name:'Host',game_version:'0.5.0'});const joined=await h.next('joined');
+  c.send({type:'join',code:joined.code,name:'Guest',game_version:'0.4.1'});
+  assert.match((await c.next('error')).reason,/Versões diferentes/);
+  assert.equal(relay.rooms.get(joined.code).members.size,1);
+  c.send({type:'join',code:joined.code,name:'Guest',game_version:'0.5.0'});
+  await c.next('joined');assert.equal(relay.rooms.get(joined.code).members.size,2);
+ }finally{h.ws.terminate();c.ws.terminate();await relay.close();}
+});

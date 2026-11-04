@@ -39,7 +39,7 @@ extends Resource
 @export var spell_recovery: float = 0.65
 @export var activation_grace: float = 1.0
 @export_group("Poderes e limites")
-@export var summon_limit: int = 14
+@export var summon_limit: int = 32
 @export var summon_batch: int = 4
 @export var summon_warning: float = 1.0
 @export var fire_speed: float = 135.0
@@ -56,7 +56,7 @@ extends Resource
 @export var ice_duration: float = 4.0
 @export var ice_radius: float = 36.0
 @export var ice_slow_multiplier: float = 0.68
-@export var area_limit: int = 8
+@export var area_limit: int = 24
 
 func executioner_health() -> float:
 	return executioner_previous_health * executioner_health_multiplier
@@ -66,3 +66,27 @@ func demon_health() -> float:
 
 func portal_duration() -> float:
 	return portal_trace + portal_open + portal_emerge + portal_close
+
+@export_group("Segunda fase")
+@export var second_health_multiplier:float=5.0
+@export var transformation_duration:float=1.6
+@export var second_damage_multiplier:float=1.35
+@export var second_interval_multiplier:float=0.85
+
+@export var first_summon_batch:int=12
+@export var second_summon_batch:int=20
+@export var first_lightning_count:int=6
+@export var second_lightning_count:int=10
+@export var sector_radius:float=34
+@export var sector_warning:float=1.25
+@export var sector_delay:float=0.14
+@export var ice_band_length:float=560
+@export var ice_band_width:float=44
+@export var ice_corridor:float=150
+@export var ring_radius:float=170
+@export var ring_hit_radius:float=30
+
+@export var ring_speed:float=70
+
+@export var first_fire_volleys:int=5
+@export var second_fire_volleys:int=8

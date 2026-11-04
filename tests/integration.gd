@@ -148,14 +148,14 @@ func _test_director() -> void:
 		check(corner_spawns > 0, "director can reinforce each world corner")
 	metrics["offscreen_spawns_checked"] = successes
 	g.start_run()
-	for _i: int in 180:
+	for _i: int in g.balance.max_enemies:
 		g.spawn_enemy("ghoul", Vector2(100, 100))
 	var accepted: bool = g.director.spawn("ghoul")
-	check(not accepted and g.enemies.size() <= 180, "director enforces entity cap on direct spawn requests")
+	check(not accepted and g.enemies.size() <= g.balance.max_enemies, "director enforces entity cap on direct spawn requests")
 	g.elapsed = 540.0
 	g.director.cooldown = 0.0
 	g.director.tick(STEP)
-	check(g.enemies.size() <= 180, "elite and boss scheduling respect the same entity cap")
+	check(g.enemies.size() <= g.balance.max_enemies, "elite and boss scheduling respect the same entity cap")
 	g.start_run()
 	check(not g.director.boss_spawned and not g.director.elite_spawned, "restart resets one-time director events")
 
@@ -171,11 +171,13 @@ func _test_boss_and_outcome() -> void:
 	g.boss_arena.tick(g.boss_balance.portal_duration() + 0.01)
 	check(enemy.combat_enabled and enemy.targetable, "complete portal enables the boss")
 	g.boss_arena.cast("lightning", enemy, Vector2.LEFT, 2)
-	check(g.boss_arena.areas.size() == 3, "new boss creates three marked lightning positions")
+	check(g.boss_arena.areas.size() == g.boss_balance.first_lightning_count, "boss creates configured marked lightning sequence")
 	var aimed_at: Vector2 = g.boss_arena.areas[0].at
 	g.player.position += Vector2(0, 175)
 	check(g.boss_arena.areas[0].at == aimed_at, "boss mark stays fixed after player moves")
 	enemy.take_damage(10000)
+	enemy.tick(g.boss_balance.transformation_duration + 0.01)
+	enemy.take_damage(100000)
 	check(g.boss_defeated and g.state == "running", "boss death records prerequisite while death animation plays")
 	check(g.boss_arena.areas.is_empty(), "boss death clears dangerous areas")
 	g.boss_arena.tick(g.boss_balance.death_duration + 0.01)
@@ -309,6 +311,7 @@ func _test_full_run() -> void:
 		# The accelerated test explicitly grants invulnerability. This is a systems
 		# traversal, not a difficulty, physical-step accuracy or framerate claim.
 		g.player.invulnerable = 10000.0
+		g.player.hp=g.player.max_hp;g.player.clear_status()
 		var before_us: int = Time.get_ticks_usec()
 		g.simulate(STEP, _bot_direction())
 		simulate_us += Time.get_ticks_usec() - before_us
@@ -323,7 +326,7 @@ func _test_full_run() -> void:
 			last_report = minute
 			print("TRAVERSAL_PROGRESS seconds=%d entities=%d kills=%d level=%d" % [g.elapsed, g.enemies.size(), g.kills, g.level])
 	check(g.state == "result" and g.director.phase == "complete", "entire sequence of hordes reaches a defined result")
-	check(maximum_entities <= 180, "entity count stays within cap over full run")
+	check(maximum_entities <= g.balance.split_entity_budget, "entity count stays within cap over full run")
 	check(saw_elite, "elite event occurs during full traversal")
 	check(saw_boss, "boss event occurs during full traversal")
 	check(g.profile.data == permanent, "accelerated traversal does not write permanent progression")

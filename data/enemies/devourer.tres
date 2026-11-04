@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/entities/enemy_data.gd" id="1"]
+[resource]
+script = ExtResource("1")
+id = "devourer"
+title = "Devorador"
+health = 38.0
+speed = 27.0
+damage = 7.0
+experience = 4
+radius = 9.0
+texture = "res://assets/devourer.png"
+frames = 6
+contact_damage = false

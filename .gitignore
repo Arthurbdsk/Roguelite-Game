@@ -4,3 +4,9 @@ build/
 test_output/
 tools/.cache/
 relay/node_modules/
+
+/network.cfg
+.env
+.env.*
+!.env.example
+*.log

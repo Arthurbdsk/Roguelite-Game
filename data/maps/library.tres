@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="MapDefinition" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/data/map_definition.gd" id="1"]
+[resource]
+script = ExtResource("1")
+title = "Biblioteca"
+style = "library"
+floor_color = Color(0.4470588235294118,0.3568627450980392,0.2627450980392157,1)
+blocks = Array[Rect2]([Rect2(180,250,120,24),Rect2(400,250,120,24),Rect2(620,250,120,24),Rect2(1100,250,120,24),Rect2(1320,250,120,24),Rect2(1540,250,120,24),Rect2(180,450,120,24),Rect2(400,450,120,24),Rect2(620,450,120,24),Rect2(1100,450,120,24),Rect2(1320,450,120,24),Rect2(1540,450,120,24),Rect2(180,820,120,24),Rect2(400,820,120,24),Rect2(620,820,120,24),Rect2(1100,820,120,24),Rect2(1320,820,120,24),Rect2(1540,820,120,24),Rect2(180,1020,120,24),Rect2(400,1020,120,24),Rect2(620,1020,120,24),Rect2(1100,1020,120,24),Rect2(1320,1020,120,24),Rect2(1540,1020,120,24)])

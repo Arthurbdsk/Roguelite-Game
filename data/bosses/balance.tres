@@ -8,6 +8,6 @@ executioner_health_multiplier = 3.0
 demon_health_multiplier = 2.0
 executioner_speed = 64.0
 demon_speed = 70.0
-summon_limit = 14
+summon_limit = 32
 fire_limit = 72
 final_projectile_limit = 120

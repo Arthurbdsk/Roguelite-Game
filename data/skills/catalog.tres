@@ -4,7 +4,7 @@
 [sub_resource type="Resource" id="edge"]
 script = ExtResource("2")
 id = "edge"
-title = "Aço temperado"
+title = "Dano"
 branch = 0
 depth = 0
 description = "Dano de armas +6%."
@@ -15,7 +15,7 @@ prerequisites = {}
 [sub_resource type="Resource" id="tempo"]
 script = ExtResource("2")
 id = "tempo"
-title = "Ritmo de ferro"
+title = "Intervalo de ataque"
 branch = 0
 depth = 1
 description = "Intervalo de ataques -5%."
@@ -26,7 +26,7 @@ prerequisites = {"edge": 1}
 [sub_resource type="Resource" id="critical"]
 script = ExtResource("2")
 id = "critical"
-title = "Fenda na guarda"
+title = "Chance de crítico"
 branch = 0
 depth = 2
 description = "5% de crítico. Crítico causa 160% do dano."
@@ -37,7 +37,7 @@ prerequisites = {"tempo": 1}
 [sub_resource type="Resource" id="opening"]
 script = ExtResource("2")
 id = "opening"
-title = "Passo decisivo"
+title = "Crítico por movimento"
 branch = 0
 depth = 3
 description = "Mover 48 px prepara um crítico garantido. Intervalo mínimo de 4 s."
@@ -48,7 +48,7 @@ prerequisites = {"critical": 1}
 [sub_resource type="Resource" id="vigor"]
 script = ExtResource("2")
 id = "vigor"
-title = "Vigor da vigília"
+title = "Vida máxima"
 branch = 1
 depth = 0
 description = "Vida máxima +15."
@@ -59,7 +59,7 @@ prerequisites = {}
 [sub_resource type="Resource" id="armor"]
 script = ExtResource("2")
 id = "armor"
-title = "Malha recuperada"
+title = "Defesa"
 branch = 1
 depth = 1
 description = "Defesa +1: reduz cada dano recebido em 1."
@@ -70,7 +70,7 @@ prerequisites = {"vigor": 1}
 [sub_resource type="Resource" id="recovery"]
 script = ExtResource("2")
 id = "recovery"
-title = "Fôlego teimoso"
+title = "Regeneração"
 branch = 1
 depth = 2
 description = "Após 4 s sem dano, recupera 1 de vida a cada 6 s."
@@ -81,7 +81,7 @@ prerequisites = {"armor": 1}
 [sub_resource type="Resource" id="last_stand"]
 script = ExtResource("2")
 id = "last_stand"
-title = "Última centelha"
+title = "Sobrevivência"
 branch = 1
 depth = 3
 description = "Uma vez por partida, um golpe letal deixa 15 de vida e concede 2 s de proteção."
@@ -92,7 +92,7 @@ prerequisites = {"recovery": 1}
 [sub_resource type="Resource" id="stride"]
 script = ExtResource("2")
 id = "stride"
-title = "Passo do exílio"
+title = "Botas"
 branch = 2
 depth = 0
 description = "Velocidade de movimento +6."
@@ -103,7 +103,7 @@ prerequisites = {}
 [sub_resource type="Resource" id="magnet"]
 script = ExtResource("2")
 id = "magnet"
-title = "Chamado do ouro"
+title = "Coleta"
 branch = 2
 depth = 1
 description = "Raio de atração de ouro e experiência +14."
@@ -114,7 +114,7 @@ prerequisites = {"stride": 1}
 [sub_resource type="Resource" id="forager"]
 script = ExtResource("2")
 id = "forager"
-title = "Passo entre ruínas"
+title = "Coleta rápida"
 branch = 2
 depth = 2
 description = "Moedas atraídas viajam 60% mais rápido durante a preparação entre hordas."
@@ -125,7 +125,7 @@ prerequisites = {"magnet": 1}
 [sub_resource type="Resource" id="salvager"]
 script = ExtResource("2")
 id = "salvager"
-title = "Coletor de brasas"
+title = "Cura por moedas"
 branch = 2
 depth = 3
 description = "Coletar 10 moedas recupera 3 de vida, uma vez por horda."
@@ -136,7 +136,7 @@ prerequisites = {"forager": 1}
 [sub_resource type="Resource" id="sword_echo"]
 script = ExtResource("2")
 id = "sword_echo"
-title = "Contraguarda"
+title = "Golpe traseiro"
 branch = 3
 depth = 0
 description = "A espada ganha seu arco traseiro desde o nível 1. Não duplica arcos já existentes."
@@ -147,35 +147,35 @@ prerequisites = {"edge": 1}
 [sub_resource type="Resource" id="bolt_pierce"]
 script = ExtResource("2")
 id = "bolt_pierce"
-title = "Ponta partida"
+title = "Perfuração"
 branch = 3
 depth = 1
-description = "Cada virote atravessa um inimigo adicional."
+description = "Cada flecha atravessa mais 1 inimigo."
 costs = PackedInt32Array(50)
 values = PackedFloat32Array(1)
-benefits = PackedStringArray("Cada virote atravessa um inimigo adicional.")
+benefits = PackedStringArray("Cada flecha atravessa mais 1 inimigo.")
 prerequisites = {"stride": 1}
 [sub_resource type="Resource" id="orbit_extra"]
 script = ExtResource("2")
 id = "orbit_extra"
-title = "Brasa desperta"
+title = "Orbe adicional"
 branch = 3
 depth = 2
-description = "Uma brasa orbital adicional em todos os níveis."
+description = "Um orbe adicional em todos os níveis."
 costs = PackedInt32Array(50)
 values = PackedFloat32Array(1)
-benefits = PackedStringArray("Uma brasa orbital adicional em todos os níveis.")
+benefits = PackedStringArray("Um orbe adicional em todos os níveis.")
 prerequisites = {"magnet": 1}
 [sub_resource type="Resource" id="pact"]
 script = ExtResource("2")
 id = "pact"
-title = "Pacto das três"
+title = "Preparação"
 branch = 3
 depth = 3
-description = "Equipar as três armas abre a quarta vaga de passiva nesta partida."
+description = "Vida máxima +10 no início da partida. Não ocupa espaço."
 costs = PackedInt32Array(120)
 values = PackedFloat32Array(1)
-benefits = PackedStringArray("Equipar as três armas abre a quarta vaga de passiva nesta partida.")
+benefits = PackedStringArray("Vida máxima +10 no início da partida. Não ocupa espaço.")
 prerequisites = {"sword_echo": 1, "bolt_pierce": 1, "orbit_extra": 1}
 [resource]
 script = ExtResource("1")

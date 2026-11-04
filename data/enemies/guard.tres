@@ -3,7 +3,7 @@
 [resource]
 script = ExtResource("1")
 id = "guard"
-title = "Carrasco"
+title = "Soldado"
 health = 78.0
 speed = 18.0
 damage = 14.0

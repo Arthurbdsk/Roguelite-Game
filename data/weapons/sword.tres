@@ -5,13 +5,15 @@
 [resource]
 script = ExtResource("1")
 id = "sword"
-display_name = "Lâmina da vigília"
-description = "Arco amplo contra ameaças próximas. Mira no inimigo mais próximo."
+display_name = "Espada"
+description = "Golpe amplo na direção do inimigo mais próximo."
 icon = "res://assets/icons/sword.png"
-affinity = "ward"
-evolution_name = "Juramento partido"
-damage = PackedFloat32Array(18, 23, 26, 32, 40)
-cooldown = PackedFloat32Array(0.8, 0.8, 0.76, 0.72, 0.66)
-reach = PackedFloat32Array(58, 65, 67, 76, 88)
-count = PackedInt32Array(1, 1, 2, 2, 2)
-level_descriptions = PackedStringArray("Varre um arco frontal. 18 de dano; alcance 58.", "A lâmina alcança mais longe e causa 23 de dano.", "Adiciona um segundo arco atrás da sentinela.", "Arcos mais amplos, alcance 76 e 32 de dano.", "Evolução: dois arcos de alcance 88; rompe o cerco.")
+affinity = ""
+evolution_name = "Espada dupla"
+damage = PackedFloat32Array(18,23,26,32,40,45,51,60)
+cooldown = PackedFloat32Array(0.8,0.8,0.76,0.72,0.66,0.62,0.62,0.58)
+reach = PackedFloat32Array(58.0,65.0,67.0,76.0,88.0,98.56,98.56,110.39)
+count = PackedInt32Array(1,1,2,2,2,2,2,2)
+level_descriptions = PackedStringArray("Dano: 18. Intervalo: 0.8 s. Alcance: 58. Quantidade: 1.", "Dano: 18 → 23. Intervalo: 0.8 s → 0.8 s. Alcance: 58 → 65. Quantidade: 1 → 1.", "Dano: 23 → 26. Intervalo: 0.8 s → 0.76 s. Alcance: 65 → 67. Quantidade: 1 → 2.", "Dano: 26 → 32. Intervalo: 0.76 s → 0.72 s. Alcance: 67 → 76. Quantidade: 2 → 2.", "Dano: 32 → 40. Intervalo: 0.72 s → 0.66 s. Alcance: 76 → 88. Quantidade: 2 → 2.")
+
+max_level = 8

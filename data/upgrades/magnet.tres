@@ -3,8 +3,8 @@
 [resource]
 script = ExtResource("1")
 id = "magnet"
-display_name = "Ímã funerário"
-description = "Recolhe experiência sem atravessar o centro da horda."
+display_name = "Ímã"
+description = "Alcance de coleta +32."
 icon = "res://assets/icons/magnet.png"
-max_level = 2
-level_descriptions = PackedStringArray("+32 de alcance de coleta. Permite evoluir as brasas.", "+40 de alcance de coleta adicional.")
+max_level = 8
+level_descriptions = PackedStringArray("Total: Raio de coleta +14 px.","Total: Raio de coleta +28 px.","Total: Raio de coleta +42 px.","Total: Raio de coleta +56 px.","Total: Raio de coleta +70 px.","Total: Raio de coleta +84 px.","Total: Raio de coleta +98 px.","Total: Raio de coleta +112 px.")

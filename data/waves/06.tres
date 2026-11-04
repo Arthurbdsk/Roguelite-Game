@@ -2,9 +2,9 @@
 [ext_resource type="Script" path="res://scripts/data/wave_data.gd" id="1"]
 [resource]
 script = ExtResource("1")
-title = "Cerco de ossos"
-composition = {"ghoul": 14, "hound": 10, "skeleton_sword": 22, "skeleton_archer": 10, "guard": 12}
-spawn_interval = 0.38
-max_alive = 50
+title = "Horda 6"
+composition = {"ghoul": 88, "hound": 10, "skeleton_sword": 22, "skeleton_archer": 10, "guard": 12, "plague": 1, "beast": 2, "slime_large": 2, "devourer": 1}
+spawn_interval = 0.19
+max_alive = 100
 elite_guards = 0
 boss = false

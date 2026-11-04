@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/data/weapon_data.gd" id="1"]
+[resource]
+script = ExtResource("1")
+id = "clock"
+display_name = "Lança Relógio"
+evolution_name = "Lança Relógio reforçada"
+affinity = ""
+icon = "res://assets/icons/clock.png"
+damage = PackedFloat32Array(1.0,1.0,2.0,2.0,3.0,3.36,3.36,3.76)
+cooldown = PackedFloat32Array(0.9,0.82,0.74,0.66,0.58,0.55,0.55,0.52)
+reach = PackedFloat32Array(160.0,180.0,200.0,220.0,240.0,268.8,268.8,301.06)
+count = PackedInt32Array(1,1,1,1,1,1,1,1)
+level_descriptions = PackedStringArray("Paralisa por 3 s. Dano 1. Alcance 160. Largura 8. Intervalo 0,9 s.","Alcance 180. Largura 10. Intervalo 0,82 s.","Dano 2. Alcance 200. Largura 12. Intervalo 0,74 s.","Alcance 220. Largura 14. Intervalo 0,66 s.","Dano 3. Alcance 240. Largura 16. Intervalo 0,58 s.")
+
+max_level = 8

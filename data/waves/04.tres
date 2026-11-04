@@ -2,9 +2,9 @@
 [ext_resource type="Script" path="res://scripts/data/wave_data.gd" id="1"]
 [resource]
 script = ExtResource("1")
-title = "Laminas da cripta"
-composition = {"ghoul": 12, "hound": 6, "skeleton_sword": 10, "guard": 4}
-spawn_interval = 0.65
-max_alive = 28
+title = "Horda 4"
+composition = {"ghoul": 46, "hound": 6, "skeleton_sword": 10, "guard": 4, "beast": 1, "slime_large": 1}
+spawn_interval = 0.325
+max_alive = 56
 elite_guards = 0
 boss = false

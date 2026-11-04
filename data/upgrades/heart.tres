@@ -3,8 +3,8 @@
 [resource]
 script = ExtResource("1")
 id = "heart"
-display_name = "Coração de âmbar"
-description = "Reserva de vida para resistir a uma decisão arriscada."
+display_name = "Coração"
+description = "Vida máxima +25. Recupera até 30 de vida."
 icon = "res://assets/icons/heart.png"
-max_level = 2
-level_descriptions = PackedStringArray("+25 de vida máxima e recupera 30 de vida.", "+25 de vida máxima e recupera 30 de vida.")
+max_level = 8
+level_descriptions = PackedStringArray("Total: Vida máxima +10. Recupera até 15 de vida.","Total: Vida máxima +20. Recupera até 15 de vida.","Total: Vida máxima +30. Recupera até 15 de vida.","Total: Vida máxima +40. Recupera até 15 de vida.","Total: Vida máxima +50. Recupera até 15 de vida.","Total: Vida máxima +60. Recupera até 15 de vida.","Total: Vida máxima +70. Recupera até 15 de vida.","Total: Vida máxima +80. Recupera até 15 de vida.")

@@ -3,8 +3,8 @@
 [resource]
 script = ExtResource("1")
 id = "ward"
-display_name = "Selo da muralha"
-description = "Reduz dano de contato. Cada golpe ainda causa ao menos 1."
+display_name = "Armadura"
+description = "Defesa +2. Cada dano causa no mínimo 1."
 icon = "res://assets/icons/ward.png"
-max_level = 2
-level_descriptions = PackedStringArray("Bloqueia 2 de dano. Permite a evolução da lâmina.", "Bloqueia mais 2 de dano por contato.")
+max_level = 8
+level_descriptions = PackedStringArray("Total: Defesa +1. Cada acerto conserva pelo menos 20% do dano e causa no mínimo 1.","Total: Defesa +2. Cada acerto conserva pelo menos 20% do dano e causa no mínimo 1.","Total: Defesa +3. Cada acerto conserva pelo menos 20% do dano e causa no mínimo 1.","Total: Defesa +4. Cada acerto conserva pelo menos 20% do dano e causa no mínimo 1.","Total: Defesa +5. Cada acerto conserva pelo menos 20% do dano e causa no mínimo 1.","Total: Defesa +6. Cada acerto conserva pelo menos 20% do dano e causa no mínimo 1.","Total: Defesa +7. Cada acerto conserva pelo menos 20% do dano e causa no mínimo 1.","Total: Defesa +8. Cada acerto conserva pelo menos 20% do dano e causa no mínimo 1.")

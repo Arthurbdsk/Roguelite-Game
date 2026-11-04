@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/entities/enemy_data.gd" id="1"]
+[resource]
+script = ExtResource("1")
+id = "plague"
+title = "Médico da peste"
+health = 65.0
+speed = 24
+damage = 10.0
+radius = 9.0
+experience = 6
+texture = "res://assets/v08/plague.png"
+behavior = "special"
+frames = 16
+contact_damage = false
+attack_range = 300.0
+attack_interval = 2.8
+windup = 0.65
+recovery = 0.9

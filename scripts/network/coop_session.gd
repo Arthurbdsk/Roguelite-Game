@@ -10,6 +10,7 @@ var revives := ReviveAuthority.new()
 var active: bool = false
 var hosting: bool = false
 var initial_size: int = 1
+var lobby_map:String="courtyard"
 var room_run: String = ""
 var message: String = ""
 var local_name: String = ""
@@ -55,6 +56,7 @@ func connect_room(create: bool, name_value: String, code: String = "") -> void:
 func receive(packet: Dictionary) -> void:
 	match packet.get("type", ""):
 		"joined", "lobby":
+			lobby_map=packet.get("map",lobby_map)
 			game.state = "lobby"
 			hosting = connection.peer_id == connection.host_id
 			message = ""
@@ -62,6 +64,9 @@ func receive(packet: Dictionary) -> void:
 		"error":
 			message = packet.get("reason", "Falha na sala.")
 			game.ui.render("lobby" if not connection.code.is_empty() else "online")
+		"prepare":
+			game.selected_map=packet.get("map","courtyard");game.arena.apply_map(game.selected_map)
+			connection.send_message({"type":"loaded"})
 		"start": begin(packet)
 		"left":
 			remove_actor(packet.id)
@@ -82,6 +87,7 @@ func receive(packet: Dictionary) -> void:
 					if data is Dictionary: apply_event(data)
 
 func begin(packet: Dictionary) -> void:
+	game.selected_map=packet.get("map",game.selected_map)
 	game.start_run()
 	room_run = packet.run
 	game.run_id = room_run
@@ -162,21 +168,25 @@ func tick(delta: float, movement: Vector2) -> void:
 func host_tick(delta: float, local: Dictionary) -> void:
 	if game.state != "running": return
 	game.elapsed += delta
+	game.navigation.tick(delta)
 	var local_actor: CoopActor = actors[connection.peer_id]
 	var actions: Dictionary = {}
 	for id in actors:
 		var actor: CoopActor = actors[id]
 		var action: Dictionary = local if id == connection.peer_id else inputs.current(id, world_clock)
 		actions[id] = action
-		if actor.down: continue
+		if actor.down:
+			actor.player.tick_visual(delta);continue
 		var before: Vector2 = actor.player.position
 		actor.player.movement_multiplier = game.boss_arena.slow_multiplier(before)
 		actor.player.tick(delta, action.movement)
 		actor.mastery.tick(delta, before.distance_to(actor.player.position) if action.movement.length_squared() > 0 else 0)
 	game.player = local_actor.player
+	game.slime_families.tick(delta)
 	game.director.tick(delta)
 	if ended: return
 	game.gold_loot.tick(delta)
+	game.food_index.tick(delta)
 	game.rebuild_grid()
 	for enemy in game.enemies.duplicate():
 		if not is_instance_valid(enemy) or not enemy.alive: continue
@@ -185,6 +195,7 @@ func host_tick(delta: float, local: Dictionary) -> void:
 			game.player = target
 			enemy.tick(delta)
 	game.player = local_actor.player
+	game.rebuild_grid()
 	for id in actors:
 		var actor: CoopActor = actors[id]
 		if not actor.down:
@@ -192,6 +203,7 @@ func host_tick(delta: float, local: Dictionary) -> void:
 	game.update_pickups(delta)
 	game.enemy_projectiles.tick(delta)
 	game.update_hazards(delta)
+	game.specials.tick(delta)
 	game.boss_arena.tick(delta)
 	if ended: return
 	game.update_event(delta)
@@ -210,6 +222,7 @@ func host_tick(delta: float, local: Dictionary) -> void:
 		target.player.hp = result.hp
 		target.player.invulnerable = result.invulnerability
 		target.player.sprite.rotation = 0
+		target.player.revive_remaining=.45
 		publish({"type": "revive", "event": result})
 	if revives.all_down(actor_states()): finish(false); return
 	for id in actors:
@@ -268,8 +281,14 @@ func mark_down(id: String) -> void:
 	actors[id].down = true
 	actors[id].player.down = true
 	actors[id].player.hp = 0
+	actors[id].player.clear_status()
 	actors[id].player.velocity = Vector2.ZERO
-	actors[id].player.sprite.rotation = PI / 2
+	actors[id].player.sprite.rotation = 0
+	actors[id].player.visual_clock=0
+	actors[id].player.tick_visual(0)
+	actors[id].weapon_system.ground.reset();actors[id].weapon_system.arsenal.reset()
+	actors[id].weapon_system.beams.clear()
+	actors[id].weapon_system.lightning_fx.clear()
 	actors[id].weapon_system.projectiles.clear()
 	actors[id].weapon_system.slashes.clear()
 	actors[id].weapon_system.orbit_positions.clear()
@@ -330,6 +349,9 @@ func settle(result: Dictionary) -> void:
 	ended = true
 	if is_instance_valid(team_hud): team_hud.hide()
 	game.state = "result"
+	for actor in actors.values():
+		actor.player.clear_status();actor.weapon_system.ground.reset();actor.weapon_system.arsenal.reset()
+	game.slime_families.reset()
 	game.run_settled = true
 	game.boss_arena.stop_combat()
 	game.camera.position = Vector2.ZERO
@@ -402,11 +424,11 @@ func broadcast_state(force: bool = false) -> void:
 		if is_instance_valid(death.boss) and not visible_enemies.has(death.boss): visible_enemies.append(death.boss)
 	for enemy in visible_enemies:
 		if not is_instance_valid(enemy): continue
-		entities["e" + str(enemy.serial)] = {"kind": "enemy", "species": enemy.data.id, "position": enemy.position, "hp": enemy.hp, "max_hp": enemy.max_hp, "frame": enemy.sprite.frame, "flip": enemy.sprite.flip_h, "state": enemy.state, "charge_direction": enemy.charge_direction, "targetable": enemy.targetable, "visible": enemy.sprite.visible, "sprite_position": enemy.sprite.position, "alpha": enemy.sprite.modulate.a}
-		entities["e" + str(enemy.serial)].merge({"state_time": enemy.state_time, "elite": enemy.elite, "attack_name": enemy.attack_name if enemy is HordeBoss else "", "phase": enemy.phase if enemy is HordeBoss else 1})
+		entities["e" + str(enemy.serial)] = {"kind": "enemy", "species": enemy.data.id, "position": enemy.position, "hp": enemy.hp, "max_hp": enemy.max_hp, "frame": enemy.sprite.frame, "flip": enemy.sprite.flip_h, "state": enemy.state, "charge_direction": enemy.charge_direction, "targetable": enemy.targetable, "visible": enemy.sprite.visible, "sprite_position": enemy.sprite.position, "alpha": enemy.sprite.modulate.a,"meals":enemy.meals if enemy is Devourer else 0,"enemy_damage":enemy.data.damage}
+		entities["e" + str(enemy.serial)].merge({"form":enemy.form if enemy is HordeBoss else 1,"frozen":enemy.frozen_remaining,"slow":enemy.slow_remaining,"state_time": enemy.state_time, "elite": enemy.elite, "attack_name": enemy.attack_name if enemy is HordeBoss else "", "phase": enemy.phase if enemy is HordeBoss else 1,"ambush_at":enemy.ambush_at if enemy is SpecialEnemy else Vector2.ZERO})
 	for id in actors:
 		var actor: CoopActor = actors[id]
-		entities[id] = {"kind": "player", "position": actor.player.position, "hp": actor.player.hp, "max_hp": actor.player.max_hp, "speed": actor.player.speed, "down": actor.down, "frame": actor.player.sprite.frame, "flip": actor.player.sprite.flip_h, "invulnerable": actor.player.invulnerable}
+		entities[id] = {"kind": "player", "position": actor.player.position, "hp": actor.player.hp, "max_hp": actor.player.max_hp, "speed": actor.player.speed, "down": actor.down, "frame": actor.player.sprite.frame, "flip": actor.player.sprite.flip_h, "invulnerable": actor.player.invulnerable,"poison":actor.player.poison_remaining,"root":actor.player.root_remaining}
 	for coin in game.gold_loot.coins:
 		entities["c" + str(coin.id)] = {"kind": "coin", "at": coin.at, "age": floorf(coin.age), "value": coin.value, "attracted": coin.attracted}
 	for item in game.pickups:
@@ -428,8 +450,8 @@ func broadcast_state(force: bool = false) -> void:
 		var weapons: WeaponSystem = actors[id].weapon_system
 		var shots: Array = []
 		for shot in weapons.projectiles: shots.append({"position": shot.position, "velocity": shot.velocity})
-		weapon_fx[id] = {"projectiles": shots, "slashes": weapons.slashes, "orbit_positions": weapons.orbit_positions}
-	var data := {"changes": changes, "removals": removals, "elapsed": game.elapsed, "gold": game.gold, "kills": game.kills, "earned": game.earned, "wave": game.director.wave_number(), "pressure": game.director.pressure(), "banner": game.banner, "arrows": game.enemy_projectiles.arrows, "hazards": game.hazards, "areas": game.boss_arena.areas, "summons": game.boss_arena.pending_summons, "swings": game.boss_arena.swings, "portal_age": game.boss_arena.portal_age, "stage": game.boss_arena.stage, "weapons": weapon_fx, "revives": revives.interactions, "event_claimed": game.event_claimed, "event_progress": game.event_progress, "numbers": game.numbers}
+		weapon_fx[id] = {"projectiles": shots, "slashes": weapons.slashes, "orbit_positions": weapons.orbit_positions,"lightning_fx":weapons.lightning_fx,"beams":weapons.beams,"pools":weapons.ground.pools,"arsenal_shots":weapons.arsenal.shots,"arsenal_zones":weapons.arsenal.zones,"blade_points":weapons.arsenal.blade_points}
+	var data := {"changes": changes, "removals": removals, "elapsed": game.elapsed, "gold": game.gold, "kills": game.kills, "earned": game.earned, "wave": game.director.wave_number(), "pressure": game.director.pressure(), "banner": game.banner, "arrows": game.enemy_projectiles.arrows, "hazards": game.hazards, "areas": game.boss_arena.areas, "summons": game.boss_arena.pending_summons, "swings": game.boss_arena.swings, "portal_age": game.boss_arena.portal_age, "stage": game.boss_arena.stage, "weapons": weapon_fx, "revives": revives.interactions, "event_claimed": game.event_claimed, "event_progress": game.event_progress, "numbers": game.numbers,"split_pending":game.slime_families.pending,"special_marks":game.specials.marks,"special_areas":game.specials.areas,"special_bolts":game.specials.bolts}
 	var packet := {"type": "delta", "data": CoopWire.encode(data)}
 	bytes_sent += JSON.stringify(packet).length()
 	snapshot_count += 1
@@ -444,10 +466,11 @@ func apply_event(data: Dictionary) -> void:
 			received_personal = data.data
 			var actor: CoopActor = actors[connection.peer_id]
 			actor.level = int(data.data.level)
-			actor.xp = int(data.data.xp)
+			actor.xp = float(data.data.xp)
 			actor.xp_needed = int(data.data.xp_needed)
 			actor.weapon_system.levels = data.data.levels
 			actor.weapon_system.passives = data.data.passives
+			for key in data.data.stats:actor.player.set(key,data.data.stats[key])
 			game.level = actor.level
 			game.xp = actor.xp
 			game.xp_needed = actor.xp_needed
@@ -460,6 +483,7 @@ func apply_event(data: Dictionary) -> void:
 				if data.id == connection.peer_id and data.hp < actors[data.id].player.hp:
 					game.sound.play_cue("hurt")
 					game.shake_time = 0.16
+				actors[data.id].player.hurt_remaining=.2 if data.hp<actors[data.id].player.hp else actors[data.id].player.hurt_remaining
 				actors[data.id].player.hp = data.hp
 				actors[data.id].down = data.down
 				actors[data.id].player.down = data.down
@@ -473,6 +497,7 @@ func apply_event(data: Dictionary) -> void:
 			if actors.has(event.target):
 				actors[event.target].down = false
 				actors[event.target].player.down = false
+				actors[event.target].player.revive_remaining = .45
 				actors[event.target].player.hp = event.hp
 				actors[event.target].player.invulnerable = event.invulnerability
 		"end": settle(data.data)
@@ -502,13 +527,17 @@ func apply_delta(raw: Dictionary) -> void:
 				destinations[id] = state.position
 				actor.player.hp = state.hp
 				actor.player.max_hp = state.max_hp
+				actor.player.poison_remaining = state.poison
+				actor.player.root_remaining = state.root
 				actor.player.speed = state.speed
 				actor.down = state.down
 				actor.player.down = state.down
 				actor.player.sprite.frame = int(state.frame)
+				if int(state.frame) in range(10,16):actor.player.swing_remaining=(16-int(state.frame))*.05
+				if int(state.frame) in [8,9]:actor.player.anticipation_remaining=.12 if int(state.frame)==8 else .06
 				actor.player.sprite.flip_h = state.flip
 				actor.player.invulnerable = state.invulnerable
-				actor.player.sprite.rotation = PI / 2 if state.down else 0
+				actor.player.sprite.rotation = 0
 				actor.player.queue_redraw()
 			"enemy":
 				var enemy = state.get("node")
@@ -518,8 +547,13 @@ func apply_delta(raw: Dictionary) -> void:
 				destinations[id] = state.position
 				enemy.hp = state.hp
 				enemy.max_hp = state.max_hp
+				enemy.data.damage=state.enemy_damage
+				if enemy is Devourer:enemy.meals=int(state.meals);enemy.growth_visual()
 				enemy.state = state.state
+				if enemy is SpecialEnemy:enemy.ambush_at=state.ambush_at
 				enemy.state_time = state.state_time
+				enemy.frozen_remaining=state.frozen
+				enemy.slow_remaining=state.slow
 				enemy.charge_direction = state.charge_direction
 				enemy.targetable = state.targetable
 				enemy.sprite.frame = int(state.frame)
@@ -531,6 +565,8 @@ func apply_delta(raw: Dictionary) -> void:
 					enemy.combat_enabled = state.targetable
 					enemy.attack_name = state.attack_name
 					enemy.phase = int(state.phase)
+					enemy.form = int(state.form)
+					enemy.apply_visual_form()
 				enemy.queue_redraw()
 			"coin": game.gold_loot.coins.append({"at": state.at, "age": state.age, "value": state.value})
 			"xp": game.pickups.append({"at": state.at, "xp": state.xp})
@@ -543,6 +579,12 @@ func apply_delta(raw: Dictionary) -> void:
 	game.event_claimed = data.event_claimed
 	game.event_progress = data.event_progress
 	game.numbers.assign(data.numbers)
+	game.slime_families.pending.assign(data.split_pending)
+	game.slime_families.queue_redraw()
+	game.specials.marks.assign(data.special_marks)
+	game.specials.areas.assign(data.special_areas)
+	game.specials.bolts.assign(data.special_bolts)
+	game.specials.queue_redraw()
 	game.enemy_projectiles.arrows.assign(data.arrows)
 	game.hazards.assign(data.hazards)
 	game.boss_arena.areas.assign(data.areas)
@@ -554,6 +596,14 @@ func apply_delta(raw: Dictionary) -> void:
 	for id in data.weapons:
 		if not actors.has(id): continue
 		var weapons: WeaponSystem = actors[id].weapon_system
+		weapons.arsenal.shots.assign(data.weapons[id].arsenal_shots)
+		weapons.arsenal.zones.assign(data.weapons[id].arsenal_zones)
+		weapons.arsenal.blade_points.assign(data.weapons[id].blade_points)
+		weapons.arsenal.queue_redraw()
+		weapons.ground.pools.assign(data.weapons[id].pools)
+		weapons.ground.queue_redraw()
+		weapons.beams.assign(data.weapons[id].beams)
+		weapons.lightning_fx.assign(data.weapons[id].lightning_fx)
 		weapons.projectiles.assign(data.weapons[id].projectiles)
 		weapons.slashes.assign(data.weapons[id].slashes)
 		weapons.orbit_positions.assign(data.weapons[id].orbit_positions)
@@ -575,8 +625,9 @@ func client_tick(delta: float, action: Dictionary) -> void:
 	var local: CoopActor = actors[connection.peer_id]
 	if not local.down:
 		local.player.movement_multiplier = game.boss_arena.slow_multiplier(local.player.position)
-		local.player.tick(delta, action.movement)
-		if destinations.has(local.id): destinations[local.id] += action.movement.limit_length() * local.player.speed * local.player.movement_multiplier * delta
+		var movement:Vector2=action.movement if local.player.root_remaining<=0 else Vector2.ZERO
+		local.player.tick(delta, movement)
+		if destinations.has(local.id): destinations[local.id] += movement.limit_length() * local.player.speed * local.player.movement_multiplier * delta
 	for id in destinations:
 		var node = actors[id].player if actors.has(id) else replicas[id].get("node")
 		if not is_instance_valid(node): continue
@@ -584,7 +635,15 @@ func client_tick(delta: float, action: Dictionary) -> void:
 	for actor in actors.values():
 		actor.player.sprite.modulate.a = 0.55 if actor.player.invulnerable > 0 and int(world_clock * 10) % 2 == 0 else 1.0
 	for arrow in game.enemy_projectiles.arrows: arrow.at += arrow.velocity * delta
-	for area in game.boss_arena.areas: area.age += delta
+	for area in game.boss_arena.areas:
+		area.age += delta
+		if area.kind=="ring":area.at=area.ring_center+Vector2.from_angle(area.ring_angle)*maxf(0,game.boss_balance.ring_radius-maxf(0,area.age-area.warning)*game.boss_balance.ring_speed)
+	for batch in game.slime_families.pending:batch.age+=delta
+	game.slime_families.queue_redraw()
+	for mark in game.specials.marks:mark.age+=delta
+	for area in game.specials.areas:area.age+=delta
+	for bolt in game.specials.bolts:bolt.at+=bolt.velocity*delta
+	game.specials.queue_redraw()
 	for hazard in game.hazards: hazard.age += delta
 	for mark in game.boss_arena.pending_summons: mark.age += delta
 	if game.boss_arena.stage == "portal": game.boss_arena.portal_age += delta
@@ -594,6 +653,19 @@ func client_tick(delta: float, action: Dictionary) -> void:
 		effect.at.y -= delta * 13
 	game.gold_loot.feedback = game.gold_loot.feedback.filter(func(effect): return effect.life > 0)
 	for actor in actors.values():
+		for shot in actor.weapon_system.arsenal.shots:
+			shot.age+=delta
+			if shot.kind=="axe":shot.at=shot.origin+shot.direction*170*shot.age+Vector2(0,180*shot.age*(shot.age-shot.flight))
+			else:shot.at+=shot.direction*250*delta if shot.leg==0 else (actor.player.position-shot.at).normalized()*300*delta
+		for zone in actor.weapon_system.arsenal.zones:zone.age+=delta
+		actor.weapon_system.arsenal.queue_redraw()
+		for beam in actor.weapon_system.beams:beam.life-=delta
+		actor.weapon_system.beams=actor.weapon_system.beams.filter(func(b):return b.life>0)
+		for fx in actor.weapon_system.lightning_fx:fx.life-=delta
+		actor.weapon_system.lightning_fx=actor.weapon_system.lightning_fx.filter(func(f):return f.life>0)
+		for pool in actor.weapon_system.ground.pools:pool.age+=delta
+		actor.weapon_system.ground.pools=actor.weapon_system.ground.pools.filter(func(p):return p.age<p.flight+p.duration)
+		actor.weapon_system.ground.queue_redraw()
 		for shot in actor.weapon_system.projectiles: shot.position += shot.velocity * delta
 		for slash in actor.weapon_system.slashes: slash.remaining = maxf(0, slash.remaining - delta)
 		actor.weapon_system.queue_redraw()

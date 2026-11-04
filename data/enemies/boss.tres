@@ -3,7 +3,7 @@
 [resource]
 script = ExtResource("1")
 id = "boss"
-title = "O Rei sem Brasa"
+title = "Chefe"
 health = 1350.0
 speed = 22.0
 damage = 20.0

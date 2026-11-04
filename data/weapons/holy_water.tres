@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/data/weapon_data.gd" id="1"]
+[resource]
+script = ExtResource("1")
+id = "holy_water"
+display_name = "Água Benta"
+evolution_name = "Água Benta"
+icon = "res://assets/icons/holy_water.png"
+damage = PackedFloat32Array(8.0,12.0,12.0,16.0,20.0,22.4,22.4,25.09)
+cooldown = PackedFloat32Array(4.0,4.0,4.0,4.0,3.8,3.57,3.57,3.36)
+reach = PackedFloat32Array(36.0,36.0,42.0,42.0,48.0,53.76,53.76,60.21)
+count = PackedInt32Array(1,1,1,2,2,2,3,3)
+duration = PackedFloat32Array(4.0,4.0,5.0,5.0,6.0,6.0,6.5,6.5)
+flight_time = 0.7
+
+max_level = 8

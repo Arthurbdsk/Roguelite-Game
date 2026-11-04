@@ -3,8 +3,8 @@
 [resource]
 script = ExtResource("1")
 id = "boots"
-display_name = "Passo do exílio"
-description = "Cria espaço para reposicionar o leque de virotes."
+display_name = "Botas"
+description = "Movimento +18."
 icon = "res://assets/icons/boots.png"
-max_level = 2
-level_descriptions = PackedStringArray("+18 de velocidade. Permite a evolução da besta.", "+18 de velocidade adicional. Limite atingido.")
+max_level = 8
+level_descriptions = PackedStringArray("Total: Movimento +8 px/s.","Total: Movimento +16 px/s.","Total: Movimento +24 px/s.","Total: Movimento +32 px/s.","Total: Movimento +40 px/s.","Total: Movimento +48 px/s.","Total: Movimento +56 px/s.","Total: Movimento +64 px/s.")

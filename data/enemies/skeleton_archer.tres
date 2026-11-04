@@ -3,7 +3,7 @@
 [resource]
 script = ExtResource("1")
 id = "skeleton_archer"
-title = "Arqueiro da cripta"
+title = "Esqueleto com arco"
 health = 38.0
 speed = 28.0
 damage = 10.0

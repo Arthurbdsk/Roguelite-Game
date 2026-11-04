@@ -40,7 +40,7 @@ func run() -> void:
 		var boss = fresh(kind)
 		await physics_frame
 		game.simulate(1.0/60)
-		check(is_equal_approx(boss.velocity.length(), 102.4 if kind == "executioner" else 112.0), "actual four-player chase speed: " + kind)
+		check(is_equal_approx(boss.velocity.length(), (102.4 if kind == "executioner" else 112.0)*game.balance.enemy_speed_multiplier), "actual four-player chase speed: " + kind)
 		for attack in (["execute", "charge"] if kind == "executioner" else ["charge"]):
 			boss = fresh(kind)
 			if attack == "execute": game.player.position = Vector2(840,630)
@@ -59,7 +59,15 @@ func run() -> void:
 	boss.hp = boss.max_hp * 0.4
 	await physics_frame
 	game.simulate(1.0/60)
-	check(is_equal_approx(boss.velocity.length(), 108.544), "four-player enraged executioner retains requested speed multiplier")
+	check(is_equal_approx(boss.velocity.length(), 108.544*game.balance.enemy_speed_multiplier), "four-player enraged executioner retains requested speed multiplier")
+	var fast=fresh("hound")
+	game.player.position=Vector2(700,700);fast.position=Vector2(675,700)
+	game.coop.local_input_override={"movement":Vector2.RIGHT,"revive":false}
+	for i in 360:
+		await physics_frame
+		game.simulate(1.0/60)
+	print("DIFFICULTY_RISK hound four-player speed=%.2f player=%.2f hp_after_6s=%.2f; straight retreat without attacks, initial gap 25px"%[fast.data.speed,game.player.speed,game.player.hp])
+	game.coop.local_input_override.clear()
 	# Spawn checks cover all four view rectangles even after the team splits.
 	for actor in game.coop.actors.values(): actor.player.invulnerable = 100
 	game.despawn_enemy(boss)

@@ -30,19 +30,19 @@ func _validate() -> void:
 		await process_frame
 	ui.render("upgrading", {"offers": [
 		{"id": "sword", "name": "Espada", "description": "O arco alcança mais inimigos.", "detail": "Nível 2"},
-		{"id": "bolt", "name": "Virote", "description": "Um projétil atravessa a horda.", "detail": "Nova arma"},
-		{"id": "orbit", "name": "Brasas", "description": "Proteção em torno da sentinela.", "detail": "Nova arma"}
+		{"id": "bolt", "name": "Arco", "description": "Um projétil atravessa a horda.", "detail": "Nova arma"},
+		{"id": "orbit", "name": "Orbes", "description": "Orbes giram ao seu redor.", "detail": "Nova arma"}
 	]})
 	await process_frame
 	var concrete_offers: Array[Dictionary] = []
 	for weapon_id: String in ["sword", "bolt", "orbit"]:
 		var resource = load("res://data/weapons/%s.tres" % weapon_id)
 		for level: int in range(5):
-			concrete_offers.append({"id": weapon_id, "name": resource.evolution_name if level == 4 else resource.display_name, "description": resource.level_descriptions[level], "detail": "ARMA %d/5 · Só nesta expedição. Nível 5 exige Passo do exílio." % [level + 1]})
+			concrete_offers.append({"id": weapon_id, "name": resource.evolution_name if level == 4 else resource.display_name, "description": resource.level_descriptions[level], "detail": "ARMA %d/5 · Só nesta partida. Nível 5 exige Botas." % [level + 1]})
 	for passive_id: String in ["boots", "magnet", "heart", "ward", "cadence"]:
 		var resource = load("res://data/upgrades/%s.tres" % passive_id)
 		for level: int in range(2):
-			concrete_offers.append({"id": passive_id, "name": resource.display_name, "description": resource.level_descriptions[level], "detail": "PASSIVA %d/2 · Só nesta expedição. 3/3 vagas ocupadas." % [level + 1]})
+			concrete_offers.append({"id": passive_id, "name": resource.display_name, "description": resource.level_descriptions[level], "detail": "PASSIVA %d/2 · Só nesta partida. 3/3 vagas ocupadas." % [level + 1]})
 	for index: int in range(0, concrete_offers.size(), 3):
 		ui.render("upgrading", {"offers": concrete_offers.slice(index, mini(index + 3, concrete_offers.size()))})
 		await process_frame

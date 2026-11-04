@@ -1,6 +1,8 @@
 class_name HordeBoss
 extends HordeEnemy
 
+var form:int=1
+var first_phase_hp:float=0
 var phase: int = 1
 var attack_name: String = ""
 var attack_index: int = 0
@@ -9,11 +11,37 @@ var death_paid: bool = false
 var charge_hit: bool = false
 var contact_timer: float = 0.8
 var is_executioner: bool = false
+var visual_form:int=0
+
+func _ready() -> void:
+	super._ready()
+	apply_visual_form()
+
+func apply_visual_form() -> void:
+	if is_executioner:return
+	var shown:int=1 if form==1 or (state=="transform" and state_time<game.boss_balance.transformation_duration*.5) else 2
+	if shown==visual_form:return
+	visual_form=shown
+	sprite.texture=load("res://assets/v08/demon_"+str(shown)+".png")
+	sprite.hframes=32
+	sprite.position.y=-float(sprite.texture.get_height())*.5+4
+
+func animate_demon(moving:bool) -> void:
+	apply_visual_form()
+	if state=="transform":
+		var progress:float=state_time/game.boss_balance.transformation_duration
+		sprite.frame=26+mini(3,int(fmod(progress,.5)*8))
+	elif hit_flash>0:sprite.frame=24+int(hit_flash<.04)
+	elif state=="windup":sprite.frame=12+mini(3,int(state_time/maxf(.01,warning_duration())*4))
+	elif state=="recovery":sprite.frame=16+mini(7,int(state_time/maxf(.01,game.boss_balance.charge_recovery if attack_name=="charge" else game.boss_balance.spell_recovery)*8))
+	elif moving:sprite.frame=4+int(clock*9)%8
+	else:sprite.frame=int(clock*4)%4
 
 func setup(owner_game, stats: EnemyData, _is_elite: bool = false) -> void:
 	super.setup(owner_game, stats, false)
 	is_executioner = stats.behavior == "executioner"
 	max_hp = game.boss_balance.executioner_health() if is_executioner else game.boss_balance.demon_health()
+	max_hp *= game.balance.enemy_health_multiplier
 	hp = max_hp
 	state = "chase"
 	attack_time = 1.2
@@ -32,6 +60,15 @@ func enable_combat() -> void:
 func tick(delta: float) -> void:
 	if not alive or not combat_enabled:
 		return
+	tick_control(delta)
+	if state=="transform":
+		state_time+=delta
+		animate_demon(false)
+		queue_redraw()
+		if state_time>=game.boss_balance.transformation_duration:
+			state="chase";state_time=0;targetable=true;attack_time=1;contact_timer=1
+			game.announce("DEMÔNIO | FASE 2",3)
+		return
 	clock += delta
 	state_time += delta
 	attack_time -= delta
@@ -41,18 +78,18 @@ func tick(delta: float) -> void:
 	phase = (2 if hp < max_hp * 0.5 else 1) if is_executioner else (3 if hp < max_hp * 0.35 else (2 if hp <= max_hp * 0.7 else 1))
 	if phase > previous_phase:
 		attack_time = minf(attack_time, 0.8)
-		game.announce("O CARRASCO SE ENFURECE" if is_executioner else "O DEVORADOR: FASE %d" % phase, 2.0)
+		game.announce("O CARRASCO SE ENFURECE" if is_executioner else "DEMÔNIO | FASE %d" % form, 2.0)
 	var offset: Vector2 = game.player.position - position
 	var direction: Vector2 = offset.normalized()
 	var movement := Vector2.ZERO
 	if state == "chase":
 		var speed: float = game.boss_balance.executioner_speed if is_executioner else game.boss_balance.demon_speed
-		movement = direction * speed * game.enemy_scale().speed * (1.06 if phase >= 2 and is_executioner else 1.0)
+		movement = direction * speed * game.balance.enemy_speed_multiplier * game.enemy_scale().speed * (1.06 if phase >= 2 and is_executioner else 1.0)
 		if attack_time <= 0:
 			begin_attack(choose_attack())
 			movement = Vector2.ZERO
 		if offset.length() < radius + game.player.radius and contact_timer <= 0:
-			game.player.take_damage(data.damage, position)
+			game.player.take_damage(data.damage*damage_scale(), position)
 			contact_timer = 1.0
 	elif state == "windup":
 		if state_time < tracking_duration():
@@ -60,7 +97,7 @@ func tick(delta: float) -> void:
 		if state_time >= warning_duration():
 			execute_attack()
 	elif state == "charge":
-		movement = charge_direction * (game.boss_balance.executioner_charge_speed if is_executioner else game.boss_balance.demon_charge_speed) * game.enemy_scale().speed
+		movement = charge_direction * (game.boss_balance.executioner_charge_speed if is_executioner else game.boss_balance.demon_charge_speed) * game.balance.enemy_speed_multiplier * game.enemy_scale().speed
 		if state_time >= game.boss_balance.charge_duration:
 			finish_attack()
 			movement = Vector2.ZERO
@@ -68,14 +105,16 @@ func tick(delta: float) -> void:
 		if state_time >= (game.boss_balance.charge_recovery if attack_name == "charge" else game.boss_balance.spell_recovery):
 			state = "chase"
 			state_time = 0
+	if state=="chase":movement=game.navigation.steer(self,movement)
 	var previous_position: Vector2 = position
+	if slow_remaining>0:movement*=slow_factor
 	velocity = movement
 	move_and_slide()
 	if state == "charge":
 		var victim = game.projectile_victim(previous_position, position, radius)
 		if not charge_hit and victim != null:
 			charge_hit = true
-			victim.take_damage((game.boss_balance.executioner_charge_damage if is_executioner else game.boss_balance.demon_charge_damage) * game.enemy_scale().damage, previous_position)
+			victim.take_damage((game.boss_balance.executioner_charge_damage if is_executioner else game.boss_balance.demon_charge_damage) * game.enemy_scale().damage * damage_scale(), previous_position)
 		if is_on_wall():
 			finish_attack()
 	sprite.frame = int(clock * 7) % 4
@@ -84,6 +123,7 @@ func tick(delta: float) -> void:
 		sprite.frame = mini(frames.get(attack_name, 4), data.frames - 1)
 	elif state == "charge":
 		sprite.frame = 5
+	if not is_executioner:animate_demon(movement.length_squared()>1)
 	sprite.flip_h = charge_direction.x < 0 if state in ["windup", "charge"] else direction.x < 0
 	sprite.modulate = Color(1.6, 1.6, 1.6) if hit_flash > 0 else Color.WHITE
 	queue_redraw()
@@ -93,6 +133,12 @@ func choose_attack() -> String:
 		var chosen: String = "execute" if attack_index % 2 == 0 else "charge"
 		attack_index += 1
 		return chosen
+	if form==2:
+		var choices:Array=["fire","lightning","ring","charge","summon","ice","fire"]
+		for attempt in choices.size():
+			var chosen:String=choices[attack_index%choices.size()];attack_index+=1
+			if game.boss_arena.can_cast(chosen):return chosen
+		return "charge"
 	var order: Array = ["fire", "summon", "charge", "fire"]
 	if phase == 2:
 		order = ["lightning", "fire", "ice", "charge", "summon"]
@@ -141,6 +187,10 @@ func finish_attack() -> void:
 		attack_time = game.boss_balance.executioner_enraged_interval if phase == 2 else game.boss_balance.executioner_interval
 	else:
 		attack_time = game.boss_balance.demon_interval if phase == 1 else (game.boss_balance.demon_phase2_interval if phase == 2 else game.boss_balance.demon_phase3_interval)
+	if not is_executioner and form==2:attack_time*=game.boss_balance.second_interval_multiplier
+
+func damage_scale()->float:
+	return game.boss_balance.second_damage_multiplier if not is_executioner and form==2 else 1.0
 
 func take_damage(amount: float, _force: Vector2 = Vector2.ZERO) -> void:
 	if not alive or not combat_enabled or not targetable:
@@ -149,6 +199,15 @@ func take_damage(amount: float, _force: Vector2 = Vector2.ZERO) -> void:
 	hit_flash = 0.08
 	game.add_damage_number(position - Vector2(0, 35), int(amount))
 	game.sound.play_cue("hit")
+	if hp<=0 and not is_executioner and form==1:
+		first_phase_hp=max_hp
+		form=2
+		max_hp=first_phase_hp*game.boss_balance.second_health_multiplier
+		hp=max_hp
+		state="transform";state_time=0;targetable=false;velocity=Vector2.ZERO
+		game.boss_arena.clear_for_transform()
+		game.announce("DEMÔNIO | TRANSFORMAÇÃO",2)
+		return
 	if hp <= 0 and not death_paid:
 		alive = false
 		targetable = false
@@ -158,6 +217,10 @@ func take_damage(amount: float, _force: Vector2 = Vector2.ZERO) -> void:
 		game.enemy_killed(self)
 
 func _draw() -> void:
+	if state=="transform":
+		draw_arc(Vector2.ZERO,30+state_time*25,0,TAU,40,Color("ad8eac"),3)
+		return
+
 	draw_rect(Rect2(-radius, -2, radius * 2, 7), Color(0, 0, 0, 0.4))
 	if not combat_enabled or not alive:
 		return

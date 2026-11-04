@@ -3,7 +3,7 @@
 [resource]
 script = ExtResource("1")
 id = "ghoul"
-title = "Esquecido"
+title = "Zumbi"
 health = 24.0
 speed = 25.0
 damage = 8.0

@@ -2,9 +2,9 @@
 [ext_resource type="Script" path="res://scripts/data/wave_data.gd" id="1"]
 [resource]
 script = ExtResource("1")
-title = "A ultima porta"
-composition = {"ghoul": 28, "hound": 24, "skeleton_sword": 54, "skeleton_archer": 24, "guard": 44}
-spawn_interval = 0.17
-max_alive = 130
+title = "Horda 9"
+composition = {"ghoul": 416, "hound": 24, "skeleton_sword": 54, "skeleton_archer": 24, "guard": 44, "necromancer": 3, "beast": 4, "plague": 4, "shadow": 4, "slime_large": 3, "devourer": 2}
+spawn_interval = 0.12
+max_alive = 240
 elite_guards = 0
 boss = false

@@ -10,7 +10,7 @@ static func build(ui, screen: String) -> void:
 		ui._button(ui.menu, "Continuar", Rect2(180, 178, 280, 34), session.close_menu, true)
 		ui._button(ui.menu, "Sair da partida", Rect2(180, 229, 280, 34), session.leave)
 		return
-	ui._label(ui.menu, "VIGÍLIA COOPERATIVA", Rect2(24, 19, 592, 42), 27)
+	ui._label(ui.menu, "COOPERATIVO ONLINE", Rect2(24, 19, 592, 42), 27)
 	if screen == "lobby":
 		ui._label(ui.menu, "SALA  " + session.connection.code, Rect2(26, 65, 420, 30), 21, ui.ICE)
 		ui._button(ui.menu, "Copiar código", Rect2(463, 66, 149, 28), func(): DisplayServer.clipboard_set(session.connection.code))
@@ -18,11 +18,16 @@ static func build(ui, screen: String) -> void:
 		var local_ready: bool = false
 		for index in session.connection.players.size():
 			var member: Dictionary = session.connection.players[index]
-			ui._box(ui.menu, Rect2(26, 106 + index * 34, 586, 30))
-			ui._label(ui.menu, member.name + ("  (anfitrião)" if member.id == session.connection.host_id else ""), Rect2(37, 111 + index * 34, 370, 22), 13)
-			ui._label(ui.menu, "Pronto" if member.ready else "Aguardando", Rect2(460, 111 + index * 34, 140, 22), 12, ui.ICE if member.ready else ui.MUTED)
+			ui._box(ui.menu, Rect2(26, 106 + index * 30, 586, 26))
+			ui._label(ui.menu, member.name + ("  (anfitrião)" if member.id == session.connection.host_id else ""), Rect2(37, 111 + index * 30, 370, 22), 13)
+			ui._label(ui.menu, "Pronto" if member.ready else "Aguardando", Rect2(460, 111 + index * 30, 140, 22), 12, ui.ICE if member.ready else ui.MUTED)
 			all_ready = all_ready and member.ready
 			if member.id == session.connection.peer_id: local_ready = member.ready
+		var map_choice:=OptionButton.new();map_choice.position=Vector2(26,228);map_choice.size=Vector2(350,24)
+		for title in ["Pátio","Biblioteca","Campos"]:map_choice.add_item(title)
+		map_choice.select(["courtyard","library","fields"].find(session.lobby_map));map_choice.disabled=not session.hosting
+		map_choice.item_selected.connect(func(index):session.connection.send_message({"type":"map","map":["courtyard","library","fields"][index]}))
+		ui.menu.add_child(map_choice)
 		ui._button(ui.menu, "Cancelar prontidão" if local_ready else "Estou pronto", Rect2(26, 260, 215, 32), func(): session.connection.send_message({"type": "ready", "ready": not local_ready}), true)
 		if session.hosting:
 			var start: Button = ui._button(ui.menu, "Iniciar partida", Rect2(256, 260, 215, 32), func(): session.connection.send_message({"type": "start"}))

@@ -2,9 +2,9 @@
 [ext_resource type="Script" path="res://scripts/data/wave_data.gd" id="1"]
 [resource]
 script = ExtResource("1")
-title = "Ossos em marcha"
-composition = {"ghoul": 10, "hound": 4, "skeleton_sword": 8}
-spawn_interval = 0.85
-max_alive = 22
+title = "Horda 3"
+composition = {"ghoul": 21, "hound": 4, "skeleton_sword": 8, "devourer": 1}
+spawn_interval = 0.567
+max_alive = 33
 elite_guards = 0
 boss = false

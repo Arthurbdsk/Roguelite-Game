@@ -1,0 +1,47 @@
+{
+  "1": {
+    "before": 8,
+    "after": 12,
+    "factor": 1.5
+  },
+  "2": {
+    "before": 14,
+    "after": 21,
+    "factor": 1.5
+  },
+  "3": {
+    "before": 23,
+    "after": 34,
+    "factor": 1.5
+  },
+  "4": {
+    "before": 34,
+    "after": 68,
+    "factor": 2
+  },
+  "5": {
+    "before": 50,
+    "after": 100,
+    "factor": 2
+  },
+  "6": {
+    "before": 74,
+    "after": 148,
+    "factor": 2
+  },
+  "7": {
+    "before": 99,
+    "after": 297,
+    "factor": 3
+  },
+  "8": {
+    "before": 144,
+    "after": 432,
+    "factor": 3
+  },
+  "9": {
+    "before": 194,
+    "after": 582,
+    "factor": 3
+  }
+}

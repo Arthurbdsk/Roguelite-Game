@@ -14,9 +14,9 @@
 script = ExtResource("1")
 waves = Array[Resource]([ExtResource("2"), ExtResource("3"), ExtResource("4"), ExtResource("5"), ExtResource("6"), ExtResource("7"), ExtResource("8"), ExtResource("9"), ExtResource("10"), ExtResource("11")])
 initial_preparation = 2.5
-preparation_seconds = 5.0
+preparation_seconds = 2.5
 minimum_spawn_interval = 0.12
-max_enemies = 180
+max_enemies = 240
 coin_lifetime = 60.0
 coin_value = 1
 coin_attraction_radius = 44.0

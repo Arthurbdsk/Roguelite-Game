@@ -3,7 +3,7 @@
 [resource]
 script = ExtResource("1")
 id = "skeleton_sword"
-title = "Ossada da vigília"
+title = "Esqueleto com espada"
 health = 48.0
 speed = 31.0
 damage = 12.0

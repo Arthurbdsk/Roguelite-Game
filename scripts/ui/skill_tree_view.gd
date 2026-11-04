@@ -9,8 +9,8 @@ func setup(owner_game, interface) -> void:
 	game = owner_game
 	ui = interface
 	size = Vector2(640, 360)
-	ui._label(self, "HERANÇA DA VIGÍLIA", Rect2(18, 14, 405, 38), 26)
-	ui._label(self, "Permanente. Aplicado ao iniciar uma nova expedição.", Rect2(20, 48, 400, 14), 9, ui.MUTED)
+	ui._label(self, "HABILIDADES PERMANENTES", Rect2(18, 14, 405, 38), 26)
+	ui._label(self, "Permanente. Aplicado ao iniciar uma nova partida.", Rect2(20, 48, 400, 14), 9, ui.MUTED)
 	ui._label(self, "%d OURO" % game.profile.data.gold, Rect2(430, 21, 194, 24), 16, Color("dfb969"), true)
 	var branch_names := ["COMBATE", "SOBREVIVÊNCIA", "MOVIMENTO", "ESPECIALIZAÇÕES"]
 	for branch in 4:

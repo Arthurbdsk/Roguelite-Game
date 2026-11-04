@@ -40,7 +40,7 @@ func state(id: String) -> Dictionary:
 func purchase(id: String, expected_rank: int = -1) -> bool:
 	last_error = ""
 	if game.state not in ["title", "hub", "tree"]:
-		last_error = "Compre fora da expedição."
+		last_error = "Compre fora da partida."
 		return false
 	if expected_rank >= 0 and expected_rank != rank(id):
 		last_error = "A habilidade já foi atualizada."

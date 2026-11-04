@@ -2,9 +2,9 @@
 [ext_resource type="Script" path="res://scripts/data/wave_data.gd" id="1"]
 [resource]
 script = ExtResource("1")
-title = "Rastros na bruma"
-composition = {"ghoul": 10, "hound": 4}
-spawn_interval = 1.05
-max_alive = 14
+title = "Horda 2"
+composition = {"ghoul": 17, "hound": 4}
+spawn_interval = 0.7
+max_alive = 21
 elite_guards = 0
 boss = false

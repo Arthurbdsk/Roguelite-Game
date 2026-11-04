@@ -11,7 +11,7 @@ var mastery := RunMastery.new()
 var skills := PermanentSkills.new()
 var profile: GameProfile
 var level: int = 1
-var xp: int = 0
+var xp: float = 0
 var xp_needed: int = 6
 var offers: Array[Dictionary] = []
 var generation: int = 0
@@ -85,7 +85,7 @@ func announce(message: String, duration: float) -> void:
 		world.announce(message, duration)
 
 func award_xp(amount: int) -> void:
-	xp += amount
+	xp += amount * (1.0+.07*int(weapon_system.passives.get("crown",0)))
 	prepare_offer()
 
 func prepare_offer() -> void:
@@ -108,7 +108,7 @@ func choose(id_value: String, expected_generation: int) -> bool:
 	return false
 
 func personal() -> Dictionary:
-	return {"level": level, "xp": xp, "xp_needed": xp_needed, "offers": offers, "generation": generation, "levels": weapon_system.levels, "passives": weapon_system.passives}
+	return {"level": level, "xp": xp, "xp_needed": xp_needed, "offers": offers, "generation": generation, "levels": weapon_system.levels, "passives": weapon_system.passives,"stats":{"hp":player.hp,"max_hp":player.max_hp,"speed":player.speed,"armor":player.armor,"pickup_radius":player.pickup_radius}}
 
 func release() -> void:
 	mastery.game = null

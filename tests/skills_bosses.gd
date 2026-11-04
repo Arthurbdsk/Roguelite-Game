@@ -156,7 +156,7 @@ func fresh_boss(kind: String) -> void:
 func test_executioner() -> void:
 	fresh_boss("executioner")
 	var boss = g.boss
-	verify(boss.max_hp == 936 and boss.max_hp == 312 * 3, "executioner has triple its previous maximum health")
+	verify(is_equal_approx(boss.max_hp,936*g.balance.enemy_health_multiplier), "executioner has triple its previous maximum health")
 	verify(g.boss_balance.executioner_speed > g.enemy_data.hound.speed and g.boss_balance.executioner_speed < 96, "executioner chases faster than common enemies but slower than base player")
 	g.player.invulnerable = 0
 	g.player.position = boss.position + Vector2(-50, 0)
@@ -212,7 +212,7 @@ func test_executioner() -> void:
 func test_demon() -> void:
 	fresh_boss("demon")
 	var boss = g.boss
-	verify(boss.max_hp == 1872 and boss.max_hp == g.boss_balance.executioner_health() * 2, "demon starts at twice the strengthened executioner health")
+	verify(is_equal_approx(boss.max_hp,1872*g.balance.enemy_health_multiplier) and is_equal_approx(boss.max_hp,g.boss_balance.executioner_health()*2*g.balance.enemy_health_multiplier), "demon starts at twice the strengthened executioner health")
 	verify(boss.position == Vector2(900, 630) and g.boss_arena.stage == "portal", "portal starts at the arena center")
 	var hp: float = boss.hp
 	boss.take_damage(500)
@@ -254,12 +254,13 @@ func test_demon() -> void:
 	angles.sort()
 	verify(absf(wrapf(angles[1] - angles[0], -PI, PI)) > 0.3, "fire fan has traversable angular gaps")
 	g.enemy_projectiles.reset()
+	g.boss_arena.bursts.clear()
 	g.boss_arena.cast("fire", boss, Vector2.LEFT, 3)
 	g.boss_arena.tick(0.41)
 	verify(g.enemy_projectiles.fire_count() == 13, "phase three changes pattern with a staggered second fan")
 	g.boss_arena.areas.clear()
 	g.boss_arena.cast("lightning", boss, Vector2.LEFT, 3)
-	verify(g.boss_arena.areas.size() == 4, "phase three marks four lightning positions")
+	verify(g.boss_arena.areas.size() == g.boss_balance.first_lightning_count, "first form marks its configured lightning sequence")
 	var positions: Array[Vector2] = []
 	for area in g.boss_arena.areas:
 		positions.append(area.at)
@@ -273,7 +274,7 @@ func test_demon() -> void:
 	g.boss_arena.tick(0.65)
 	verify(g.player.hp == health, "moving outside lightning marks avoids damage")
 	verify(not g.boss_arena.can_cast("ice"), "controller blocks ice while lightning areas remain")
-	g.boss_arena.tick(0.4)
+	g.boss_arena.tick(2.0)
 	g.player.position = Vector2(900, 630)
 	g.boss_arena.cast("ice", boss, Vector2.LEFT, 2)
 	verify(g.boss_arena.areas.size() == 2, "ice forms two separated regions")
@@ -287,6 +288,8 @@ func test_demon() -> void:
 	verify(g.boss_arena.slow_multiplier(at) == 1, "ice expires and restores normal movement")
 	var permanent: int = g.profile.data.gold
 	var gold_before: int = g.gold
+	boss.take_damage(99999)
+	boss.tick(g.boss_balance.transformation_duration + 0.01)
 	boss.take_damage(99999)
 	verify(g.gold == gold_before + g.boss_balance.demon_reward and g.boss_defeated, "demon grants its reward once")
 	boss.take_damage(99999)
@@ -324,6 +327,8 @@ func test_real_victory_save() -> void:
 	g.boss_arena.cast("summon", boss, Vector2.LEFT, 3)
 	g.boss_arena.tick(1.01)
 	var kills: int = g.kills
+	boss.take_damage(99999)
+	boss.tick(g.boss_balance.transformation_duration + 0.01)
 	boss.take_damage(99999)
 	verify(g.kills == kills + 1 and g.boss_arena.summons.is_empty(), "retired summons do not create extra rewards or kills")
 	g.boss_arena.tick(g.boss_balance.death_duration + 0.01)
@@ -382,7 +387,7 @@ func test_intense_phase() -> void:
 		verify(g.boss_arena.summons.size() + g.boss_arena.pending_summons.size() <= g.boss_balance.summon_limit, "intense phase living plus pending summon budget")
 		verify(not (g.boss_arena.has_area("ice") and g.boss_arena.has_area("lightning")), "controller never combines ice and lightning coverage")
 		verify(g.boss_arena.areas.size() <= g.boss_balance.area_limit, "intense phase area budget")
-	metrics.intense_phase = {"physics_steps": 480, "cpu_ms": cpu_us / 1000.0, "fire_limit": 72, "summon_limit": 14, "method": "Headless CPU update time; not rendered FPS."}
+	metrics.intense_phase = {"physics_steps": 480, "cpu_ms": cpu_us / 1000.0, "fire_limit": 72, "summon_limit": g.boss_balance.summon_limit, "method": "Headless CPU update time; not rendered FPS."}
 	g.player.invulnerable = 0
 	g.player.take_damage(99999, g.player.position)
 	verify(g.state == "result" and g.boss_arena.areas.is_empty() and g.boss_arena.pending_summons.is_empty() and g.enemy_projectiles.arrows.is_empty(), "defeat clears boss threats")

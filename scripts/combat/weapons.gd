@@ -2,22 +2,38 @@ extends Node2D
 class_name WeaponSystem
 
 const WEAPON_PATHS: Dictionary = {
+	"ice_wave":"res://data/weapons/ice_wave.tres",
+	"blades":"res://data/weapons/blades.tres",
+	"bombs":"res://data/weapons/bombs.tres",
+	"boomerang":"res://data/weapons/boomerang.tres",
+	"axe":"res://data/weapons/axe.tres",
+	"holy_water":"res://data/weapons/holy_water.tres",
+	"sludge":"res://data/weapons/sludge.tres",
+	"clock":"res://data/weapons/clock.tres",
+	"lightning":"res://data/weapons/lightning.tres",
 	"sword": "res://data/weapons/sword.tres",
 	"bolt": "res://data/weapons/bolt.tres",
 	"orbit": "res://data/weapons/orbit.tres",
 }
 const PASSIVE_PATHS: Dictionary = {
+	"hourglass":"res://data/upgrades/hourglass.tres",
+	"lens":"res://data/upgrades/lens.tres",
+	"crown":"res://data/upgrades/crown.tres",
 	"boots": "res://data/upgrades/boots.tres",
 	"magnet": "res://data/upgrades/magnet.tres",
 	"heart": "res://data/upgrades/heart.tres",
 	"ward": "res://data/upgrades/ward.tres",
 	"cadence": "res://data/upgrades/cadence.tres",
 }
-const MAX_WEAPONS: int = 3
-const MAX_PASSIVES: int = 3
+const MAX_WEAPONS: int = 6
+const MAX_PASSIVES: int = 4
 const MAX_PROJECTILES: int = 100
 
 var game
+var lightning_texture=preload("res://assets/effects/lightning.png")
+var beam_texture=preload("res://assets/effects/clock_beam.png")
+var arsenal:Arsenal
+var ground:GroundAttacks
 var levels: Dictionary = {"sword": 1, "bolt": 0, "orbit": 0}
 var passives: Dictionary = {}
 var weapon_data: Dictionary = {}
@@ -29,6 +45,9 @@ var orbit_hits: Dictionary = {}
 var timers: Dictionary = {"sword": 0.1, "bolt": 0.2}
 var orbit_phase: float = 0.0
 var combat_time: float = 0.0
+var lightning_fx:Array[Dictionary]=[]
+var beams:Array[Dictionary]=[]
+var clock_index:int=0
 var support: String = "none"
 var last_offer_ids: Array[String] = []
 var rng: RandomNumberGenerator = RandomNumberGenerator.new()
@@ -40,15 +59,22 @@ func setup(game_ref) -> void:
 		weapon_data[id] = load(WEAPON_PATHS[id])
 	for id: String in PASSIVE_PATHS:
 		passive_data[id] = load(PASSIVE_PATHS[id])
+	arsenal=Arsenal.new();add_child(arsenal);arsenal.setup(self)
+	ground=GroundAttacks.new();add_child(ground);ground.setup(self)
 	rng.randomize()
 	reset()
 
 
 # Call after the player has reset its base statistics for a fresh expedition.
 func reset(support_id: String = "none") -> void:
+	if arsenal!=null:arsenal.reset()
+	if ground!=null:ground.reset()
 	support = support_id
 	levels = {"sword": 1, "bolt": 0, "orbit": 0}
 	passives.clear()
+	beams.clear()
+	clock_index=0
+	lightning_fx.clear()
 	projectiles.clear()
 	slashes.clear()
 	orbit_positions.clear()
@@ -68,14 +94,20 @@ func update_combat(delta: float, allow_attacks: bool = true) -> void:
 	if game == null or not is_instance_valid(game.player):
 		return
 	combat_time += delta
-	for id: String in ["sword", "bolt"]:
+	for id: String in ["sword", "bolt", "lightning", "clock", "holy_water", "axe", "boomerang", "bombs", "ice_wave"]:
 		if not allow_attacks: continue
-		if int(levels[id]) <= 0:
+		if int(levels.get(id,0)) <= 0:
 			continue
-		timers[id] = maxf(0.0, float(timers[id]) - delta)
+		timers[id] = maxf(0.0, float(timers.get(id,0)) - delta)
 		if float(timers[id]) <= 0.0:
-			var fired: bool = _swing_sword() if id == "sword" else _fire_bolts()
+			var fired: bool = arsenal.launch(id) if id in ["axe","boomerang","bombs","ice_wave"] else ground.launch_water() if id=="holy_water" else _clock() if id=="clock" else _lightning() if id=="lightning" else (_swing_sword() if id == "sword" else _fire_bolts())
 			timers[id] = _interval(id) if fired else 0.08
+	for beam in beams:beam.life-=delta
+	beams=beams.filter(func(beam):return beam.life>0)
+	for fx in lightning_fx:fx.life-=delta
+	lightning_fx=lightning_fx.filter(func(fx):return fx.life>0)
+	arsenal.tick(delta)
+	ground.tick(delta,allow_attacks)
 	_update_projectiles(delta)
 	_update_orbit(delta, allow_attacks)
 	for i: int in range(slashes.size() - 1, -1, -1):
@@ -88,15 +120,18 @@ func update_combat(delta: float, allow_attacks: bool = true) -> void:
 func _stat(id: String, field: String) -> float:
 	var data = weapon_data[id]
 	var values = data.get(field)
-	var index: int = clampi(int(levels[id]) - 1, 0, values.size() - 1)
-	return float(values[index])
+	var index: int = clampi(int(levels.get(id,0)) - 1, 0, values.size() - 1)
+	var value:float=float(values[index])
+	if (field=="reach" and id in ["sword","sludge","holy_water","ice_wave"]) or field=="area_radius" or (field=="beam_width" and id=="clock"):value*=area_factor()
+	if field=="duration" and id in ["sludge","holy_water","ice_wave"]:value*=1+.08*int(passives.get("hourglass",0))
+	return value
 
 
 func _interval(id: String) -> float:
-	var multiplier: float = 1.0 - 0.12 * int(passives.get("cadence", 0))
+	var multiplier: float = 1.0 - 0.06 * int(passives.get("cadence", 0))
 	if support == "library" and id == "bolt":
 		multiplier *= 1.15
-	return _stat(id, "cooldown") * multiplier * (_mastery().interval_multiplier if _mastery() != null else 1.0)
+	return maxf(.15,_stat(id, "cooldown") * multiplier * (_mastery().interval_multiplier if _mastery() != null else 1.0))
 
 func _mastery():
 	return game.get("mastery") if game != null else null
@@ -124,7 +159,8 @@ func _swing_sword() -> bool:
 	var direction: Vector2 = (target.position - game.player.position).normalized()
 	if direction.length_squared() < 0.1:
 		direction = game.player.facing
-	var half_angle: float = deg_to_rad(62.0 if int(levels["sword"]) < 4 else 78.0)
+	if game.player.has_method("begin_swing"):game.player.begin_swing(direction)
+	var half_angle: float = deg_to_rad(62.0 if int(levels.get("sword",0)) < 4 else 78.0)
 	var arcs: int = int(_stat("sword", "count"))
 	if _mastery() != null and _mastery().rank("sword_echo") > 0:
 		arcs = maxi(2, arcs)
@@ -132,7 +168,7 @@ func _swing_sword() -> bool:
 		var angle: float = direction.angle() + float(arc_index) * PI
 		var origin: Vector2 = game.player.position
 		slashes.append({"origin": origin, "angle": angle, "half": half_angle,
-			"reach": reach, "remaining": 0.16, "evolved": int(levels["sword"]) == 5})
+			"reach": reach, "remaining": 0.16, "evolved": int(levels.get("sword",0)) == 5})
 		for enemy in game.enemies.duplicate():
 			if not _valid_target(enemy):
 				continue
@@ -157,8 +193,8 @@ func _fire_bolts() -> bool:
 		var velocity: Vector2 = direction.rotated(angle_offset) * 275.0
 		projectiles.append({"position": game.player.position, "velocity": velocity,
 			"distance": 0.0, "reach": reach, "damage": _stat("bolt", "damage"),
-			"pierce": (2 if int(levels["bolt"]) >= 2 else 1) + (_mastery().rank("bolt_pierce") if _mastery() != null else 0),
-			"bounce": 1 if int(levels["bolt"]) >= 5 else 0, "hits": []})
+			"pierce": (2 if int(levels.get("bolt",0)) >= 2 else 1) + (_mastery().rank("bolt_pierce") if _mastery() != null else 0),
+			"bounce": 1 if int(levels.get("bolt",0)) >= 5 else 0, "hits": []})
 	_play("bolt")
 	return true
 
@@ -223,10 +259,10 @@ func _bounce_target(origin: Vector2, excluded: Array):
 
 func _update_orbit(delta: float, allow_attacks: bool = true) -> void:
 	orbit_positions.clear()
-	if int(levels["orbit"]) <= 0:
+	if int(levels.get("orbit",0)) <= 0:
 		return
 	var multiplier: float = 0.85 if support == "arsenal" else 1.0
-	var angular_speed: float = (2.0 + 0.18 * int(levels["orbit"])) * multiplier
+	var angular_speed: float = (2.0 + 0.18 * int(levels.get("orbit",0))) * multiplier
 	orbit_phase = fmod(orbit_phase + delta * angular_speed, TAU)
 	var count: int = int(_stat("orbit", "count"))
 	count += _mastery().rank("orbit_extra") if _mastery() != null else 0
@@ -257,11 +293,11 @@ func _update_orbit(delta: float, allow_attacks: bool = true) -> void:
 func get_loadout() -> Array[Dictionary]:
 	var result: Array[Dictionary] = []
 	for id: String in WEAPON_PATHS:
-		var current: int = int(levels[id])
+		var current: int = int(levels.get(id,0))
 		if current <= 0:
 			continue
 		var data = weapon_data[id]
-		var label: String = data.evolution_name if current == data.max_level else data.display_name
+		var label: String = data.display_name
 		result.append({"id": id, "name": label, "level": current, "icon": data.icon,
 			"evolution_hint": _evolution_hint(id)})
 	return result
@@ -279,6 +315,7 @@ func get_passives() -> Array[Dictionary]:
 
 func _evolution_hint(id: String) -> String:
 	var affinity: String = weapon_data[id].affinity
+	if affinity.is_empty():return ""
 	var passive_name: String = passive_data[affinity].display_name
 	return "Nível 5 exige " + passive_name + "."
 
@@ -288,12 +325,12 @@ func get_offers() -> Array[Dictionary]:
 	for id: String in WEAPON_PATHS:
 		if not _weapon_available(id):
 			continue
-		var current: int = int(levels[id])
+		var current: int = int(levels.get(id,0))
 		var data = weapon_data[id]
-		var description: String = data.level_descriptions[current]
-		var label: String = data.evolution_name if current == 4 else data.display_name
+		var description: String = upgrade_values(id,current)
+		var label: String = data.display_name
 		pool.append({"id": id, "name": label, "description": description,
-			"detail": "ARMA  %d/5 · Só nesta expedição. %s" % [current + 1, _evolution_hint(id)],
+			"detail": "Novo" if current==0 else "Nível %d → %d"%[current,current+1],
 			"icon": data.icon, "level": current + 1, "weapon": true})
 	for id: String in PASSIVE_PATHS:
 		if not _passive_available(id):
@@ -302,7 +339,7 @@ func get_offers() -> Array[Dictionary]:
 		var data = passive_data[id]
 		pool.append({"id": id, "name": data.display_name,
 			"description": data.level_descriptions[current],
-			"detail": "PASSIVA  %d/2 · Só nesta expedição. %d/%d vagas ocupadas." % [current + 1, passives.size(), passive_limit()],
+			"detail": "Novo" if current==0 else "Nível %d → %d"%[current,current+1],
 			"icon": data.icon, "level": current + 1, "weapon": false})
 	var result: Array[Dictionary] = []
 	var weapons_pool: Array[Dictionary] = []
@@ -318,13 +355,8 @@ func get_offers() -> Array[Dictionary]:
 		var selected: Dictionary = _weighted_pick(pool)
 		result.append(selected)
 		pool.erase(selected)
-	var fallbacks: Array[Dictionary] = [
-		{"id": "heal", "name": "Rações de vigília", "description": "Recupera 35 de vida. Com vida cheia, recebe 2 selos.", "detail": "CONSUMÍVEL · Efeito imediato.", "icon": "res://assets/icons/heart.png", "level": 1},
-		{"id": "supplies", "name": "Tributo recuperado", "description": "Recebe 2 selos, mantidos mesmo após a morte.", "detail": "RECURSO · Sem bônus de combate.", "icon": "res://assets/icons/crown.png", "level": 1},
-		{"id": "repulse", "name": "Última badalada", "description": "Causa 80 de dano e repele inimigos próximos.", "detail": "CONSUMÍVEL · Alcance 160. Não ocupa vaga.", "icon": "res://assets/icons/ward.png", "level": 1},
-	]
-	while result.size() < 3:
-		result.append(fallbacks.pop_front())
+	if result.is_empty():
+		result=[{"id":"heal","name":"Recuperar vida","description":"Recupera até 35 de vida.","detail":"Efeito imediato","icon":"res://assets/icons/heart.png"},{"id":"supplies","name":"Receber ouro","description":"Recebe 10 de ouro.","detail":"Efeito imediato","icon":"res://assets/icons/crown.png"}]
 	# The guaranteed weapon need not always occupy the first UI card.
 	for index: int in range(result.size() - 1, 0, -1):
 		var swap_index: int = rng.randi_range(0, index)
@@ -362,8 +394,6 @@ func _weapon_available(id: String) -> bool:
 		return false
 	if current == 0 and get_loadout().size() >= MAX_WEAPONS:
 		return false
-	if current == 4 and int(passives.get(data.affinity, 0)) <= 0:
-		return false
 	return true
 
 
@@ -378,7 +408,7 @@ func apply_upgrade(id: String) -> bool:
 	if weapon_data.has(id):
 		if not _weapon_available(id):
 			return false
-		levels[id] = int(levels[id]) + 1
+		levels[id] = int(levels.get(id,0)) + 1
 	elif passive_data.has(id):
 		if not _passive_available(id):
 			return false
@@ -386,21 +416,18 @@ func apply_upgrade(id: String) -> bool:
 		passives[id] = current + 1
 		match id:
 			"boots":
-				game.player.speed += 18.0
+				game.player.speed += 8.0
 			"magnet":
-				game.player.pickup_radius += 32.0 if current == 0 else 40.0
+				game.player.pickup_radius += 14.0
 			"heart":
-				game.player.max_hp += 25.0
-				game.player.hp = minf(game.player.max_hp, game.player.hp + 30.0)
+				game.player.max_hp += 10.0
+				game.player.hp = minf(game.player.max_hp, game.player.hp + 15.0)
 			"ward":
-				game.player.armor += 2.0
+				game.player.armor += 1.0
 	elif id == "heal":
-		if game.player.hp >= game.player.max_hp:
-			game.earned += 2
-		else:
-			game.player.hp = minf(game.player.max_hp, game.player.hp + 35.0)
+		game.player.hp=minf(game.player.max_hp,game.player.hp+35)
 	elif id == "supplies":
-		game.earned += 2
+		game.gold += 10
 	elif id == "repulse":
 		for enemy in game.enemies.duplicate():
 			if not _valid_target(enemy):
@@ -422,7 +449,47 @@ func _play(cue: String) -> void:
 		game.sound.play_cue(cue)
 
 
+func _clock()->bool:
+	var origin:Vector2=game.player.position
+	var direction:Vector2=Vector2.UP.rotated(clock_index*TAU/12)
+	clock_index=(clock_index+1)%12
+	var end:Vector2=origin+direction*_stat("clock","reach")
+	var width:float=_stat("clock","beam_width")
+	beams.append({"origin":origin,"end":end,"width":width,"life":0.22})
+	for enemy in game.enemies.duplicate():
+		if not _valid_target(enemy):continue
+		if Geometry2D.get_closest_point_to_segment(enemy.position,origin,end).distance_to(enemy.position)<=width/2+enemy.radius:
+			enemy.apply_time_control(weapon_data.clock.freeze_duration,weapon_data.clock.freeze_resistance,weapon_data.clock.boss_slow,weapon_data.clock.boss_slow_duration)
+			_hit(enemy,_stat("clock","damage"),Vector2.ZERO)
+	return true
+
+func _lightning()->bool:
+	var candidates:Array=[]
+	for enemy in game.enemies:
+		if _valid_target(enemy) and game.player.position.distance_to(enemy.position)<=_stat("lightning","reach"):candidates.append(enemy)
+	if candidates.is_empty():return false
+	for i in mini(int(_stat("lightning","count")),candidates.size()):
+		var selected:int=rng.randi_range(0,candidates.size()-1)
+		var enemy=candidates[selected];candidates.remove_at(selected)
+		lightning_fx.append({"at":enemy.position,"life":0.24})
+		_hit(enemy,_stat("lightning","damage"),Vector2.ZERO)
+	_play("thunder")
+	return true
+
 func _draw() -> void:
+	for beam in beams:
+		var length:float=beam.origin.distance_to(beam.end)
+		draw_set_transform(beam.origin.round(),(beam.end-beam.origin).angle())
+		var offset:float=0
+		while offset<length:
+			var segment:float=minf(32,length-offset)
+			draw_texture_rect_region(beam_texture,Rect2(offset,-beam.width/2,segment,beam.width),Rect2(int(combat_time*18)%6*32,0,segment,16))
+			offset+=segment
+		draw_set_transform(Vector2.ZERO)
+	for fx in lightning_fx:
+		var frame:int=clampi(int((.24-fx.life)*32),0,7)
+		draw_texture_rect_region(lightning_texture,Rect2(fx.at.round()-Vector2(24,84),Vector2(48,96)),Rect2(frame*48,0,48,96))
+
 	var intensity: float = clampf(float(game.effects), 0.0, 1.0) if game != null else 1.0
 	for slash: Dictionary in slashes:
 		var origin: Vector2 = Vector2(slash["origin"]).round()
@@ -454,3 +521,62 @@ func _draw() -> void:
 			draw_rect(Rect2(point - tail * 4.0 - Vector2(3, 3), Vector2(6, 6)), Color(0.71, 0.37, 0.26, 0.35))
 		draw_rect(Rect2(point - Vector2(3, 3), Vector2(6, 6)), Color("b65f42"))
 		draw_rect(Rect2(point - Vector2(1, 2), Vector2(3, 3)), Color("e4c37d"))
+
+func offer_stat(id:String,field:String,index:int)->float:
+	var value:float=weapon_data[id].get(field)[index]
+	if _mastery()!=null:
+		if field=="damage":value*=_mastery().damage_multiplier
+		if field=="count" and id=="orbit":value+=_mastery().rank("orbit_extra")
+		if field=="count" and id=="sword" and _mastery().rank("sword_echo")>0:value=maxf(2,value)
+	if field=="cooldown":
+		value*=(1-.06*int(passives.get("cadence",0)))*(_mastery().interval_multiplier if _mastery()!=null else 1)
+		if support=="library" and id=="bolt":value*=1.15
+	if (field=="reach" and id in ["sword","sludge","holy_water","ice_wave"]) or field=="area_radius":value*=area_factor()
+	if field=="duration" and id in ["sludge","holy_water","ice_wave"]:value*=1+.08*int(passives.get("hourglass",0))
+	if field=="cooldown":value=maxf(.15,value)
+	return value
+func upgrade_values(id:String,current:int)->String:
+	var data=weapon_data[id]
+	var fields:Array[String]=[]
+	for spec in [["damage","Dano"],["cooldown","Intervalo"],["reach","Raio da poça" if id in ["sludge","holy_water"] else "Alcance"],["count","Alvos" if id=="lightning" else "Quantidade"]]:
+		var after:float=offer_stat(id,spec[0],current)
+		var before:float=offer_stat(id,spec[0],maxi(0,current-1))
+		if current>0 and is_equal_approx(before,after):continue
+		var unit:String=" s" if spec[0]=="cooldown" else ""
+		fields.append(value_change(spec[1],before,after,current,unit))
+	if id in ["sludge","holy_water"]:
+		if current==0 or data.duration[current]!=data.duration[current-1]:fields.append(value_change("Duração",offer_stat(id,"duration",maxi(0,current-1)),offer_stat(id,"duration",current),current," s"))
+		fields.append("Dano a cada %.1f s. Sem dano extra por sobreposição."%data.tick_interval)
+	if id=="clock":
+		fields.append(value_change("Largura",data.beam_width[maxi(0,current-1)]*area_factor(),data.beam_width[current]*area_factor(),current))
+		fields.append("Paralisa %.1f s. Chefes: -%d%% de movimento por %.1f s."%[data.freeze_duration,data.boss_slow*100,data.boss_slow_duration])
+	elif id=="sword" and (current==0 or current==3):
+		fields.append(value_change("Abertura",124,156 if current==3 else 124,current,"°"))
+	elif id=="bolt":
+		var extra:int=_mastery().rank("bolt_pierce") if _mastery()!=null else 0
+		if current in [0,1]:fields.append(value_change("Atravessa",1+extra,1+extra if current==0 else 2+extra,current," inimigos"))
+		if current==4:fields.append("Ricochetes: 0 → 1")
+	elif id=="orbit":
+		var multiplier:float=.85 if support=="arsenal" else 1
+		fields.append(value_change("Giro",(2+.18*maxi(1,current))*multiplier,(2+.18*(current+1))*multiplier,current," rad/s"))
+	if id=="axe":fields.append(value_change("Perfuração",data.pierce[maxi(0,current-1)],data.pierce[current],current))
+	if id=="bombs":fields.append(value_change("Raio",data.area_radius[maxi(0,current-1)]*area_factor(),data.area_radius[current]*area_factor(),current))
+	if id=="blades":fields.append(value_change("Rotação",data.rotation_speed[maxi(0,current-1)],data.rotation_speed[current],current," rad/s"))
+	if id=="ice_wave":fields.append("Movimento -30%% por %.2f s. Chefes: -15%% por até 1 s."%offer_stat(id,"duration",current))
+	return ". ".join(fields.filter(func(v):return not v.is_empty()))
+func value_change(label:String,before:float,after:float,current:int,unit:String="")->String:
+	if current>0 and is_equal_approx(before,after):return ""
+	return "%s: %s%s%s"%[label,(number_text(before)+unit+" → ") if current>0 else "",number_text(after),unit]
+func number_text(value:float)->String:
+	return ("%.2f"%value).trim_suffix("0").trim_suffix("0").trim_suffix(".")
+func build_stats()->String:
+	var p=game.player
+	var damage:float=(_mastery().damage_multiplier-1)*100 if _mastery()!=null else 0
+	var interval:float=(1-.06*int(passives.get("cadence",0)))*(_mastery().interval_multiplier if _mastery()!=null else 1)
+	var text:String="Vida: %d/%d | Defesa: %.2f\nMovimento: %.2f px/s\nDano: +%.2f%% | Vel. ataque: %.2fx\nColeta XP: %.2f | Ouro: %.2f\nExperiência: +%d%%"%[p.hp,p.max_hp,p.armor,p.speed,damage,1/interval,p.pickup_radius,game.balance.coin_attraction_radius+maxf(0,p.pickup_radius-42),7*int(passives.get("crown",0))]
+	for id in weapon_data:
+		if int(levels.get(id,0))>0:text+="\n%s: %s dano | %ss | %spx"%[weapon_data[id].display_name,number_text(_stat(id,"damage")*(1+damage/100)),number_text(_interval(id)),number_text(_stat(id,"reach"))]
+	return text
+
+func area_factor()->float:
+	return 1+.05*int(passives.get("lens",0))

@@ -19,6 +19,11 @@ var sprite: Sprite2D
 var serial: int = 0
 var targetable: bool = true
 var summoner_id: int = 0
+var frozen_remaining:float=0
+var freeze_resistance:float=0
+var resistance_duration:float=1
+var slow_remaining:float=0
+var slow_factor:float=1
 
 func setup(owner_game, stats: EnemyData, is_elite: bool = false) -> void:
 	game = owner_game
@@ -51,6 +56,7 @@ func _ready() -> void:
 func tick(delta: float) -> void:
 	if not alive:
 		return
+	if tick_control(delta):return
 	clock += delta
 	state_time += delta
 	attack_time -= delta
@@ -73,7 +79,7 @@ func tick(delta: float) -> void:
 				state = "attack"
 				state_time = 0
 		elif state == "attack":
-			movement = charge_direction * 165 * game.enemy_scale().speed
+			movement = charge_direction * 165 * game.balance.enemy_speed_multiplier * game.enemy_scale().speed
 			if state_time > 0.65:
 				state = "recovery"
 				state_time = 0
@@ -92,6 +98,8 @@ func tick(delta: float) -> void:
 		state_time = 0
 	if data.behavior == "boss" and state_time < 0.8:
 		movement *= 0.15
+	if state=="approach":movement=game.navigation.steer(self,movement)
+	if slow_remaining>0:movement*=slow_factor
 	velocity = movement + game.separation(self) * 14 + knockback
 	knockback = knockback.move_toward(Vector2.ZERO, delta * 500)
 	move_and_slide()
@@ -155,9 +163,12 @@ func take_damage(amount: float, force: Vector2 = Vector2.ZERO) -> void:
 		queue_free()
 
 func _draw() -> void:
+	if frozen_remaining>0:
+		draw_arc(Vector2.ZERO,radius+5,0,TAU,20,Color("83c4bd"),2)
+		draw_line(Vector2(-3,-34),Vector2(3,-34),Color("83c4bd"),2)
 	draw_rect(Rect2(-radius, -1, radius * 2, 5), Color(0, 0, 0, 0.3))
 	if state == "prepare":
-		var reach: float = minf(data.attack_range, 78.0) if data.behavior == "archer" else (data.attack_range if data.behavior == "sword" else 110.0)
+		var reach: float = minf(data.attack_range, 78.0) if data.behavior == "archer" else (data.attack_range if data.behavior == "sword" or data.id=="beast" else 110.0)
 		draw_line(Vector2.ZERO, charge_direction * reach, Color("d9a46a"), 1)
 		draw_arc(Vector2.ZERO, radius + 5, 0, TAU, 20, Color("d9a46a"), 1, false)
 		if data.behavior == "sword":
@@ -171,3 +182,22 @@ func _draw() -> void:
 	if hp < max_hp and data.behavior != "boss":
 		draw_rect(Rect2(-11, -sprite.texture.get_height() + 1, 22, 2), Color("12191d"))
 		draw_rect(Rect2(-11, -sprite.texture.get_height() + 1, 22 * hp / max_hp, 2), Color("b65f42"))
+
+func apply_time_control(duration:float,resistance:float,boss_slow:float,boss_duration:float):
+	if self is HordeBoss:
+		slow_remaining=maxf(slow_remaining,boss_duration)
+		slow_factor=1-boss_slow
+	elif frozen_remaining<=0 and freeze_resistance<=0:
+		frozen_remaining=duration
+		resistance_duration=resistance
+	queue_redraw()
+func tick_control(delta:float)->bool:
+	freeze_resistance=maxf(0,freeze_resistance-delta)
+	slow_remaining=maxf(0,slow_remaining-delta)
+	if frozen_remaining>0:
+		frozen_remaining=maxf(0,frozen_remaining-delta)
+		if frozen_remaining<=0:freeze_resistance=resistance_duration
+		velocity=Vector2.ZERO
+		queue_redraw()
+		return true
+	return false

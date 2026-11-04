@@ -1,4 +1,4 @@
-"""Export Brasafria with the official Godot 4.7.2 Windows x64 release template.
+"""Export Hordas with the official Godot 4.7.2 Windows x64 release template.
 
 Only the selected compressed ZIP entry is fetched using explicit HTTP ranges.
 The 1.28 GB multi-platform template archive is never downloaded in full.
@@ -138,7 +138,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--godot", type=Path, default=Path.home() / "Downloads" / "Godot_v4.7.2-stable_win64_console.exe")
     parser.add_argument("--template-only", action="store_true")
-    parser.add_argument("--output", type=Path, default=BUILD / "Brasafria-0.4.1.exe")
+    parser.add_argument("--output", type=Path, default=BUILD / "Hordas-0.7.0" / "Hordas-0.7.0.exe")
     parser.add_argument("--smoke", action="store_true", help="Run exported executable headlessly for 120 frames")
     args = parser.parse_args()
     ensure_template()
@@ -160,7 +160,7 @@ def main():
     payload = target.read_bytes()
     manifest = {
         "file": target.name,
-        "game_version": "0.4.1",
+        "game_version": "0.7.0",
         "godot_version": VERSION,
         "size_bytes": len(payload),
         "sha256": hashlib.sha256(payload).hexdigest(),
@@ -170,7 +170,7 @@ def main():
     if args.smoke:
         outcome = subprocess.run([
             str(target), "--headless", "--quit-after", "120",
-            "--log-file", str(BUILD / "smoke.log"),
+            "--log-file", str(BUILD / "smoke.log"), "--", "--profile-slot=release_smoke_06",
         ], cwd=BUILD, capture_output=True, text=True, timeout=45)
         manifest["smoke_test"] = f"headless_120_frames_exit_{outcome.returncode}"
         (BUILD / "smoke_stdout.log").write_text(outcome.stdout + outcome.stderr, encoding="utf-8")
