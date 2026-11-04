@@ -51,6 +51,8 @@ var clock_index:int=0
 var support: String = "none"
 var last_offer_ids: Array[String] = []
 var rng: RandomNumberGenerator = RandomNumberGenerator.new()
+var stat_cache:Dictionary={}
+var cache_combat_stats:bool=false
 
 
 func setup(game_ref) -> void:
@@ -94,6 +96,7 @@ func update_combat(delta: float, allow_attacks: bool = true) -> void:
 	if game == null or not is_instance_valid(game.player):
 		return
 	combat_time += delta
+	stat_cache.clear();cache_combat_stats=true
 	for id: String in ["sword", "bolt", "lightning", "clock", "holy_water", "axe", "boomerang", "bombs", "ice_wave"]:
 		if not allow_attacks: continue
 		if int(levels.get(id,0)) <= 0:
@@ -114,10 +117,13 @@ func update_combat(delta: float, allow_attacks: bool = true) -> void:
 		slashes[i]["remaining"] = float(slashes[i]["remaining"]) - delta
 		if float(slashes[i]["remaining"]) <= 0.0:
 			slashes.remove_at(i)
+	cache_combat_stats=false
 	queue_redraw()
 
 
 func _stat(id: String, field: String) -> float:
+	var cache_key:String=id+":"+field
+	if cache_combat_stats and stat_cache.has(cache_key):return stat_cache[cache_key]
 	var data = weapon_data[id]
 	var values = data.get(field)
 	var index: int = clampi(int(levels.get(id,0)) - 1, 0, values.size() - 1)
@@ -125,6 +131,7 @@ func _stat(id: String, field: String) -> float:
 	if (field=="reach" and id in ["sword","sludge","holy_water","ice_wave"]) or field=="area_radius" or (field=="beam_width" and id=="clock"):value*=area_factor()*(sqrt(1+permanent("area")) if id in ["sword","sludge","holy_water","ice_wave","bombs"] else 1)
 	if field=="duration" and id in ["sludge","holy_water","ice_wave"]:value*=1+.08*int(passives.get("hourglass",0))+permanent("duration")
 	if field=="count" and id in ["bolt","axe","boomerang","bombs","holy_water"]:value+=permanent("amount")
+	if cache_combat_stats:stat_cache[cache_key]=value
 	return value
 
 
@@ -138,7 +145,7 @@ func _mastery():
 	return game.get("mastery") if game != null else null
 
 func _valid_target(enemy) -> bool:
-	return is_instance_valid(enemy) and enemy.alive and enemy.get("targetable") != false
+	return is_instance_valid(enemy) and enemy.alive and enemy.targetable
 
 func _hit(enemy, amount: float, force: Vector2) -> void:
 	if not _valid_target(enemy):
@@ -272,7 +279,7 @@ func _update_orbit(delta: float, allow_attacks: bool = true) -> void:
 		var angle: float = orbit_phase + TAU * float(index) / float(count)
 		orbit_positions.append(game.player.position + Vector2.from_angle(angle) * reach)
 	if not allow_attacks: return
-	for enemy in game.enemies.duplicate():
+	for enemy in arsenal.candidates(game.player.position-Vector2.ONE*reach,game.player.position+Vector2.ONE*reach):
 		if not _valid_target(enemy):
 			continue
 		var enemy_id: int = enemy.get_instance_id()

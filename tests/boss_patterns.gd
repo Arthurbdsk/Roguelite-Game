@@ -14,7 +14,7 @@ func run():
 	g.boss_arena.clear_for_transform();g.boss_arena.cast("lightning",boss,Vector2.LEFT,1)
 	assert(g.boss_arena.areas.size()==10 and not g.boss_arena.can_cast("ice"))
 	g.boss_arena.areas.clear();g.boss_arena.cast("ice",boss,Vector2.LEFT,1)
-	assert(g.boss_arena.areas.size()==2)
+	assert(g.boss_arena.areas.size()==4)
 	assert(g.boss_arena.slow_multiplier(g.boss_arena.center)==1)
 	g.boss_arena.tick(1)
 	assert(g.boss_arena.slow_multiplier(g.boss_arena.areas[0].at)<1)

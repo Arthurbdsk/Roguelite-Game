@@ -26,7 +26,7 @@ var boss_defeated: bool = false
 var test_mode: bool = false
 var slice_mode: bool = false
 var hud_clock: float = 0
-var serial: int = 0
+var serial: int = 1
 var banked_reward: int = 0
 var gold: int = 0
 var banked_gold: int = 0
@@ -51,6 +51,8 @@ var gold_loot: GoldLoot
 var enemy_projectiles: EnemyProjectiles
 var skills := PermanentSkills.new()
 var run_challenge:int=0
+var campaign:=LateCampaign.new()
+var late_arena:LateArena
 var mastery := RunMastery.new()
 var tree_return: String = "title"
 var dev_boss_test: bool = false
@@ -79,7 +81,7 @@ func _ready() -> void:
   profile.load_profile()
  skills.setup(self)
  mastery.setup(self)
- for id in ["ghoul", "hound", "guard", "demon", "executioner", "skeleton_sword", "skeleton_archer", "necromancer", "beast", "plague", "shadow", "devourer", "slime_large", "slime_small"]:
+ for id in ["ghoul", "hound", "guard", "demon", "executioner", "skeleton_sword", "skeleton_archer", "necromancer", "beast", "plague", "shadow", "devourer", "slime_large", "slime_small", "guardian", "horror"]:
   enemy_data[id] = load("res://data/enemies/" + id + ".tres")
  enemy_data["boss"] = enemy_data.demon
  arena = RuinedArena.new()
@@ -116,6 +118,8 @@ func _ready() -> void:
  boss_arena = BossArena.new()
  add_child(boss_arena)
  boss_arena.setup(self)
+ campaign.setup(self)
+ late_arena=LateArena.new();add_child(late_arena);late_arena.setup(self)
  specials = SpecialEncounters.new()
  add_child(specials)
  specials.setup(self)
@@ -135,6 +139,7 @@ func _ready() -> void:
  if "--play" in OS.get_cmdline_user_args():
   start_run()
  for argument in OS.get_cmdline_user_args():
+  if argument.begins_with("--encounter-test="):start_late_test(argument.get_slice("=",1))
   if argument.begins_with("--boss-test="):
    start_boss_test(argument.get_slice("=", 1))
 
@@ -178,6 +183,7 @@ func simulate(delta: float, movement: Vector2 = Vector2.ZERO) -> void:
  if state != "running":
   return
  elapsed += delta
+ campaign.tick()
  navigation.tick(delta)
  var previous_position: Vector2 = player.position
  player.movement_multiplier = boss_arena.slow_multiplier(player.position)
@@ -205,6 +211,7 @@ func simulate(delta: float, movement: Vector2 = Vector2.ZERO) -> void:
  update_hazards(delta)
  specials.tick(delta)
  boss_arena.tick(delta)
+ late_arena.tick(delta)
  if state != "running":
   queue_redraw()
   return
@@ -265,6 +272,8 @@ func start_run(selected_support: String = "none") -> void:
  announce("PREPARE-SE PARA A PRIMEIRA HORDA", 2.5)
 
 func clear_run() -> void:
+ campaign.reset()
+ if late_arena!=null:late_arena.reset()
  food_index.reset()
  navigation.reset()
  if is_instance_valid(weapon_system) and weapon_system.ground!=null:weapon_system.ground.reset();weapon_system.arsenal.reset()
@@ -412,11 +421,12 @@ func retry() -> void:
   open_online()
   return
  if dev_boss_test:
-  if state in ["running", "paused", "upgrading"]:
+  if state in ["running", "paused", "upgrading", "revive_offer"]:
    finish_run(false)
-  start_boss_test(dev_boss_kind)
+  if dev_boss_kind in ["guardian","horror","true"]:start_late_test(dev_boss_kind)
+  else:start_boss_test(dev_boss_kind)
   return
- if state in ["running", "paused", "upgrading"]:
+ if state in ["running", "paused", "upgrading", "revive_offer"]:
   finish_run(false)
  start_run(support)
 
@@ -425,7 +435,7 @@ func abandon() -> void:
   coop.leave()
   return
  # Leaving a live expedition settles it once, just like defeat.
- if state in ["running", "paused", "upgrading"]:
+ if state in ["running", "paused", "upgrading", "revive_offer"]:
   finish_run(false)
  else:
   enter_hub()
@@ -434,13 +444,14 @@ func finish_run(won: bool) -> void:
  if coop != null and coop.active:
   coop.finish(won)
   return
- if state not in ["running", "paused", "upgrading"] or run_settled:
+ if state not in ["running", "paused", "upgrading", "revive_offer"] or run_settled:
   return
  state = "result"
  player.clear_status()
  weapon_system.ground.reset();weapon_system.arsenal.reset();slime_families.reset()
  run_settled = true
  boss_arena.stop_combat()
+ late_arena.reset()
  camera.offset = Vector2.ZERO
  banked_gold = 0 if dev_boss_test else gold
  banked_reward = profile.reward(elapsed, kills, won, earned, gold, run_id, director.wave_number(), mastery.gold_fraction) if persistence_enabled else floori(elapsed / 30.0) + floori(kills / 30.0) + earned + (10 if won else 0)
@@ -453,7 +464,7 @@ func request_quit() -> void:
  if coop != null and coop.active:
   coop.finish(false)
   if coop.connection.socket != null: coop.connection.socket.poll()
- if state in ["running", "paused", "upgrading"]:
+ if state in ["running", "paused", "upgrading", "revive_offer"]:
   finish_run(false)
  get_tree().quit()
 
@@ -567,11 +578,12 @@ func apply_settings() -> void:
  if not test_mode:
   DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN if profile.data.settings.fullscreen else DisplayServer.WINDOW_MODE_WINDOWED)
 
-func spawn_enemy(id: String, point: Vector2, elite: bool = false):
+func spawn_enemy(id: String, point: Vector2, elite: bool = false, chain_meta:Dictionary={}):
  id = "demon" if id == "boss" else id
  if id=="slime_large" and not (coop.active and not coop.hosting) and not slime_families.can_add():return null
- var enemy = SlimeEnemy.new() if id in ["slime_large","slime_small"] else Devourer.new() if id=="devourer" else HordeBoss.new() if id in ["demon", "executioner"] else (SpecialEnemy.new() if id in ["necromancer","beast","plague","shadow"] else preload("res://scenes/entities/enemy.tscn").instantiate())
+ var enemy = LateBoss.new() if id in ["guardian","horror"] else SlimeEnemy.new() if id in ["slime_large","slime_small"] else Devourer.new() if id=="devourer" else HordeBoss.new() if id in ["demon", "executioner"] else (SpecialEnemy.new() if id in ["necromancer","beast","plague","shadow"] else preload("res://scenes/entities/enemy.tscn").instantiate())
  enemy.position = point
+ enemy.chain_root=int(chain_meta.get("root",0));enemy.chain_generation=int(chain_meta.get("generation",-1))
  enemy.serial = serial
  serial += 1
  var stats: EnemyData = enemy_data[id].duplicate()
@@ -592,8 +604,10 @@ func spawn_enemy(id: String, point: Vector2, elite: bool = false):
   enemy.hp = enemy.max_hp
  entities.add_child(enemy)
  enemies.append(enemy)
+ late_arena.chain.register(enemy)
+ if id=="necromancer" and enemy.chain_root>0:enemy.summon_cooldown=0;enemy.attack_time=2
  if id=="slime_large" and not (coop.active and not coop.hosting):slime_families.reserved[enemy.serial]=true
- if id in ["demon", "executioner"]:
+ if id in ["demon", "executioner", "guardian", "horror"]:
   boss = enemy
  return enemy
 
@@ -601,6 +615,7 @@ func enemy_killed(enemy) -> void:
  if reported_deaths.has(enemy.get_instance_id()):
   return
  reported_deaths[enemy.get_instance_id()] = true
+ late_arena.chain.remove(enemy)
  if enemy.data.id=="slime_large":slime_families.schedule(enemy)
  kills += 1
  if enemy is Devourer:
@@ -611,7 +626,11 @@ func enemy_killed(enemy) -> void:
  if enemy.elite:
   earned += 3
   announce("CARRASCO ABATIDO  |  +3 MEDALHAS", 3)
- if enemy is HordeBoss:
+ if enemy is LateBoss:
+  gold+=int(campaign.config.guardian_reward if enemy.data.id=="guardian" else campaign.config.horror_reward)
+  earned+=3 if enemy.data.id=="guardian" else 8
+  late_arena.on_death(enemy)
+ elif enemy is HordeBoss:
   if enemy.is_executioner:
    executioner_defeated = true
    gold += boss_balance.executioner_reward
@@ -634,6 +653,7 @@ func despawn_enemy(enemy) -> void:
  if not is_instance_valid(enemy):
   return
  slime_families.reserved.erase(enemy.serial)
+ late_arena.chain.remove(enemy)
  enemy.alive = false
  enemy.targetable = false
  enemies.erase(enemy)
@@ -739,7 +759,7 @@ func camera_rect() -> Rect2:
  return Rect2(center - Vector2(320, 180), Vector2(640, 360))
 
 func snapshot() -> Dictionary:
- return {"hp": player.hp, "max_hp": player.max_hp, "xp": xp, "xp_needed": xp_needed, "elapsed": elapsed, "level": level, "kills": kills, "gold": gold+coop.local_gold_bonus(), "earned": earned + floori(elapsed / 30.0) + floori(kills / 30.0), "wave": director.wave_number(), "weapons": weapon_system.get_loadout(), "passives": weapon_system.get_passives(), "boss_hp": boss.hp if is_instance_valid(boss) else 0, "boss_max": boss.max_hp if is_instance_valid(boss) else 0, "boss_name": (boss.data.title+" | Fase %d"%boss.form) if is_instance_valid(boss) and boss is HordeBoss and not boss.is_executioner else (boss.data.title if is_instance_valid(boss) else ""), "banner": banner, "pressure": director.pressure()}
+ return {"hp": player.hp, "max_hp": player.max_hp, "xp": xp, "xp_needed": xp_needed, "elapsed": elapsed, "level": level, "kills": kills, "gold": gold+coop.local_gold_bonus(), "earned": earned + floori(elapsed / 30.0) + floori(kills / 30.0), "wave": director.wave_number(), "weapons": weapon_system.get_loadout(), "passives": weapon_system.get_passives(), "dev":dev_boss_test,"chain_debug":late_arena.chain.snapshot(),"true_form":is_instance_valid(boss) and boss.data.id=="horror" and boss.form==2,"boss_hp": boss.hp if is_instance_valid(boss) else 0, "boss_max": boss.max_hp if is_instance_valid(boss) else 0, "boss_name": "TRUE FORM" if is_instance_valid(boss) and boss.data.id=="horror" and boss.form==2 else (boss.data.title+" | Fase %d"%boss.form) if is_instance_valid(boss) and boss is HordeBoss and not boss.is_executioner else (boss.data.title if is_instance_valid(boss) else ""), "banner": banner, "pressure": director.pressure()}
 
 func _draw() -> void:
  if state in ["title", "hub"]:
@@ -758,9 +778,9 @@ func _draw() -> void:
   draw_arc(region, 42, 0, TAU, 32, Color("c5a361"), 1, false)
   draw_arc(region, 45, -PI / 2, -PI / 2 + TAU * event_progress / 6, 32, Color("d7c9a1"), 2, false)
   draw_rect(Rect2(region - Vector2(7, 11), Vector2(14, 19)), Color("7c7153"))
-  draw_string(ThemeDB.fallback_font, region + Vector2(-48, -52), "ÁREA  |  FIQUE 6s", HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color("d7c9a1"))
+  draw_string(GameFonts.interface_font(), region + Vector2(-48, -52), "ÁREA  |  FIQUE 6s", HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color("d7c9a1"))
  for number in numbers:
-  draw_string(ThemeDB.fallback_font, number.at, number.value, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color("e3c9a0"))
+  draw_string(GameFonts.interface_font(), number.at, number.value, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color("e3c9a0"))
 
 func drop_xp(at:Vector2,amount:int,protected:bool=false):
  if amount<=0:return
@@ -787,3 +807,17 @@ func show_revive_offer():
  state="revive_offer";ui.render("revive_offer")
 func use_solo_revive():
  if state=="revive_offer" and mastery.use_revive():state="running";ui.render("running")
+
+func start_late_test(kind:String):
+ if kind not in ["guardian","horror","true"]:return
+ start_run();dev_boss_kind=kind;dev_boss_test=true;persistence_enabled=false;run_challenge=0;mastery.begin(false)
+ director.phase="complete";elapsed=900 if kind=="guardian" else 1200
+ weapon_system.levels={"sword":8,"bolt":8,"orbit":8,"lightning":8,"clock":8,"holy_water":8}
+ for id in ["boots","heart","ward","crown"]:
+  for i in 8:weapon_system.apply_upgrade(id)
+ level=80 if kind=="guardian" else 96;player.position=Vector2(820,630)
+ late_arena.begin_encounter("guardian" if kind=="guardian" else "horror")
+ if kind=="true":
+  late_arena.tick(1.3);boss.take_damage(boss.max_hp);boss.tick(1.7)
+ announce("TESTE: "+kind.to_upper()+" | SEM SALVAMENTO",3)
+ ui.update_hud(snapshot())

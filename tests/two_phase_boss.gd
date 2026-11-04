@@ -9,7 +9,7 @@ func run():
 	assert(not boss.targetable and g.enemy_projectiles.arrows.is_empty() and g.boss_arena.areas.is_empty())
 	boss.tick(1.7);assert(boss.targetable)
 	boss.take_damage(100000);g.boss_arena.tick(2)
-	assert(g.state=="result" and g.boss_defeated)
+	assert(g.state=="running" and g.boss_defeated and g.campaign.completed.has("demon"))
 	g.coop.connection.peer_id="a";g.coop.hosting=true
 	g.coop.begin({"run":"scale_fixture","players":[{"id":"a","name":"A","skills":{}},{"id":"b","name":"B","skills":{}},{"id":"c","name":"C","skills":{}},{"id":"d","name":"D","skills":{}}]})
 	boss=g.spawn_enemy("demon",Vector2(900,900));first=boss.max_hp;boss.take_damage(100000)

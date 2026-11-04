@@ -16,18 +16,22 @@ func tick(delta:float):
 		if state=="prepare":
 			movement=Vector2.ZERO
 			if state_time>=data.windup:
-				if data.id=="necromancer":game.specials.magic(position,charge_direction,data.damage)
-				else:game.specials.flask(position,ambush_at)
+				if data.id=="necromancer":game.specials.magic(position,charge_direction,data.damage,chain_root)
+				else:game.specials.flask(position,ambush_at,chain_root)
 				state="recovery";state_time=0;attack_time=data.attack_interval
 		elif state=="recovery":
 			movement=Vector2.ZERO
 			if state_time>=data.recovery:state="approach"
 		elif state=="approach" and attack_time<=0 and offset.length()<data.attack_range:
 			state="prepare";state_time=0;charge_direction=direction;ambush_at=game.player.position
-		if data.id=="necromancer" and summon_cooldown<=0 and state=="approach":
+		if data.id=="necromancer" and summon_cooldown<=0 and state in ["approach","conjure_wait"]:
 			if game.specials.summon(self):
 				summon_cooldown=game.specials.balance.summon_interval
 				state="conjure";state_time=0
+			else:
+				summon_cooldown=.35
+				if chain_root>0:state="conjure_wait"
+		if state=="conjure_wait":movement=Vector2.ZERO
 		if state=="conjure":
 			movement=Vector2.ZERO
 			if state_time>=game.specials.balance.summon_warning:state="approach"
@@ -62,7 +66,8 @@ func tick(delta:float):
 	knockback=knockback.move_toward(Vector2.ZERO,delta*500)
 	move_and_slide()
 	if data.frames>=16:
-		if state=="prepare":sprite.frame=8+mini(3,int(state_time/maxf(.01,data.windup)*4))
+		if state=="conjure_wait":sprite.frame=8+int(clock*4)%2
+		elif state=="prepare":sprite.frame=8+mini(3,int(state_time/maxf(.01,data.windup)*4))
 		elif state=="conjure":sprite.frame=8+mini(7,int(state_time/maxf(.01,game.specials.balance.summon_warning)*8))
 		elif state=="recovery":sprite.frame=12+mini(3,int(state_time/maxf(.01,data.recovery)*4))
 		else:sprite.frame=(4+int(clock*9)%4) if movement.length()>2 else int(clock*5)%4

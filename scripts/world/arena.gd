@@ -11,6 +11,8 @@ var pillar: Texture2D
 var grave: Texture2D
 var brazier: Texture2D
 var rng := RandomNumberGenerator.new()
+var dynamic_walls:Dictionary={}
+var wall_revision:int=0
 
 func _ready() -> void:
  rng.seed = 81391
@@ -31,7 +33,7 @@ func _ready() -> void:
   add_obstacle(rect)
  queue_redraw()
 
-func add_obstacle(rect: Rect2) -> void:
+func add_obstacle(rect: Rect2) -> StaticBody2D:
  obstacles.append(rect)
  var wall := StaticBody2D.new()
  wall.position = rect.get_center()
@@ -43,6 +45,7 @@ func add_obstacle(rect: Rect2) -> void:
  shape.shape = box
  wall.add_child(shape)
  add_child(wall)
+ return wall
 
 func safe_position(point: Vector2, radius: float = 12.0) -> bool:
  if not Rect2(40, 45, 1720, 1110).has_point(point):
@@ -80,6 +83,7 @@ func _draw() -> void:
 func apply_map(id:String):
  if id not in ["courtyard","library","fields"]:id="courtyard"
  if definition!=null and map_id==id:return
+ sync_dynamic_walls({})
  if get_parent().get("navigation")!=null:get_parent().navigation.reset()
  map_id=id;definition=load("res://data/maps/"+id+".tres")
  if is_instance_valid(floor_layer):remove_child(floor_layer);floor_layer.queue_free()
@@ -122,3 +126,17 @@ func draw_extra_modules():
   for i in 70:
    var at:=Vector2(70+(i*137)%1640,70+(i*239)%1060)
    draw_rect(Rect2(at,Vector2(2,2)),Color("c6b888") if i%3 else Color("9da87c"))
+
+func sync_dynamic_walls(rectangles:Dictionary):
+ var same:bool=dynamic_walls.size()==rectangles.size()
+ if same:
+  for id in rectangles:
+   if not dynamic_walls.has(id) or dynamic_walls[id].rect!=rectangles[id]:same=false;break
+ if same:return
+ for old in dynamic_walls.values():
+  obstacles.erase(old.rect)
+  if is_instance_valid(old.node):old.node.collision_layer=0;old.node.queue_free()
+ dynamic_walls.clear()
+ for id in rectangles:dynamic_walls[id]={"rect":rectangles[id],"node":add_obstacle(rectangles[id])}
+ wall_revision+=1
+ if get_parent().get("navigation")!=null:get_parent().navigation.reset()

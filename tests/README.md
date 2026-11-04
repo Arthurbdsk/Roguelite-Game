@@ -1,3 +1,15 @@
+# Validação atual, versão 0.10
+
+`python tools/validate_campaign10.py` executa as verificações atuais por etapa, com perfis isolados. Os testes de captura precisam do renderizador real; o runner escolhe esse modo automaticamente. `tests/full_campaign10.gd` percorre a campanha completa com um bot invulnerável em passos 1/60. Não mede dificuldade humana nem FPS.
+
+- `node relay/match-test.mjs --campaign`: quatro processos, encontros, paredes, invocações, transformação, recompensa e salvamento individual.
+- `node relay/match-test.mjs`: regressão do combate cooperativo, coleta, melhorias, resgate, carga e derrota.
+- Acrescente `--packed=build/Hordas-0.10.0/Hordas-0.10.0.exe` para verificar o PCK exportado.
+- `python tools/verify_export.py --suite true10`: barra, transição e vitória final no pacote.
+- `Godot --path . --script res://tests/load_campaign10.gd -- --self-test --representative`: carga renderizada de quatro atores locais, seis armas por ator e a cadeia de vinte Necromantes. Retire `--representative` para a sobrecarga artificial acima do limite normal de inimigos.
+
+Medições e limitações estão em `docs/ATUALIZACAO_0_10.md`. Os comandos abaixo registram verificações históricas. Alguns roteiros antigos de árvore e vitória na décima horda foram substituídos pelos testes de aprimoramentos 0.9 e campanha 0.10; eles não são critérios atuais de aprovação.
+
 # Verificação de integração
 
 Execute a partir da pasta que contém `project.godot`, com Godot 4.7.2:

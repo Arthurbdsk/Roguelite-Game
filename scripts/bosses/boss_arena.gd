@@ -125,8 +125,7 @@ func tick(delta: float) -> void:
 				death.boss.queue_free()
 			if death.final:
 				stage = "complete"
-				game.director.phase = "complete"
-				game.finish_run(true)
+				game.campaign.encounter_finished("demon")
 				return
 	for i in range(bursts.size() - 1, -1, -1):
 		bursts[i].delay -= delta
@@ -171,7 +170,7 @@ func can_cast(power: String) -> bool:
 	if power == "lightning":
 		return not has_area("ice") and not has_area("lightning") and areas.size() < game.boss_balance.area_limit - 3
 	if power == "ice":
-		return not has_area("lightning") and not has_area("ice") and areas.size() < game.boss_balance.area_limit - 2
+		return not has_area("lightning") and not has_area("ice") and areas.size() < game.boss_balance.area_limit - 4
 	if power == "summon":
 		return game.boss_balance.summon_limit-summons.size()-pending_summons.size() >= (game.boss_balance.second_summon_batch if is_instance_valid(demon) and demon.form==2 else game.boss_balance.first_summon_batch)
 	if power == "fire":
@@ -219,13 +218,11 @@ func cast(power: String, boss, direction: Vector2, phase: int) -> bool:
 			add_area("lightning",at,game.boss_balance.sector_radius,game.boss_balance.sector_warning,.3,game.boss_balance.lightning_damage,owner)
 			areas.back().age=-i*game.boss_balance.sector_delay
 	elif power == "ice":
-		var vertical:bool=boss.attack_index%2==0
-		var size:Vector2=Vector2(game.boss_balance.ice_band_width,game.boss_balance.ice_band_length) if vertical else Vector2(game.boss_balance.ice_band_length,game.boss_balance.ice_band_width)
-		var spacing:float=(game.boss_balance.ice_corridor+game.boss_balance.ice_band_width)/2
-		for side in [-1,1]:
-			var at:Vector2=center+(Vector2.RIGHT if vertical else Vector2.DOWN)*spacing*side
-			add_area("ice",at,game.boss_balance.ice_radius,game.boss_balance.ice_warning,game.boss_balance.ice_duration,0,owner)
-			areas.back().size=size
+		var rectangles:Array[Rect2]=IceLayout.plan(game,game.boss_balance.ice_band_length,game.boss_balance.ice_band_width,game.boss_balance.ice_corridor,game.boss_balance.ice_opening)
+		if rectangles.is_empty():return false
+		for rect in rectangles:
+			add_area("ice",rect.get_center(),game.boss_balance.ice_radius,game.boss_balance.ice_warning,game.boss_balance.ice_duration,0,owner)
+			areas.back().size=rect.size
 		game.sound.play_cue("ice")
 	elif power == "ring":
 		var gap:int=boss.attack_index%12
@@ -319,18 +316,4 @@ func clear_for_transform():
 	queue_redraw()
 
 func draw_ice_barrier(area:Dictionary,active:bool):
-	var bounds:=Rect2(area.at-area.size/2,area.size)
-	draw_rect(bounds,Color(0.3,0.65,0.8,.14 if active else .06))
-	draw_rect(bounds,Color("9bdcec"),false,1)
-	var vertical:bool=area.size.y>area.size.x
-	var count:int=int((area.size.y if vertical else area.size.x)/24)
-	for i in count:
-		var base:Vector2=bounds.position+(Vector2(area.size.x/2,12+i*24) if vertical else Vector2(12+i*24,area.size.y/2))
-		if not active:
-			draw_line(base-Vector2(6,0),base+Vector2(6,0),Color("a7e2f2"),1)
-			continue
-		var age:float=area.age-area.warning
-		var remaining:float=area.warning+area.duration-area.age
-		var frame:int=mini(2,int(age*12)) if age<.25 else 3+int(age*7+i)%4
-		if remaining<.3:frame=mini(9,7+int((.3-remaining)*10))
-		draw_texture_rect_region(ice_texture,Rect2(base.round()-Vector2(16,48),Vector2(32,56)),Rect2(frame*32,0,32,56))
+	IceVFX.render(self,ice_texture,area,active)

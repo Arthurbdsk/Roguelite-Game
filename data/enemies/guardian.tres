@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/entities/enemy_data.gd" id="1"]
+[resource]
+script = ExtResource("1")
+id = "guardian"
+title = "Guardião"
+health = 100.0
+speed = 56.0
+damage = 24.0
+radius = 20.0
+experience = 100
+texture = "res://assets/v10/guardian.png"
+behavior = "guardian"
+frames = 32
+contact_damage = false

@@ -85,7 +85,7 @@ func _draw() -> void:
 		var frame: int = int(coin.age * 10) % 8
 		draw_texture_rect_region(texture, Rect2(coin.at.round() - Vector2(8, 9), Vector2(16, 16)), Rect2(frame * 16, 0, 16, 16))
 	for effect in feedback:
-		draw_string(ThemeDB.fallback_font, effect.at, "+%d" % effect.amount, HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color("dfb969"))
+		draw_string(GameFonts.interface_font(), effect.at, "+%d" % effect.amount, HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color("dfb969"))
 
 func refund(at:Vector2,amount:int):
 	serial+=1

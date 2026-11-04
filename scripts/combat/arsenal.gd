@@ -8,6 +8,8 @@ var blade_hits:Dictionary={}
 var angle:float=0
 var textures:Dictionary={}
 var bomb_texture=preload("res://assets/v08/bombs.png")
+var snow_texture=preload("res://assets/v10/snowflake.png")
+var explosion_texture=preload("res://assets/v10/explosion.png")
 func setup(w):
  weapons=w
  for id in ["axe","boomerang","bombs","blades","ice_wave"]:textures[id]=load("res://assets/icons/"+id+".png")
@@ -97,6 +99,15 @@ func _draw():
    draw_set_transform(Vector2.ZERO)
   else:
    var progress:float=clampf((zone.age-zone.delay)/.4,0,1)
+   if zone.kind=="bombs":
+    draw_texture_rect_region(explosion_texture,Rect2(zone.at-Vector2.ONE*zone.radius,Vector2.ONE*zone.radius*2),Rect2(mini(7,int(progress*8))*96,0,96,96))
+    continue
+   if zone.kind=="ice_wave":
+    var count:int=clampi(ceili(TAU*zone.radius/28),12,32)
+    for i in count:
+     var at:Vector2=zone.at+Vector2.from_angle(i*TAU/count)*zone.radius*minf(1,zone.age/.35)
+     draw_texture_rect_region(snow_texture,Rect2(at.round()-Vector2(12,12),Vector2(24,24)),Rect2(mini(7,int(progress*8))*32,0,32,32))
+    continue
    for i in 40:
     var at:Vector2=zone.at+Vector2.from_angle(i*TAU/40)*zone.radius*progress
     draw_rect(Rect2(at.round(),Vector2(2,3)),Color("abddeb") if zone.kind=="ice_wave" else Color("e9b45a"))

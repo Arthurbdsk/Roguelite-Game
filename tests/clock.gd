@@ -7,7 +7,7 @@ func run():
 	g.weapon_system._clock();assert(enemy.hp==999 and enemy.frozen_remaining==3)
 	var at=enemy.position;var cooldown=enemy.attack_time;enemy.tick(1)
 	assert(enemy.position==at and enemy.attack_time==cooldown)
-	enemy.tick(2);assert(enemy.freeze_resistance==1)
+	enemy.tick(2);assert(enemy.freeze_resistance==g.weapon_system.weapon_data.clock.freeze_resistance)
 	enemy.apply_time_control(3,1,.3,1);assert(enemy.frozen_remaining==0)
 	for i in 11:g.weapon_system._clock()
 	assert(g.weapon_system.clock_index==0 and g.weapon_system.beams.size()==12)

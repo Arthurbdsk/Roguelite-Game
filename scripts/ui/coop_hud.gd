@@ -9,7 +9,7 @@ func _ready() -> void:
 
 func _draw() -> void:
 	if session == null or not session.active or session.ended: return
-	var font: Font = ThemeDB.fallback_font
+	var font: Font = GameFonts.interface_font()
 	var row: int = 0
 	for id in session.actors:
 		var actor: CoopActor = session.actors[id]

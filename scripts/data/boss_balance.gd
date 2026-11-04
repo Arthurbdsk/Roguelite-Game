@@ -80,7 +80,8 @@ func portal_duration() -> float:
 @export var sector_radius:float=34
 @export var sector_warning:float=1.25
 @export var sector_delay:float=0.14
-@export var ice_band_length:float=560
+@export var ice_band_length:float=1120
+@export var ice_opening:float=160
 @export var ice_band_width:float=44
 @export var ice_corridor:float=150
 @export var ring_radius:float=170

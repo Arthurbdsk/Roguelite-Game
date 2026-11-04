@@ -2,7 +2,15 @@
 
 Projeto editável em Godot 4.7.2. Inclui código, cenas, mapas, dados de balanceamento, sprites e testes. Não precisa instalar Python ou Node.js para jogar no modo solo pelo editor.
 
-Para jogar no Windows sem instalar o Godot, baixe [Hordas 0.9.0](https://github.com/Arthurbdsk/Roguelite-Game/releases/tag/v0.9.0). O arquivo `.exe` contém todos os recursos. Essa versão inclui a remodelação atual; a nova explosão da bomba e a medição final de desempenho ainda estão pendentes.
+Para jogar no Windows sem instalar o Godot, baixe [Hordas 0.10.0](https://github.com/Arthurbdsk/Roguelite-Game/releases/tag/v0.10.0). O arquivo `.exe` contém todos os recursos. Todos os participantes precisam usar a mesma versão.
+
+## Campanha 0.10.0
+
+A partida continua após o Demônio dos dez minutos. Guardião aos quinze minutos; Abominação e True Form aos vinte. Inclui espera corrigida do herói, gelo com avisos próximos aos jogadores, paredes sólidas no novo chefe, explosão animada da bomba e novos sprites. Atalhos F9 e `Testar_Guardiao.cmd`, `Testar_Abominacao.cmd`, `Testar_True_Form.cmd` usam builds de desenvolvimento sem gravar progresso.
+
+A imagem da fonte Kingdom foi recebida, mas o arquivo TTF/OTF não foi fornecido. A fonte anterior continua ativa; o tema central está preparado para `assets/fonts/Kingdom.ttf`, com apoio para acentos.
+
+Valores, testes e limitações de desempenho estão em [docs/ATUALIZACAO_0_10.md](docs/ATUALIZACAO_0_10.md).
 
 ## Aprimoramentos permanentes 0.9.0
 
@@ -25,7 +33,7 @@ Todos os jogadores precisam usar a mesma versão do projeto. Um endereço tempor
 
 ## Estado do projeto
 
-O código atual inclui a expansão 0.7 e a remodelação visual em andamento: navegação ao redor dos obstáculos, novo herói, Necromante, Médico da Peste, Besta, duas formas do chefe, bomba azul, bumerangue de madeira e Água Benta animada. A nova explosão da bomba e a validação conjunta final dessa remodelação ainda estão pendentes. Os relatórios anteriores não certificam automaticamente essas alterações mais recentes.
+O código atual preserva os três mapas, doze armas, oito passivas, dezesseis aprimoramentos permanentes, ouro e cooperação por código. A campanha foi estendida com os encontros da versão 0.10. Os relatórios históricos descrevem as versões em que foram escritos; consulte o relatório 0.10 para os testes atuais.
 
 ## Versão 0.7.0 anterior
 

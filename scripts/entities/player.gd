@@ -17,6 +17,7 @@ var radius: float = 7.0
 var facing: Vector2 = Vector2.DOWN
 var invulnerable: float = 0.0
 var animation: float = 0.0
+var actually_moving:bool=false
 var sprite: Sprite2D
 var movement_multiplier: float = 1.0
 var time_since_damage: float = 0.0
@@ -54,18 +55,20 @@ func tick(delta: float, movement: Vector2) -> void:
  if root_remaining>0:movement=Vector2.ZERO
  invulnerable = maxf(0.0, invulnerable - delta)
  time_since_damage += delta
+ if movement.length()<.12:movement=Vector2.ZERO
  velocity = movement.limit_length() * speed * movement_multiplier
- if movement.length_squared() > 0.01:
-  facing = movement.normalized()
-  animation += delta * 9
-  if absf(movement.x) > 0.05:
-   sprite.flip_h = movement.x < 0
- else:
-  animation = 0
- tick_visual(delta,movement.length_squared()>.01)
+ var before:Vector2=position
  sprite.modulate = Color(1, 0.55, 0.45) if invulnerable > 0.0 and fmod(invulnerable, 0.16) > 0.08 else Color.WHITE
  move_and_slide()
  position = position.clamp(Vector2(35, 45), Vector2(1765, 1165))
+ var travelled:Vector2=position-before
+ var actual_speed:float=travelled.length()/maxf(delta,.0001)
+ actually_moving=actual_speed>(1.0 if actually_moving else 2.0)
+ if actually_moving:
+  facing=travelled.normalized()
+  if absf(facing.x)>.05:sprite.flip_h=facing.x<0
+ else:animation=0
+ tick_visual(delta,actually_moving)
  queue_redraw()
 
 func take_damage(amount: float, source: Vector2) -> bool:
@@ -90,7 +93,7 @@ func _draw() -> void:
  # Cold pixels under the sentinel keep them visible in a dense crowd.
  draw_arc(Vector2(0, 1), 10, 0, TAU, 16, Color("b65f42") if down else marker_color, 1, false)
  if not display_name.is_empty():
-  var font: Font = ThemeDB.fallback_font
+  var font: Font = GameFonts.interface_font()
   var width: float = font.get_string_size(display_name, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x
   draw_string(font, Vector2(-width * 0.5, -58 if sprite.hframes>=32 else -34), display_name, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, marker_color)
 
@@ -141,7 +144,7 @@ func tick_visual(delta:float,moving:bool=false):
  elif anticipation_remaining>0:sprite.frame=8+int(anticipation_remaining<.06)
  elif not (game.coop.active and not game.coop.hosting) and game.weapon_system.levels.get("sword",0)>0 and float(game.weapon_system.timers.get("sword",1))<.12 and game.nearest_enemy(position,game.weapon_system._stat("sword","reach")+25)!=null:sprite.frame=8+int(float(game.weapon_system.timers.get("sword",1))<.06)
  elif moving:sprite.frame=16+int(visual_clock*10)%8
- else:sprite.frame=int(visual_clock*4)%4
+ else:sprite.frame=0
 
 func received_damage(amount:float)->float:
  return maxf(amount*.2,maxf(0,amount-armor)*(1-clampf(damage_reduction,0,.8)))

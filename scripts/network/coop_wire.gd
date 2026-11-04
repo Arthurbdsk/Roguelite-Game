@@ -7,12 +7,13 @@ static func encode(value):
 	if value is Dictionary:
 		var result := {}
 		for key in value:
-			result[str(key)] = encode(value[key])
+			var item=value[key]
+			result[str(key)] = encode(item) if item is Dictionary or item is Array or item is Vector2 or item is PackedVector2Array else item
 		return result
 	if value is Array or value is PackedVector2Array:
 		var result: Array = []
 		for item in value:
-			result.append(encode(item))
+			result.append(encode(item) if item is Dictionary or item is Array or item is Vector2 or item is PackedVector2Array else item)
 		return result
 	return value
 
@@ -20,7 +21,7 @@ static func vector(value) -> Vector2:
 	return Vector2(float(value[0]), float(value[1])) if value is Array and value.size() == 2 else Vector2.ZERO
 
 static func decode(value, key: String = ""):
-	if value is Array and key in ["at", "position", "velocity", "origin", "direction", "charge_direction", "sprite_position", "ambush_at", "source", "end", "size", "ring_center"]:
+	if value is Array and key in ["at", "position", "velocity", "origin", "direction", "charge_direction", "sprite_position", "ambush_at", "source", "end", "size", "ring_center", "stop", "locked_target"]:
 		return vector(value)
 	if value is Dictionary:
 		var result := {}

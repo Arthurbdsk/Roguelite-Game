@@ -18,6 +18,7 @@ var menu: Control
 var hud: Control
 var life_bar: ProgressBar
 var experience_bar: ProgressBar
+var true_health:TrueHealthBar
 var boss_bar: ProgressBar
 var life_text: Label
 var time_text: Label
@@ -26,6 +27,7 @@ var counts_text: Label
 var pressure_text: Label
 var banner_text: Label
 var boss_text: Label
+var dev_chain_label:Label
 var build_stats_label:Label
 var status_text:Label
 var status_icon:TextureRect
@@ -56,8 +58,7 @@ func setup(game_ref) -> void:
 func _build_theme() -> void:
  ui_theme = Theme.new()
  ui_theme.default_font_size = 12
- if ResourceLoader.exists("res://assets/font.ttf"):
-  ui_theme.default_font = load("res://assets/font.ttf")
+ ui_theme.default_font = GameFonts.interface_font()
  ui_theme.set_color("font_color", "Label", IVORY)
  ui_theme.set_color("font_color", "Button", IVORY)
  ui_theme.set_color("font_hover_color", "Button", Color("f0e6c8"))
@@ -202,10 +203,13 @@ func render(which: String, data: Dictionary = {}) -> void:
   "lab":
    _backdrop()
    _label(menu, "LABORATÓRIO DE COMBATE", Rect2(24, 28, 592, 40), 25, IVORY, true)
-   _label(menu, "Carrasco: armas nível 4. Demônio: armas evoluídas nível 5.\nBotas 2, Escudo 2 e Ímã 2. Sem habilidades permanentes.\nO teste não salva nem concede ouro.", Rect2(80, 90, 480, 80), 12, MUTED, true)
-   var first := _button(menu, "Enfrentar o Carrasco", Rect2(160, 184, 320, 32), game.start_boss_test.bind("executioner"), true)
-   _button(menu, "Portal do demônio", Rect2(160, 228, 320, 32), game.start_boss_test.bind("demon"))
-   _button(menu, "Voltar", Rect2(160, 281, 320, 28), game.show_title)
+   _label(menu, "Carrasco: armas nível 4. Demônio: armas evoluídas nível 5.\nEncontros tardios: seis armas nos níveis 6 a 8. Sem aprimoramentos permanentes.\nO teste não salva nem concede ouro.", Rect2(80, 90, 480, 80), 12, MUTED, true)
+   var first := _button(menu, "Enfrentar o Carrasco", Rect2(28,175,280,30), game.start_boss_test.bind("executioner"), true)
+   _button(menu, "Portal do demônio", Rect2(332,175,280,30), game.start_boss_test.bind("demon"))
+   _button(menu,"Guardião (15 min)",Rect2(28,217,280,30),game.start_late_test.bind("guardian"))
+   _button(menu,"Abominação (20 min)",Rect2(332,217,280,30),game.start_late_test.bind("horror"))
+   _button(menu,"True Form",Rect2(180,260,280,28),game.start_late_test.bind("true"))
+   _button(menu, "Voltar", Rect2(180,305,280,26), game.show_title)
    call_deferred("_grant_focus", first)
 
 func _title() -> void:
@@ -475,6 +479,8 @@ func _build_hud() -> void:
  root.add_child(hud)
  _box(hud, Rect2(10, 10, 165, 39), Color("11191ce8"))
  _box(hud,Rect2(440,10,190,39),Color("142238ed"))
+ dev_chain_label=_label(hud,"",Rect2(10,105,360,30),8,MUTED)
+ true_health=TrueHealthBar.new();hud.add_child(true_health);true_health.visible=false
  status_icon=TextureRect.new()
  status_icon.texture=load("res://assets/icons/poison.png")
  status_icon.position=Vector2(180,33)
@@ -533,11 +539,17 @@ func update_hud(data: Dictionary) -> void:
  experience_bar.value = float(data.get("xp", 0))
  level_text.text = "NÍVEL %d" % int(data.get("level", 1))
  time_text.text = _clock(float(data.get("elapsed", 0.0)))
+ dev_chain_label.visible=data.get("dev",false)
+ if dev_chain_label.visible:
+  var stats:Dictionary=data.get("chain_debug",{})
+  dev_chain_label.text="Cadeia: solicitados %d | gerados %d | adiados %d"%[stats.get("requested",0),stats.get("generated",0),stats.get("deferred",0)]
  counts_text.text = "%d abates  |  %d ouro" % [int(data.get("kills", 0)), int(data.get("gold", 0))]
  pressure_text.text = str(data.get("pressure", "ARENA"))
  banner_text.text = str(data.get("banner", ""))
  var max_boss: float = float(data.get("boss_max", 0.0))
- boss_bar.visible = max_boss > 0.0
+ true_health.visible=max_boss>0 and data.get("true_form",false)
+ if true_health.visible:true_health.update_health(float(data.get("boss_hp",0)),max_boss)
+ boss_bar.visible = max_boss > 0.0 and not true_health.visible
  boss_text.visible = boss_bar.visible
  if boss_bar.visible:
   boss_bar.max_value = max_boss

@@ -24,6 +24,6 @@ func run():
   if i in [20,70]:await capture("form2-cast-"+str(i))
  boss.take_damage(1);boss.tick(.01);assert(boss.sprite.frame in [24,25]);await capture("form2-hit")
  boss.take_damage(999999);g.boss_arena.tick(.3);await capture("death")
- g.boss_arena.tick(2);assert(g.state=="result" and g.boss_defeated)
+ g.boss_arena.tick(2);assert(g.state=="running" and g.boss_defeated and g.campaign.completed.has("demon"))
  g.clear_run();assert(g.boss_arena.deaths.is_empty());g.queue_free();await process_frame
  print("BOSS_VISUAL8_PASS both atlases, transform, five times HP, death once, cleanup");quit()

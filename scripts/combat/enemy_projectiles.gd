@@ -38,11 +38,12 @@ func fire_count() -> int:
 		count += int(projectile.get("kind", "arrow") == "fire")
 	return count
 
-func fire_ball(origin: Vector2, direction: Vector2, owner: int, phase: int) -> bool:
-	if arrows.size() >= game.boss_balance.final_projectile_limit or fire_count() >= game.boss_balance.fire_limit:
+func fire_ball(origin: Vector2, direction: Vector2, owner: int, phase: int, damage_override:float=-1,limit_override:int=-1) -> bool:
+	if arrows.size() >= (game.boss_balance.final_projectile_limit if limit_override<0 else game.balance.max_enemy_projectiles) or fire_count() >= (game.boss_balance.fire_limit if limit_override<0 else limit_override):
 		return false
 	serial += 1
 	arrows.append({"id": serial, "at": origin, "velocity": direction.normalized() * game.boss_balance.fire_speed * (1.08 if phase == 3 else 1), "damage": game.boss_balance.fire_damage * game.enemy_scale().damage * (game.boss_balance.second_damage_multiplier if is_instance_valid(game.boss_arena.demon) and game.boss_arena.demon.form==2 else 1), "distance": 0.0, "range": 900.0, "life": game.boss_balance.fire_lifetime, "owner": owner, "kind": "fire", "radius": 5.0})
+	if damage_override>=0:arrows.back().damage=damage_override
 	game.sound.play_cue("fire")
 	queue_redraw()
 	return true

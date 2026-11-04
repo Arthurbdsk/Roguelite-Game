@@ -19,6 +19,8 @@ var sprite: Sprite2D
 var serial: int = 0
 var targetable: bool = true
 var summoner_id: int = 0
+var chain_root:int=0
+var chain_generation:int=-1
 var frozen_remaining:float=0
 var freeze_resistance:float=0
 var resistance_duration:float=1

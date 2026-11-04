@@ -5,6 +5,8 @@ var pools:Array[Dictionary]=[]
 var hit_times:Dictionary={}
 var last_trail:Vector2=Vector2.INF
 var trail_clock:float=0
+var pool_cells:Dictionary={}
+var cells_dirty:bool=true
 var water_texture=preload("res://assets/v08/holy_water.png")
 var vial_texture=preload("res://assets/effects/holy_water_vial.png")
 var splash_texture=preload("res://assets/effects/holy_water_splash.png")
@@ -12,12 +14,13 @@ var sludge_texture=preload("res://assets/effects/sludge.png")
 func setup(system):
 	weapons=system;z_index=-6
 func reset():
-	pools.clear();hit_times.clear();last_trail=Vector2.INF;trail_clock=0;queue_redraw()
+	pools.clear();pool_cells.clear();cells_dirty=true;hit_times.clear();last_trail=Vector2.INF;trail_clock=0;queue_redraw()
 func world():
 	return weapons.game.world if weapons.game is CoopActor else weapons.game
 func add_pool(id:String,at:Vector2,source:Vector2,flight:float=0)->bool:
 	if pools.size()>=weapons.weapon_data[id].pool_limit:return false
 	pools.append({"kind":id,"at":at,"source":source,"age":0.0,"flight":flight/weapons.projectile_factor(),"duration":weapons._stat(id,"duration"),"radius":weapons._stat(id,"reach"),"damage":weapons._stat(id,"damage"),"interval":weapons.weapon_data[id].tick_interval})
+	cells_dirty=true
 	return true
 func tick(delta:float,allow_creation:bool=true):
 	trail_clock=maxf(0,trail_clock-delta)
@@ -28,22 +31,24 @@ func tick(delta:float,allow_creation:bool=true):
 		if world().arena.safe_position(at,weapons._stat("sludge","reach")) and add_pool("sludge",at,at):
 			last_trail=position_now;trail_clock=maxf(.15,weapons._interval("sludge"))
 	for pool in pools:pool.age+=delta
+	var previous_count:int=pools.size()
 	pools=pools.filter(func(p):return p.age<p.flight+p.duration)
-	var cells:Dictionary={}
-	for pool in pools:
-		if pool.age<pool.flight:continue
-		var low:=Vector2i(floori((pool.at.x-pool.radius)/64),floori((pool.at.y-pool.radius)/64))
-		var high:=Vector2i(floori((pool.at.x+pool.radius)/64),floori((pool.at.y+pool.radius)/64))
-		for x in range(low.x,high.x+1):
-			for y in range(low.y,high.y+1):
-				var cell:=Vector2i(x,y)
-				if not cells.has(cell):cells[cell]=[]
-				cells[cell].append(pool)
+	if cells_dirty or previous_count!=pools.size():
+		pool_cells.clear()
+		for pool in pools:
+			var low:=Vector2i(floori((pool.at.x-pool.radius)/64),floori((pool.at.y-pool.radius)/64))
+			var high:=Vector2i(floori((pool.at.x+pool.radius)/64),floori((pool.at.y+pool.radius)/64))
+			for x in range(low.x,high.x+1):
+				for y in range(low.y,high.y+1):
+					var cell:=Vector2i(x,y)
+					if not pool_cells.has(cell):pool_cells[cell]=[]
+					pool_cells[cell].append(pool)
+		cells_dirty=false
 	# One decision per owner, weapon and enemy. Overlapping pools cannot stack.
 	for enemy in weapons.game.enemies.duplicate():
 		if not weapons._valid_target(enemy):continue
 		var cell:=Vector2i(floori(enemy.position.x/64),floori(enemy.position.y/64))
-		var nearby:Array=cells.get(cell,[])
+		var nearby:Array=pool_cells.get(cell,[])
 		if nearby.is_empty():continue
 		for id in ["sludge","holy_water"]:
 			var key:String=id+":"+str(enemy.serial)

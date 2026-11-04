@@ -55,7 +55,7 @@ func tick(delta: float) -> void:
 		if preparation_left <= 0:
 			begin_wave()
 		return
-	var wave: WaveData = game.balance.waves[wave_index]
+	var wave: WaveData = game.campaign.wave(wave_index)
 	cooldown -= delta
 	var budget: int = 8
 	while cooldown <= 0 and not queue.is_empty() and budget > 0:
@@ -71,25 +71,14 @@ func tick(delta: float) -> void:
 		cooldown += maxf(game.balance.minimum_spawn_interval, wave.spawn_interval)
 		budget -= 1
 	if queue.is_empty() and game.enemies.is_empty() and game.slime_families.pending.is_empty():
-		if wave_index >= game.balance.waves.size() - 1:
-			phase = "complete"
-			game.finish_run(game.boss_defeated)
-		else:
-			phase = "preparing"
-			preparation_left = game.balance.preparation_seconds
-			game.enemy_projectiles.reset()
-			game.hazards.clear()
-			game.announce("HORDA %d CONCLUÍDA" % (wave_index + 1), 3)
+		phase = "preparing"
+		preparation_left = game.balance.preparation_seconds
+		game.enemy_projectiles.reset();game.hazards.clear()
+		game.announce("HORDA %d CONCLUÍDA"%(wave_index+1),3)
 
 func begin_wave() -> void:
-	if wave_index + 1 >= game.balance.waves.size():
-		return
-	var next_wave: WaveData = game.balance.waves[wave_index + 1]
-	if next_wave.boss and not game.executioner_defeated:
-		phase = "waiting_executioner"
-		return
 	wave_index += 1
-	var wave: WaveData = game.balance.waves[wave_index]
+	var wave: WaveData = game.campaign.wave(wave_index)
 	queue.clear()
 	if wave.boss:
 		phase = "boss"
@@ -151,7 +140,7 @@ func pressure() -> String:
 	if phase == "waiting_executioner":
 		return "DERROTE O CARRASCO" if elite_spawned else "CARRASCO AOS 5 MIN"
 	if phase == "boss":
-		return "PORTAL NO CENTRO" if game.boss_arena.stage == "portal" else "ÚLTIMA HORDA"
+		return "PORTAL NO CENTRO" if game.boss_arena.stage == "portal" else "ENCONTRO EM ANDAMENTO"
 	if phase == "preparing":
 		return "HORDA %d EM %ds" % [wave_index + 2, ceili(preparation_left)]
 	if phase == "complete":
