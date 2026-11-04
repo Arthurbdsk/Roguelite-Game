@@ -2,6 +2,8 @@
 
 Projeto editável em Godot 4.7.2. Inclui código, cenas, mapas, dados de balanceamento, sprites e testes. Não precisa instalar Python ou Node.js para jogar no modo solo pelo editor.
 
+Para jogar no Windows sem instalar o Godot, baixe [Hordas 0.8.0](https://github.com/Arthurbdsk/Roguelite-Game/releases/tag/v0.8.0). O arquivo `.exe` contém todos os recursos. Essa versão inclui a remodelação atual; a nova explosão da bomba e a medição final de desempenho ainda estão pendentes.
+
 ## Abrir em outra máquina
 
 1. Baixe este repositório em **Code > Download ZIP** e extraia, ou use `git clone https://github.com/Arthurbdsk/Roguelite-Game.git`.

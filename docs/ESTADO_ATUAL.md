@@ -6,6 +6,8 @@ A remodelação em andamento já inclui navegação com caminhos compartilhados 
 
 Executado antes deste envio: importação no Godot, capturas na arena de cada asset integrado, transformação e recompensa do chefe, animações do herói, testes de chefes com escala cooperativa e perseguição com 240 inimigos em cada um dos três mapas. Os testes de multidão registraram movimento de todos os agentes e zero violações de colisão no cenário testado.
 
-Pendente: nova sequência da explosão da bomba; teste final da remodelação com quatro processos de jogo, efeitos simultâneos e medição de desempenho. O executável 0.7 já existente é anterior a esta remodelação.
+O executável 0.8.0 inclui essa remodelação. Foi exportado com os recursos embutidos, iniciado com perfil isolado e verificado por quatro processos Godot usando o PCK do executável: movimentação, escolhas individuais, recursos, reanimação, escala e transformação do chefe, derrota e crédito de ouro. O teste do relay também passou.
+
+Pendente: nova sequência da explosão da bomba e medição final de desempenho da remodelação com efeitos simultâneos. A explosão anterior foi preservada nesta entrega.
 
 O saldo e a árvore permanente ficam no perfil local do jogador. O perfil pessoal, configurações de túnel, caches, dependências instaladas e executáveis não fazem parte do repositório.
