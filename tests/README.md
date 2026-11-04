@@ -40,3 +40,7 @@ Os processos da suíte usam slots `cooptest<TIMESTAMP>_<INDEX>` e removem seus p
 `tests/render_coop.gd` captura título, entrada, lobby, combate/resgate, melhoria e menu em `test_output/coop_*.png`. Execute sem `--headless`, com `-- --self-test`. A captura usa quatro contextos locais preparados para revisão visual, separada do teste de rede com quatro processos.
 
 As verificações locais não comprovam WSS público, latência real, disponibilidade do provedor, FPS renderizado ou equilíbrio humano. A hospedagem e o teste entre redes diferentes continuam pendentes.
+
+Regressão 0.4.1: `node --test test.mjs` também verifica uma rajada de 180 mensagens e bloqueio de flood. `network_backpressure.gd` testa dez cenários de envio recusado e repetição correta. `match-test.mjs --soak-seconds=310` mantém a simulação real com quatro processos por mais de cinco minutos. `--relay-url=wss://...` direciona o teste ao túnel público; `--packed=...` escolhe o executável e `--embedded-endpoint` usa o endereço embutido.
+
+Os eventos confiáveis pendentes são enviados em lotes de até aproximadamente 60 KiB; os dez casos de backpressure verificam preservação de ordem e ausência de perda ou duplicação em uma fila de 500 eventos.

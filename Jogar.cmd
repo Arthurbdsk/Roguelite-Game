@@ -1,2 +1,2 @@
 @echo off
-start "" "%~dp0build\Brasafria-0.4.0.exe"
+start "" "%~dp0build\Online-Atualizado\Brasafria-Online-0.4.1.exe"

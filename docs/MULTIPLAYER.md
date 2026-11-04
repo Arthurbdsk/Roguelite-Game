@@ -48,3 +48,22 @@ A hospedagem precisa executar continuamente esse container ou Node.js, expor `/h
 O túnel temporário foi testado com quatro processos pelo endereço WSS público, incluindo combate, carga, coleta e persistência. Todos os processos ainda estavam no mesmo computador. Falta testar com os amigos em redes físicas diferentes e providenciar hospedagem permanente. Não anunciar validação entre quatro redes independentes. Não há migração de host, reconexão ou retomada de tentativa após encerrar o processo à força.
 
 Teste externo: em `relay/`, `node match-test.mjs --packed=../build/Brasafria-0.4.0.exe --relay-url=wss://ENDERECO` permite exercitar o pacote pelo serviço público. O teste de 03/11 passou com 83 verificações distribuídas em quatro processos, sem erros do motor.
+
+
+## Correção 0.4.1
+
+O limite anterior fechava a conexão ao receber mais de 100 mensagens em uma janela curta. O teste de regressão reproduziu fechamento 1008 com 180 mensagens acumuladas. O controle agora limita o tráfego sustentado com créditos para rajadas e também limita bytes; o mesmo lote passa e um flood permanece bloqueado.
+
+O cliente verifica falhas de envio, mantém eventos confiáveis pendentes e só avança a base de deltas quando o envio é aceito. Também suspende a construção de novas posições enquanto o buffer de saída está congestionado. O teste `network_backpressure.gd` confere dez casos de falha e retomada, incluindo remoção de inimigos e moedas.
+
+O cliente registra código, motivo, idade da conexão, falhas de envio e maior intervalo de polling em `user://network_<PID>.log`, sem gravar mensagens de partida. O relay registra motivo do fechamento e limites em `test_output/relay-runtime.jsonl` quando essa pasta existe; em container usa a saída padrão. A tela de erro mostra o código do fechamento.
+
+O teste prolongado por QUIC perdeu todas as conexões quando o Windows entrou em suspensão, com erro de buffer de rede registrado pelo túnel. O túnel antigo expirou após o período offline. O novo túnel temporário usa HTTP/2 sobre TCP e IPv4. Isso não permite jogar enquanto o PC estiver suspenso. A causa exata da primeira queda relatada pelo usuário não pôde ser recuperada: aquela versão não registrava o fechamento.
+
+`match-test.mjs --soak-seconds=310 --relay-url=wss://ENDERECO --packed=CAMINHO` mantém quatro processos por mais de cinco minutos; depois de um minuto adiciona 180 inimigos duráveis, 2.000 moedas, 240 itens de experiência e disparos até o limite de 320. Exercita expiração, novas moedas e coleta em massa. Os logs do motor são separados por processo para não sobrescrever o log da partida normal.
+
+No teste inicial de HTTP/2, as quatro conexões permaneceram ativas por aproximadamente 339 segundos. O próprio harness encerrou os clientes por timeout antes do host: a espera por timers da simulação demorava mais sob carga. O harness foi corrigido para medir a duração com relógio monotônico e dar margem ao encerramento. Esse primeiro resultado não é registrado como suíte aprovada.
+
+Os eventos confiáveis pendentes são enviados em lotes de até aproximadamente 60 KiB; os dez casos de backpressure verificam preservação de ordem e ausência de perda ou duplicação em uma fila de 500 eventos.
+
+Validação final de HTTP/2: quatro processos com o pacote 0.4.1 permaneceram conectados por 310.099 ms de relógio monotônico, sem queda, incluindo 180 inimigos. Todos terminaram com `COOP_MATCH_PEER_PASS`. A distribuição está em `build/Online-Atualizado/Brasafria-Online-0.4.1.exe`, com o endereço atualizado embutido. Não foi uma medição de FPS renderizado nem um teste com quatro redes físicas independentes.

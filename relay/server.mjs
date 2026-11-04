@@ -3,12 +3,13 @@ import {randomInt,randomUUID} from 'node:crypto';
 import {WebSocketServer,WebSocket} from 'ws';
 import {pathToFileURL} from 'node:url';
 import {resolve} from 'node:path';
+import {appendFileSync,existsSync} from 'node:fs';
 
-export function createRelay({port=8080,host='127.0.0.1',maxRooms=100}={}) {
+export function createRelay({port=8080,host='127.0.0.1',maxRooms=100,onDiagnostic=()=>{}}={}) {
   const rooms=new Map(), peers=new Map();
   const server=http.createServer((req,res)=>{res.writeHead(req.url==='/health'?200:404,{'Content-Type':'application/json'});res.end(JSON.stringify(req.url==='/health'?{ok:true,protocol:1}:{}));});
   const wss=new WebSocketServer({server,maxPayload:524288,perMessageDeflate:false});
-  const send=(ws,msg)=>{if(ws.readyState!==WebSocket.OPEN)return;if(ws.bufferedAmount>=1048576){ws.close(1013,'Slow connection');return;}ws.send(JSON.stringify(msg));};
+  const send=(ws,msg)=>{if(ws.readyState!==WebSocket.OPEN)return;if(ws.bufferedAmount>=1048576){onDiagnostic({event:'slow_connection',buffered:ws.bufferedAmount});ws.close(1013,'Slow connection');return;}ws.send(JSON.stringify(msg));};
   server.maxConnections=512;
   const broadcast=(room,msg)=>{for(const p of room.members.values())send(p.ws,msg);};
   const lobby=room=>broadcast(room,{type:'lobby',code:room.code,host:room.host,players:[...room.members.values()].map(p=>({id:p.id,name:p.name,ready:p.ready,skills:p.skills}))});
@@ -19,10 +20,16 @@ export function createRelay({port=8080,host='127.0.0.1',maxRooms=100}={}) {
     else if(room.members.size){broadcast(room,{type:'left',id:p.id});if(!room.started)lobby(room);}
   }
   wss.on('connection',ws=>{
-    const p={id:randomUUID(),ws,room:null,name:'',ready:false,skills:{},window:Date.now(),messages:0,alive:true};peers.set(ws,p);
+    const p={id:randomUUID(),ws,room:null,name:'',ready:false,skills:{},window:Date.now(),tokens:600,byteTokens:16*1048576,alive:true,connectedAt:Date.now(),maxPayload:0};peers.set(ws,p);
     ws.on('pong',()=>p.alive=true);
     ws.on('message',raw=>{
-      const now=Date.now();if(now-p.window>1000){p.window=now;p.messages=0;}if(++p.messages>100){ws.close(1008,'Rate limit');return;}
+      p.maxPayload=Math.max(p.maxPayload,raw.length);
+      // Proxies can deliver several seconds of legitimate traffic in one burst.
+      // Bound sustained traffic while allowing that backlog to drain.
+      const now=Date.now(),elapsed=Math.max(0,now-p.window)/1000;p.window=now;
+      p.tokens=Math.min(600,p.tokens+elapsed*120)-1;
+      p.byteTokens=Math.min(16*1048576,p.byteTokens+elapsed*8*1048576)-raw.length;
+      if(p.tokens<0||p.byteTokens<0){onDiagnostic({event:'rate_limit',peer:p.id,age_ms:now-p.connectedAt});ws.close(1008,'Rate limit');return;}
       let m;try{m=JSON.parse(raw.toString());}catch{return send(ws,{type:'error',reason:'Mensagem inválida.'});}
       if(!m||typeof m!=='object'||Array.isArray(m))return;
       const fail=reason=>send(ws,{type:'error',reason});
@@ -66,11 +73,14 @@ export function createRelay({port=8080,host='127.0.0.1',maxRooms=100}={}) {
         for(const member of room.members.values())if(member.id!==p.id&&(!m.to||m.to===member.id))send(member.ws,{type:m.type,data:m.data});
       }
     });
-    ws.on('close',()=>{leave(p);peers.delete(ws);});ws.on('error',()=>{});
+    ws.on('close',(code,reason)=>{onDiagnostic({event:'close',peer:p.id,code,reason:reason.toString(),age_ms:Date.now()-p.connectedAt,host:p.room?.host===p.id,max_payload:p.maxPayload});leave(p);peers.delete(ws);});
+    ws.on('error',error=>onDiagnostic({event:'socket_error',peer:p.id,code:error.code,message:error.message}));
   });
-  const heartbeat=setInterval(()=>{for(const [ws,p]of peers){if(!p.alive){ws.terminate();continue;}p.alive=false;ws.ping();}},15000);heartbeat.unref();
+  const heartbeat=setInterval(()=>{for(const [ws,p]of peers){if(!p.alive){onDiagnostic({event:'heartbeat_timeout',peer:p.id,age_ms:Date.now()-p.connectedAt});ws.terminate();continue;}p.alive=false;ws.ping();}},15000);heartbeat.unref();
   return {server,rooms,wss,listen:()=>new Promise(resolve=>server.listen(port,host,()=>resolve(server.address()))),close:()=>new Promise(resolve=>{clearInterval(heartbeat);for(const ws of peers.keys())ws.terminate();wss.close(()=>server.close(resolve));})};
 }
 if(process.argv[1]&&pathToFileURL(resolve(process.argv[1])).href===import.meta.url){
- const relay=createRelay({port:Number(process.env.PORT||8080),host:process.env.HOST||'127.0.0.1'});relay.listen().then(a=>console.log(`Relay ${a.address}:${a.port}`));
+ const directory=resolve('..','test_output');
+ const onDiagnostic=event=>{const line=JSON.stringify({time:new Date().toISOString(),...event});console.log(line);if(existsSync(directory)){try{appendFileSync(resolve(directory,'relay-runtime.jsonl'),line+'\n');}catch{}}};
+ const relay=createRelay({port:Number(process.env.PORT||8080),host:process.env.HOST||'127.0.0.1',onDiagnostic});relay.listen().then(a=>console.log(`Relay ${a.address}:${a.port}`));
 }

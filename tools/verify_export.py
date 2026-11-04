@@ -11,9 +11,10 @@ import sys
 
 root = Path(__file__).resolve().parents[1]
 parser = argparse.ArgumentParser()
-parser.add_argument('--suite', choices=['hordes_gold', 'skills_bosses', 'network_foundation', 'coop_bosses'], default='skills_bosses')
+parser.add_argument('--suite', choices=['hordes_gold', 'skills_bosses', 'network_foundation', 'network_backpressure', 'coop_bosses'], default='skills_bosses')
+parser.add_argument('--target', type=Path, default=root / 'build' / 'Online-Atualizado' / 'Brasafria-Online-0.4.1.exe')
 args = parser.parse_args()
-target = root / 'build' / 'Brasafria-0.4.0.exe'
+target = args.target.resolve()
 log = root / 'test_output' / f'export_{args.suite}.log'
 godot = Path.home() / 'Downloads' / 'Godot_v4.7.2-stable_win64_console.exe'
 result = subprocess.run([
@@ -24,7 +25,7 @@ output = result.stdout + result.stderr
 if log.exists():
     output += log.read_text(encoding='utf-8')
 print(output[-4000:])
-marker = {'skills_bosses':'SKILLS_BOSSES_PASS', 'hordes_gold':'HORDES_GOLD_PASS', 'network_foundation':'NETWORK_FOUNDATION_PASS', 'coop_bosses':'COOP_BOSSES_PASS'}[args.suite]
+marker = {'skills_bosses':'SKILLS_BOSSES_PASS', 'hordes_gold':'HORDES_GOLD_PASS', 'network_foundation':'NETWORK_FOUNDATION_PASS', 'network_backpressure':'NETWORK_BACKPRESSURE_PASS', 'coop_bosses':'COOP_BOSSES_PASS'}[args.suite]
 if result.returncode or marker not in output or 'ERROR:' in output or 'FAIL:' in output:
     sys.exit(result.returncode or 1)
 print(f'PACKED_GAME_VERIFIED: embedded PCK, matching editor runtime, {args.suite}, isolated saves')

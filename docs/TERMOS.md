@@ -1,6 +1,6 @@
 # Termos de serviço
 
-Brasafria 0.4.0 é um protótipo em desenvolvimento para jogar, avaliar e editar. Pode conter falhas e alterações de balanceamento. Perfis anteriores são migrados para versão 3 preservando o progresso compatível. Não há compras, assinatura ou cadastro.
+Brasafria 0.4.1 é um protótipo em desenvolvimento para jogar, avaliar e editar. Pode conter falhas e alterações de balanceamento. Perfis anteriores são migrados para versão 3 preservando o progresso compatível. Não há compras, assinatura ou cadastro.
 
 O cooperativo depende de um serviço de salas configurado e da conexão dos participantes. Sua disponibilidade pública ainda depende de hospedagem. A saída ou perda do anfitrião encerra a sessão. Não há reconexão, migração de anfitrião ou garantia de disponibilidade. A implementação foi validada localmente; testes entre redes diferentes permanecem pendentes.
 

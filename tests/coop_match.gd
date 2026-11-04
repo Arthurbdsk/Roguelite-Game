@@ -12,6 +12,7 @@ var finished: bool = false
 var age: float = 0
 var slot: String = ""
 var disconnect_scenario: bool = false
+var soak_seconds: int = 0
 
 func _initialize() -> void: call_deferred("run")
 
@@ -26,6 +27,7 @@ func run() -> void:
 	for argument in OS.get_cmdline_user_args():
 		if argument == "--host": hosting = true
 		if argument == "--disconnect": disconnect_scenario = true
+		if argument.begins_with("--soak-seconds="): soak_seconds = int(argument.trim_prefix("--soak-seconds="))
 		if argument.begins_with("--index="): index = int(argument.trim_prefix("--index="))
 		if argument.begins_with("--code-file="): code_file = argument.trim_prefix("--code-file=")
 		if argument.begins_with("--room="): code = argument.trim_prefix("--room=")
@@ -36,6 +38,10 @@ func run() -> void:
 	game.sound.volume = 0
 	session = game.coop
 	session.connection.message_received.connect(receive)
+	session.connection.connection_failed.connect(func(reason):
+		if not finished:
+			check(false, "unexpected disconnect: " + reason)
+			finish_peer.call_deferred())
 	session.connection.connect_room(hosting, "Peer%d" % index, code)
 
 func receive(packet: Dictionary) -> void:
@@ -59,7 +65,8 @@ func receive(packet: Dictionary) -> void:
 			check(session.initial_size == 4, "initial party frozen at four")
 			if hosting:
 				game.director.phase = "complete"
-				if disconnect_scenario: host_disconnect.call_deferred()
+				if soak_seconds > 0: host_soak.call_deferred()
+				elif disconnect_scenario: host_disconnect.call_deferred()
 				else: host_scenario.call_deferred()
 		"event":
 			if packet.data.get("type") == "fixture": client_command(packet.data)
@@ -80,6 +87,9 @@ func command(name_value: String) -> void:
 
 func client_command(data: Dictionary) -> void:
 	match data.command:
+		"soak_finish":
+			check(session.active and not session.ended, "long-running public connection remains active")
+			finish_peer.call_deferred()
 		"move":
 			if index == 1: session.local_input_override = {"movement": Vector2.RIGHT, "revive": false}
 		"stop": session.local_input_override = {"movement": Vector2.ZERO, "revive": false}
@@ -259,6 +269,55 @@ func host_disconnect() -> void:
 	await wait_seconds(0.4)
 	await finish_peer()
 
+func host_soak() -> void:
+	game.director.reset()
+	for actor in session.actors.values():
+		actor.weapon_system.levels = {"sword":5,"bolt":5,"orbit":5}
+		actor.weapon_system.passives = {"boots":2,"magnet":2,"ward":2}
+		actor.player.pickup_radius = 114
+	var started_at: int = Time.get_ticks_msec()
+	var last_second: int = -1
+	var load_at: int = mini(60,maxi(1,soak_seconds/5))
+	var stress_started: bool = false
+	var next_coins: int = load_at
+	var next_arrows: int = load_at
+	var next_collection: int = load_at + 15
+	while Time.get_ticks_msec() - started_at < soak_seconds * 1000:
+		var second: int = (Time.get_ticks_msec() - started_at) / 1000
+		if second == last_second:
+			await process_frame
+			continue
+		last_second = second
+		if not session.active or session.ended: check(false,"soak ended early"); break
+		for actor in session.actors.values():
+			actor.player.invulnerable = 100
+			if not actor.offers.is_empty(): actor.choose(actor.offers[0].id,actor.generation)
+		if second >= load_at and not stress_started:
+			stress_started = true
+			game.director.phase = "complete"
+			for i in maxi(0,180-game.enemies.size()):
+				var enemy = game.spawn_enemy("skeleton_archer" if i % 3 == 0 else "skeleton_sword",Vector2(900,630)+Vector2.from_angle(i*TAU/180)*220)
+				enemy.max_hp = 100000
+				enemy.hp = enemy.max_hp
+			for i in 240: game.pickups.append({"id":10000+i,"at":Vector2(1450+i%40,1000),"xp":1,"attracted":false})
+		if second >= next_coins:
+			next_coins += 60
+			for i in 2000: game.gold_loot.drop(Vector2(1400+i%50,1050+i/50))
+		if second >= next_arrows:
+			next_arrows += 30
+			for i in maxi(0,320-game.enemy_projectiles.arrows.size()): game.enemy_projectiles.fire(Vector2(1400,800+i),Vector2.RIGHT,game.enemy_data.skeleton_archer)
+		if second >= next_collection:
+			next_collection += 60
+			for coin in game.gold_loot.coins: coin.at = game.player.position
+		if second % 30 == 0:
+			print("SOAK_PROGRESS seconds=%d actors=%d enemies=%d snapshots=%d" % [second,session.actors.size(),game.enemies.size(),session.snapshot_count])
+		await process_frame
+	check(session.active and session.actors.size() == 4, "all four peers survive extended session")
+	print("SOAK_DURATION wall_ms=%d target_seconds=%d" % [Time.get_ticks_msec()-started_at,soak_seconds])
+	command("soak_finish")
+	await wait_seconds(0.5)
+	await finish_peer()
+
 func finish_peer() -> void:
 	if finished: return
 	finished = true
@@ -272,7 +331,7 @@ func finish_peer() -> void:
 
 func _process(delta: float) -> bool:
 	age += delta
-	if age > 35 and not finished:
+	if age > maxi(35, soak_seconds + 90) and not finished:
 		check(false, "actual match timed out")
 		finish_peer.call_deferred()
 	return false

@@ -13,9 +13,9 @@ const externalArgument=process.argv.find(v=>v.startsWith('--relay-url='));
 const endpoint=externalArgument?externalArgument.slice('--relay-url='.length):`ws://127.0.0.1:${address.port}`;
 const endpointArgs=process.argv.includes('--embedded-endpoint')?[]:[`--relay=${endpoint}`];
 await mkdir(resolve(root,'test_output'),{recursive:true});
-function peer(index,args){const child=spawn(godot,['--headless',...runtime,'--script',harness,'--',...endpointArgs,`--index=${index}`,`--profile-slot=cooptest${stamp}_${index}`,...args],{cwd:root,windowsHide:true});children.push(child);let out='';child.stdout.on('data',d=>out+=d);child.stderr.on('data',d=>out+=d);return new Promise((ok,bad)=>{child.on('error',bad);child.on('close',async code=>{await writeFile(resolve(root,`test_output/coop-${scenario}-peer-${index}.log`),out);console.log(out.trim());if(code===0&&out.includes('COOP_MATCH_PEER_PASS')&&!out.includes('ERROR:'))ok();else bad(Error(`Match peer ${index} failed ${code}`));});});}
+function peer(index,args){const child=spawn(godot,['--headless','--log-file',resolve(root,`test_output/coop-${stamp}-${index}.runtime.log`),...runtime,'--script',harness,'--',...endpointArgs,`--index=${index}`,`--profile-slot=cooptest${stamp}_${index}`,...args],{cwd:root,windowsHide:true});children.push(child);let out='';child.stdout.on('data',d=>out+=d);child.stderr.on('data',d=>out+=d);return new Promise((ok,bad)=>{child.on('error',bad);child.on('close',async code=>{await writeFile(resolve(root,`test_output/coop-${scenario}-peer-${index}.log`),out);console.log(out.trim());if(code===0&&out.includes('COOP_MATCH_PEER_PASS')&&!out.includes('ERROR:'))ok();else bad(Error(`Match peer ${index} failed ${code}`));});});}
 try{
- const extra=process.argv.includes('--disconnect')?['--disconnect']:[];
+ const extra=process.argv.filter(v=>v==='--disconnect'||v.startsWith('--soak-seconds='));
  await rm(codeFile,{force:true});const host=peer(0,['--host',`--code-file=${codeFile}`,...extra]);
  let code='';for(let i=0;i<100;i++){try{code=await readFile(codeFile,'utf8');if(code)break;}catch{}await new Promise(r=>setTimeout(r,50));}
  if(!code)throw Error('Host did not publish a room code');

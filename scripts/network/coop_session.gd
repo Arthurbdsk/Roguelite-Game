@@ -309,8 +309,14 @@ func publish(data: Dictionary, target: String = "") -> void:
 
 func flush_events() -> void:
 	if outbox.is_empty(): return
-	connection.send_message({"type": "events", "data": outbox})
-	outbox.clear()
+	var batch: Array[Dictionary] = []
+	var byte_count: int = 32
+	for entry in outbox:
+		var entry_bytes: int = JSON.stringify(entry).to_utf8_buffer().size() + 1
+		if not batch.is_empty() and byte_count + entry_bytes > 61440: break
+		batch.append(entry)
+		byte_count += entry_bytes
+	if connection.send_message({"type": "events", "data": batch}): outbox = outbox.slice(batch.size())
 
 func finish(won: bool) -> void:
 	if ended: return
@@ -389,6 +395,7 @@ func update_camera() -> void:
 	else: game.camera.position = Vector2.ZERO
 
 func broadcast_state(force: bool = false) -> void:
+	if connection.socket != null and connection.socket.get_current_outbound_buffered_amount() > 262144: return
 	var entities: Dictionary = {}
 	var visible_enemies: Array = game.enemies.duplicate()
 	for death in game.boss_arena.deaths:
@@ -406,15 +413,16 @@ func broadcast_state(force: bool = false) -> void:
 		entities["x" + str(item.get("id", 0))] = {"kind": "xp", "at": item.at, "xp": item.xp}
 	var changes: Array = []
 	var removals: Array = []
+	var next_entities: Dictionary = {}
 	for id in entities:
 		var wire: Dictionary = CoopWire.encode(entities[id])
 		var changed := {"id": id}
 		for key in wire:
 			if force or not sent_entities.has(id) or sent_entities[id].get(key) != wire[key]: changed[key] = wire[key]
 		if changed.size() > 1: changes.append(changed)
-		sent_entities[id] = wire
+		next_entities[id] = wire
 	for id in sent_entities.keys():
-		if not entities.has(id): removals.append(id); sent_entities.erase(id)
+		if not entities.has(id): removals.append(id)
 	var weapon_fx: Dictionary = {}
 	for id in actors:
 		var weapons: WeaponSystem = actors[id].weapon_system
@@ -425,7 +433,7 @@ func broadcast_state(force: bool = false) -> void:
 	var packet := {"type": "delta", "data": CoopWire.encode(data)}
 	bytes_sent += JSON.stringify(packet).length()
 	snapshot_count += 1
-	connection.send_message(packet)
+	if connection.send_message(packet): sent_entities = next_entities
 
 func apply_event(data: Dictionary) -> void:
 	match data.get("type", ""):

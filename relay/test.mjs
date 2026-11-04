@@ -40,3 +40,21 @@ test('real sockets: room codes, four peers, ready, routing, host authority and d
   h.ws.close();assert.match((await clients[2].next('closed')).reason,/criador/);assert.equal(relay.rooms.size,0);
  }finally{for(const c of clients)c.ws.terminate();await relay.close();}
 });
+
+test('buffered network burst stays connected; sustained flood is still bounded',async()=>{
+ const relay=createRelay({port:0});const address=await relay.listen();
+ const h=await client(`ws://127.0.0.1:${address.port}`),c=await client(`ws://127.0.0.1:${address.port}`);
+ try{
+  h.send({type:'create',name:'Host'});const joined=await h.next('joined');
+  c.send({type:'join',code:joined.code,name:'Guest'});await c.next('joined');
+  h.send({type:'ready',ready:true});c.send({type:'ready',ready:true});
+  await h.next('lobby',m=>m.players.length===2&&m.players.every(p=>p.ready));
+  h.send({type:'start'});await c.next('start');
+  for(let i=0;i<180;i++)h.send({type:'delta',data:{sequence:i}});
+  assert.equal((await c.next('delta',m=>m.data.sequence===179)).data.sequence,179);
+  assert.equal(h.ws.readyState,WebSocket.OPEN);
+  const closed=new Promise(resolve=>h.ws.once('close',resolve));
+  for(let i=0;i<700;i++)h.send({type:'delta',data:{sequence:180+i}});
+  assert.equal(await closed,1008);
+ }finally{h.ws.terminate();c.ws.terminate();await relay.close();}
+});
