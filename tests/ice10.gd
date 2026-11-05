@@ -2,6 +2,15 @@ extends SceneTree
 func _initialize():call_deferred("run")
 func run():
  var g=load("res://scenes/main.tscn").instantiate();root.add_child(g);await process_frame;g.set_physics_process(false);g.sound.volume=0
+ g.start_run();g.director.phase="complete"
+ var original:Array[Rect2]=g.arena.obstacles.duplicate()
+ g.arena.obstacles.assign(original.filter(func(r):return r.position.x<25 or r.position.y<25 or r.end.x>1775 or r.end.y>1175))
+ g.navigation.reset();g.player.facing=Vector2.RIGHT
+ var vertical:Array[Rect2]=IceLayout.plan(g,1120,44,150,160)
+ assert(vertical.size()==4 and vertical[0].size.y>vertical[0].size.x,"vertical orientation fits arena")
+ var span:float=maxf(vertical[0].end.y,vertical[1].end.y)-minf(vertical[0].position.y,vertical[1].position.y)
+ assert(is_equal_approx(span,1100),"vertical length bounded to available arena")
+ g.arena.obstacles.assign(original);g.navigation.reset()
  for map in ["courtyard","library","fields"]:
   g.selected_map=map;g.start_run();g.director.phase="complete";g.player.invulnerable=100
   var boss=g.spawn_enemy("demon",g.player.position+Vector2(160,0))
@@ -17,7 +26,7 @@ func run():
   save_capture("res://test_output/10-ice-"+map+".png")
   g.boss_arena.tick(1);assert(g.boss_arena.slow_multiplier(locations[0])<1)
   g.boss_arena.tick(10);assert(g.boss_arena.areas.is_empty())
-  print("ICE10_PASS ",map," planned near target, full 1120 span, safe gaps, fixed warnings, expiry")
+  print("ICE10_PASS ",map," near target, 1120 horizontal/1100 vertical, safe gaps, fixed warnings, expiry")
  g.queue_free();await process_frame;await create_timer(.3).timeout;quit()
 
 func save_capture(path:String):

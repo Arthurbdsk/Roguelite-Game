@@ -5,12 +5,14 @@ func check(ok:bool,description:String):
  if not ok:failures+=1;printerr("FAIL: ",description)
 func run():
  var g=load("res://scenes/main.tscn").instantiate();root.add_child(g);await process_frame;g.set_physics_process(false);g.sound.volume=0
- for map in ["courtyard","library","fields"]:
-  g.selected_map=map;g.start_late_test("horror");g.weapon_system.levels.clear();g.player.position=Vector2(900,630);g.player.facing=Vector2.DOWN
+ for scenario in [{"map":"courtyard","facing":Vector2.DOWN},{"map":"library","facing":Vector2.DOWN},{"map":"fields","facing":Vector2.DOWN},{"map":"courtyard","facing":Vector2.RIGHT}]:
+  var map:String=scenario.map
+  g.selected_map=map;g.start_late_test("horror");g.weapon_system.levels.clear();g.player.position=Vector2(900,630);g.player.facing=scenario.facing
   g.late_arena.tick(1.3);var boss=g.boss
   check(g.late_arena.cast("ice",boss),map+" safe ice plan")
   g.late_arena.tick(1.6);await physics_frame
   var rect:Rect2=Rect2(g.late_arena.areas[0].at-g.late_arena.areas[0].size/2,g.late_arena.areas[0].size)
+  if scenario.facing==Vector2.RIGHT:check(rect.size.y>rect.size.x,"vertical wall in actual courtyard")
   var side:Vector2=Vector2.DOWN if rect.size.x>rect.size.y else Vector2.RIGHT
   var along:Vector2=Vector2.RIGHT if rect.size.x>rect.size.y else Vector2.DOWN
   var start:Vector2=rect.get_center()+along*(rect.size.dot(along)/2-35)-side*(rect.size.dot(side)/2+35)

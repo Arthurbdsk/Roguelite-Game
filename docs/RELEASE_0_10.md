@@ -9,7 +9,7 @@ Execute `Hordas-0.10.0.exe` no Windows. Os recursos estão embutidos. Todos na s
 - Barra ornamental exclusiva da True Form e vitória apenas após sua morte.
 - F9 abre atalhos de teste sem gravar progresso. Saves, ouro, aprimoramentos e três mapas preservados.
 
-Pendente: o arquivo TTF/OTF da fonte Kingdom não foi fornecido; a fonte anterior continua ativa. Equilíbrio dos encontros ainda exige partidas humanas. A carga de quatro atores, seis armas e 213 inimigos mediu 21,1 FPS renderizados nesta máquina. A sobrecarga artificial de 307 inimigos e 2.000 moedas caiu para 5,1 FPS; ainda exige otimização. O online depende do relay e do túnel temporário ativos.
+Pendente: o arquivo TTF/OTF da fonte Kingdom não foi fornecido; a fonte anterior continua ativa. Equilíbrio dos encontros ainda exige partidas humanas. A carga de quatro atores, seis armas e 213 inimigos mediu 21,1 FPS renderizados nesta máquina. A sobrecarga artificial de 307 inimigos e 2.000 moedas caiu para 5,1 FPS; ainda exige otimização. O serviço público de salas está indisponível nesta publicação. O modo cooperativo continua funcionando com um relay configurado; o túnel temporário anterior foi encerrado e não pôde ser reativado nesta sessão.
 
 Testes: campanha completa com bot invulnerável, padrões e colisões nos três mapas, regressões de combate/progressão/perfis, quatro processos locais e quatro processos pelo WSS público com o pacote exportado, smoke do executável. Isso não equivale a quatro pessoas em redes distintas.
 

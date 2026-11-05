@@ -32,7 +32,7 @@ func _ready() -> void:
 
 func connect_room(create: bool, display_name: String, room_code: String = "", skills: Dictionary = {}, challenge:int=0,gold_remainder:float=0) -> void:
 	if endpoint.is_empty():
-		connection_failed.emit("O serviço de salas ainda não foi publicado.")
+		connection_failed.emit("O serviço de salas está indisponível no momento.")
 		return
 	close()
 	pending = {"type": "create" if create else "join", "name": display_name.strip_edges(), "code": room_code.strip_edges().to_upper(), "skills": skills,"challenge":challenge,"gold_remainder":gold_remainder}

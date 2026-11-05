@@ -11,9 +11,10 @@ static func plan(game, length:float, width:float, corridor:float, opening:float)
   var across:Vector2=along.orthogonal()
   for offset in [0,60,-60,120,-120,180,-180]:
    var anchor:Vector2=target.position+across*offset
-   var half:float=length*.5
-   anchor.x=clampf(anchor.x,half+48 if not vertical else 80,1752-half if not vertical else 1720)
-   anchor.y=clampf(anchor.y,half+48 if vertical else 80,1152-half if vertical else 1120)
+   # The vertical arena span is shorter than the requested doubled length.
+   var half:float=minf(length,(1200.0 if vertical else 1800.0)-100.0)*.5
+   anchor.x=clampf(anchor.x,half+50 if not vertical else 80,1750-half if not vertical else 1720)
+   anchor.y=clampf(anchor.y,half+50 if vertical else 80,1150-half if vertical else 1120)
    var rectangles:Array[Rect2]=[]
    for side in [-1,1]:
     var center:Vector2=anchor+across*side*(corridor+width)*.5
