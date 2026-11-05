@@ -1,6 +1,7 @@
 class_name HordeBoss
 extends HordeEnemy
 
+var dev_summons_alive:int=0
 var dev_frozen:bool=false
 var dev_repeat:String=""
 var dev_next_attack:String=""

@@ -31,5 +31,9 @@ func run():
  g.profile.data.upgrade_ranks={"health":5,"damage":5};dev.apply_build();var hp:float=g.player.max_hp;dev.apply_build();assert(g.player.max_hp==hp and hp==205 and g.mastery.damage_multiplier==1.25)
  dev.build.permanent=false;dev.apply_build();assert(g.player.max_hp==180 and g.mastery.damage_multiplier==1)
  g.player.hp=10;dev.heal();assert(g.player.hp==180);assert(not g.player.dev_invulnerable)
+ g.profile.data.upgrade_ranks.challenge=5;g.profile.data.challenge_active=2;dev.build.permanent=true;dev.encounter="demon1";dev.participants=4;assert(dev.start_encounter())
+ assert(g.run_challenge==2 and is_equal_approx(g.boss.max_hp,2995.2*2.5*1.1))
+ dev.next_phase();assert(is_equal_approx(g.boss.max_hp,2995.2*2.5*1.1*5))
+ dev.build.permanent=false;dev.start_encounter();assert(g.run_challenge==0 and is_equal_approx(g.boss.max_hp,2995.2*2.5))
  dev.end_test();g.queue_free();await process_frame;await create_timer(.3).timeout
  print("DEV_ATTACKS11_PASS attacks=",count," real windup/recovery, frozen boss/live effects, horde scale once, permanent toggle/idempotence and heal");quit()

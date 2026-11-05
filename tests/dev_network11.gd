@@ -69,6 +69,7 @@ func command(name:String):
   "heal":
    if index==1:g.dev_tools.heal()
   "wall":check(g.arena.dynamic_walls.size()==4,"solid wall replicated")
+  "summons":check(g.boss.dev_summons_alive==20 and g.enemies.filter(func(e):return e.data.id=="necromancer").size()==20,"live summons counter replicated")
   "true":
    check(g.boss.form==2 and not g.boss.targetable and g.arena.dynamic_walls.is_empty(),"real transformation and cleanup replicated")
    check(is_equal_approx(g.boss.max_hp,123552),"transformation does not reapply multiplayer")
@@ -91,7 +92,10 @@ func scenario():
  remote.player.hp=1;await send("heal");check(remote.player.hp==remote.player.max_hp,"remote heal validated on host")
  check(dev.force_attack("ice"),"real ice command")
  g.boss.state="chase";g.boss.attack_time=0;g.boss.tick(.01);g.boss.tick(1.3);g.late_arena.tick(1.6)
- await send("wall");check(dev.next_phase(),"advance with real damage transition")
+ await send("wall")
+ g.late_arena.clear_attacks(g.boss);g.boss.state="chase";g.boss.attack_time=0;dev.force_attack("summon");g.boss.tick(.01);g.boss.tick(1.3);g.late_arena.tick(1.3)
+ check(g.late_arena.chain.count(g.boss.serial)==20,"real twenty-necromancer summon")
+ await send("summons");check(dev.next_phase(),"advance with real damage transition")
  await send("true");check(dev.start_encounter(),"host restart")
  await send("restart");dev.set_time(.5);await send("time")
  dev.end_test()

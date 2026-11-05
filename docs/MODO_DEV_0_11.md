@@ -20,9 +20,9 @@ Tempo: 0,5x, 1x e 2x, com alteração imediata e sincronizada pelo host. Ao ence
 
 ## Aba Jogador
 
-Cada jogador pode configurar nível 1 a 999, seis espaços de armas, quatro de passivas e nível 1 a 8 por item. Vazio remove o item do espaço. Itens repetidos são rejeitados. Aplicar build recalcula a partir da base, sem acumular bônus de aplicações anteriores, e cura o jogador.
+O nível fica sob controle manual; a coleta de experiência não abre escolhas automáticas de melhorias no teste. Cada jogador pode configurar nível 1 a 999, seis espaços de armas, quatro de passivas e nível 1 a 8 por item. Vazio remove o item do espaço. Itens repetidos são rejeitados. Aplicar build recalcula a partir da base, sem acumular bônus de aplicações anteriores, e cura o jogador.
 
-Aprimoramentos do perfil usa os níveis já adquiridos pelo dono do personagem, a partir de uma cópia temporária. Desmarcar remove esses efeitos do teste. Isso não ocupa espaços da run.
+Aprimoramentos do perfil usa os níveis já adquiridos pelo dono do personagem, a partir de uma cópia temporária. Desmarcar remove esses efeitos do teste. Isso não ocupa espaços da run. O Desafio ativo do perfil ou da sala é aplicado uma vez no início do encontro quando os aprimoramentos do host estão ligados; com eles desligados, o Desafio fica zero. Alterações de Desafio exigem reinício para recalcular os inimigos.
 
 Invulnerável bloqueia dano de contato, projéteis e veneno. Ataques automáticos interrompe a criação de novos ataques; projéteis e poças já existentes terminam normalmente. Curar completamente restaura a vida e permite levantar um personagem caído no teste. Esses controles são individuais nas salas DEV.
 

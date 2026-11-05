@@ -100,6 +100,9 @@ func start_encounter()->bool:
  if not game.coop.active:game.start_run()
  else:game.clear_run();game.arena.apply_map(map_id);game.coop.sent_entities.clear();game.coop.ended=false
  game.persistence_enabled=false;game.dev_boss_test=true;game.dev_boss_kind=encounter;game.run_challenge=0
+ if build.permanent:
+  var requested:int=game.coop.lobby_challenge if game.coop.active else int(game.profile.data.challenge_active)
+  game.run_challenge=clampi(requested,0,game.skills.rank("challenge"))
  game.elapsed=float(ENCOUNTERS[encounter][1]);game.state="running"
  game.director.elite_spawned=true;game.director.wave_index=int(game.elapsed/60)-3;game.director.queue.clear()
  game.director.phase="preparing" if hordes else "complete";game.director.preparation_left=2.5
@@ -121,7 +124,7 @@ func start_encounter()->bool:
  if encounter in ["demon2","true"]:game.boss.take_damage(game.boss.hp);game.boss.tick(1.7)
  game.ui.render("running");game.ui.update_hud(game.snapshot());running_test=true;panel.rebuild();status="Encontro iniciado. Sem progresso permanente."
  if game.coop.active:
-  broadcast({"type":"dev_start","data":{"encounter":encounter,"map":map_id,"participants":participants,"hordes":hordes,"time":Engine.time_scale,"builds":online_builds}})
+  broadcast({"type":"dev_start","data":{"encounter":encounter,"map":map_id,"participants":participants,"hordes":hordes,"time":Engine.time_scale,"challenge":game.run_challenge,"builds":online_builds}})
   game.coop.broadcast_state(true)
  return true
 func apply_build()->bool:
@@ -174,9 +177,9 @@ func complete(_won:bool):
  var clock:float=game.elapsed;game.clear_run();game.elapsed=clock;game.state="dev_complete";game.ui.render("running");status="Teste concluído. Reinicie ou escolha outro encontro."
 func boss_info()->String:
  var scale:Dictionary=game.enemy_scale()
- var result:String="Escala simulada: %d | Vida ×%.2f | Dano ×%.2f | Movimento ×%.2f | Quantidade ×%.2f\nSimular escala não testa conexões reais.\n"%[applied_participants if running_test else participants,scale.health,scale.damage,scale.speed,scale.count]
+ var result:String="Escala simulada: %d | Vida ×%.2f | Dano ×%.2f | Movimento ×%.2f | Quantidade ×%.2f\nSimular escala não testa conexões reais. Desafio ativo: %d.\n"%[applied_participants if running_test else participants,scale.health,scale.damage,scale.speed,scale.count,game.run_challenge]
  if not is_instance_valid(game.boss):return result+status
- var boss=game.boss;var summons:int=game.boss_arena.summons.size()+game.late_arena.chain.count(boss.serial)
+ var boss=game.boss;var summons:int=game.boss_arena.summons.size()+game.late_arena.chain.count(boss.serial) if is_host() else boss.dev_summons_alive
  return result+"Vida: %.1f / %.1f | Fase: %d | Estado: %s\nPreparação: %s | Próximo ataque: %.2f s | Invocações: %d\nDano-base do inimigo: %.2f | Movimento: %.2f px/s"%[boss.hp,boss.max_hp,boss.phase if boss.is_executioner else boss.form,boss.state,boss.attack_name,maxf(0,boss.attack_time),summons,boss.data.damage, movement_speed(boss)]+"\n"+damage_summary(boss)+" | Congelado: "+("sim" if boss.dev_frozen else "não")+" | Repetir: "+boss.dev_repeat
 
 func _process(_delta:float):
@@ -253,7 +256,7 @@ func receive_event(data:Dictionary):
   "dev_start":
    var config:Dictionary=data.data;encounter=config.encounter;map_id=config.map;participants=int(config.participants);applied_participants=participants;hordes=config.hordes;online_builds=config.builds
    game.clear_run();game.coop.replicas.clear();game.coop.destinations.clear();game.arena.apply_map(map_id);game.selected_map=map_id
-   game.state="running";game.elapsed=float(ENCOUNTERS[encounter][1]);game.dev_boss_test=true;game.persistence_enabled=false;game.run_challenge=0;game.director.phase="complete"
+   game.state="running";game.elapsed=float(ENCOUNTERS[encounter][1]);game.dev_boss_test=true;game.persistence_enabled=false;game.run_challenge=clampi(int(config.get("challenge",0)),0,5);game.director.phase="complete"
    for id in game.coop.actors:
     if online_builds.has(id):prepare_player(online_builds[id],game.coop.actors[id])
    running_test=true;Engine.time_scale=float(config.time);game.ui.render("running");status="Encontro controlado pelo host.";panel.rebuild()

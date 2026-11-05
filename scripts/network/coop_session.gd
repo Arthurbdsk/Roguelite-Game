@@ -448,7 +448,7 @@ func broadcast_state(force: bool = false) -> void:
  for enemy in visible_enemies:
   if not is_instance_valid(enemy): continue
   entities["e" + str(enemy.serial)] = {"kind": "enemy", "species": enemy.data.id, "position": enemy.position, "hp": enemy.hp, "max_hp": enemy.max_hp, "frame": enemy.sprite.frame, "flip": enemy.sprite.flip_h, "state": enemy.state, "charge_direction": enemy.charge_direction, "targetable": enemy.targetable, "visible": enemy.sprite.visible, "sprite_position": enemy.sprite.position, "alpha": enemy.sprite.modulate.a,"meals":enemy.meals if enemy is Devourer else 0,"enemy_damage":enemy.data.damage}
-  entities["e" + str(enemy.serial)].merge({"locked_target":enemy.locked_target if enemy is LateBoss else Vector2.ZERO,"attack_time":enemy.attack_time,"dev_frozen":enemy.dev_frozen if enemy is HordeBoss else false,"dev_repeat":enemy.dev_repeat if enemy is HordeBoss else "","form":enemy.form if enemy is HordeBoss else 1,"frozen":enemy.frozen_remaining,"slow":enemy.slow_remaining,"state_time": enemy.state_time, "elite": enemy.elite, "attack_name": enemy.attack_name if enemy is HordeBoss else "", "phase": enemy.phase if enemy is HordeBoss else 1,"ambush_at":enemy.ambush_at if enemy is SpecialEnemy else Vector2.ZERO})
+  entities["e" + str(enemy.serial)].merge({"locked_target":enemy.locked_target if enemy is LateBoss else Vector2.ZERO,"attack_time":enemy.attack_time,"summons_alive":game.boss_arena.summons.size()+game.late_arena.chain.count(enemy.serial) if enemy is HordeBoss else 0,"dev_frozen":enemy.dev_frozen if enemy is HordeBoss else false,"dev_repeat":enemy.dev_repeat if enemy is HordeBoss else "","form":enemy.form if enemy is HordeBoss else 1,"frozen":enemy.frozen_remaining,"slow":enemy.slow_remaining,"state_time": enemy.state_time, "elite": enemy.elite, "attack_name": enemy.attack_name if enemy is HordeBoss else "", "phase": enemy.phase if enemy is HordeBoss else 1,"ambush_at":enemy.ambush_at if enemy is SpecialEnemy else Vector2.ZERO})
  for id in actors:
   var actor: CoopActor = actors[id]
   entities[id] = {"kind": "player", "position": actor.player.position, "hp": actor.player.hp, "max_hp": actor.player.max_hp, "speed": actor.player.speed, "down": actor.down, "frame": actor.player.sprite.frame, "flip": actor.player.sprite.flip_h, "invulnerable": actor.player.invulnerable,"poison":actor.player.poison_remaining,"root":actor.player.root_remaining}
@@ -591,6 +591,7 @@ func apply_delta(raw: Dictionary) -> void:
     enemy.sprite.position = state.sprite_position
     enemy.sprite.modulate.a = state.alpha
     if enemy is HordeBoss:
+     enemy.dev_summons_alive=int(state.get("summons_alive",0))
      enemy.dev_frozen=state.get("dev_frozen",false);enemy.dev_repeat=state.get("dev_repeat","")
      enemy.combat_enabled = state.targetable
      enemy.attack_name = state.attack_name
