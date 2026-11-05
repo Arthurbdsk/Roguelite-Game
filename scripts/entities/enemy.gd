@@ -28,6 +28,20 @@ var freeze_resistance:float=0
 var resistance_duration:float=1
 var slow_remaining:float=0
 var slow_factor:float=1
+var last_visual_state:String=""
+var last_visual_hp:float=-1
+var last_visual_max:float=-1
+var last_visual_radius:float=-1
+var last_visual_charge:Vector2=Vector2.INF
+var last_visual_frozen:bool=false
+func refresh_visual():
+	if state!=last_visual_state or hp!=last_visual_hp or max_hp!=last_visual_max or radius!=last_visual_radius or charge_direction!=last_visual_charge or (frozen_remaining>0)!=last_visual_frozen or state=="ambush":
+		last_visual_state=state;last_visual_hp=hp;last_visual_max=max_hp;last_visual_radius=radius;last_visual_charge=charge_direction;last_visual_frozen=frozen_remaining>0;queue_redraw()
+func move_body():
+	var t:int=Time.get_ticks_usec() if game.perf_enabled else 0
+	move_and_slide()
+	if game.perf_enabled:game.perf_us["physics_bodies"]=int(game.perf_us.get("physics_bodies",0))+Time.get_ticks_usec()-t
+
 
 func setup(owner_game, stats: EnemyData, is_elite: bool = false) -> void:
 	game = owner_game
@@ -110,7 +124,7 @@ func tick(delta: float) -> void:
 	velocity = movement + game.separation(self) * 14 + knockback
 	knockback = knockback.move_toward(Vector2.ZERO, delta * 500)
 	velocity=game.crowd_velocity(self,velocity)
-	move_and_slide()
+	move_body()
 	if data.contact_damage and offset.length() < radius + game.player.radius:
 		game.player.take_damage(data.damage * (1.25 if elite else 1), position)
 	sprite.frame = int(clock * 7) % 4
@@ -118,7 +132,7 @@ func tick(delta: float) -> void:
 		sprite.frame = 4 if state == "prepare" else 5
 	sprite.flip_h = charge_direction.x < 0 if state == "prepare" else direction.x < 0
 	sprite.modulate = Color(2, 2, 2) if hit_flash > 0 else (Color(1.3, 0.8, 0.6) if elite else Color.WHITE)
-	queue_redraw()
+	refresh_visual()
 
 func skeleton_attack(offset: Vector2, direction: Vector2) -> Vector2:
 	var distance: float = offset.length()
@@ -199,7 +213,7 @@ func apply_time_control(duration:float,resistance:float,boss_slow:float,boss_dur
 	elif frozen_remaining<=0 and freeze_resistance<=0:
 		frozen_remaining=duration
 		resistance_duration=resistance
-	queue_redraw()
+	refresh_visual()
 func tick_control(delta:float)->bool:
 	freeze_resistance=maxf(0,freeze_resistance-delta)
 	slow_remaining=maxf(0,slow_remaining-delta)
@@ -207,7 +221,7 @@ func tick_control(delta:float)->bool:
 		frozen_remaining=maxf(0,frozen_remaining-delta)
 		if frozen_remaining<=0:freeze_resistance=resistance_duration
 		velocity=Vector2.ZERO
-		queue_redraw()
+		refresh_visual()
 		return true
 	return false
 

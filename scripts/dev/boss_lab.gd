@@ -327,3 +327,8 @@ func force_chest():
 func survival_info()->String:
  var ev=game.special_events
  return "Tempo %.1fs | Estágio %d | Resistência %.0f%% | Vida adicional +%.0f\nGeração %.1f/min | Vivos %d/%d | Dívida %.1f | Adiamentos %d\nEvento: %s | Cerco restante %.1fs | Família viva %d | Lotes pendentes %d\nBaús %d gerados / %d abertos | Tentativas %d"%[game.elapsed,game.horde_progress.stage(),100*game.horde_progress.resistance(),game.horde_progress.stage()*game.balance.horde_health_step,game.director.rate(),game.enemies.size(),game.balance.max_enemies,game.director.debt,game.director.deferred+ev.deferred,ev.active,maxf(0,45-ev.age) if ev.active=="siege" else 0,ev.members.size() if ev.active=="king" else 0,ev.pending.size()+game.slime_families.pending.size(),game.chests.generated,game.chests.opened,game.chests.attempts]
+
+func performance_info()->String:
+ var net=game.coop.connection
+ var metrics:Dictionary=net.metrics
+ return "FPS %.1f | Corpos %d | Pares locais %d | Maior célula %d\nNavegação: consultas %d | Adiadas %d | Campos %d\nRede: protocolo 2 / WebSocket TCP | RTT %.0f ms | Jitter %.0f ms\nEnviados %d bytes | Recebidos %d bytes | Fila %d bytes / %d ms\nCodificação %.2f ms | Decodificação %.2f ms | Snapshot há %d ms\nTempos de simulação (microssegundos): %s"%[Engine.get_frames_per_second(),game.enemies.size(),game.crowd_pairs,game.crowded_cell_peak,game.navigation.queries,game.navigation.deferred,game.navigation.field_builds,metrics.rtt_ms,metrics.jitter_ms,metrics.tx_bytes,metrics.rx_bytes,metrics.queue_bytes,metrics.queue_age_ms,metrics.serialize_us/1000.0,metrics.decode_us/1000.0,Time.get_ticks_msec()-net.last_snapshot_ms if net.last_snapshot_ms>0 else 0,str(game.perf_us)]

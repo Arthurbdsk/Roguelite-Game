@@ -75,6 +75,18 @@ node relay/match-test.mjs --balance
 
 Quatro processos reais em relay local. Pode receber --packed=build/Hordas-DEV-0.12.0/Hordas-DEV-0.12.0.exe. Suítes --packed usam o Godot da mesma versão para carregar o PCK exportado; o executável nativo recebe teste de inicialização separado por tools/export_windows.py --smoke.
 
+## Desempenho e rede 0.14
+
+```powershell
+python tools/validate_dev11.py spatial14 codec14 network_foundation network_backpressure
+node --test relay/test.mjs relay/binary-test.mjs
+python tools/build_baseline14.py
+python tools/benchmark14.py
+python tools/stress14.py
+```
+
+As medições de renderização usam executáveis release nativos com janela. Testes de rede, condições TCP e sessão de trinta minutos estão documentados em `docs/ONLINE_0_14.md`. Resultados e limitações estão em `docs/DESEMPENHO_0_14.md`. Os cenários DEV e testes de save usam perfis temporários. Uma execução headless não comprova FPS.
+
 ## Sobrevivência 0.13
 
 python tools/validate_dev11.py body_collision13 continuous13 campaign13 endless13 voting13 events13 event_scheduler13 chests13 chest_frequency13 dev_survival13

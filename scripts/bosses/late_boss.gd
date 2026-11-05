@@ -43,7 +43,7 @@ func tick(delta:float):
   if state_time>=.9 or position.distance_to(locked_target)<12:finish_attack();movement=Vector2.ZERO
  elif state=="recovery" and state_time>=float(game.campaign.config.recovery):state="chase";state_time=0
  if slow_remaining>0:movement*=slow_factor
- var before:Vector2=position;velocity=movement;move_and_slide()
+ var before:Vector2=position;velocity=movement;move_body()
  if state=="charge":
   var victim=game.projectile_victim(before,position,radius)
   if victim!=null and not charge_hit:charge_hit=true;victim.take_damage(game.late_arena.damage("dash",self),before)

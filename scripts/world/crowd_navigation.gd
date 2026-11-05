@@ -7,10 +7,14 @@ var grids:Dictionary={}
 var fields:Dictionary={}
 var agents:Dictionary={}
 var clock:float=0
+var plans_left:int=48
+var deferred:int=0
+var queries:int=0
+var field_builds:int=0
 func reset():
  grids.clear();fields.clear();agents.clear();clock=0
 func tick(delta:float):
- clock+=delta
+ clock+=delta;plans_left=48
  if agents.size()>600:
   for key in agents.keys():
    if agents[key].until<clock-2:agents.erase(key)
@@ -39,7 +43,7 @@ func near_cell(at:Vector2,valid:Dictionary)->Vector2i:
    if valid.has(c) and at.distance_squared_to(center(c))<d:best=c;d=at.distance_squared_to(center(c))
  return best
 func clear_segment(a:Vector2,b:Vector2,radius:float)->bool:
- for obstacle in game.arena.obstacles:
+ for obstacle in game.arena.obstacle_candidates(a,b,radius+1):
   var rect:Rect2=obstacle.grow(radius+1)
   var tmin:float=0;var tmax:float=1
   for axis in 2:
@@ -60,6 +64,7 @@ func distances(radius:int,goal:Vector2)->Dictionary:
  else:goals.append(near_cell(goal,valid))
  var signature:String=str(radius)+str(goals)
  if fields.has(signature) and fields[signature].until>clock:return fields[signature].values
+ field_builds+=1
  var values:Dictionary={};var queue:Array[Vector2i]=[]
  for c in goals:
   if valid.has(c):values[c]=0;queue.append(c)
@@ -76,10 +81,19 @@ func reachable(at:Vector2,radius:float)->bool:
  var r:int=bucket(radius);var valid:=grid(r);var c:=near_cell(at,valid)
  return valid.has(c) and distances(r,Vector2(900,630)).has(c) and clear_segment(at,center(c),radius)
 func steer(enemy,desired:Vector2,goal:Vector2=Vector2.INF)->Vector2:
+ if not game.perf_enabled:return plan(enemy,desired,goal)
+ var t:int=Time.get_ticks_usec();var result:Vector2=plan(enemy,desired,goal)
+ game.perf_us["navigation_planning"]=int(game.perf_us.get("navigation_planning",0))+Time.get_ticks_usec()-t
+ return result
+func plan(enemy,desired:Vector2,goal:Vector2=Vector2.INF)->Vector2:
  if desired.length_squared()<.01:return desired
  var speed:float=desired.length()
  if agents.has(enemy.serial) and agents[enemy.serial].until>clock:
   return Vector2(agents[enemy.serial].direction)*speed
+ if plans_left<=0:
+  deferred+=1
+  return Vector2(agents[enemy.serial].direction)*speed if agents.has(enemy.serial) else desired
+ plans_left-=1;queries+=1
  var target:Vector2=game.player.position if goal==Vector2.INF else goal
  var direction:Vector2=desired.normalized()
  if desired.dot(target-enemy.position)<0:

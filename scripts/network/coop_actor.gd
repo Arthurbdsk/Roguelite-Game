@@ -18,6 +18,9 @@ var generation: int = 0
 var down: bool = false
 var state: String:
 	get: return world.state
+var gold:int:
+	get:return world.gold
+	set(value):world.gold=value
 var earned: int:
 	get: return world.earned
 	set(value): world.earned = value

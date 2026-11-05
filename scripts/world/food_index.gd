@@ -1,5 +1,6 @@
 class_name FoodIndex
 extends RefCounted
+const EMPTY_QUERY:Array=[]
 var game
 var grid:Dictionary={}
 var cooldown:float=0
@@ -24,7 +25,7 @@ func nearest(at:Vector2)->Dictionary:
 	var best:Dictionary={}
 	for x in range(-steps,steps+1):
 		for y in range(-steps,steps+1):
-			for candidate in grid.get(cell+Vector2i(x,y),[]):
+			for candidate in grid.get(cell+Vector2i(x,y),EMPTY_QUERY):
 				var item:Dictionary=candidate.item
 				if item.get("consumed",false) or item.get("attracted",false) or item.get("protected",false):continue
 				var d:float=at.distance_squared_to(item.at)

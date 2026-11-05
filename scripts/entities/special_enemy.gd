@@ -65,7 +65,7 @@ func tick(delta:float):
 	velocity=movement+knockback
 	knockback=knockback.move_toward(Vector2.ZERO,delta*500)
 	velocity=game.crowd_velocity(self,velocity)
-	move_and_slide()
+	move_body()
 	if data.frames>=16:
 		if state=="conjure_wait":sprite.frame=8+int(clock*4)%2
 		elif state=="prepare":sprite.frame=8+mini(3,int(state_time/maxf(.01,data.windup)*4))
@@ -78,7 +78,7 @@ func tick(delta:float):
 		sprite.rotation=(-.12 if sprite.flip_h else .12) * sin(minf(1,state_time/maxf(.01,data.windup))*PI) if state=="prepare" else 0
 	sprite.modulate=Color(1.5,1.5,1.5) if hit_flash>0 else Color.WHITE
 	sprite.flip_h=direction.x<0
-	queue_redraw()
+	refresh_visual()
 func take_damage(amount:float,force:Vector2=Vector2.ZERO):
 	if targetable:super.take_damage(amount,force)
 func _draw():

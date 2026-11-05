@@ -1,0 +1,6 @@
+{$RELAY_DOMAIN} {
+  header X-Content-Type-Options nosniff
+  reverse_proxy relay:8080 {
+    flush_interval -1
+  }
+}

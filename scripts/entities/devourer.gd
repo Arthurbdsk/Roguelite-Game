@@ -43,7 +43,7 @@ func tick(delta:float):
 	velocity=(direction*data.speed*(slow_factor if slow_remaining>0 else 1) if state=="approach" else Vector2.ZERO)+knockback
 	knockback=knockback.move_toward(Vector2.ZERO,delta*500)
 	velocity=game.crowd_velocity(self,velocity)
-	move_and_slide()
+	move_body()
 	sprite.frame=4 if state=="prepare" else int(clock*7)%4
 	sprite.flip_h=direction.x<0
-	queue_redraw()
+	refresh_visual()

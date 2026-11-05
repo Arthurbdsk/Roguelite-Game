@@ -79,7 +79,10 @@ func tick(delta:float):
    var budget:int=15
    while batch.left>0 and budget>0:
     if game.enemies.size()>=int(config.entity_limit):deferred+=1;break
-    var at:Vector2=game.free_enemy_position(batch.at,17 if batch.kind=="event_blue" else 4)
+    var slot:int=15-int(batch.left)
+    var spacing:float=24.0 if batch.kind=="event_blue" else 6.5
+    var desired:Vector2=batch.at+Vector2.from_angle(slot*2.39996323)*sqrt(slot+.5)*spacing
+    var at:Vector2=game.free_enemy_position(desired,17 if batch.kind=="event_blue" else 4)
     if at==Vector2.INF:deferred+=1;break
     var e=game.spawn_enemy(batch.kind,at)
     if e==null:deferred+=1;break

@@ -7,7 +7,8 @@ func run():
  g.player.position+=Vector2(24,0);g.weapon_system.update_combat(.01)
  assert(g.weapon_system.ground.pools.size()==1)
  var pool=g.weapon_system.ground.pools[0]
- var e=g.spawn_enemy("guard",pool.at);e.hp=1000
+ g.set_physics_process(false);g.player.position+=Vector2(100,0)
+ var e=g.spawn_enemy("guard",pool.at);e.hp=1000;g.rebuild_grid();g.weapon_system.ground.last_trail=g.player.position
  g.weapon_system.ground.add_pool("sludge",pool.at,pool.at)
  g.weapon_system.update_combat(.01);assert(is_equal_approx(e.hp,997.3))
  g.weapon_system.update_combat(.25);assert(is_equal_approx(e.hp,997.3))

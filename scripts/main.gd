@@ -1,4 +1,5 @@
 extends Node2D
+const EMPTY_QUERY:Array=[]
 
 var experience_texture=preload("res://assets/v12/experience.png")
 var survival_config:Dictionary={}
@@ -22,6 +23,15 @@ var numbers: Array[Dictionary] = []
 var navigation:=CrowdNavigation.new()
 var grid: Dictionary = {}
 var crowd_grid:Dictionary={}
+var crowd_near:Dictionary={}
+var crowd_push:Dictionary={}
+var crowd_pairs:int=0
+var crowded_cell_peak:int=0
+var perf_enabled:bool=false
+var perf_us:Dictionary={}
+func perf_mark(section:String,started:int):
+ if perf_enabled:perf_us[section]=Time.get_ticks_usec()-started
+
 var crowd_max_radius:float=1
 var enemy_collision_margin:float=10
 var offers: Array[Dictionary] = []
@@ -164,6 +174,11 @@ func _ready() -> void:
   if dev_tools!=null and argument.begins_with("--boss-test="):
    dev_tools.launch_argument("demon1" if argument.get_slice("=",1)=="demon" else "executioner")
 
+ for arg in OS.get_cmdline_user_args():
+  if arg.begins_with("--benchmark14="):
+   if not OS.get_cmdline_user_args().has("--profile-slot=benchmark14"):get_tree().quit(2);return
+   var runner=load("res://scripts/diagnostics/benchmark14.gd").new();add_child(runner);runner.call_deferred("setup",self,arg.trim_prefix("--benchmark14="))
+
 func development_build()->bool:return (OS.has_feature("editor") or OS.has_feature("dev_tools")) and ResourceLoader.exists("res://scripts/dev/boss_lab.gd") and FileAccess.file_exists("res://data/dev/presets.json")
 
 func _input(event:InputEvent):
@@ -231,6 +246,7 @@ func simulate(delta: float, movement: Vector2 = Vector2.ZERO) -> void:
  gold_loot.tick(delta)
  food_index.tick(delta)
  rebuild_grid()
+ prepare_crowd()
  for enemy in enemies.duplicate():
   if is_instance_valid(enemy) and enemy.alive:
    enemy.tick(delta)
@@ -762,7 +778,7 @@ func enemy_space_free(at:Vector2,radius:float,except=null)->bool:
  var span:int=ceili((radius+crowd_max_radius+2)/16)
  for x in range(-span,span+1):
   for y in range(-span,span+1):
-   for other in crowd_grid.get(cell+Vector2i(x,y),[]):
+   for other in crowd_grid.get(cell+Vector2i(x,y),EMPTY_QUERY):
     if not is_instance_valid(other) or not other.alive or other.collision_layer==0 or other==except:continue
     if at.distance_squared_to(other.position)<pow(radius+other.radius+1,2):return false
  return true
@@ -778,37 +794,48 @@ func free_enemy_position(at:Vector2,radius:float,except=null,max_distance:float=
    if enemy_space_free(point,radius,except) and (not avoid_players or not players_near(point,radius+14)) and navigation.reachable(point,radius):return point
  return Vector2.INF
 
+func prepare_crowd():
+ crowd_near.clear();crowd_push.clear();crowd_pairs=0;crowded_cell_peak=0
+ for bucket in crowd_grid.values():crowded_cell_peak=maxi(crowded_cell_peak,bucket.size())
+ for enemy in enemies:
+  if not is_instance_valid(enemy) or not enemy.alive or enemy.collision_layer==0:continue
+  if not crowd_near.has(enemy.serial):crowd_near[enemy.serial]=PackedVector3Array();crowd_push[enemy.serial]=Vector2.ZERO
+  var reach:float=enemy.radius+crowd_max_radius+5
+  var low:=Vector2i(floori((enemy.position.x-reach)/16),floori((enemy.position.y-reach)/16))
+  var high:=Vector2i(floori((enemy.position.x+reach)/16),floori((enemy.position.y+reach)/16))
+  for x in range(low.x,high.x+1):
+   for y in range(low.y,high.y+1):
+    for other in crowd_grid.get(Vector2i(x,y),EMPTY_QUERY):
+     if other.serial<=enemy.serial or not other.alive or other.collision_layer==0:continue
+     var offset:Vector2=enemy.position-other.position;var minimum:float=enemy.radius+other.radius+4
+     if offset.length_squared()>pow(minimum+1,2):continue
+     var distance:float=offset.length()
+     if distance<.01:offset=Vector2.from_angle((enemy.serial+other.serial)*2.4)*(1 if enemy.serial>other.serial else -1);distance=1
+     var normal:Vector2=offset/distance
+     if not crowd_near.has(other.serial):crowd_near[other.serial]=PackedVector3Array();crowd_push[other.serial]=Vector2.ZERO
+     crowd_near[enemy.serial].append(Vector3(normal.x,normal.y,distance-enemy.radius-other.radius-.4))
+     crowd_near[other.serial].append(Vector3(-normal.x,-normal.y,distance-enemy.radius-other.radius-.4))
+     var push:Vector2=normal*clampf((minimum-distance)/maxf(4,minimum*.3),0,1)
+     crowd_push[enemy.serial]+=push;crowd_push[other.serial]-=push;crowd_pairs+=1
 func separation(enemy)->Vector2:
- var cell:=Vector2i(floori(enemy.position.x/16),floori(enemy.position.y/16))
- var span:int=ceili((enemy.radius+crowd_max_radius+5)/16)
- var push:=Vector2.ZERO
- for x in range(-span,span+1):
-  for y in range(-span,span+1):
-   for other in crowd_grid.get(cell+Vector2i(x,y),[]):
-    if other==enemy or not is_instance_valid(other) or not other.alive or other.collision_layer==0:continue
-    var offset:Vector2=enemy.position-other.position
-    var distance:float=offset.length();var minimum:float=enemy.radius+other.radius+4
-    if distance>=minimum:continue
-    if distance<.01:offset=Vector2.from_angle((enemy.serial+other.serial)*2.4)*(1 if enemy.serial>other.serial else -1);distance=1
-    push+=offset/distance*clampf((minimum-distance)/maxf(4,minimum*.3),0,1)
- return push.limit_length(2)
-
+ return Vector2(crowd_push.get(enemy.serial,Vector2.ZERO)).limit_length(2)
 func crowd_velocity(enemy,desired:Vector2)->Vector2:
- var cell:=Vector2i(floori(enemy.position.x/16),floori(enemy.position.y/16))
- var span:int=ceili((enemy.radius+crowd_max_radius+4)/16)
- for x in range(-span,span+1):
-  for y in range(-span,span+1):
-   for other in crowd_grid.get(cell+Vector2i(x,y),[]):
-    if other==enemy or not is_instance_valid(other) or not other.alive or other.collision_layer==0:continue
-    var offset:Vector2=enemy.position-other.position
-    var distance:float=offset.length();var required:float=enemy.radius+other.radius+.4
-    if distance>required+3 or distance<.01:continue
-    var normal:Vector2=offset/distance
-    var allowed:float=maxf(0,distance-required)*30
-    var inward:float=desired.dot(normal)
-    if inward< -allowed:desired-=normal*(inward+allowed)
-    if distance<required:desired+=normal*minf(45,(required-distance)*35)
+ for pair in crowd_near.get(enemy.serial,EMPTY_QUERY):
+  var normal:=Vector2(pair.x,pair.y);var gap:float=pair.z
+  var allowed:float=maxf(0,gap)*30;var inward:float=desired.dot(normal)
+  if inward< -allowed:desired-=normal*(inward+allowed)
+  if gap<0:desired+=normal*minf(45,-gap*35)
  return desired
+
+func query_enemies(at:Vector2,radius:float)->Array:
+ var result:Array=[]
+ var reach:float=radius+crowd_max_radius
+ var low:=Vector2i(floori((at.x-reach)/40),floori((at.y-reach)/40));var high:=Vector2i(floori((at.x+reach)/40),floori((at.y+reach)/40))
+ for x in range(low.x,high.x+1):
+  for y in range(low.y,high.y+1):
+   for enemy in grid.get(Vector2i(x,y),EMPTY_QUERY):
+    if is_instance_valid(enemy) and enemy.alive and at.distance_squared_to(enemy.position)<=pow(radius+enemy.radius,2):result.append(enemy)
+ return result
 
 func update_pickups(delta: float) -> void:
  var bounds:Rect2=collection_bounds()

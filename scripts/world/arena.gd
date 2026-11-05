@@ -1,10 +1,32 @@
 class_name RuinedArena
 extends Node2D
+const EMPTY_QUERY:Array=[]
 
 var floor_layer:TileMapLayer
 var definition:MapDefinition
 var map_id:String="courtyard"
 var obstacles: Array[Rect2] = []
+var obstacle_cells:Dictionary={}
+var obstacle_index_dirty:bool=true
+func obstacle_candidates(a:Vector2,b:Vector2,margin:float=0)->Array:
+ if obstacle_index_dirty:
+  obstacle_cells.clear()
+  for rect in obstacles:
+   var low:=Vector2i(floori(rect.position.x/96),floori(rect.position.y/96));var high:=Vector2i(floori(rect.end.x/96),floori(rect.end.y/96))
+   for x in range(low.x,high.x+1):
+    for y in range(low.y,high.y+1):
+     var cell:=Vector2i(x,y)
+     if not obstacle_cells.has(cell):obstacle_cells[cell]=[]
+     obstacle_cells[cell].append(rect)
+  obstacle_index_dirty=false
+ var result:Array=[];var seen:Dictionary={}
+ var low:=Vector2i(floori((minf(a.x,b.x)-margin)/96),floori((minf(a.y,b.y)-margin)/96));var high:=Vector2i(floori((maxf(a.x,b.x)+margin)/96),floori((maxf(a.y,b.y)+margin)/96))
+ for x in range(low.x,high.x+1):
+  for y in range(low.y,high.y+1):
+   for rect in obstacle_cells.get(Vector2i(x,y),EMPTY_QUERY):
+    if not seen.has(rect):result.append(rect);seen[rect]=true
+ return result
+
 var decorations: Array[Dictionary] = []
 var tiles: Texture2D
 var pillar: Texture2D
@@ -36,6 +58,7 @@ func _ready() -> void:
  queue_redraw()
 
 func add_obstacle(rect: Rect2) -> StaticBody2D:
+ obstacle_index_dirty=true
  obstacles.append(rect)
  var wall := StaticBody2D.new()
  wall.position = rect.get_center()
@@ -52,7 +75,7 @@ func add_obstacle(rect: Rect2) -> StaticBody2D:
 func safe_position(point: Vector2, radius: float = 12.0) -> bool:
  if not Rect2(40, 45, 1720, 1110).has_point(point):
   return false
- for rect in obstacles:
+ for rect in obstacle_candidates(point,point,radius):
   if rect.grow(radius).has_point(point):
    return false
  return true
@@ -105,7 +128,7 @@ func apply_map(id:String):
 
  for node in get_children():
   if node is StaticBody2D:remove_child(node);node.queue_free()
- obstacles.clear();decorations.clear()
+ obstacles.clear();obstacle_index_dirty=true;decorations.clear()
  for entry in definition.props:
   var prop=load("res://scripts/world/outdoor_prop.gd").new();prop.position=entry.at
   prop.texture=load("res://assets/v12/"+entry.kind+str(entry.variant)+".png")
@@ -154,6 +177,7 @@ func sync_dynamic_walls(rectangles:Dictionary):
   if is_instance_valid(old.node):old.node.collision_layer=0;old.node.queue_free()
  dynamic_walls.clear()
  for id in rectangles:dynamic_walls[id]={"rect":rectangles[id],"node":add_obstacle(rectangles[id])}
+ obstacle_index_dirty=true
  wall_revision+=1
  if get_parent().get("navigation")!=null:get_parent().navigation.reset()
 

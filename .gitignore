@@ -10,3 +10,4 @@ relay/node_modules/
 .env.*
 !.env.example
 *.log
+__pycache__/

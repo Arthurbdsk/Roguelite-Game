@@ -179,7 +179,7 @@ func _swing_sword() -> bool:
 		var origin: Vector2 = game.player.position
 		slashes.append({"origin": origin, "angle": angle, "half": half_angle,
 			"reach": reach, "remaining": 0.16, "evolved": int(levels.get("sword",0)) == 5})
-		for enemy in game.enemies.duplicate():
+		for enemy in arsenal.candidates(origin-Vector2.ONE*reach,origin+Vector2.ONE*reach):
 			if not _valid_target(enemy):
 				continue
 			var offset: Vector2 = enemy.position - origin
@@ -218,7 +218,7 @@ func _update_projectiles(delta: float) -> void:
 		shot["distance"] = float(shot["distance"]) + start.distance_to(end)
 		var consumed: bool = false
 		var collisions: Array[Dictionary] = []
-		for enemy in game.enemies:
+		for enemy in arsenal.candidates(start,end):
 			if not _valid_target(enemy) or shot["hits"].has(enemy.get_instance_id()):
 				continue
 			var closest: Vector2 = Geometry2D.get_closest_point_to_segment(enemy.position, start, end)
@@ -257,7 +257,7 @@ func _update_projectiles(delta: float) -> void:
 func _bounce_target(origin: Vector2, excluded: Array):
 	var best = null
 	var distance: float = 170.0 * 170.0
-	for enemy in game.enemies:
+	for enemy in arsenal.candidates(origin-Vector2.ONE*170,origin+Vector2.ONE*170):
 		if not _valid_target(enemy) or excluded.has(enemy.get_instance_id()):
 			continue
 		var candidate: float = origin.distance_squared_to(enemy.position)
@@ -467,7 +467,7 @@ func _clock()->bool:
 	var end:Vector2=origin+direction*_stat("clock","reach")
 	var width:float=_stat("clock","beam_width")
 	beams.append({"origin":origin,"end":end,"width":width,"life":0.22})
-	for enemy in game.enemies.duplicate():
+	for enemy in arsenal.candidates(origin.min(end)-Vector2.ONE*width*.5,origin.max(end)+Vector2.ONE*width*.5):
 		if not _valid_target(enemy):continue
 		if Geometry2D.get_closest_point_to_segment(enemy.position,origin,end).distance_to(enemy.position)<=width/2+enemy.radius:
 			enemy.apply_time_control(weapon_data.clock.freeze_duration,weapon_data.clock.freeze_resistance,weapon_data.clock.boss_slow,weapon_data.clock.boss_slow_duration)
@@ -476,7 +476,7 @@ func _clock()->bool:
 
 func _lightning()->bool:
 	var candidates:Array=[]
-	for enemy in game.enemies:
+	for enemy in arsenal.candidates(game.player.position-Vector2.ONE*_stat("lightning","reach"),game.player.position+Vector2.ONE*_stat("lightning","reach")):
 		if _valid_target(enemy) and game.player.position.distance_to(enemy.position)<=_stat("lightning","reach"):candidates.append(enemy)
 	if candidates.is_empty():return false
 	for i in mini(int(_stat("lightning","count")),candidates.size()):
@@ -488,6 +488,10 @@ func _lightning()->bool:
 	return true
 
 func _draw() -> void:
+	if game==null:return
+	var world=game.world if game is CoopActor else game
+	if not is_instance_valid(world):return
+	var visible:Rect2=world.render_rect().grow(100)
 	for beam in beams:
 		var length:float=beam.origin.distance_to(beam.end)
 		draw_set_transform(beam.origin.round(),(beam.end-beam.origin).angle())
@@ -498,6 +502,7 @@ func _draw() -> void:
 			offset+=segment
 		draw_set_transform(Vector2.ZERO)
 	for fx in lightning_fx:
+		if not visible.has_point(fx.at):continue
 		var frame:int=clampi(int((.24-fx.life)*32),0,7)
 		draw_texture_rect_region(lightning_texture,Rect2(fx.at.round()-Vector2(24,84),Vector2(48,96)),Rect2(frame*48,0,48,96))
 
@@ -521,6 +526,7 @@ func _draw() -> void:
 		color.a = alpha
 		draw_polyline(PackedVector2Array(points.slice(0, 17)), color, 1.0, false)
 	for shot: Dictionary in projectiles:
+		if not visible.has_point(shot.position):continue
 		var point: Vector2 = Vector2(shot["position"]).round()
 		var direction: Vector2 = Vector2(shot["velocity"]).normalized()
 		draw_line((point - direction * 7.0).round(), (point + direction * 3.0).round(), Color("d7c9a1"), 2.0, false)

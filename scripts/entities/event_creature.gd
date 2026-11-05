@@ -15,7 +15,7 @@ func tick(delta:float):
  sprite.frame=4 if state=="prepare" else 5 if state=="recovery" else int(clock*4)%4
  sprite.flip_h=game.player.position.x<position.x
  sprite.modulate=Color("b7d8e7")
- queue_redraw()
+ refresh_visual()
 func _draw():
  super._draw()
  if event_kind=="siege":

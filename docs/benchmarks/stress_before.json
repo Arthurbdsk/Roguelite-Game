@@ -1,0 +1,104 @@
+{
+  "cpu": "AMD Ryzen 5 5600 6-Core Processor",
+  "frame_cap": 120,
+  "gpu": "AMD Radeon RX 6600",
+  "renderer": "gl_compatibility",
+  "resolution": "1280x720 viewport640x360",
+  "results": [
+    {
+      "coins": 0,
+      "enemies": 420,
+      "frame_ms": {
+        "median": 288.546,
+        "p95": 324.893,
+        "p99": 354.107
+      },
+      "frames": 36,
+      "peaks": {
+        "crowd_pairs": 0.0,
+        "draw_calls": 1981.0,
+        "effects": 42.0,
+        "enemies": 420.0,
+        "memory_mb": 0.0,
+        "nodes": 1523.0,
+        "objects": 4598.0,
+        "pools": 120.0,
+        "projectiles": 320.0
+      },
+      "physics_ms": 53.254,
+      "process_ms": 4.432,
+      "projectiles": 317,
+      "scenario": "stress420",
+      "sections_ms": {
+        "collection": {
+          "median": 0.025,
+          "p95": 0.038,
+          "p99": 0.043
+        },
+        "enemy_ai_physics": {
+          "median": 18.849,
+          "p95": 22.884,
+          "p99": 25.926
+        },
+        "enemy_effects": {
+          "median": 1.877,
+          "p95": 2.919,
+          "p99": 3.139
+        },
+        "navigation": {
+          "median": 0.003,
+          "p95": 0.004,
+          "p99": 0.005
+        },
+        "navigation_planning": {
+          "median": 0.751,
+          "p95": 4.134,
+          "p99": 5.46
+        },
+        "physics_bodies": {
+          "median": 2.402,
+          "p95": 3.286,
+          "p99": 3.71
+        },
+        "render_cpu": {
+          "median": 2.49499988555908,
+          "p95": 4.03200006484985,
+          "p99": 4.26200008392334
+        },
+        "render_gpu": {
+          "median": 1.26699995994568,
+          "p95": 3.84800004959106,
+          "p99": 5.5019998550415
+        },
+        "weapons_damage": {
+          "median": 6.018,
+          "p95": 8.55,
+          "p99": 11.255
+        },
+        "xp_collection": {
+          "median": 0.01,
+          "p95": 0.016,
+          "p99": 0.031
+        }
+      },
+      "simulation_ms": {
+        "median": 28.192,
+        "p95": 48.487,
+        "p99": 52.575
+      },
+      "xp": 0
+    }
+  ],
+  "sample_seconds": 10,
+  "seed": 140031,
+  "tag": "stress_before",
+  "warmup_seconds": 2,
+  "windowed": true,
+  "exe_sha256": "7343cc709db910c51d7e8d56040e2cfd95a83333c00125eb39ac404d5b916982",
+  "duration_wall_seconds": 13.374755299999379,
+  "rss_peak_mb": {
+    "stress420": 217.9140625
+  },
+  "rss_source": "Windows GetProcessMemoryInfo WorkingSetSize, sampled 20Hz",
+  "background_note": "Hordas 0.12.0 was left open in both runs; four-process tests stopped during measurement."
+}

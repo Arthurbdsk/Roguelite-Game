@@ -1,0 +1,158 @@
+--- a/scripts/main.gd
++++ b/scripts/main.gd
+@@ -22,6 +22,11 @@
+ var navigation:=CrowdNavigation.new()
+ var grid: Dictionary = {}
+ var crowd_grid:Dictionary={}
++var perf_enabled:bool=false
++var perf_us:Dictionary={}
++func perf_mark(section:String,started:int):
++ if perf_enabled:perf_us[section]=Time.get_ticks_usec()-started
++
+ var crowd_max_radius:float=1
+ var enemy_collision_margin:float=10
+ var offers: Array[Dictionary] = []
+@@ -164,6 +169,11 @@
+   if dev_tools!=null and argument.begins_with("--boss-test="):
+    dev_tools.launch_argument("demon1" if argument.get_slice("=",1)=="demon" else "executioner")
+ 
++ for arg in OS.get_cmdline_user_args():
++  if arg.begins_with("--benchmark14="):
++   if not OS.get_cmdline_user_args().has("--profile-slot=benchmark14"):get_tree().quit(2);return
++   var runner=load("res://scripts/diagnostics/benchmark14.gd").new();add_child(runner);runner.call_deferred("setup",self,arg.trim_prefix("--benchmark14="))
++
+ func development_build()->bool:return (OS.has_feature("editor") or OS.has_feature("dev_tools")) and ResourceLoader.exists("res://scripts/dev/boss_lab.gd") and FileAccess.file_exists("res://data/dev/presets.json")
+ 
+ func _input(event:InputEvent):
+--- a/scripts/network/coop_session.gd
++++ b/scripts/network/coop_session.gd
+@@ -183,7 +183,9 @@
+  game.elapsed += delta
+  game.horde_progress.tick()
+  game.campaign.tick()
++ var perf_start:int=Time.get_ticks_usec() if game.perf_enabled else 0
+  game.navigation.tick(delta)
++ game.perf_mark("navigation",perf_start)
+  var local_actor: CoopActor = actors[connection.peer_id]
+  var actions: Dictionary = {}
+  for id in actors:
+@@ -204,8 +206,11 @@
+  game.chests.tick(delta)
+  game.director.tick(delta)
+  if ended: return
++ perf_start=Time.get_ticks_usec() if game.perf_enabled else 0
+  game.gold_loot.tick(delta)
+  game.food_index.tick(delta)
++ game.perf_mark("collection",perf_start)
++ perf_start=Time.get_ticks_usec() if game.perf_enabled else 0
+  game.rebuild_grid()
+  for enemy in game.enemies.duplicate():
+   if not is_instance_valid(enemy) or not enemy.alive: continue
+@@ -214,18 +219,25 @@
+    game.player = target
+    enemy.tick(delta)
+  game.player = local_actor.player
++ game.perf_mark("enemy_ai_physics",perf_start)
++ perf_start=Time.get_ticks_usec() if game.perf_enabled else 0
+  game.rebuild_grid()
+  for id in actors:
+   var actor: CoopActor = actors[id]
+   if not actor.down:
+    actor.weapon_system.update_combat(delta, not actions[id].revive)
++ game.perf_mark("weapons_damage",perf_start)
++ perf_start=Time.get_ticks_usec() if game.perf_enabled else 0
+  game.update_pickups(delta)
++ game.perf_mark("xp_collection",perf_start)
++ perf_start=Time.get_ticks_usec() if game.perf_enabled else 0
+  game.enemy_projectiles.tick(delta)
+  game.update_hazards(delta)
+  game.specials.tick(delta)
+  game.boss_arena.tick(delta)
+  game.late_arena.tick(delta)
+  if ended: return
++ game.perf_mark("enemy_effects",perf_start)
+  game.update_event(delta)
+  for number in game.numbers:
+   number.life -= delta
+--- a/scripts/entities/enemy.gd
++++ b/scripts/entities/enemy.gd
+@@ -28,6 +28,12 @@
+ var resistance_duration:float=1
+ var slow_remaining:float=0
+ var slow_factor:float=1
++
++func move_body():
++	var t:int=Time.get_ticks_usec() if game.perf_enabled else 0
++	move_and_slide()
++	if game.perf_enabled:game.perf_us["physics_bodies"]=int(game.perf_us.get("physics_bodies",0))+Time.get_ticks_usec()-t
++
+ 
+ func setup(owner_game, stats: EnemyData, is_elite: bool = false) -> void:
+ 	game = owner_game
+@@ -110,7 +116,7 @@
+ 	velocity = movement + game.separation(self) * 14 + knockback
+ 	knockback = knockback.move_toward(Vector2.ZERO, delta * 500)
+ 	velocity=game.crowd_velocity(self,velocity)
+-	move_and_slide()
++	move_body()
+ 	if data.contact_damage and offset.length() < radius + game.player.radius:
+ 		game.player.take_damage(data.damage * (1.25 if elite else 1), position)
+ 	sprite.frame = int(clock * 7) % 4
+--- a/scripts/entities/devourer.gd
++++ b/scripts/entities/devourer.gd
+@@ -43,7 +43,7 @@
+ 	velocity=(direction*data.speed*(slow_factor if slow_remaining>0 else 1) if state=="approach" else Vector2.ZERO)+knockback
+ 	knockback=knockback.move_toward(Vector2.ZERO,delta*500)
+ 	velocity=game.crowd_velocity(self,velocity)
+-	move_and_slide()
++	move_body()
+ 	sprite.frame=4 if state=="prepare" else int(clock*7)%4
+ 	sprite.flip_h=direction.x<0
+ 	queue_redraw()
+--- a/scripts/entities/special_enemy.gd
++++ b/scripts/entities/special_enemy.gd
+@@ -65,7 +65,7 @@
+ 	velocity=movement+knockback
+ 	knockback=knockback.move_toward(Vector2.ZERO,delta*500)
+ 	velocity=game.crowd_velocity(self,velocity)
+-	move_and_slide()
++	move_body()
+ 	if data.frames>=16:
+ 		if state=="conjure_wait":sprite.frame=8+int(clock*4)%2
+ 		elif state=="prepare":sprite.frame=8+mini(3,int(state_time/maxf(.01,data.windup)*4))
+--- a/scripts/bosses/horde_boss.gd
++++ b/scripts/bosses/horde_boss.gd
+@@ -114,7 +114,7 @@
+ 	if slow_remaining>0:movement*=slow_factor
+ 	velocity = movement
+ 	velocity=game.crowd_velocity(self,velocity)
+-	move_and_slide()
++	move_body()
+ 	if state == "charge":
+ 		var victim = game.projectile_victim(previous_position, position, radius)
+ 		if not charge_hit and victim != null:
+--- a/scripts/bosses/late_boss.gd
++++ b/scripts/bosses/late_boss.gd
+@@ -43,7 +43,7 @@
+   if state_time>=.9 or position.distance_to(locked_target)<12:finish_attack();movement=Vector2.ZERO
+  elif state=="recovery" and state_time>=float(game.campaign.config.recovery):state="chase";state_time=0
+  if slow_remaining>0:movement*=slow_factor
+- var before:Vector2=position;velocity=movement;move_and_slide()
++ var before:Vector2=position;velocity=movement;move_body()
+  if state=="charge":
+   var victim=game.projectile_victim(before,position,radius)
+   if victim!=null and not charge_hit:charge_hit=true;victim.take_damage(game.late_arena.damage("dash",self),before)
+--- a/scripts/world/crowd_navigation.gd
++++ b/scripts/world/crowd_navigation.gd
+@@ -76,6 +76,11 @@
+  var r:int=bucket(radius);var valid:=grid(r);var c:=near_cell(at,valid)
+  return valid.has(c) and distances(r,Vector2(900,630)).has(c) and clear_segment(at,center(c),radius)
+ func steer(enemy,desired:Vector2,goal:Vector2=Vector2.INF)->Vector2:
++ if not game.perf_enabled:return plan(enemy,desired,goal)
++ var t:int=Time.get_ticks_usec();var result:Vector2=plan(enemy,desired,goal)
++ game.perf_us["navigation_planning"]=int(game.perf_us.get("navigation_planning",0))+Time.get_ticks_usec()-t
++ return result
++func plan(enemy,desired:Vector2,goal:Vector2=Vector2.INF)->Vector2:
+  if desired.length_squared()<.01:return desired
+  var speed:float=desired.length()
+  if agents.has(enemy.serial) and agents[enemy.serial].until>clock:

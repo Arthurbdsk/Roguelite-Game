@@ -1,5 +1,6 @@
 class_name Arsenal
 extends Node2D
+const EMPTY_QUERY:Array=[]
 var weapons
 var shots:Array[Dictionary]=[]
 var zones:Array[Dictionary]=[]
@@ -63,20 +64,20 @@ func tick(delta:float,allow_attacks:bool=true):
  for zone in zones:
   zone.age+=delta
   if zone.kind=="ice_wave":
-   for e in weapons.game.enemies.duplicate():
+   for e in candidates(zone.at-Vector2.ONE*zone.radius,zone.at+Vector2.ONE*zone.radius):
     if weapons._valid_target(e) and not zone.hits.has(e.serial) and e.position.distance_to(zone.at)<=zone.radius*minf(1,zone.age/.35):
      zone.hits[e.serial]=true;weapons._hit(e,weapons._stat("ice_wave","damage"),Vector2.ZERO)
      e.slow_remaining=maxf(e.slow_remaining,minf(1,weapons._stat("ice_wave","duration")) if e is HordeBoss else weapons._stat("ice_wave","duration"));e.slow_factor=.85 if e is HordeBoss else .7
   if zone.kind=="bombs" and zone.age>=zone.delay and not zone.hit:
    zone.hit=true
-   for e in weapons.game.enemies.duplicate():
+   for e in candidates(zone.at-Vector2.ONE*zone.radius,zone.at+Vector2.ONE*zone.radius):
     if weapons._valid_target(e) and e.position.distance_to(zone.at)<=zone.radius:weapons._hit(e,weapons._stat("bombs","damage"),Vector2.ZERO)
  zones=zones.filter(func(z):return z.age<z.life)
  blade_points.clear()
  if allow_attacks and int(weapons.levels.get("blades",0))>0:
   angle+=delta*weapons._stat("blades","rotation_speed")
   for i in int(weapons._stat("blades","count")):blade_points.append(weapons.game.player.position+Vector2.from_angle(angle+i*TAU/weapons._stat("blades","count"))*weapons._stat("blades","reach"))
-  for e in weapons.game.enemies.duplicate():
+  for e in candidates(weapons.game.player.position-Vector2.ONE*weapons._stat("blades","reach"),weapons.game.player.position+Vector2.ONE*weapons._stat("blades","reach")):
    if not weapons._valid_target(e) or weapons.combat_time<float(blade_hits.get(e.serial,0)):continue
    if e.position.distance_squared_to(weapons.game.player.position)>pow(weapons._stat("blades","reach")+e.radius+6*weapons.area_factor(),2):continue
    for at in blade_points:

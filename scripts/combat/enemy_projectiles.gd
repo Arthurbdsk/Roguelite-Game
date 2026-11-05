@@ -8,6 +8,7 @@ var visual_fire:Dictionary={}
 var fire_impacts:Array[Dictionary]=[]
 var arrows: Array[Dictionary] = []
 var serial: int = 0
+var wall_query:=PhysicsRayQueryParameters2D.new()
 
 func setup(owner_game) -> void:
 	game = owner_game
@@ -66,9 +67,8 @@ func tick(delta: float) -> void:
 		var movement: Vector2 = Vector2(arrow.velocity) * delta
 		movement = movement.limit_length(maxf(0, remaining))
 		var end: Vector2 = start + movement
-		var query := PhysicsRayQueryParameters2D.create(start, end, 4)
-		query.hit_from_inside = true
-		var wall: Dictionary = get_world_2d().direct_space_state.intersect_ray(query)
+		wall_query.from=start;wall_query.to=end;wall_query.collision_mask=4;wall_query.hit_from_inside=true
+		var wall: Dictionary = get_world_2d().direct_space_state.intersect_ray(wall_query)
 		if not wall.is_empty():
 			end = wall.position
 		var victim = game.projectile_victim(start, end, arrow.get("radius", game.balance.arrow_radius))

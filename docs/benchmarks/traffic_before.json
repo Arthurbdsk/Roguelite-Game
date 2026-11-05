@@ -1,0 +1,82 @@
+{
+  "stamp": 1793906465104,
+  "args": [
+    "--normal13",
+    "--packed=build/baseline14.exe",
+    "--harness=build/baseline14-source/tests/coop_match13.gd"
+  ],
+  "diagnostics": [
+    {
+      "event": "close",
+      "peer": "client-0",
+      "code": 1000,
+      "reason": "",
+      "age_ms": 19583,
+      "host": false,
+      "max_payload": 117,
+      "metrics": {
+        "tx_bytes": 1234980,
+        "rx_bytes": 28540,
+        "replaced": 0,
+        "max_queue_age_ms": 0,
+        "rtt_ms": 1
+      },
+      "critical_bytes": 0,
+      "remaining_snapshot": 0
+    },
+    {
+      "event": "close",
+      "peer": "client-1",
+      "code": 1006,
+      "reason": "",
+      "age_ms": 20167,
+      "host": false,
+      "max_payload": 117,
+      "metrics": {
+        "tx_bytes": 1236662,
+        "rx_bytes": 28387,
+        "replaced": 0,
+        "max_queue_age_ms": 0,
+        "rtt_ms": 7
+      },
+      "critical_bytes": 0,
+      "remaining_snapshot": 0
+    },
+    {
+      "event": "close",
+      "peer": "client-2",
+      "code": 1006,
+      "reason": "",
+      "age_ms": 20167,
+      "host": false,
+      "max_payload": 117,
+      "metrics": {
+        "tx_bytes": 1237022,
+        "rx_bytes": 28549,
+        "replaced": 0,
+        "max_queue_age_ms": 0,
+        "rtt_ms": 3
+      },
+      "critical_bytes": 0,
+      "remaining_snapshot": 0
+    },
+    {
+      "event": "close",
+      "peer": "host",
+      "code": 1006,
+      "reason": "",
+      "age_ms": 21047,
+      "host": true,
+      "max_payload": 347206,
+      "metrics": {
+        "tx_bytes": 133644,
+        "rx_bytes": 1284563,
+        "replaced": 0,
+        "max_queue_age_ms": 0,
+        "rtt_ms": 8
+      },
+      "critical_bytes": 0,
+      "remaining_snapshot": 0
+    }
+  ]
+}

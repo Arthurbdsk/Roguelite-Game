@@ -1,0 +1,317 @@
+{
+  "stamp": 1793907692011,
+  "args": [
+    "--normal13",
+    "--packed=build/Hordas-DEV-0.14.0/Hordas-DEV-0.14.0.exe",
+    "--soak-seconds=1800",
+    "--render-one",
+    "--rtt=100",
+    "--jitter=10",
+    "--bandwidth-kbps=4096",
+    "--stall-every=250"
+  ],
+  "diagnostics": [
+    {
+      "event": "close",
+      "peer": "host",
+      "code": 1006,
+      "reason": "",
+      "age_ms": 1802454,
+      "host": true,
+      "max_payload": 36293,
+      "metrics": {
+        "tx_bytes": 11811282,
+        "rx_bytes": 267505560,
+        "replaced": 0,
+        "max_queue_age_ms": 0,
+        "rtt_ms": 241
+      },
+      "critical_bytes": 0,
+      "remaining_snapshot": 0
+    },
+    {
+      "event": "close",
+      "peer": "client-1",
+      "code": 1006,
+      "reason": "",
+      "age_ms": 1801565,
+      "host": false,
+      "max_payload": 130,
+      "metrics": {
+        "tx_bytes": 264103657,
+        "rx_bytes": 2735543,
+        "replaced": 0,
+        "max_queue_age_ms": 26,
+        "rtt_ms": 134
+      },
+      "critical_bytes": 0,
+      "remaining_snapshot": 0
+    },
+    {
+      "event": "close",
+      "peer": "client-2",
+      "code": 1006,
+      "reason": "",
+      "age_ms": 1801570,
+      "host": false,
+      "max_payload": 130,
+      "metrics": {
+        "tx_bytes": 264292676,
+        "rx_bytes": 2735380,
+        "replaced": 0,
+        "max_queue_age_ms": 26,
+        "rtt_ms": 142
+      },
+      "critical_bytes": 0,
+      "remaining_snapshot": 0
+    },
+    {
+      "event": "close",
+      "peer": "client-3",
+      "code": 1006,
+      "reason": "",
+      "age_ms": 1801269,
+      "host": false,
+      "max_payload": 130,
+      "metrics": {
+        "tx_bytes": 264199203,
+        "rx_bytes": 2734004,
+        "replaced": 0,
+        "max_queue_age_ms": 26,
+        "rtt_ms": 162
+      },
+      "critical_bytes": 0,
+      "remaining_snapshot": 0
+    }
+  ],
+  "impairment": {
+    "bytes": 1081479633,
+    "stalls": 1496,
+    "queue_peak": 100299
+  },
+  "participants": [
+    {
+      "index": 0,
+      "metrics": {
+        "apply_us": {},
+        "decode_us": {},
+        "index": 0,
+        "metrics": {
+          "decode_us": 7,
+          "jitter_ms": 93.4501283225142,
+          "max_queue_bytes": 0,
+          "packets_rx": 81809,
+          "packets_tx": 25012,
+          "queue_age_ms": 0,
+          "queue_bytes": 0,
+          "rtt_ms": 252.0,
+          "rx_bytes": 11810844,
+          "serialize_us": 2763,
+          "tx_bytes": 267548487
+        },
+        "peer_rtt_ms": {},
+        "relay_rtt_ms": {
+          "median": 168.0,
+          "p95": 343.0,
+          "p99": 440.0,
+          "samples": 768
+        },
+        "seconds": 1568.54831566688,
+        "serialize_us": {
+          "median": 3550,
+          "p95": 9034,
+          "p99": 10230,
+          "samples": 600
+        },
+        "snapshot_age_ms": 0,
+        "snapshot_interval_ms": {}
+      },
+      "evidence": [
+        "SOAK_CAMPAIGN {\"demon\":true,\"guardian\":true,\"horror\":true} endless=true",
+        "SOAK_DURATION wall_ms=1800012 target_seconds=1800 scripted_rate=1.0",
+        "COOP_MATCH_PEER_PASS index=0 checks=5 failures=0"
+      ]
+    },
+    {
+      "index": 1,
+      "metrics": {
+        "apply_us": {
+          "median": 4788,
+          "p95": 16439,
+          "p99": 20433,
+          "samples": 600
+        },
+        "decode_us": {
+          "median": 2673,
+          "p95": 6255,
+          "p99": 8462,
+          "samples": 600
+        },
+        "index": 1,
+        "metrics": {
+          "apply_us": 6596,
+          "correction_sum_px": 52476.6524266231,
+          "decode_us": 1297,
+          "jitter_ms": 41.0877553802325,
+          "max_correction_px": 10.7959995269775,
+          "max_queue_bytes": 0,
+          "packets_rx": 24555,
+          "packets_tx": 27900,
+          "peer_jitter_ms": 141.712234288696,
+          "peer_rtt_ms": 269.0,
+          "queue_age_ms": 0,
+          "queue_bytes": 0,
+          "rtt_ms": 167.0,
+          "rx_bytes": 264177846,
+          "serialize_us": 8,
+          "tx_bytes": 2734134
+        },
+        "peer_rtt_ms": {
+          "median": 358.0,
+          "p95": 570.0,
+          "p99": 660.0,
+          "samples": 870
+        },
+        "relay_rtt_ms": {
+          "median": 134.0,
+          "p95": 232.0,
+          "p99": 366.0,
+          "samples": 886
+        },
+        "seconds": 1801.5512689995,
+        "serialize_us": {},
+        "snapshot_age_ms": 15,
+        "snapshot_interval_ms": {
+          "median": 133,
+          "p95": 235,
+          "p99": 334,
+          "samples": 600
+        }
+      },
+      "evidence": [
+        "COOP_MATCH_PEER_PASS index=1 checks=4 failures=0"
+      ]
+    },
+    {
+      "index": 2,
+      "metrics": {
+        "apply_us": {
+          "median": 6385,
+          "p95": 21430,
+          "p99": 23189,
+          "samples": 600
+        },
+        "decode_us": {
+          "median": 3591,
+          "p95": 8312,
+          "p99": 9337,
+          "samples": 600
+        },
+        "index": 2,
+        "metrics": {
+          "apply_us": 6119,
+          "correction_sum_px": 49809.2481583553,
+          "decode_us": 817,
+          "jitter_ms": 35.0367962453715,
+          "max_correction_px": 9.23459053039551,
+          "max_queue_bytes": 0,
+          "packets_rx": 24553,
+          "packets_tx": 27912,
+          "peer_jitter_ms": 57.2945557731264,
+          "peer_rtt_ms": 460.0,
+          "queue_age_ms": 0,
+          "queue_bytes": 0,
+          "rtt_ms": 118.0,
+          "rx_bytes": 264082300,
+          "serialize_us": 27,
+          "tx_bytes": 2735543
+        },
+        "peer_rtt_ms": {
+          "median": 350.0,
+          "p95": 555.0,
+          "p99": 675.0,
+          "samples": 870
+        },
+        "relay_rtt_ms": {
+          "median": 136.0,
+          "p95": 193.0,
+          "p99": 331.0,
+          "samples": 899
+        },
+        "seconds": 1801.86386966359,
+        "serialize_us": {},
+        "snapshot_age_ms": 14,
+        "snapshot_interval_ms": {
+          "median": 123,
+          "p95": 250,
+          "p99": 341,
+          "samples": 600
+        }
+      },
+      "evidence": [
+        "COOP_MATCH_PEER_PASS index=2 checks=4 failures=0"
+      ]
+    },
+    {
+      "index": 3,
+      "metrics": {
+        "apply_us": {
+          "median": 6424,
+          "p95": 20794,
+          "p99": 22532,
+          "samples": 600
+        },
+        "decode_us": {
+          "median": 3612,
+          "p95": 8053,
+          "p99": 9526,
+          "samples": 600
+        },
+        "index": 3,
+        "metrics": {
+          "apply_us": 6281,
+          "correction_sum_px": 50618.408570113,
+          "decode_us": 909,
+          "jitter_ms": 11.4573336324127,
+          "max_correction_px": 10.6960325241089,
+          "max_queue_bytes": 0,
+          "packets_rx": 24559,
+          "packets_tx": 27914,
+          "peer_jitter_ms": 53.6328747376034,
+          "peer_rtt_ms": 344.0,
+          "queue_age_ms": 0,
+          "queue_bytes": 0,
+          "rtt_ms": 138.0,
+          "rx_bytes": 264271319,
+          "serialize_us": 35,
+          "tx_bytes": 2735481
+        },
+        "peer_rtt_ms": {
+          "median": 351.0,
+          "p95": 547.0,
+          "p99": 661.0,
+          "samples": 870
+        },
+        "relay_rtt_ms": {
+          "median": 134.0,
+          "p95": 205.0,
+          "p99": 332.0,
+          "samples": 899
+        },
+        "seconds": 1801.80194066361,
+        "serialize_us": {},
+        "snapshot_age_ms": 13,
+        "snapshot_interval_ms": {
+          "median": 124,
+          "p95": 248,
+          "p99": 334,
+          "samples": 600
+        }
+      },
+      "evidence": [
+        "COOP_MATCH_PEER_PASS index=3 checks=4 failures=0"
+      ]
+    }
+  ],
+  "note": "Local processes, one rendered; not internet validation. Candidate predates final spawn placement and cadence corrections."
+}

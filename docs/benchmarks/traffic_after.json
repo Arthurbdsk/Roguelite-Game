@@ -1,0 +1,82 @@
+{
+  "stamp": 1793906487113,
+  "args": [
+    "--normal13",
+    "--packed=build/Hordas-0.14.0/Hordas-0.14.0.exe",
+    "--harness=build/baseline14-source/tests/coop_match13.gd"
+  ],
+  "diagnostics": [
+    {
+      "event": "close",
+      "peer": "client-0",
+      "code": 1000,
+      "reason": "",
+      "age_ms": 19143,
+      "host": false,
+      "max_payload": 130,
+      "metrics": {
+        "tx_bytes": 268234,
+        "rx_bytes": 28220,
+        "replaced": 1,
+        "max_queue_age_ms": 23,
+        "rtt_ms": 4
+      },
+      "critical_bytes": 0,
+      "remaining_snapshot": 0
+    },
+    {
+      "event": "close",
+      "peer": "client-1",
+      "code": 1006,
+      "reason": "",
+      "age_ms": 19753,
+      "host": false,
+      "max_payload": 130,
+      "metrics": {
+        "tx_bytes": 270690,
+        "rx_bytes": 28380,
+        "replaced": 1,
+        "max_queue_age_ms": 23,
+        "rtt_ms": 5
+      },
+      "critical_bytes": 0,
+      "remaining_snapshot": 0
+    },
+    {
+      "event": "close",
+      "peer": "client-2",
+      "code": 1006,
+      "reason": "",
+      "age_ms": 19741,
+      "host": false,
+      "max_payload": 130,
+      "metrics": {
+        "tx_bytes": 269773,
+        "rx_bytes": 28308,
+        "replaced": 1,
+        "max_queue_age_ms": 23,
+        "rtt_ms": 2
+      },
+      "critical_bytes": 0,
+      "remaining_snapshot": 0
+    },
+    {
+      "event": "close",
+      "peer": "host",
+      "code": 1006,
+      "reason": "",
+      "age_ms": 20732,
+      "host": true,
+      "max_payload": 11391,
+      "metrics": {
+        "tx_bytes": 130183,
+        "rx_bytes": 268404,
+        "replaced": 0,
+        "max_queue_age_ms": 0,
+        "rtt_ms": 3
+      },
+      "critical_bytes": 0,
+      "remaining_snapshot": 0
+    }
+  ]
+}

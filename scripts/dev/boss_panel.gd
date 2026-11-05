@@ -11,6 +11,7 @@ var attack_box:OptionButton
 var host_controls:Array=[]
 var attack_signature:String=""
 var clock:float=0
+var performance_label:Label
 var survival_label:Label
 var permanent:CheckBox
 func setup(controller):
@@ -94,8 +95,11 @@ func rebuild():
  button(debug13,"Limpar eventos",func():
   if lab.is_host():lab.game.special_events.stop();lab.game.chests.reset(),true)
  survival_label=label(survival,lab.survival_info())
+ var perf_tab:=tab("Desempenho")
+ var measure:=CheckBox.new();measure.text="Medir custos da simulação";measure.button_pressed=lab.game.perf_enabled;measure.toggled.connect(func(value):lab.game.perf_enabled=value);perf_tab.add_child(measure)
+ performance_label=label(perf_tab,lab.performance_info())
  status_label=label(base,lab.status);status_label.custom_minimum_size.y=14
- tabs.current_tab=clampi(selected,0,3);refresh()
+ tabs.current_tab=clampi(selected,0,4);refresh()
 func slots(parent:Node,title:String,definitions:Dictionary,equipped:Dictionary,count:int,records:Array):
  label(parent,title)
  var grid:=GridContainer.new();grid.columns=2;grid.add_theme_constant_override("h_separation",8);parent.add_child(grid)
@@ -118,6 +122,7 @@ func read_build()->bool:
  lab.build=result;return true
 func refresh():
  if not is_instance_valid(status_label):return
+ if is_instance_valid(performance_label):performance_label.text=lab.performance_info()
  if is_instance_valid(survival_label):survival_label.text=lab.survival_info()
  status_label.text="Tempo: %.1fx | "%Engine.time_scale+lab.status;boss_label.text=lab.boss_info();build_label.text=lab.game.weapon_system.build_stats()
  var signature:String=str(lab.attacks())

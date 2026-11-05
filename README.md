@@ -2,15 +2,15 @@
 
 Projeto editável em Godot 4.7.2. Inclui código, cenas, mapas, dados de balanceamento, sprites e testes. Não precisa instalar Python ou Node.js para jogar no modo solo pelo editor.
 
-Para jogar no Windows sem instalar o Godot, baixe [Hordas 0.13.0](https://github.com/Arthurbdsk/Roguelite-Game/releases/tag/v0.13.0). O arquivo `.exe` contém todos os recursos. Todos os participantes precisam usar a mesma versão. O serviço público de salas está indisponível nesta publicação; o solo funciona e o cooperativo exige um relay configurado.
+Para jogar no Windows sem instalar o Godot, baixe [Hordas 0.14.0](https://github.com/Arthurbdsk/Roguelite-Game/releases/tag/v0.14.0). O arquivo `.exe` contém todos os recursos. Todos os participantes precisam usar a mesma versão. O serviço público de salas está indisponível nesta publicação; o solo funciona e o cooperativo exige um relay configurado.
 
-## Atualização 0.13.0
+## Atualização 0.14.0
 
-Colisão entre corpos, geração contínua, infinito após a True Form, cerco, Slime Rei e baús compartilhados. [Parâmetros e testes](docs/IMPLEMENTACAO_0_13.md).
+Otimização de consultas espaciais e navegação, lotes de poças, snapshots binários comprimidos, filas separadas e implantação permanente preparada. [Desempenho e testes](docs/DESEMPENHO_0_14.md). [Cooperativo e implantação](docs/ONLINE_0_14.md).
 
-## Painel DEV 0.13.0
+## Painel DEV 0.14.0
 
-Use `Hordas-DEV-0.13.0.exe` e pressione F8 no menu. O painel testa os seis encontros reais, configura builds e controla ataques, fases, tempo e reinícios. O perfil é temporário e o save original permanece intacto. O executável público `Hordas-0.13.0.exe` exclui o painel e seus presets.
+Use `Hordas-DEV-0.14.0.exe` e pressione F8 no menu. O painel testa os seis encontros reais, configura builds e controla ataques, fases, tempo e reinícios. O perfil é temporário e o save original permanece intacto. O executável público `Hordas-0.14.0.exe` exclui o painel e seus presets.
 
 Guia e testes: [docs/MODO_DEV_0_11.md](docs/MODO_DEV_0_11.md). `Testar_Chefes_DEV.cmd` abre a build DEV exportada. O projeto aberto no Godot também habilita o F8. Para salas de desenvolvimento, todos precisam usar a mesma build DEV e abrir Sala DEV pelo painel.
 
@@ -37,13 +37,13 @@ No Windows, `Jogar.cmd` também procura o executável já exportado ou o Godot i
 
 ## Multiplayer
 
-O modo online exige um relay acessível. As configurações locais não são enviadas ao GitHub: copie `network.cfg.example` para `network.cfg` e informe a URL WSS do relay. O servidor e as instruções estão em [relay/](relay/) e [docs/MULTIPLAYER.md](docs/MULTIPLAYER.md). Para testar na mesma máquina, use `Testar_Coop_Local.cmd` com Node.js instalado e as dependências de `relay/package.json`.
+O modo online exige um relay acessível. As configurações locais não são enviadas ao GitHub: copie `network.cfg.example` para `network.cfg` e informe a URL WSS do relay. O servidor e as instruções estão em [relay/](relay/) e [docs/ONLINE_0_14.md](docs/ONLINE_0_14.md). Para testar na mesma máquina, use `Testar_Coop_Local.cmd` com Node.js instalado e as dependências de `relay/package.json`.
 
 Todos os jogadores precisam usar a mesma versão do projeto. Um endereço temporário de túnel pode parar de funcionar quando o computador que o hospeda for desligado.
 
 ## Estado do projeto
 
-O código atual preserva os três mapas, doze armas, oito passivas, dezesseis aprimoramentos permanentes, ouro e cooperação por código. A campanha foi estendida com os encontros da versão 0.10. Os relatórios históricos descrevem as versões em que foram escritos; consulte o relatório 0.10 para os testes atuais.
+O código atual preserva os três mapas, doze armas, oito passivas, dezesseis aprimoramentos permanentes, ouro e cooperação por código. A campanha foi estendida com os encontros da versão 0.10. Os relatórios históricos descrevem as versões em que foram escritos; consulte o relatório 0.14 para os testes atuais.
 
 ## Versão 0.7.0 anterior
 

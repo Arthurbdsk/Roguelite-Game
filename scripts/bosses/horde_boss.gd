@@ -114,7 +114,7 @@ func tick(delta: float) -> void:
 	if slow_remaining>0:movement*=slow_factor
 	velocity = movement
 	velocity=game.crowd_velocity(self,velocity)
-	move_and_slide()
+	move_body()
 	if state == "charge":
 		var victim = game.projectile_victim(previous_position, position, radius)
 		if not charge_hit and victim != null:

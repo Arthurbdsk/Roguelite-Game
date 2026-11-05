@@ -35,6 +35,10 @@ var local_input_override: Dictionary = {}
 var snapshot_count: int = 0
 var bytes_sent: int = 0
 var outbox: Array[Dictionary] = []
+var peer_probe_clock:float=0
+var peer_rtt_samples:Array=[]
+var apply_samples:Array=[]
+var last_snapshot_serial:int=-1
 var team_hud
 const COLORS := [Color("83c4bd"), Color("dfb969"), Color("ad8eac"), Color("dc7b5d")]
 
@@ -84,11 +88,14 @@ func receive(packet: Dictionary) -> void:
      if game.dev_tools!=null and game.dev_tools.active:game.dev_tools.receive_request(packet.from,data.dev)
      return
     var accepted: bool = inputs.accept(packet.from, data, world_clock)
+    if accepted and data.has("probe_stamp"):publish({"type":"peer_pong","stamp":data.probe_stamp},packet.from)
     if accepted and data.get("self_revive",false)==true:perform_self_revive(packet.from)
     if accepted and data.has("choice") and (data.get("generation") is int or data.get("generation") is float):
      actors[packet.from].choose(str(data.choice), int(data.get("generation", -1)))
   "delta":
-   if active and not hosting: apply_delta(packet.data)
+   if active and not hosting:
+    var started:int=Time.get_ticks_usec();apply_delta(packet.data,packet.get("native",false));connection.metrics.apply_us=Time.get_ticks_usec()-started;apply_samples.append(connection.metrics.apply_us)
+    if apply_samples.size()>600:apply_samples.pop_front()
   "event":
    if active and not hosting: apply_event(packet.data)
   "events":
@@ -122,6 +129,7 @@ func begin(packet: Dictionary) -> void:
  revives.rules = rules
  world_clock = 0
  sequence = 0
+ last_snapshot_serial=-1;peer_probe_clock=0;peer_rtt_samples.clear()
  send_clock = 0
  for index in packet.players.size():
   var metadata: Dictionary = packet.players[index]
@@ -180,10 +188,13 @@ func tick(delta: float, movement: Vector2) -> void:
 
 func host_tick(delta: float, local: Dictionary) -> void:
  if game.state != "running": return
+ if game.perf_enabled:game.perf_us.clear()
  game.elapsed += delta
  game.horde_progress.tick()
  game.campaign.tick()
+ var perf_start:int=Time.get_ticks_usec() if game.perf_enabled else 0
  game.navigation.tick(delta)
+ game.perf_mark("navigation",perf_start)
  var local_actor: CoopActor = actors[connection.peer_id]
  var actions: Dictionary = {}
  for id in actors:
@@ -204,9 +215,13 @@ func host_tick(delta: float, local: Dictionary) -> void:
  game.chests.tick(delta)
  game.director.tick(delta)
  if ended: return
+ perf_start=Time.get_ticks_usec() if game.perf_enabled else 0
  game.gold_loot.tick(delta)
  game.food_index.tick(delta)
+ game.perf_mark("collection",perf_start)
+ perf_start=Time.get_ticks_usec() if game.perf_enabled else 0
  game.rebuild_grid()
+ game.prepare_crowd()
  for enemy in game.enemies.duplicate():
   if not is_instance_valid(enemy) or not enemy.alive: continue
   var target = nearest_player(enemy.position)
@@ -214,18 +229,25 @@ func host_tick(delta: float, local: Dictionary) -> void:
    game.player = target
    enemy.tick(delta)
  game.player = local_actor.player
+ game.perf_mark("enemy_ai_physics",perf_start)
+ perf_start=Time.get_ticks_usec() if game.perf_enabled else 0
  game.rebuild_grid()
  for id in actors:
   var actor: CoopActor = actors[id]
   if not actor.down:
    actor.weapon_system.update_combat(delta, not actions[id].revive)
+ game.perf_mark("weapons_damage",perf_start)
+ perf_start=Time.get_ticks_usec() if game.perf_enabled else 0
  game.update_pickups(delta)
+ game.perf_mark("xp_collection",perf_start)
+ perf_start=Time.get_ticks_usec() if game.perf_enabled else 0
  game.enemy_projectiles.tick(delta)
  game.update_hazards(delta)
  game.specials.tick(delta)
  game.boss_arena.tick(delta)
  game.late_arena.tick(delta)
  if ended: return
+ game.perf_mark("enemy_effects",perf_start)
  game.update_event(delta)
  for number in game.numbers:
   number.life -= delta
@@ -268,13 +290,15 @@ func host_tick(delta: float, local: Dictionary) -> void:
  game.xp_needed = local_actor.xp_needed
  if local_actor.down and menu_open: close_menu()
  update_camera()
- game.ui.update_hud(game.snapshot())
+ game.hud_clock-=delta
+ if game.hud_clock<=0:game.ui.update_hud(game.snapshot());game.hud_clock=.1
  game.queue_redraw()
  send_clock -= delta
- if send_clock <= 0:
+ if send_clock <= 0.000001:
   flush_events()
   broadcast_state()
-  send_clock = maxf(0.05, rules.state_interval)
+  var interval:float=maxf(0.05,rules.state_interval)
+  send_clock=send_clock+interval if send_clock> -interval else interval
 
 func actor_states() -> Dictionary:
  var result: Dictionary = {}
@@ -476,7 +500,7 @@ func broadcast_state(force: bool = false) -> void:
   var wire: Dictionary = entities[id]
   var changed := {"id": id}
   for key in wire:
-   if force or not sent_entities.has(id) or sent_entities[id].get(key) != wire[key]: changed[key] = wire[key]
+   if true: changed[key] = wire[key]
   if changed.size() > 1: changes.append(changed)
   next_entities[id] = wire
  for id in sent_entities.keys():
@@ -487,17 +511,24 @@ func broadcast_state(force: bool = false) -> void:
   var shots: Array = []
   for shot in weapons.projectiles: shots.append({"position": shot.position, "velocity": shot.velocity})
   weapon_fx[id] = {"projectiles": shots, "slashes": weapons.slashes, "orbit_positions": weapons.orbit_positions,"lightning_fx":weapons.lightning_fx,"beams":weapons.beams,"pools":weapons.ground.pools,"arsenal_shots":weapons.arsenal.shots,"arsenal_zones":weapons.arsenal.zones,"blade_points":weapons.arsenal.blade_points}
- var data := {"reward_chest":game.chests.chest,"event_status":{"active":game.special_events.active,"age":game.special_events.age,"pending":game.special_events.pending.size()},"campaign_cleared":game.campaign.cleared,"endless":game.campaign.endless,"final_jobs":game.late_arena.patterns.jobs,"final_shots":game.late_arena.patterns.shots,"final_marks":game.late_arena.patterns.marks,"hordes_completed":game.horde_progress.completed,"chain_seeds":game.late_arena.seed_pending,"chain_stats":game.late_arena.chain.snapshot(),"late_areas":game.late_arena.areas,"late_shots":game.late_arena.shots,"changes": changes, "removals": removals, "elapsed": game.elapsed, "gold": game.gold, "kills": game.kills, "earned": game.earned, "wave": game.director.wave_number(), "pressure": "TESTE DEV" if game.dev_tools!=null and game.dev_tools.active else game.director.pressure(), "banner": game.banner, "arrows": game.enemy_projectiles.arrows, "hazards": game.hazards, "areas": game.boss_arena.areas, "summons": game.boss_arena.pending_summons, "swings": game.boss_arena.swings, "portal_age": game.boss_arena.portal_age, "stage": game.boss_arena.stage, "weapons": weapon_fx, "revives": revives.interactions, "event_claimed": game.event_claimed, "event_progress": game.event_progress, "numbers": game.numbers,"split_pending":game.slime_families.pending,"special_marks":game.specials.marks,"special_areas":game.specials.areas,"special_bolts":game.specials.bolts}
- var packet := {"type": "delta", "data": CoopWire.encode(data)}
- bytes_sent += JSON.stringify(packet).length()
+ var data := {"reward_chest":game.chests.chest,"event_status":{"active":game.special_events.active,"age":game.special_events.age,"pending":game.special_events.pending.size()},"campaign_cleared":game.campaign.cleared,"endless":game.campaign.endless,"final_jobs":game.late_arena.patterns.jobs,"final_shots":game.late_arena.patterns.shots,"final_marks":game.late_arena.patterns.marks,"hordes_completed":game.horde_progress.completed,"chain_seeds":game.late_arena.seed_pending,"chain_stats":game.late_arena.chain.snapshot(),"late_areas":game.late_arena.areas,"late_shots":game.late_arena.shots,"full":true,"changes": changes, "removals": removals, "elapsed": game.elapsed, "gold": game.gold, "kills": game.kills, "earned": game.earned, "wave": game.director.wave_number(), "pressure": "TESTE DEV" if game.dev_tools!=null and game.dev_tools.active else game.director.pressure(), "banner": game.banner, "arrows": game.enemy_projectiles.arrows, "hazards": game.hazards, "areas": game.boss_arena.areas, "summons": game.boss_arena.pending_summons, "swings": game.boss_arena.swings, "portal_age": game.boss_arena.portal_age, "stage": game.boss_arena.stage, "weapons": weapon_fx, "revives": revives.interactions, "event_claimed": game.event_claimed, "event_progress": game.event_progress, "numbers": game.numbers,"split_pending":game.slime_families.pending,"special_marks":game.specials.marks,"special_areas":game.specials.areas,"special_bolts":game.specials.bolts}
+ data.snapshot_serial=snapshot_count+1;data.room_run=room_run
+ var packet := {"type": "delta", "data": data}
  snapshot_count += 1
- if connection.send_message(packet): sent_entities = next_entities
+ if connection.send_message(packet):
+  sent_entities = next_entities
+  bytes_sent=int(connection.metrics.tx_bytes)
 
 func apply_event(data: Dictionary) -> void:
  if str(data.get("type","")).begins_with("dev_"):
   if game.dev_tools!=null and game.dev_tools.active:game.dev_tools.receive_event(data)
   return
  match data.get("type", ""):
+  "peer_pong":
+   var value:float=Time.get_ticks_msec()-int(data.stamp)
+   connection.metrics.peer_jitter_ms=lerpf(float(connection.metrics.get("peer_jitter_ms",0)),absf(value-float(connection.metrics.get("peer_rtt_ms",value))),.2)
+   connection.metrics.peer_rtt_ms=value;peer_rtt_samples.append(value)
+   if peer_rtt_samples.size()>900:peer_rtt_samples.pop_front()
   "reward_chest":game.chests.show_receipt(data.data)
   "campaign_won":game.campaign.remember_clear()
   "endless_offer":game.campaign.remember_clear();game.campaign.deciding=true;game.state="endless_choice";game.ui.render("endless_choice")
@@ -545,9 +576,17 @@ func apply_event(data: Dictionary) -> void:
     actors[event.target].player.invulnerable = event.invulnerability
   "end": settle(data.data)
 
-func apply_delta(raw: Dictionary) -> void:
+func apply_delta(raw: Dictionary,native:bool=false) -> void:
  if ended: return
- var data: Dictionary = CoopWire.decode(raw)
+ var data: Dictionary = raw if native else CoopWire.decode(raw)
+ if data.get("room_run",room_run)!=room_run:return
+ if int(data.get("snapshot_serial",last_snapshot_serial+1))<=last_snapshot_serial:return
+ last_snapshot_serial=int(data.get("snapshot_serial",last_snapshot_serial+1))
+ if data.get("full",false):
+  var present:Dictionary={}
+  for update in data.changes:present[update.id]=true
+  for id in replicas:
+   if not present.has(id) and not data.removals.has(id):data.removals.append(id)
  for update in data.changes:
   var id: String = update.id
   if not replicas.has(id): replicas[id] = {}
@@ -616,8 +655,14 @@ func apply_delta(raw: Dictionary) -> void:
      enemy.form = int(state.form)
      enemy.apply_visual_form()
     enemy.queue_redraw()
-   "coin": game.gold_loot.coins.append({"at": state.at, "age": maxf(0,data.elapsed-state.born), "value": state.value})
-   "xp": game.pickups.append({"at": state.at, "xp": state.xp})
+   "coin":
+    if not state.has("item"):state.item={"id":id,"at":state.at,"age":0.0,"value":state.value}
+    var item:Dictionary=state.item;item.at=state.at;item.age=maxf(0,data.elapsed-state.born);item.value=state.value
+    game.gold_loot.coins.append(item)
+   "xp":
+    if not state.has("item"):state.item={"id":id,"at":state.at,"xp":state.xp}
+    var item:Dictionary=state.item;item.at=state.at;item.xp=state.xp
+    game.pickups.append(item)
  game.special_events.active=str(data.get("event_status",{}).get("active",""));game.special_events.age=float(data.get("event_status",{}).get("age",0));game.special_events.remote_pending=int(data.get("event_status",{}).get("pending",0))
  game.special_events.members.clear()
  for e in game.enemies:
@@ -676,11 +721,15 @@ func apply_delta(raw: Dictionary) -> void:
 
 func client_tick(delta: float, action: Dictionary) -> void:
  if game.state=="running":game.chests.visual_tick(delta)
+ peer_probe_clock+=delta
  send_clock -= delta
- if send_clock <= 0:
+ if send_clock <= 0.000001:
   sequence += 1
-  connection.send_message({"type": "action", "data": {"sequence": sequence, "movement": CoopWire.encode(action.movement), "revive": action.revive,"self_revive":action.get("self_revive",false)}})
-  send_clock = maxf(0.025, rules.input_interval)
+  var input_packet:Dictionary={"sequence":sequence,"movement":CoopWire.encode(action.movement),"revive":action.revive,"self_revive":action.get("self_revive",false)}
+  if peer_probe_clock>=2:input_packet.probe_stamp=Time.get_ticks_msec();peer_probe_clock=0
+  connection.send_message({"type":"action","data":input_packet})
+  var interval:float=maxf(0.025,rules.input_interval)
+  send_clock=send_clock+interval if send_clock> -interval else interval
  var local: CoopActor = actors[connection.peer_id]
  if not local.down:
   local.player.movement_multiplier = game.boss_arena.slow_multiplier(local.player.position)
@@ -690,7 +739,11 @@ func client_tick(delta: float, action: Dictionary) -> void:
  for id in destinations:
   var node = actors[id].player if actors.has(id) else replicas[id].get("node")
   if not is_instance_valid(node): continue
-  node.position = node.position.lerp(destinations[id], minf(1, delta * rules.interpolation_rate))
+  var corrected:Vector2=node.position.lerp(destinations[id], minf(1, delta * rules.interpolation_rate))
+  if id==connection.peer_id:
+   connection.metrics.max_correction_px=maxf(float(connection.metrics.get("max_correction_px",0)),node.position.distance_to(corrected))
+   connection.metrics.correction_sum_px=float(connection.metrics.get("correction_sum_px",0))+node.position.distance_to(corrected)
+  node.position=corrected
   if actors.has(id) and id!=connection.peer_id and node.position.distance_to(destinations[id])<.25 and node.sprite.frame in range(16,24):node.sprite.frame=0
  for actor in actors.values():
   actor.player.sprite.modulate.a = 0.55 if actor.player.invulnerable > 0 and int(world_clock * 10) % 2 == 0 else 1.0
