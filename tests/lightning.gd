@@ -7,7 +7,7 @@ func run():
 	var b=g.spawn_enemy("ghoul",g.player.position+Vector2(100,0));b.hp=1000
 	var c=g.spawn_enemy("ghoul",g.player.position+Vector2(400,0));c.hp=1000
 	g.weapon_system._lightning()
-	assert(a.hp==905 and b.hp==905 and c.hp==1000)
+	assert(is_equal_approx(a.hp,914.5) and is_equal_approx(b.hp,914.5) and c.hp==1000)
 	assert(g.weapon_system.lightning_fx.size()==2)
 	g.queue_free();await process_frame;await create_timer(.2).timeout
 	print("LIGHTNING_PASS unique targets and range");quit()

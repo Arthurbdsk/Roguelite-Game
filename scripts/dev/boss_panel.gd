@@ -73,6 +73,12 @@ func rebuild():
  var commands:=row(boss);button(commands,"Executar ataque",func():if attack_box.item_count>0:lab.force_attack(attack_box.get_item_metadata(attack_box.selected)),true)
  button(commands,"Repetir somente este",func():if attack_box.item_count>0:lab.force_attack(attack_box.get_item_metadata(attack_box.selected),true),true)
  button(commands,"Sequência normal",lab.normal_sequence,true)
+ var combo:=row(boss)
+ var combinations:=pick(combo,{"spiral":"Espiral + Selos","rings":"Anéis + Orbes","spears":"Lanças + Cristais","beams":"Feixes + Totens"},"spiral")
+ button(combo,"Testar combinação",func():
+  var first:String=combinations.get_item_metadata(combinations.selected)
+  for pair in lab.game.late_arena.patterns.config.combination_pairs:
+   if pair[0]==first:lab.force_combination(pair[0],pair[1]),true)
  var values:=row(boss);var frozen:=CheckBox.new();frozen.text="Congelar chefe";frozen.add_theme_font_size_override("font_size",10);frozen.button_pressed=lab.frozen;frozen.toggled.connect(lab.freeze);values.add_child(frozen);host_controls.append(frozen)
  label(values,"Vida %");var percent:=spin(values,100,1,100,.1);button(values,"Definir vida",func():lab.health_percent(percent.value),true);button(values,"Próxima fase",lab.next_phase,true)
  label(boss,"Ataques aguardam os limites reais de efeitos e a recuperação. Congelar para o chefe, mas mantém projéteis e áreas já lançados. Vida 0: use Próxima fase ou cause dano na arena.")
@@ -104,7 +110,7 @@ func refresh():
  var signature:String=str(lab.attacks())
  if signature!=attack_signature:
   attack_signature=signature;attack_box.clear()
-  var names:Dictionary={"execute":"Golpe","charge":"Investida","fire":"Bolas de fogo","summon":"Invocar","lightning":"Raios","ice":"Parede de gelo","ring":"Anel","cross":"Feixes cruzados","feathers":"Penas","light_ring":"Anel de luz","columns":"Colunas","dash":"Dash","ice_sectors":"Lanças de gelo","light_bands":"Faixas de luz","moving_ring":"Ondas com abertura móvel"}
+  var names:Dictionary={"spiral":"Espiral Dupla","rings":"Anéis com Abertura","spears":"Chuva de Lanças","orbs":"Orbes de Cerco","crystals":"Cristais de Gelo","beams":"Feixes Giratórios","seals":"Selos de Perseguição","totems":"Totens de Canalização","execute":"Golpe","charge":"Investida","fire":"Bolas de fogo","summon":"Invocar","lightning":"Raios","ice":"Parede de gelo","ring":"Anel","cross":"Feixes cruzados","feathers":"Penas","light_ring":"Anel de luz","columns":"Colunas","dash":"Dash","ice_sectors":"Lanças de gelo","light_bands":"Faixas de luz","moving_ring":"Ondas com abertura móvel"}
   for id in lab.attacks():attack_box.add_item(names.get(id,id));attack_box.set_item_metadata(attack_box.item_count-1,id)
  for control in host_controls:
   if control is Button:control.disabled=not lab.is_host()

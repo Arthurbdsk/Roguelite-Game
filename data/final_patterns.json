@@ -1,0 +1,64 @@
+{
+  "max_projectiles": 384,
+  "max_targets": 16,
+  "max_jobs": 2,
+  "recovery": 0.65,
+  "warning": 1.35,
+  "projectile_speed": 108,
+  "projectile_radius": 4,
+  "projectile_life": 6,
+  "phase2_speed": 1.12,
+  "phase2_damage": 1.2,
+  "spiral_steps": 32,
+  "spiral_spacing": 0.105,
+  "spiral_turn": 0.23,
+  "ring_steps": 4,
+  "ring_count": 32,
+  "ring_gap_degrees": 85,
+  "ring_spacing": 0.65,
+  "spear_count": 5,
+  "spear_spacing": 0.3,
+  "spear_width": 28,
+  "spear_duration": 0.3,
+  "orb_count": 6,
+  "orb_burst": 7,
+  "orb_spacing": 0.16,
+  "crystal_count": 6,
+  "crystal_health": 65,
+  "crystal_charge": 4,
+  "crystal_radial_count": 16,
+  "beam_arms": 3,
+  "beam_range": 280,
+  "beam_width": 10,
+  "beam_inner": 56,
+  "beam_speed": 0.24,
+  "beam_duration": 4,
+  "seal_steps": 5,
+  "seal_radius": 25,
+  "seal_spacing": 0.48,
+  "seal_warning": 1.15,
+  "seal_duration": 0.28,
+  "totem_count": 4,
+  "totem_health": 95,
+  "totem_charge": 4.5,
+  "totem_sector_count": 16,
+  "combination_pairs": [
+    [
+      "spiral",
+      "seals"
+    ],
+    [
+      "rings",
+      "orbs"
+    ],
+    [
+      "spears",
+      "crystals"
+    ],
+    [
+      "beams",
+      "totems"
+    ]
+  ],
+  "totem_default_gap_degrees": 28
+}

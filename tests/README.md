@@ -2,7 +2,7 @@
 
 `python tools/validate_dev11.py` verifica isolamento de save, seis encontros nos três mapas, 30 ataques, controle do jogador e painel renderizado. `node relay/match-test.mjs --dev` usa quatro processos reais com um relay local para verificar comandos do host, builds individuais, fases, reinícios e preservação dos perfis.
 
-O pacote público é verificado com `python tools/validate_dev11.py --packed=build/Hordas-0.11.0/Hordas-0.11.0.exe dev_public11`. O pacote DEV aceita as suítes `dev_feature11`, `dev_sandbox11`, `dev_encounters11`, `dev_attacks11` e `dev_panel11`. Instruções completas em `docs/MODO_DEV_0_11.md`.
+O pacote público é verificado com `python tools/validate_dev11.py --packed=build/Hordas-0.12.0/Hordas-0.12.0.exe dev_public11`. O pacote DEV aceita as suítes `dev_feature11`, `dev_sandbox11`, `dev_encounters11`, `dev_attacks11` e `dev_panel11`. Instruções completas em `docs/MODO_DEV_0_11.md`.
 
 Os testes de atalhos de desenvolvimento antigos só fazem sentido no editor ou no pacote DEV. O pacote público deve rejeitá-los. Os registros abaixo são históricos.
 
@@ -64,3 +64,13 @@ As verificações locais não comprovam WSS público, latência real, disponibil
 Regressão 0.4.1: `node --test test.mjs` também verifica uma rajada de 180 mensagens e bloqueio de flood. `network_backpressure.gd` testa dez cenários de envio recusado e repetição correta. `match-test.mjs --soak-seconds=310` mantém a simulação real com quatro processos por mais de cinco minutos. `--relay-url=wss://...` direciona o teste ao túnel público; `--packed=...` escolhe o executável e `--embedded-endpoint` usa o endereço embutido.
 
 Os eventos confiáveis pendentes são enviados em lotes de até aproximadamente 60 KiB; os dez casos de backpressure verificam preservação de ordem e ausência de perda ou duplicação em uma fila de 500 eventos.
+
+## Balanceamento 0.12
+
+python tools/validate_dev11.py water12 gold12 xp12 resistance12 damage12 prices12 fields12 pattern_integration12
+
+Os testes pattern_spiral12, pattern_rings12, pattern_spears12, pattern_orbs12, pattern_crystals12, pattern_beams12, pattern_seals12 e pattern_totems12 verificam cada ataque separadamente. load_balance12 mede carga renderizada. income12 mede coleta integral por horda; bot_income12 executa três partidas com escolhas e movimento automáticos, com --fixed-fps 60 para acelerar apenas o tempo de execução.
+
+node relay/match-test.mjs --balance
+
+Quatro processos reais em relay local. Pode receber --packed=build/Hordas-DEV-0.12.0/Hordas-DEV-0.12.0.exe. Suítes --packed usam o Godot da mesma versão para carregar o PCK exportado; o executável nativo recebe teste de inicialização separado por tools/export_windows.py --smoke.

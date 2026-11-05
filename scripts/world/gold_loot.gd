@@ -1,6 +1,9 @@
 class_name GoldLoot
 extends Node2D
 
+var death_rng:=RandomNumberGenerator.new()
+var death_rolls:int=0
+var death_drops:int=0
 var game
 var coins: Array[Dictionary] = []
 var feedback: Array[Dictionary] = []
@@ -10,18 +13,27 @@ var expired_count: int = 0
 var collected_count: int = 0
 
 func setup(owner_game) -> void:
+	death_rng.randomize()
 	game = owner_game
 	texture = load("res://assets/effects/coin.png")
 	z_index = 3
 
 func reset() -> void:
 	coins.clear()
+	death_rolls=0;death_drops=0
 	feedback.clear()
 	expired_count = 0
 	collected_count = 0
 	queue_redraw()
 
+func roll_death(at:Vector2)->bool:
+	if game.coop.active and not game.coop.hosting:return false
+	death_rolls+=1
+	if death_rng.randf()>=clampf(game.balance.gold_drop_chance,0,1):return false
+	death_drops+=1;drop(at,game.balance.gold_drop_value);return true
+
 func drop(at: Vector2, value: int = 1) -> int:
+	at=game.arena.loot_point(at)
 	serial += 1
 	coins.append({"id": serial, "at": at, "age": 0.0, "value": maxi(1, value) * maxi(1, game.balance.coin_value), "attracted": false})
 	queue_redraw()
@@ -55,12 +67,12 @@ func tick(delta: float) -> void:
 			coins.remove_at(i)
 			game.gold += amount
 			if game.coop != null and game.coop.active:
-				game.coop.on_gold(amount)
+				game.coop.on_gold(amount,coin.get("bonus_eligible",true))
 				collected_value += amount
 				collected_at = collector.position
 			else:
 				var before_bonus:int=game.mastery.gold_bonus
-				game.mastery.on_gold(amount)
+				if coin.get("bonus_eligible",true):game.mastery.on_gold(amount)
 				game.gold+=game.mastery.gold_bonus-before_bonus
 			collected_count += 1
 			if feedback.size() < 12:
@@ -77,7 +89,7 @@ func tick(delta: float) -> void:
 func _draw() -> void:
 	if game == null or game.state in ["title", "hub"]:
 		return
-	var visible:=Rect2(game.camera.get_screen_center_position()-Vector2(336,196),Vector2(672,392))
+	var visible:Rect2=game.render_rect().grow(20)
 	for coin in coins:
 		if not visible.has_point(coin.at):continue
 		if coin.age > game.balance.coin_lifetime - 5 and int(coin.age * 6) % 2 == 0:
@@ -88,5 +100,6 @@ func _draw() -> void:
 		draw_string(GameFonts.interface_font(), effect.at, "+%d" % effect.amount, HORIZONTAL_ALIGNMENT_LEFT, -1, 9, Color("dfb969"))
 
 func refund(at:Vector2,amount:int):
+	at=game.arena.loot_point(at)
 	serial+=1
-	coins.append({"id":serial,"at":at,"age":0.0,"value":amount,"attracted":false,"protected":true})
+	coins.append({"id":serial,"at":at,"age":0.0,"value":amount,"attracted":false,"protected":true,"bonus_eligible":false})

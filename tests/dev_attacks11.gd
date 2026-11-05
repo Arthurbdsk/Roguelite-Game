@@ -8,6 +8,7 @@ func run():
   var boss=g.boss
   for attack in dev.attacks():
    g.boss_arena.clear_for_transform();g.late_arena.clear_attacks(boss);g.enemy_projectiles.reset();g.specials.reset()
+   g.late_arena.patterns.tick(.7)
    boss.state="chase";boss.attack_time=0
    assert(dev.force_attack(attack));boss.tick(.01)
    assert(boss.state=="windup" and boss.attack_name==attack)

@@ -70,7 +70,8 @@ func tick(delta: float) -> void:
 		wave_spawned += 1
 		cooldown += maxf(game.balance.minimum_spawn_interval, wave.spawn_interval)
 		budget -= 1
-	if queue.is_empty() and (game.enemies.filter(func(e):return not e is HordeBoss).is_empty() if game.dev_tools!=null and game.dev_tools.active else game.enemies.is_empty()) and game.slime_families.pending.is_empty():
+	if queue.is_empty() and game.enemies.filter(func(e):return e.data.behavior!="hazard_target" and not (e is HordeBoss and game.dev_tools!=null and game.dev_tools.active)).is_empty() and game.slime_families.pending.is_empty():
+		game.horde_progress.complete(wave_index)
 		phase = "preparing"
 		preparation_left = game.balance.preparation_seconds
 		game.enemy_projectiles.reset();game.hazards.clear()

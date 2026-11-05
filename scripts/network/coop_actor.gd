@@ -85,7 +85,7 @@ func announce(message: String, duration: float) -> void:
 	if id == session.connection.peer_id:
 		world.announce(message, duration)
 
-func award_xp(amount: int) -> void:
+func award_xp(amount: float) -> void:
 	xp += amount * (1.0+.07*int(weapon_system.passives.get("crown",0))+mastery.value("experience"))
 	prepare_offer()
 

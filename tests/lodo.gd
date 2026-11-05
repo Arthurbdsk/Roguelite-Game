@@ -9,9 +9,9 @@ func run():
  var pool=g.weapon_system.ground.pools[0]
  var e=g.spawn_enemy("guard",pool.at);e.hp=1000
  g.weapon_system.ground.add_pool("sludge",pool.at,pool.at)
- g.weapon_system.update_combat(.01);assert(e.hp==997)
- g.weapon_system.update_combat(.25);assert(e.hp==997)
- g.weapon_system.update_combat(.25);assert(e.hp==994)
+ g.weapon_system.update_combat(.01);assert(is_equal_approx(e.hp,997.3))
+ g.weapon_system.update_combat(.25);assert(is_equal_approx(e.hp,997.3))
+ g.weapon_system.update_combat(.25);assert(is_equal_approx(e.hp,994.6))
  var hp:float=g.player.hp;g.weapon_system.update_combat(.5);assert(g.player.hp==hp)
  assert(g.weapon_system.ground.pools.size()==2)
  g.weapon_system.update_combat(3);assert(g.weapon_system.ground.pools.is_empty())

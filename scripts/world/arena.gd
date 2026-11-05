@@ -13,6 +13,8 @@ var brazier: Texture2D
 var rng := RandomNumberGenerator.new()
 var dynamic_walls:Dictionary={}
 var wall_revision:int=0
+var props:Array[Node2D]=[]
+var fade_clock:float=0
 
 func _ready() -> void:
  rng.seed = 81391
@@ -80,11 +82,23 @@ func _draw() -> void:
  for edge in [Rect2(0, 0, 1800, 25), Rect2(0, 1175, 1800, 25), Rect2(0, 0, 25, 1200), Rect2(1775, 0, 25, 1200)]:
   draw_rect(edge, Color("101719"))
 
+func _process(delta:float):
+ fade_clock-=delta
+ if fade_clock>0 or props.is_empty():return
+ fade_clock=.1
+ var players:Array=get_parent().team_players()
+ for prop in props:
+  var obscured:bool=players.any(func(p):return prop.cover.has_point(p.position))
+  prop.modulate.a=.38 if obscured else 1.0
+
 func apply_map(id:String):
  if id not in ["courtyard","library","fields"]:id="courtyard"
  if definition!=null and map_id==id:return
  sync_dynamic_walls({})
  if get_parent().get("navigation")!=null:get_parent().navigation.reset()
+ for prop in props:
+  if is_instance_valid(prop):prop.get_parent().remove_child(prop);prop.queue_free()
+ props.clear()
  map_id=id;definition=load("res://data/maps/"+id+".tres")
  if is_instance_valid(floor_layer):remove_child(floor_layer);floor_layer.queue_free()
  floor_layer=load("res://scenes/maps/"+id+"_floor.tscn").instantiate();floor_layer.z_index=-1;add_child(floor_layer)
@@ -92,6 +106,12 @@ func apply_map(id:String):
  for node in get_children():
   if node is StaticBody2D:remove_child(node);node.queue_free()
  obstacles.clear();decorations.clear()
+ for entry in definition.props:
+  var prop=load("res://scripts/world/outdoor_prop.gd").new();prop.position=entry.at
+  prop.texture=load("res://assets/v12/"+entry.kind+str(entry.variant)+".png")
+  prop.cover=Rect2(entry.at-Vector2(prop.texture.get_width()*.5,prop.texture.get_height()),prop.texture.get_size()-Vector2(0,12))
+  get_parent().entities.add_child(prop);props.append(prop)
+  add_obstacle(Rect2(entry.at-Vector2(entry.width*.5,entry.depth),Vector2(entry.width,entry.depth)))
  for rect in definition.blocks:
   add_obstacle(rect)
   if id=="courtyard":decorations.append({"at":rect.get_center(),"kind":"pillar"})
@@ -119,10 +139,6 @@ func draw_extra_modules():
     draw_rect(Rect2(x+8,y+5,10,7),Color("ddd0a6"))
     draw_rect(Rect2(x+27,y-5,2,12),Color("bda050"));draw_rect(Rect2(x+26,y-8,4,4),Color("f6d78c"))
  elif map_id=="fields":
-  for x in [100,1660]:
-   for y in [180,470,810,1080]:
-    draw_rect(Rect2(x+12,y,8,22),Color("6b5137"))
-    for i in 3:draw_colored_polygon(PackedVector2Array([Vector2(x-4+i*2,y+4-i*12),Vector2(x+16,y-24-i*12),Vector2(x+36-i*2,y+4-i*12)]),Color("415b3d"))
   for i in 70:
    var at:=Vector2(70+(i*137)%1640,70+(i*239)%1060)
    draw_rect(Rect2(at,Vector2(2,2)),Color("c6b888") if i%3 else Color("9da87c"))
@@ -140,3 +156,10 @@ func sync_dynamic_walls(rectangles:Dictionary):
  for id in rectangles:dynamic_walls[id]={"rect":rectangles[id],"node":add_obstacle(rectangles[id])}
  wall_revision+=1
  if get_parent().get("navigation")!=null:get_parent().navigation.reset()
+
+func loot_point(at:Vector2)->Vector2:
+ if safe_position(at,4):return at
+ for i in 128:
+  var point:Vector2=at+Vector2.from_angle(i*2.4)*(8+int(i/8)*8)
+  if safe_position(point,4):return point
+ return Vector2(900,630)

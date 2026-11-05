@@ -2,7 +2,7 @@ class_name Devourer
 extends HordeEnemy
 var meals:int=0
 var swallowed_gold:int=0
-var swallowed_xp:int=0
+var swallowed_xp:float=0
 var search_clock:float=0
 var food:Dictionary={}
 func growth_visual():
@@ -23,7 +23,7 @@ func tick(delta:float):
 	if not food.is_empty() and destination.distance_to(position)<=radius+3:
 		if game.food_index.consume(food):
 			if food.kind=="gold":swallowed_gold+=int(food.item.value)
-			else:swallowed_xp+=int(food.item.xp)
+			else:swallowed_xp+=float(food.item.xp)
 			meals+=1;max_hp+=game.balance.devour_health_gain;hp+=game.balance.devour_health_gain
 			data.damage+=game.balance.devour_damage_gain;growth_visual()
 		food={};search_clock=0

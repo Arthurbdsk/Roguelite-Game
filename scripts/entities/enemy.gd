@@ -3,6 +3,7 @@ extends CharacterBody2D
 
 var game
 var data: EnemyData
+var horde_health_bonus:float=0
 var hp: float
 var max_hp: float
 var radius: float
@@ -154,10 +155,11 @@ func skeleton_attack(offset: Vector2, direction: Vector2) -> Vector2:
 func take_damage(amount: float, force: Vector2 = Vector2.ZERO) -> void:
 	if not alive:
 		return
+	amount=received_damage(amount)
 	hp -= amount
 	hit_flash = 0.09
 	knockback += force * (0.2 if data.behavior == "boss" else 1.0)
-	game.add_damage_number(position - Vector2(0, 18), int(amount))
+	game.add_damage_number(position - Vector2(0, 18), amount)
 	game.sound.play_cue("hit")
 	if hp <= 0:
 		alive = false
@@ -203,3 +205,6 @@ func tick_control(delta:float)->bool:
 		queue_redraw()
 		return true
 	return false
+
+func received_damage(amount:float)->float:
+	return maxf(0,amount)*(1-game.horde_progress.resistance()) if data.behavior!="hazard_target" else maxf(0,amount)

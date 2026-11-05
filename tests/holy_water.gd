@@ -15,10 +15,10 @@ func run():
  var e=g.spawn_enemy("guard",p.at);e.hp=1000
  w.update_combat(.69);assert(e.hp==1000)
  g.player.position+=Vector2(60,0);w.update_combat(.02)
- assert(e.hp==992 and p.at==fixed)
+ assert(is_equal_approx(e.hp,992.8) and p.at==fixed)
  w.ground.add_pool("holy_water",p.at,p.at)
- w.update_combat(.25);assert(e.hp==992)
- w.update_combat(.25);assert(e.hp==984)
+ w.update_combat(.25);assert(is_equal_approx(e.hp,992.8))
+ w.update_combat(.25);assert(is_equal_approx(e.hp,985.6))
  w.update_combat(5);assert(w.ground.pools.is_empty())
  g.queue_free();await process_frame;await create_timer(.3).timeout
  print("WATER_PASS random visible valid positions, fixed flight, damage timing, no stacking and expiry");quit()

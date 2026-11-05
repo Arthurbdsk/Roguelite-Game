@@ -7,10 +7,13 @@ var deaths:Array[Dictionary]=[]
 var chain:=ChainBudget.new()
 var seed_pending:Array[Dictionary]=[]
 var bursts:Array[Dictionary]=[]
+var patterns:FinalPatterns
 var active_boss
 var beam_texture=preload("res://assets/effects/clock_beam.png")
-func setup(owner_game):game=owner_game;z_index=-4
+func setup(owner_game):
+ game=owner_game;z_index=-4;patterns=FinalPatterns.new();add_child(patterns);patterns.setup(game)
 func reset():
+ if patterns!=null:patterns.reset()
  areas.clear();shots.clear();seed_pending.clear();bursts.clear();chain.reset();game.arena.sync_dynamic_walls({})
  for d in deaths:
   if is_instance_valid(d.boss):d.boss.queue_free()
@@ -30,6 +33,7 @@ func damage(kind:String,boss)->float:
  var base:float=game.boss_balance.demon_charge_damage if kind=="dash" else (game.boss_balance.fire_damage if kind=="fire" else game.boss_balance.lightning_damage)
  return base*game.boss_balance.second_damage_multiplier*float(game.campaign.config.horror_damage_ratio_to_demon_phase2)*game.enemy_scale().damage
 func clear_attacks(boss):
+ patterns.clear_owner(boss.serial)
  areas=areas.filter(func(a):return a.owner!=boss.serial);shots=shots.filter(func(s):return s.owner!=boss.serial)
  game.enemy_projectiles.remove_owner(boss.get_instance_id())
  seed_pending=seed_pending.filter(func(m):return m.root!=boss.serial);bursts=bursts.filter(func(b):return b.owner!=boss.serial)
@@ -46,6 +50,7 @@ func add_area(kind:String,at:Vector2,warning:float,duration:float,boss)->Diction
  var area:Dictionary={"kind":kind,"at":at,"age":0.0,"warning":warning,"duration":duration,"owner":boss.serial,"damage":damage(kind,boss),"hits":{}}
  areas.append(area);return area
 func cast(kind:String,boss)->bool:
+ if kind in FinalPatterns.IDS:return patterns.request(kind,boss)
  if not can_cast(kind):return false
  var c:Dictionary=game.campaign.config
  if kind=="cross":
@@ -64,6 +69,8 @@ func cast(kind:String,boss)->bool:
  else:return cast_horror(kind,boss)
  queue_redraw();return true
 func tick(delta:float):
+ patterns.tick(delta)
+ if game.state!="running":return
  tick_advanced(delta)
  if is_instance_valid(active_boss) and active_boss.state=="entry":
   active_boss.entry_age+=delta;active_boss.sprite.frame=12;active_boss.sprite.modulate.a=minf(1,active_boss.entry_age/1.2)
@@ -107,6 +114,7 @@ func tick(delta:float):
  areas=areas.filter(func(a):return a.age<a.warning+a.duration)
  sync_walls();queue_redraw()
 func visual_tick(delta:float):
+ patterns.visual_tick(delta)
  for a in areas:a.age+=delta
  for s in shots:
   s.age+=delta
@@ -143,6 +151,8 @@ func _draw():
   draw_line(Vector2(0,-6),Vector2(0,8),Color("fff6dc"),1);draw_set_transform(Vector2.ZERO)
 
 func can_cast(kind:String)->bool:
+ if kind in FinalPatterns.IDS:return patterns.can_start()
+ if not patterns.idle():return false
  if areas.size()>24 or shots.size()>64:return false
  var categories:Dictionary={}
  for a in areas:categories[a.kind]=true

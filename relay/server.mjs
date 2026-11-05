@@ -63,7 +63,7 @@ export function createRelay({port=8080,host='127.0.0.1',maxRooms=100,onDiagnosti
         if(p.id!==room.host)return fail('Somente o criador pode iniciar.');
         if(room.started)return fail('A partida já começou.');
         if([...room.members.values()].some(member=>!member.ready))return fail('Todos precisam estar prontos.');
-        if(!['0.7.0','0.8.0','0.9.0','0.10.0','0.11.0'].includes(room.build.replace(/-dev$/,''))){room.started=true;room.run=randomUUID();broadcast(room,{type:'start',challenge:room.challenge||0,map:room.map||'courtyard',run:room.run,players:[...room.members.values()].map(member=>({id:member.id,name:member.name,skills:member.skills,gold_remainder:member.goldRemainder||0}))});return;}
+        if(!['0.7.0','0.8.0','0.9.0','0.10.0','0.11.0','0.12.0'].includes(room.build.replace(/-dev$/,''))){room.started=true;room.run=randomUUID();broadcast(room,{type:'start',challenge:room.challenge||0,map:room.map||'courtyard',run:room.run,players:[...room.members.values()].map(member=>({id:member.id,name:member.name,skills:member.skills,gold_remainder:member.goldRemainder||0}))});return;}
         if(room.loading)return;room.loading=true;room.run=randomUUID();for(const member of room.members.values())member.loaded=false;broadcast(room,{type:'prepare',map:room.map||'courtyard'});return;
       }
       if(!room.started)return;

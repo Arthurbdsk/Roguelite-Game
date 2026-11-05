@@ -2,7 +2,7 @@ extends SceneTree
 func _initialize():call_deferred("run")
 func run():
  var g=load("res://scenes/main.tscn").instantiate();root.add_child(g);await process_frame
- g.sound.volume=0;g.start_run();g.director.phase="complete"
+ g.sound.volume=0;g.start_run();g.director.phase="complete";g.balance.gold_drop_chance=1
  var e=g.spawn_enemy("devourer",Vector2(500,500));var base:float=e.max_hp;var damage:float=e.data.damage
  e.hp-=8
  g.gold_loot.drop(e.position,30);g.drop_xp(e.position,11);g.food_index.tick(1)
@@ -22,6 +22,6 @@ func run():
  assert(xp==11)
  var other=g.spawn_enemy("devourer",Vector2(500,500));g.food_index.tick(1);other.tick(.01)
  assert(other.swallowed_gold==1 and other.swallowed_xp==0)
- g.clear_run();assert(g.food_index.grid.is_empty())
+ g.balance.gold_drop_chance=.1;g.clear_run();assert(g.food_index.grid.is_empty())
  g.queue_free();await process_frame;await create_timer(.3).timeout
  print("DEVOURER_PASS growth, decimals, attraction lock, exact protected refunds and cleanup");quit()

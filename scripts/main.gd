@@ -1,5 +1,6 @@
 extends Node2D
 
+var experience_texture=preload("res://assets/v12/experience.png")
 var selected_map:String="courtyard"
 var state: String = "title"
 var elapsed: float = 0
@@ -40,6 +41,7 @@ var profile := GameProfile.new()
 var player: Sentinel
 var arena: RuinedArena
 var weapon_system: WeaponSystem
+var horde_progress:=HordeProgress.new()
 var director := HordeDirector.new()
 var sound: GameSound
 var ui: GameUI
@@ -82,7 +84,7 @@ func _ready() -> void:
   profile.load_profile()
  skills.setup(self)
  mastery.setup(self)
- for id in ["ghoul", "hound", "guard", "demon", "executioner", "skeleton_sword", "skeleton_archer", "necromancer", "beast", "plague", "shadow", "devourer", "slime_large", "slime_small", "guardian", "horror"]:
+ for id in ["ice_crystal","channel_totem","ghoul", "hound", "guard", "demon", "executioner", "skeleton_sword", "skeleton_archer", "necromancer", "beast", "plague", "shadow", "devourer", "slime_large", "slime_small", "guardian", "horror"]:
   enemy_data[id] = load("res://data/enemies/" + id + ".tres")
  enemy_data["boss"] = enemy_data.demon
  arena = RuinedArena.new()
@@ -107,6 +109,7 @@ func _ready() -> void:
  weapon_system.setup(self)
  navigation.game=self
  food_index.game=self
+ horde_progress.game=self
  director.setup(self)
  sound = GameSound.new()
  add_child(sound)
@@ -287,6 +290,7 @@ func start_run(selected_support: String = "none") -> void:
  announce("PREPARE-SE PARA A PRIMEIRA HORDA", 2.5)
 
 func clear_run() -> void:
+ horde_progress.reset()
  campaign.reset()
  if late_arena!=null:late_arena.reset()
  food_index.reset()
@@ -541,7 +545,7 @@ func _unhandled_input(event: InputEvent) -> void:
  if event is InputEventKey and event.pressed and event.physical_keycode == KEY_F11:
   set_option("fullscreen", not profile.data.settings.fullscreen)
 
-func add_xp(amount: int) -> void:
+func add_xp(amount: float) -> void:
  if coop != null and coop.active:
   if coop.hosting: coop.share_xp(amount)
   return
@@ -602,7 +606,7 @@ func apply_settings() -> void:
 func spawn_enemy(id: String, point: Vector2, elite: bool = false, chain_meta:Dictionary={}):
  id = "demon" if id == "boss" else id
  if id=="slime_large" and not (coop.active and not coop.hosting) and not slime_families.can_add():return null
- var enemy = LateBoss.new() if id in ["guardian","horror"] else SlimeEnemy.new() if id in ["slime_large","slime_small"] else Devourer.new() if id=="devourer" else HordeBoss.new() if id in ["demon", "executioner"] else (SpecialEnemy.new() if id in ["necromancer","beast","plague","shadow"] else preload("res://scenes/entities/enemy.tscn").instantiate())
+ var enemy = HazardTarget.new() if id in ["ice_crystal","channel_totem"] else LateBoss.new() if id in ["guardian","horror"] else SlimeEnemy.new() if id in ["slime_large","slime_small"] else Devourer.new() if id=="devourer" else HordeBoss.new() if id in ["demon", "executioner"] else (SpecialEnemy.new() if id in ["necromancer","beast","plague","shadow"] else preload("res://scenes/entities/enemy.tscn").instantiate())
  enemy.position = point
  enemy.chain_root=int(chain_meta.get("root",0));enemy.chain_generation=int(chain_meta.get("generation",-1))
  enemy.serial = serial
@@ -613,16 +617,19 @@ func spawn_enemy(id: String, point: Vector2, elite: bool = false, chain_meta:Dic
   stats.speed=enemy_data.ghoul.speed*balance.slime_small_speed_ratio
   stats.damage=enemy_data.ghoul.damage*balance.slime_small_damage_ratio
  var scale: Dictionary = enemy_scale()
- stats.health *= balance.enemy_health_multiplier
- stats.health *= scale.health
+ if enemy is HazardTarget:stats.health=float(late_arena.patterns.config.crystal_health if id=="ice_crystal" else late_arena.patterns.config.totem_health)
+ stats.health *= 1.0 if enemy is HazardTarget else balance.enemy_health_multiplier
+ stats.health *= 1.0 if enemy is HazardTarget else scale.health
  stats.damage *= scale.damage
  if id in ["ghoul","skeleton_sword","skeleton_archer"]:stats.speed*=balance.common_speed_multiplier
  stats.speed *= balance.enemy_speed_multiplier
  stats.speed *= scale.speed
  enemy.setup(self, stats, elite)
+ if enemy is HazardTarget:enemy.owner_boss=int(chain_meta.get("pattern_owner",0))
  if enemy is HordeBoss:
   enemy.max_hp *= scale.health
   enemy.hp = enemy.max_hp
+ horde_progress.apply(enemy)
  entities.add_child(enemy)
  enemies.append(enemy)
  late_arena.chain.register(enemy)
@@ -642,8 +649,8 @@ func enemy_killed(enemy) -> void:
  if enemy is Devourer:
   if enemy.swallowed_gold>0:gold_loot.refund(enemy.position,enemy.swallowed_gold)
   if enemy.swallowed_xp>0:drop_xp(enemy.position,enemy.swallowed_xp,true)
- if enemy.data.gold_value>0:gold_loot.drop(enemy.position, enemy.data.gold_value)
- drop_xp(enemy.position,enemy.data.experience)
+ gold_loot.roll_death(enemy.position)
+ drop_xp(enemy.position,float(enemy.data.experience)*balance.death_experience_multiplier)
  if enemy.elite:
   earned += 3
   announce("CARRASCO ABATIDO  |  +3 MEDALHAS", 3)
@@ -767,9 +774,9 @@ func update_event(delta: float) -> void:
  else:
   event_progress = maxf(0, event_progress - delta * 0.5)
 
-func add_damage_number(point: Vector2, amount: int) -> void:
+func add_damage_number(point: Vector2, amount: float) -> void:
  if numbers.size() < int(20 * effects):
-  numbers.append({"at": point, "value": str(amount), "life": 0.55})
+  numbers.append({"at": point, "value": str(roundi(amount)) if is_equal_approx(amount,roundf(amount)) else ("%.2f"%amount).trim_suffix("0"), "life": 0.55})
 
 func announce(text: String, duration: float) -> void:
  banner = text
@@ -779,16 +786,21 @@ func camera_rect() -> Rect2:
  var center := player.position.clamp(Vector2(320, 180), Vector2(1480, 1020))
  return Rect2(center - Vector2(320, 180), Vector2(640, 360))
 
+func render_rect()->Rect2:
+ var view_size:Vector2=get_viewport_rect().size/camera.zoom
+ return Rect2(camera.get_screen_center_position()-view_size*.5,view_size)
+
 func snapshot() -> Dictionary:
  return {"hp": player.hp, "max_hp": player.max_hp, "xp": xp, "xp_needed": xp_needed, "elapsed": elapsed, "level": level, "kills": kills, "gold": gold+coop.local_gold_bonus(), "earned": earned + floori(elapsed / 30.0) + floori(kills / 30.0), "wave": director.wave_number(), "weapons": weapon_system.get_loadout(), "passives": weapon_system.get_passives(), "dev":dev_boss_test,"chain_debug":late_arena.chain.snapshot(),"true_form":is_instance_valid(boss) and boss.data.id=="horror" and boss.form==2,"boss_hp": boss.hp if is_instance_valid(boss) else 0, "boss_max": boss.max_hp if is_instance_valid(boss) else 0, "boss_name": "TRUE FORM" if is_instance_valid(boss) and boss.data.id=="horror" and boss.form==2 else (boss.data.title+" | Fase %d"%boss.form) if is_instance_valid(boss) and boss is HordeBoss and not boss.is_executioner else (boss.data.title if is_instance_valid(boss) else ""), "banner": banner, "pressure": "TESTE DEV" if dev_tools!=null and dev_tools.active else director.pressure()}
 
 func _draw() -> void:
  if state in ["title", "hub"]:
   return
+ var visible:Rect2=render_rect().grow(20)
  for item in pickups:
+  if not visible.has_point(item.at):continue
   var at: Vector2 = item.at.round()
-  draw_colored_polygon(PackedVector2Array([at + Vector2(0, -4), at + Vector2(3, 0), at + Vector2(0, 4), at + Vector2(-3, 0)]), Color("83c4bd"))
-  draw_line(at + Vector2(0, -2), at, Color("e1eee0"), 1)
+  draw_texture_rect_region(experience_texture,Rect2(at-Vector2(8,12),Vector2(16,16)),Rect2(int(elapsed*5)%4*16,0,16,16))
  for hazard in hazards:
   var active: bool = hazard.age >= hazard.warning
   var color := Color("e6a66c") if active else Color("b65f42")
@@ -803,8 +815,9 @@ func _draw() -> void:
  for number in numbers:
   draw_string(GameFonts.interface_font(), number.at, number.value, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color("e3c9a0"))
 
-func drop_xp(at:Vector2,amount:int,protected:bool=false):
+func drop_xp(at:Vector2,amount:float,protected:bool=false):
  if amount<=0:return
+ at=arena.loot_point(at)
  for item in pickups:
   if pickups.size()>=240 and item.get("protected",false)==protected and not item.get("attracted",false):
    item.xp+=amount;return

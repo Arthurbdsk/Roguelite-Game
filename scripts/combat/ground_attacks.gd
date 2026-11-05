@@ -82,10 +82,16 @@ func launch_water()->bool:
 	for at in points:add_pool("holy_water",at,weapons.game.player.position,weapons.weapon_data.holy_water.flight_time)
 	return true
 func _draw():
+	if pools.is_empty():return
+	var owner_world=world()
+	if not is_instance_valid(owner_world):return
+	var visible:Rect2=owner_world.render_rect()
 	for pool in pools:
+		var ground:Vector2=pool.source.lerp(pool.at,clampf(pool.age/pool.flight,0,1)) if pool.flight>0 and pool.age<pool.flight else pool.at
+		if not visible.grow(pool.radius+65).has_point(ground):continue
 		if pool.age<pool.flight:
 			var progress:float=clampf(pool.age/pool.flight,0,1)
-			var ground:Vector2=pool.source.lerp(pool.at,progress)
+			ground=pool.source.lerp(pool.at,progress)
 			draw_rect(Rect2(ground.round()-Vector2(4,1),Vector2(8,3)),Color(0,0,0,.5))
 			var at:Vector2=ground-Vector2(0,12*(1-progress)+sin(progress*PI)*50)
 			draw_set_transform(at.round(),progress*TAU)

@@ -148,15 +148,22 @@ func attacks()->Array:
  if not is_instance_valid(game.boss):return []
  if game.boss.is_executioner:return ["execute","charge"]
  if game.boss.data.id=="guardian":return ["cross","feathers","light_ring"]
- if game.boss.data.id=="horror":return ["fire","moving_ring","light_bands","dash","columns","ice_sectors"] if game.boss.form==2 else ["fire","summon","ice","columns","dash","ice_sectors","light_bands"]
+ if game.boss.data.id=="horror":return FinalPatterns.IDS+(["fire","moving_ring","light_bands","dash","columns","ice_sectors"] if game.boss.form==2 else ["fire","summon","ice","columns","dash","ice_sectors","light_bands"])
  return ["fire","summon","charge","lightning","ice","ring"]
 func force_attack(id:String,repeat_only:bool=false)->bool:
  if not active or not is_host() or not id in attacks() or not game.boss.alive:return false
+ if game.boss is LateBoss:game.boss.isolated_attack=true;game.boss.queued_combination=""
  game.boss.dev_repeat=id if repeat_only else "";game.boss.dev_next_attack=id
  if game.boss.state=="chase":game.boss.attack_time=0
  repeat_attack=game.boss.dev_repeat;sync_controls();return true
+func force_combination(first:String,second:String)->bool:
+ if not active or not is_host() or not game.boss is LateBoss or not game.boss.alive:return false
+ if not game.late_arena.patterns.config.combination_pairs.any(func(pair):return pair[0]==first and pair[1]==second):return false
+ if not force_attack(first):return false
+ game.boss.queued_combination=second;status="Combinação: "+first+" + "+second;return true
 func normal_sequence():
  if not is_host() or not is_instance_valid(game.boss):return
+ if game.boss is LateBoss:game.boss.isolated_attack=false;game.boss.queued_combination=""
  game.boss.dev_repeat="";game.boss.dev_next_attack="";repeat_attack="";sync_controls()
 func freeze(value:bool):
  if not is_host() or not is_instance_valid(game.boss):return
@@ -168,7 +175,7 @@ func next_phase()->bool:
  var boss=game.boss
  if boss.is_executioner:boss.hp=boss.max_hp*.49;return true
  if boss.data.id=="guardian" or boss.form!=1:return false
- boss.take_damage(boss.hp);return true
+ boss.take_damage(boss.hp/maxf(.01,1-game.horde_progress.resistance())+.001);return true
 func complete(_won:bool):
  running_test=false
  if not active or not is_host():return
@@ -179,7 +186,9 @@ func boss_info()->String:
  var scale:Dictionary=game.enemy_scale()
  var result:String="Escala simulada: %d | Vida ×%.2f | Dano ×%.2f | Movimento ×%.2f | Quantidade ×%.2f\nSimular escala não testa conexões reais. Desafio ativo: %d.\n"%[applied_participants if running_test else participants,scale.health,scale.damage,scale.speed,scale.count,game.run_challenge]
  if not is_instance_valid(game.boss):return result+status
- var boss=game.boss;var summons:int=game.boss_arena.summons.size()+game.late_arena.chain.count(boss.serial) if is_host() else boss.dev_summons_alive
+ var boss=game.boss;var summons:int=game.boss_arena.summons.size()+game.late_arena.chain.count(boss.serial)+game.enemies.filter(func(e):return e is HazardTarget and e.owner_boss==boss.serial).size() if is_host() else boss.dev_summons_alive
+ result+="Padrões: %d | Projéteis: %d/%d | Filas por limite: %d\n"%[game.late_arena.patterns.jobs.size(),game.late_arena.patterns.shots.size(),game.late_arena.patterns.config.max_projectiles,game.late_arena.patterns.blocked]
+ if not game.late_arena.patterns.wait_reason.is_empty():result+=game.late_arena.patterns.wait_reason+"\n"
  return result+"Vida: %.1f / %.1f | Fase: %d | Estado: %s\nPreparação: %s | Próximo ataque: %.2f s | Invocações: %d\nDano-base do inimigo: %.2f | Movimento: %.2f px/s"%[boss.hp,boss.max_hp,boss.phase if boss.is_executioner else boss.form,boss.state,boss.attack_name,maxf(0,boss.attack_time),summons,boss.data.damage, movement_speed(boss)]+"\n"+damage_summary(boss)+" | Congelado: "+("sim" if boss.dev_frozen else "não")+" | Repetir: "+boss.dev_repeat
 
 func _process(_delta:float):

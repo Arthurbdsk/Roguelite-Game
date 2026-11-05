@@ -207,15 +207,16 @@ func damage_scale()->float:
 func take_damage(amount: float, _force: Vector2 = Vector2.ZERO) -> void:
 	if not alive or not combat_enabled or not targetable:
 		return
+	amount=received_damage(amount)
 	hp = maxf(0, hp - amount)
 	hit_flash = 0.08
-	game.add_damage_number(position - Vector2(0, 35), int(amount))
+	game.add_damage_number(position - Vector2(0, 35), amount)
 	game.sound.play_cue("hit")
 	if hp<=0 and not is_executioner and form==1:
 		first_phase_hp=max_hp
 		form=2
 		dev_repeat="";dev_next_attack=""
-		max_hp=first_phase_hp*game.boss_balance.second_health_multiplier
+		max_hp=(first_phase_hp-horde_health_bonus)*game.boss_balance.second_health_multiplier+horde_health_bonus
 		hp=max_hp
 		state="transform";state_time=0;targetable=false;velocity=Vector2.ZERO
 		game.boss_arena.clear_for_transform()

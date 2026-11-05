@@ -11,6 +11,8 @@ extends Resource
 @export var spawn_distance_min: float = 390.0
 @export var spawn_distance_max: float = 460.0
 @export_group("Ouro")
+@export var gold_drop_chance:float=0.10
+@export var gold_drop_value:int=1
 @export var coin_lifetime: float = 60.0
 @export var coin_value: int = 1
 @export var coin_attraction_radius: float = 44.0
@@ -41,3 +43,10 @@ extends Resource
 @export var slime_family_xp:int=8
 
 @export var common_speed_multiplier:float=1.15
+
+@export_group("Balanceamento 0.12")
+@export var death_experience_multiplier:float=.75
+
+@export var horde_resistance_step:float=.05
+@export var horde_resistance_cap:float=.75
+@export var horde_health_step:float=35.0

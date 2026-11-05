@@ -4,7 +4,7 @@ func run():
 	var g=load("res://scenes/main.tscn").instantiate();root.add_child(g);await process_frame
 	g.sound.volume=0;g.start_run();g.director.phase="complete";g.weapon_system.levels.clock=1
 	var enemy=g.spawn_enemy("guard",g.player.position+Vector2(0,-80));enemy.hp=1000
-	g.weapon_system._clock();assert(enemy.hp==999 and enemy.frozen_remaining==3)
+	g.weapon_system._clock();assert(is_equal_approx(enemy.hp,999.1) and enemy.frozen_remaining==3)
 	var at=enemy.position;var cooldown=enemy.attack_time;enemy.tick(1)
 	assert(enemy.position==at and enemy.attack_time==cooldown)
 	enemy.tick(2);assert(enemy.freeze_resistance==g.weapon_system.weapon_data.clock.freeze_resistance)

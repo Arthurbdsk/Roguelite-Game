@@ -2,6 +2,8 @@ class_name LateBoss
 extends HordeBoss
 var locked_target:Vector2
 var entry_age:float=0
+var isolated_attack:bool=false
+var queued_combination:String=""
 func setup(owner_game,stats:EnemyData,_elite:bool=false):
  super.setup(owner_game,stats,false)
  var ratio:float=game.campaign.config.guardian_health_ratio_to_demon_phase2 if stats.id=="guardian" else game.campaign.config.horror_health_ratio_to_demon_phase2
@@ -31,7 +33,9 @@ func tick(delta:float):
  if state=="chase":
   movement=game.navigation.steer(self,direction*data.speed)
   if attack_time<=0 and dev_attack_ready():
-   begin_attack(choose_attack());movement=Vector2.ZERO
+   var chosen:String=choose_attack()
+   if not chosen.is_empty():begin_attack(chosen);movement=Vector2.ZERO
+   else:attack_time=.15
  elif state=="windup" and state_time>=warning_duration():execute_attack()
  elif state=="charge":
   var speed:float=game.boss_balance.demon_charge_speed*game.balance.enemy_speed_multiplier*game.enemy_scale().speed
@@ -62,24 +66,40 @@ func choose_attack()->String:
   var selected:String=dev_next_attack;dev_next_attack="";return selected
  if not dev_repeat.is_empty():return dev_repeat
  var order:Array=["cross","feathers","light_ring"] if data.id=="guardian" else ["fire","summon","ice","columns","dash","ice_sectors","light_bands"]
+ if data.id=="horror":order+=["spiral","rings","spears","orbs"]
  if form==2:order=["fire","moving_ring","light_bands","dash","columns","ice_sectors"]
- var chosen:String=order[attack_index%order.size()];attack_index+=1;return chosen
+ if form==2:order+=FinalPatterns.IDS
+ var chosen:String=order[attack_index%order.size()]
+ if chosen!="dash" and not game.late_arena.can_cast(chosen):return ""
+ attack_index+=1;return chosen
 func execute_attack():
  if attack_name=="dash":state="charge";state_time=0;charge_hit=false
+ elif attack_name in FinalPatterns.IDS:
+  var second:String=queued_combination
+  if second.is_empty() and form==2 and not isolated_attack:
+   for pair in game.late_arena.patterns.config.combination_pairs:
+    if pair[0]==attack_name:second=pair[1];break
+  if game.late_arena.patterns.request(attack_name,self,second):queued_combination="";isolated_attack=not dev_repeat.is_empty();finish_attack()
+  else:state_time=maxf(0,warning_duration()-.15)
  else:game.late_arena.cast(attack_name,self);finish_attack()
 func finish_attack():
  state="recovery";state_time=0
  attack_time=float(game.campaign.config.guardian_interval if data.id=="guardian" else (game.campaign.config.true_interval if form==2 else game.campaign.config.horror_interval))
 func take_damage(amount:float,_force:Vector2=Vector2.ZERO):
  if not alive or not combat_enabled or not targetable:return
- hp=maxf(0,hp-amount);hit_flash=.08;game.add_damage_number(position-Vector2(0,45),int(amount))
+ amount=received_damage(amount);hp=maxf(0,hp-amount);hit_flash=.08;game.add_damage_number(position-Vector2(0,45),amount)
  if hp>0:return
  if data.id=="horror" and form==1:
   dev_repeat="";dev_next_attack=""
-  form=2;max_hp*=float(game.campaign.config.true_health_ratio);hp=max_hp;state="transform";state_time=0;targetable=false;velocity=Vector2.ZERO
+  form=2;max_hp=(max_hp-horde_health_bonus)*float(game.campaign.config.true_health_ratio)+horde_health_bonus;hp=max_hp;state="transform";state_time=0;targetable=false;velocity=Vector2.ZERO
   game.late_arena.clear_attacks(self);game.announce("TRUE FORM",3);return
  if death_paid:return
  death_paid=true;alive=false;targetable=false;state="death";velocity=Vector2.ZERO;game.enemy_killed(self)
 func _draw():
  draw_rect(Rect2(-radius,-2,radius*2,6),Color(0,0,0,.35))
  if state=="windup" and attack_name=="dash":draw_line(Vector2.ZERO,locked_target-position,Color("f0c77d"),2)
+
+func dev_attack_ready()->bool:
+ var requested:String=dev_next_attack if not dev_next_attack.is_empty() else dev_repeat
+ if not requested.is_empty():return (game.late_arena.patterns.idle() if requested=="dash" else game.late_arena.can_cast(requested))
+ return game.late_arena.patterns.idle() and game.late_arena.patterns.cooldown<=0

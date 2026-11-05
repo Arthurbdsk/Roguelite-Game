@@ -1,6 +1,6 @@
 @echo off
-if exist "%~dp0build\Hordas-0.11.0\Hordas-0.11.0.exe" (
- start "" "%~dp0build\Hordas-0.11.0\Hordas-0.11.0.exe"
+if exist "%~dp0build\Hordas-0.12.0\Hordas-0.12.0.exe" (
+ start "" "%~dp0build\Hordas-0.12.0\Hordas-0.12.0.exe"
  exit /b
 )
 where godot >nul 2>nul

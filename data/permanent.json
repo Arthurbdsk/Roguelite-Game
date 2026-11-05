@@ -6,11 +6,11 @@
     "step": 0.05,
     "description": "Dano de todas as armas.",
     "costs": [
-      10,
-      25,
-      50,
-      90,
-      150
+      200,
+      300,
+      400,
+      500,
+      650
     ],
     "icon": "res://assets/permanent/damage.png"
   },
@@ -21,11 +21,11 @@
     "step": 0.03,
     "description": "Aplica o percentual após a defesa fixa. Dano final nunca cai abaixo de 20% do dano original (redução total máxima de 80%).",
     "costs": [
-      10,
-      25,
-      50,
-      90,
-      150
+      325,
+      500,
+      650,
+      800,
+      1000
     ],
     "icon": "res://assets/permanent/armor.png"
   },
@@ -36,11 +36,11 @@
     "step": 0.05,
     "description": "Aumenta a vida máxima inicial.",
     "costs": [
-      10,
-      25,
-      50,
-      90,
-      150
+      325,
+      500,
+      650,
+      800,
+      1000
     ],
     "icon": "res://assets/permanent/health.png"
   },
@@ -51,11 +51,11 @@
     "step": 0.1,
     "description": "Recupera vida por segundo. Não funciona enquanto caído.",
     "costs": [
-      10,
-      25,
-      50,
-      90,
-      150
+      325,
+      500,
+      650,
+      800,
+      1000
     ],
     "icon": "res://assets/permanent/regen.png"
   },
@@ -66,11 +66,11 @@
     "step": 0.02,
     "description": "Reduz o intervalo. Intervalo mínimo global: 0,15 s.",
     "costs": [
-      10,
-      25,
-      50,
-      90,
-      150
+      325,
+      500,
+      650,
+      800,
+      1000
     ],
     "icon": "res://assets/permanent/cooldown.png"
   },
@@ -81,11 +81,11 @@
     "step": 0.05,
     "description": "Aumenta a área de Espada, Lodo, Água Benta, Bombas e Onda de Gelo. Raio recebe a raiz quadrada do bônus.",
     "costs": [
-      10,
-      25,
-      50,
-      90,
-      150
+      325,
+      500,
+      650,
+      800,
+      1000
     ],
     "icon": "res://assets/permanent/area.png"
   },
@@ -96,11 +96,11 @@
     "step": 0.05,
     "description": "Acelera Arco, Machado, Bumerangue e o voo dos frascos e bombas. Preserva destinos e perfuração.",
     "costs": [
-      10,
-      25,
-      50,
-      90,
-      150
+      325,
+      500,
+      650,
+      800,
+      1000
     ],
     "icon": "res://assets/permanent/projectile_speed.png"
   },
@@ -111,11 +111,11 @@
     "step": 0.05,
     "description": "Aumenta a duração de Lodo, Água Benta e lentidão da Onda de Gelo. Não amplia controle de chefes.",
     "costs": [
-      10,
-      25,
-      50,
-      90,
-      150
+      325,
+      500,
+      650,
+      800,
+      1000
     ],
     "icon": "res://assets/permanent/duration.png"
   },
@@ -126,7 +126,7 @@
     "step": 1,
     "description": "+1 por ativação no Arco, Machado, Bumerangue, Bombas e Água Benta.",
     "costs": [
-      250
+      325
     ],
     "icon": "res://assets/permanent/amount.png"
   },
@@ -137,11 +137,11 @@
     "step": 0.03,
     "description": "Aumenta a velocidade de movimento.",
     "costs": [
-      10,
-      25,
-      50,
-      90,
-      150
+      325,
+      500,
+      650,
+      800,
+      1000
     ],
     "icon": "res://assets/permanent/move.png"
   },
@@ -152,11 +152,11 @@
     "step": 0.1,
     "description": "Aumenta o raio de atração de ouro e experiência.",
     "costs": [
-      10,
-      25,
-      50,
-      90,
-      150
+      325,
+      500,
+      650,
+      800,
+      1000
     ],
     "icon": "res://assets/permanent/pickup.png"
   },
@@ -167,9 +167,9 @@
     "step": 0.1,
     "description": "Chance de quarta opção. Um sorteio por seleção, respeitando os limites da build.",
     "costs": [
-      25,
-      60,
-      120
+      325,
+      500,
+      650
     ],
     "icon": "res://assets/permanent/luck.png"
   },
@@ -180,11 +180,11 @@
     "step": 0.02,
     "description": "Bônus somado ao da Coroa, com frações preservadas.",
     "costs": [
-      10,
-      25,
-      50,
-      90,
-      150
+      325,
+      500,
+      650,
+      800,
+      1000
     ],
     "icon": "res://assets/permanent/experience.png"
   },
@@ -195,11 +195,11 @@
     "step": 0.05,
     "description": "Bônus no ouro coletado. Frações acumulam. Não bonifica reembolsos.",
     "costs": [
-      10,
-      25,
-      50,
-      90,
-      150
+      325,
+      500,
+      650,
+      800,
+      1000
     ],
     "icon": "res://assets/permanent/gold.png"
   },
@@ -210,11 +210,11 @@
     "step": 0.05,
     "description": "Por nível ativo: +5% de vida, dano e quantidade dos inimigos. Não altera velocidade.",
     "costs": [
-      10,
-      25,
-      50,
-      90,
-      150
+      325,
+      500,
+      650,
+      800,
+      1000
     ],
     "icon": "res://assets/permanent/challenge.png"
   },
@@ -225,7 +225,7 @@
     "step": 1,
     "description": "Um retorno por partida: 40% da vida e 2 s de proteção. Reanimação por aliado não consome.",
     "costs": [
-      300
+      10000
     ],
     "icon": "res://assets/permanent/revive.png"
   }
