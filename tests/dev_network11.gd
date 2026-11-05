@@ -58,6 +58,7 @@ func send(name:String):
 func command(name:String):
  match name:
   "started":
+   check(g.ui.pressure_text.text=="TESTE DEV","development HUD pressure replicated")
    check(g.arena.map_id=="library" and g.boss.data.id=="horror" and g.boss.form==1,"shared encounter/map")
    check(is_equal_approx(g.boss.max_hp,82368),"shared scale applied once")
    check(g.weapon_system.levels.has(["sword","axe","bombs","clock"][index]) and g.level==20+index,"own prepared build")
