@@ -1,6 +1,7 @@
 extends Node2D
 
 var experience_texture=preload("res://assets/v12/experience.png")
+var survival_config:Dictionary={}
 var selected_map:String="courtyard"
 var state: String = "title"
 var elapsed: float = 0
@@ -20,6 +21,8 @@ var hazards: Array[Dictionary] = []
 var numbers: Array[Dictionary] = []
 var navigation:=CrowdNavigation.new()
 var grid: Dictionary = {}
+var crowd_grid:Dictionary={}
+var crowd_max_radius:float=1
 var enemy_collision_margin:float=10
 var offers: Array[Dictionary] = []
 var boss = null
@@ -63,6 +66,8 @@ var executioner_defeated: bool = false
 var reported_deaths: Dictionary = {}
 var boss_balance: BossBalance = preload("res://data/bosses/balance.tres")
 var boss_arena: BossArena
+var special_events
+var chests
 var specials: SpecialEncounters
 var slime_families:SlimeFamilies
 var food_index:=FoodIndex.new()
@@ -82,10 +87,16 @@ func _ready() -> void:
  register_inputs()
  if not test_mode:
   profile.load_profile()
+ survival_config=JSON.parse_string(FileAccess.get_file_as_string("res://data/survival.json"))
+ balance.continuous_per_minute=survival_config.generation.per_minute;balance.difficulty_seconds=survival_config.generation.stage_seconds;balance.continuous_stage_rate=survival_config.generation.stage_rate
  skills.setup(self)
  mastery.setup(self)
  for id in ["ice_crystal","channel_totem","ghoul", "hound", "guard", "demon", "executioner", "skeleton_sword", "skeleton_archer", "necromancer", "beast", "plague", "shadow", "devourer", "slime_large", "slime_small", "guardian", "horror"]:
   enemy_data[id] = load("res://data/enemies/" + id + ".tres")
+ for pair in [["siege_archer","skeleton_archer"],["slime_king","slime_large"],["event_blue","slime_large"],["event_small","slime_small"]]:
+  enemy_data[pair[0]]=enemy_data[pair[1]].duplicate();enemy_data[pair[0]].id=pair[0]
+ enemy_data.siege_archer.title="Arqueiro do cerco";enemy_data.siege_archer.speed=0;enemy_data.siege_archer.attack_interval+=survival_config.events.siege_extra_interval;enemy_data.siege_archer.attack_range=survival_config.events.siege_range;enemy_data.siege_archer.arrow_range=survival_config.events.siege_arrow_range;enemy_data.siege_archer.arrow_lifetime=survival_config.events.siege_arrow_lifetime
+ enemy_data.slime_king.title="Slime Rei";enemy_data.slime_king.health*=survival_config.events.king_health;enemy_data.slime_king.speed*=survival_config.events.king_speed;enemy_data.slime_king.radius=survival_config.events.king_radius;enemy_data.slime_king.texture="res://assets/v13/slime_king.png";enemy_data.slime_king.frames=8
  enemy_data["boss"] = enemy_data.demon
  arena = RuinedArena.new()
  arena.z_index = -20
@@ -128,6 +139,8 @@ func _ready() -> void:
  add_child(specials)
  specials.setup(self)
  slime_families=SlimeFamilies.new();slime_families.game=self;slime_families.z_index=2;add_child(slime_families)
+ special_events=load("res://scripts/world/special_events.gd").new();add_child(special_events);special_events.setup(self)
+ chests=load("res://scripts/world/reward_chests.gd").new();add_child(chests);chests.setup(self)
  coop = CoopSession.new()
  add_child(coop)
  coop.setup(self)
@@ -194,6 +207,7 @@ func _physics_process(delta: float) -> void:
   simulate(delta, Input.get_vector("move_left", "move_right", "move_up", "move_down"))
 
 func simulate(delta: float, movement: Vector2 = Vector2.ZERO) -> void:
+ campaign.decision_tick(delta)
  if dev_tools!=null and dev_tools.active and dev_tools.panel.visible:movement=Vector2.ZERO
  if coop != null and coop.active:
   coop.tick(delta, movement)
@@ -201,6 +215,7 @@ func simulate(delta: float, movement: Vector2 = Vector2.ZERO) -> void:
  if state != "running":
   return
  elapsed += delta
+ horde_progress.tick()
  campaign.tick()
  navigation.tick(delta)
  var previous_position: Vector2 = player.position
@@ -208,6 +223,8 @@ func simulate(delta: float, movement: Vector2 = Vector2.ZERO) -> void:
  player.tick(delta, movement)
  mastery.tick(delta, previous_position.distance_to(player.position) if movement.length_squared() > 0.01 else 0)
  slime_families.tick(delta)
+ special_events.tick(delta)
+ chests.tick(delta)
  director.tick(delta)
  if state != "running":
   return
@@ -287,9 +304,10 @@ func start_run(selected_support: String = "none") -> void:
  state = "running"
  ui.render("running")
  ui.update_hud(snapshot())
- announce("PREPARE-SE PARA A PRIMEIRA HORDA", 2.5)
 
 func clear_run() -> void:
+ if chests!=null:chests.reset()
+ if special_events!=null:special_events.reset()
  horde_progress.reset()
  campaign.reset()
  if late_arena!=null:late_arena.reset()
@@ -306,7 +324,7 @@ func clear_run() -> void:
  pickups.clear()
  hazards.clear()
  numbers.clear()
- grid.clear()
+ grid.clear();crowd_grid.clear();crowd_max_radius=1
  gold_loot.reset()
  enemy_projectiles.reset()
  boss_arena.reset()
@@ -446,12 +464,12 @@ func retry() -> void:
   open_online()
   return
  if dev_boss_test:
-  if state in ["running", "paused", "upgrading", "revive_offer"]:
+  if state in ["running", "paused", "upgrading", "revive_offer", "endless_choice"]:
    finish_run(false)
   if dev_boss_kind in ["guardian","horror","true"]:start_late_test(dev_boss_kind)
   else:start_boss_test(dev_boss_kind)
   return
- if state in ["running", "paused", "upgrading", "revive_offer"]:
+ if state in ["running", "paused", "upgrading", "revive_offer", "endless_choice"]:
   finish_run(false)
  start_run(support)
 
@@ -461,20 +479,22 @@ func abandon() -> void:
   coop.leave()
   return
  # Leaving a live expedition settles it once, just like defeat.
- if state in ["running", "paused", "upgrading", "revive_offer"]:
+ if state in ["running", "paused", "upgrading", "revive_offer", "endless_choice"]:
   finish_run(false)
  else:
   enter_hub()
 
 func finish_run(won: bool) -> void:
+ won=won or campaign.cleared
  if dev_tools!=null and dev_tools.active:
   dev_tools.complete(won);return
  if coop != null and coop.active:
   coop.finish(won)
   return
- if state not in ["running", "paused", "upgrading", "revive_offer"] or run_settled:
+ if state not in ["running", "paused", "upgrading", "revive_offer", "endless_choice"] or run_settled:
   return
  state = "result"
+ chests.reset();special_events.stop()
  player.clear_status()
  weapon_system.ground.reset();weapon_system.arsenal.reset();slime_families.reset()
  run_settled = true
@@ -492,7 +512,7 @@ func request_quit() -> void:
  if coop != null and coop.active:
   coop.finish(false)
   if coop.connection.socket != null: coop.connection.socket.poll()
- if state in ["running", "paused", "upgrading", "revive_offer"]:
+ if state in ["running", "paused", "upgrading", "revive_offer", "endless_choice"]:
   finish_run(false)
  get_tree().quit()
 
@@ -519,6 +539,8 @@ func toggle_pause() -> void:
   ui.update_hud(snapshot())
 
 func _unhandled_input(event: InputEvent) -> void:
+ if event.is_action_pressed("revive") and state=="running" and not coop.active:
+  if chests.try_open(player):get_viewport().set_input_as_handled();return
  if coop != null and coop.active:
   if event is InputEventKey and event.pressed and not event.echo:
    if event.physical_keycode == KEY_TAB: coop.open_upgrades(); return
@@ -606,13 +628,13 @@ func apply_settings() -> void:
 func spawn_enemy(id: String, point: Vector2, elite: bool = false, chain_meta:Dictionary={}):
  id = "demon" if id == "boss" else id
  if id=="slime_large" and not (coop.active and not coop.hosting) and not slime_families.can_add():return null
- var enemy = HazardTarget.new() if id in ["ice_crystal","channel_totem"] else LateBoss.new() if id in ["guardian","horror"] else SlimeEnemy.new() if id in ["slime_large","slime_small"] else Devourer.new() if id=="devourer" else HordeBoss.new() if id in ["demon", "executioner"] else (SpecialEnemy.new() if id in ["necromancer","beast","plague","shadow"] else preload("res://scenes/entities/enemy.tscn").instantiate())
+ var enemy = load("res://scripts/entities/event_creature.gd").new() if id in ["siege_archer","slime_king","event_blue","event_small"] else HazardTarget.new() if id in ["ice_crystal","channel_totem"] else LateBoss.new() if id in ["guardian","horror"] else SlimeEnemy.new() if id in ["slime_large","slime_small"] else Devourer.new() if id=="devourer" else HordeBoss.new() if id in ["demon", "executioner"] else (SpecialEnemy.new() if id in ["necromancer","beast","plague","shadow"] else preload("res://scenes/entities/enemy.tscn").instantiate())
  enemy.position = point
  enemy.chain_root=int(chain_meta.get("root",0));enemy.chain_generation=int(chain_meta.get("generation",-1))
  enemy.serial = serial
  serial += 1
  var stats: EnemyData = enemy_data[id].duplicate()
- if id=="slime_small":
+ if id in ["slime_small","event_small"]:
   stats.health=enemy_data.ghoul.health*balance.slime_small_health_ratio
   stats.speed=enemy_data.ghoul.speed*balance.slime_small_speed_ratio
   stats.damage=enemy_data.ghoul.damage*balance.slime_small_damage_ratio
@@ -624,14 +646,31 @@ func spawn_enemy(id: String, point: Vector2, elite: bool = false, chain_meta:Dic
  if id in ["ghoul","skeleton_sword","skeleton_archer"]:stats.speed*=balance.common_speed_multiplier
  stats.speed *= balance.enemy_speed_multiplier
  stats.speed *= scale.speed
+ var health_factor:float=float(survival_config.events.siege_health) if id=="siege_archer" else float(survival_config.events.blue_health) if id=="event_blue" else float(survival_config.events.small_health) if id=="event_small" else 1
+ stats.health*=health_factor
+ if id=="event_small":stats.speed*=survival_config.events.small_speed
  enemy.setup(self, stats, elite)
+ enemy.difficulty_health_factor=health_factor
+ if id=="siege_archer":enemy.event_kind="siege"
  if enemy is HazardTarget:enemy.owner_boss=int(chain_meta.get("pattern_owner",0))
  if enemy is HordeBoss:
   enemy.max_hp *= scale.health
   enemy.hp = enemy.max_hp
  horde_progress.apply(enemy)
+ if not (coop.active and not coop.hosting):
+  var free:Vector2=free_enemy_position(point,enemy.radius)
+  if free==Vector2.INF:enemy.free();return null
+  enemy.position=free
  entities.add_child(enemy)
+ if coop.active and not coop.hosting:enemy.collision_mask=0
  enemies.append(enemy)
+ enemy_collision_margin=maxf(enemy_collision_margin,enemy.radius+5)
+ var cell:=Vector2i(floori(enemy.position.x/40),floori(enemy.position.y/40))
+ if not grid.has(cell):grid[cell]=[]
+ grid[cell].append(enemy)
+ var body_cell:=Vector2i(floori(enemy.position.x/16),floori(enemy.position.y/16))
+ if not crowd_grid.has(body_cell):crowd_grid[body_cell]=[]
+ crowd_grid[body_cell].append(enemy);crowd_max_radius=maxf(crowd_max_radius,enemy.radius)
  late_arena.chain.register(enemy)
  if id=="necromancer" and enemy.chain_root>0:enemy.summon_cooldown=0;enemy.attack_time=2
  if id=="slime_large" and not (coop.active and not coop.hosting):slime_families.reserved[enemy.serial]=true
@@ -649,12 +688,14 @@ func enemy_killed(enemy) -> void:
  if enemy is Devourer:
   if enemy.swallowed_gold>0:gold_loot.refund(enemy.position,enemy.swallowed_gold)
   if enemy.swallowed_xp>0:drop_xp(enemy.position,enemy.swallowed_xp,true)
- gold_loot.roll_death(enemy.position)
- drop_xp(enemy.position,float(enemy.data.experience)*balance.death_experience_multiplier)
+ if not special_events.on_death(enemy):
+  gold_loot.roll_death(enemy.position)
+  drop_xp(enemy.position,float(enemy.data.experience)*balance.death_experience_multiplier)
  if enemy.elite:
   earned += 3
   announce("CARRASCO ABATIDO  |  +3 MEDALHAS", 3)
  if enemy is LateBoss:
+  if enemy.data.id=="horror":campaign.remember_clear()
   gold+=int(campaign.config.guardian_reward if enemy.data.id=="guardian" else campaign.config.horror_reward)
   earned+=3 if enemy.data.id=="guardian" else 8
   late_arena.on_death(enemy)
@@ -701,7 +742,7 @@ func nearest_enemy(origin: Vector2, max_range: float):
  return best
 
 func rebuild_grid() -> void:
- grid.clear()
+ grid.clear();crowd_grid.clear();crowd_max_radius=1
  enemy_collision_margin=10
  for enemy in enemies:
   if not is_instance_valid(enemy) or not enemy.alive:
@@ -711,21 +752,63 @@ func rebuild_grid() -> void:
   if not grid.has(cell):
    grid[cell] = []
   grid[cell].append(enemy)
+  var body_cell:=Vector2i(floori(enemy.position.x/16),floori(enemy.position.y/16))
+  if not crowd_grid.has(body_cell):crowd_grid[body_cell]=[]
+  crowd_grid[body_cell].append(enemy);crowd_max_radius=maxf(crowd_max_radius,enemy.radius)
 
-func separation(enemy) -> Vector2:
- var cell := Vector2i(floori(enemy.position.x / 40), floori(enemy.position.y / 40))
- var push := Vector2.ZERO
- for x in range(-1, 2):
-  for y in range(-1, 2):
-   for other in grid.get(cell + Vector2i(x, y), []):
-    if other == enemy or not is_instance_valid(other) or not other.alive:
-     continue
-    var offset: Vector2 = enemy.position - other.position
-    var length := offset.length()
-    var minimum: float = enemy.radius + other.radius
-    if length < minimum and length > 0.1:
-     push += offset / length * (1.0 - length / minimum)
+func enemy_space_free(at:Vector2,radius:float,except=null)->bool:
+ if not arena.safe_position(at,radius):return false
+ var cell:=Vector2i(floori(at.x/16),floori(at.y/16))
+ var span:int=ceili((radius+crowd_max_radius+2)/16)
+ for x in range(-span,span+1):
+  for y in range(-span,span+1):
+   for other in crowd_grid.get(cell+Vector2i(x,y),[]):
+    if not is_instance_valid(other) or not other.alive or other.collision_layer==0 or other==except:continue
+    if at.distance_squared_to(other.position)<pow(radius+other.radius+1,2):return false
+ return true
+
+func free_enemy_position(at:Vector2,radius:float,except=null,max_distance:float=240,avoid_players:bool=true)->Vector2:
+ if enemy_space_free(at,radius,except) and (not avoid_players or not players_near(at,radius+14)):return at
+ var step:float=maxf(8,radius*.7)
+ for ring in range(1,ceili(max_distance/step)+1):
+  var distance:float=ring*step
+  var count:int=maxi(12,ceili(TAU*distance/maxf(8,radius*1.5)))
+  for i in count:
+   var point:Vector2=at+Vector2.from_angle(i*TAU/count+ring*.37)*distance
+   if enemy_space_free(point,radius,except) and (not avoid_players or not players_near(point,radius+14)) and navigation.reachable(point,radius):return point
+ return Vector2.INF
+
+func separation(enemy)->Vector2:
+ var cell:=Vector2i(floori(enemy.position.x/16),floori(enemy.position.y/16))
+ var span:int=ceili((enemy.radius+crowd_max_radius+5)/16)
+ var push:=Vector2.ZERO
+ for x in range(-span,span+1):
+  for y in range(-span,span+1):
+   for other in crowd_grid.get(cell+Vector2i(x,y),[]):
+    if other==enemy or not is_instance_valid(other) or not other.alive or other.collision_layer==0:continue
+    var offset:Vector2=enemy.position-other.position
+    var distance:float=offset.length();var minimum:float=enemy.radius+other.radius+4
+    if distance>=minimum:continue
+    if distance<.01:offset=Vector2.from_angle((enemy.serial+other.serial)*2.4)*(1 if enemy.serial>other.serial else -1);distance=1
+    push+=offset/distance*clampf((minimum-distance)/maxf(4,minimum*.3),0,1)
  return push.limit_length(2)
+
+func crowd_velocity(enemy,desired:Vector2)->Vector2:
+ var cell:=Vector2i(floori(enemy.position.x/16),floori(enemy.position.y/16))
+ var span:int=ceili((enemy.radius+crowd_max_radius+4)/16)
+ for x in range(-span,span+1):
+  for y in range(-span,span+1):
+   for other in crowd_grid.get(cell+Vector2i(x,y),[]):
+    if other==enemy or not is_instance_valid(other) or not other.alive or other.collision_layer==0:continue
+    var offset:Vector2=enemy.position-other.position
+    var distance:float=offset.length();var required:float=enemy.radius+other.radius+.4
+    if distance>required+3 or distance<.01:continue
+    var normal:Vector2=offset/distance
+    var allowed:float=maxf(0,distance-required)*30
+    var inward:float=desired.dot(normal)
+    if inward< -allowed:desired-=normal*(inward+allowed)
+    if distance<required:desired+=normal*minf(45,(required-distance)*35)
+ return desired
 
 func update_pickups(delta: float) -> void:
  var bounds:Rect2=collection_bounds()
@@ -853,6 +936,6 @@ func start_late_test(kind:String):
  level=80 if kind=="guardian" else 96;player.position=Vector2(820,630)
  late_arena.begin_encounter("guardian" if kind=="guardian" else "horror")
  if kind=="true":
-  late_arena.tick(1.3);boss.take_damage(boss.max_hp);boss.tick(1.7)
+  late_arena.tick(1.3);boss.take_damage(boss.max_hp/maxf(.01,1-horde_progress.resistance())+.01);boss.tick(1.7)
  announce("TESTE: "+kind.to_upper()+" | SEM SALVAMENTO",3)
  ui.update_hud(snapshot())

@@ -61,12 +61,13 @@ func stop_combat() -> void:
 func final_active() -> bool:
 	return stage in ["portal", "combat", "death"]
 
-func begin_portal() -> void:
+func begin_portal() -> bool:
 	stop_combat()
 	stage = "portal"
 	portal_age = 0
 	portal_sound_played = false
 	demon = game.spawn_enemy("demon", center)
+	if demon==null:stage="idle";return false
 	demon.combat_enabled = false
 	demon.targetable = false
 	demon.sprite.visible = false
@@ -75,6 +76,7 @@ func begin_portal() -> void:
 	game.hazards.clear()
 	game.announce("DEMÔNIO", 3.0)
 	queue_redraw()
+	return true
 
 func on_boss_death(boss: HordeBoss) -> void:
 	var final_death: bool = boss == demon and stage in ["combat", "portal"]
@@ -138,16 +140,17 @@ func tick(delta: float) -> void:
 		mark.age += delta
 		if mark.age < game.boss_balance.summon_warning:
 			continue
-		if game.players_near(mark.at, 55) or not game.arena.safe_position(mark.at, 15):
+		if game.players_near(mark.at, 55) or not game.enemy_space_free(mark.at, game.enemy_data[mark.id].radius):
 			mark.wait += delta
-			if mark.wait > 1.5:
-				pending_summons.remove_at(i)
 			continue
-		pending_summons.remove_at(i)
+		if stage != "combat":pending_summons.remove_at(i);continue
 		if stage == "combat" and summons.size() < game.boss_balance.summon_limit and game.enemies.size() < game.balance.max_enemies:
 			var minion = game.spawn_enemy(mark.id, mark.at)
+			if minion==null:
+				continue
 			minion.summoner_id = mark.owner
 			summons[minion.get_instance_id()] = minion
+			pending_summons.remove_at(i)
 	for area in areas.duplicate():
 		area.age += delta
 		if area.kind=="ring":

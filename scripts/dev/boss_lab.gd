@@ -2,6 +2,7 @@ extends CanvasLayer
 var game
 var active:bool=false
 var running_test:bool=false
+var survival_mode:bool=false
 var original_profile:GameProfile
 var original_persistence:bool
 var original_time:float=1
@@ -18,12 +19,15 @@ var build:Dictionary={}
 var frozen:bool=false
 var repeat_attack:String=""
 var status:String=""
+var show_colliders:bool=false
+var collider_overlay:Node2D
 var online_builds:Dictionary={}
 var network_revision:int=0
 var accepted_revisions:Dictionary={}
 var applying_network:bool=false
 func setup(owner_game):
  game=owner_game;layer=60
+ collider_overlay=load("res://scripts/dev/collision_overlay.gd").new();collider_overlay.lab=self;game.add_child(collider_overlay)
  presets=JSON.parse_string(FileAccess.get_file_as_string("res://data/dev/presets.json"));load_preset("5")
  badge=Label.new();badge.text="MODO DEV";badge.position=Vector2(276,30);badge.add_theme_font_override("font",GameFonts.interface_font());badge.add_theme_font_size_override("font_size",12);badge.add_theme_color_override("font_color",Color("ffd278"));add_child(badge);badge.hide()
  panel=preload("res://scripts/dev/boss_panel.gd").new();panel.theme=game.ui.ui_theme;add_child(panel);panel.setup(self);panel.hide()
@@ -86,6 +90,7 @@ func valid_point(origin:Vector2,radius:float)->Vector2:
   if game.arena.safe_position(point,radius) and game.navigation.reachable(point,radius):return point
  return Vector2.INF
 func start_encounter()->bool:
+ survival_mode=false
  if not active and not enter():return false
  if game.state=="lobby":status="Inicie a sala antes de escolher o encontro.";return false
  if not is_host() or not ENCOUNTERS.has(encounter) or map_id not in ["courtyard","library","fields"]:return false
@@ -121,7 +126,7 @@ func start_encounter()->bool:
  else:
   if not game.late_arena.begin_encounter("guardian" if encounter=="guardian" else "horror"):return false
   game.late_arena.tick(1.3)
- if encounter in ["demon2","true"]:game.boss.take_damage(game.boss.hp);game.boss.tick(1.7)
+ if encounter in ["demon2","true"]:game.boss.take_damage(game.boss.hp/maxf(.01,1-game.horde_progress.resistance())+.01);game.boss.tick(1.7)
  game.ui.render("running");game.ui.update_hud(game.snapshot());running_test=true;panel.rebuild();status="Encontro iniciado. Sem progresso permanente."
  if game.coop.active:
   broadcast({"type":"dev_start","data":{"encounter":encounter,"map":map_id,"participants":participants,"hordes":hordes,"time":Engine.time_scale,"challenge":game.run_challenge,"builds":online_builds}})
@@ -192,8 +197,9 @@ func boss_info()->String:
  return result+"Vida: %.1f / %.1f | Fase: %d | Estado: %s\nPreparação: %s | Próximo ataque: %.2f s | Invocações: %d\nDano-base do inimigo: %.2f | Movimento: %.2f px/s"%[boss.hp,boss.max_hp,boss.phase if boss.is_executioner else boss.form,boss.state,boss.attack_name,maxf(0,boss.attack_time),summons,boss.data.damage, movement_speed(boss)]+"\n"+damage_summary(boss)+" | Congelado: "+("sim" if boss.dev_frozen else "não")+" | Repetir: "+boss.dev_repeat
 
 func _process(_delta:float):
+ if is_instance_valid(collider_overlay):collider_overlay.visible=active and show_colliders;collider_overlay.queue_redraw()
  if active:badge.position=Vector2(276,30) if game.ui.hud.visible else Vector2(540,6)
- if active and running_test and is_host() and game.state=="running" and not is_instance_valid(game.boss):complete(true)
+ if active and running_test and is_host() and game.state=="running" and not survival_mode and not is_instance_valid(game.boss):complete(true)
 
 func set_player_flag(key:String,value:bool):
  if key not in ["invulnerable","attacks"]:return
@@ -262,6 +268,9 @@ func receive_request(sender:String,raw):
  accepted_revisions[sender]=revision
 func receive_event(data:Dictionary):
  match data.type:
+  "dev_survival":
+   survival_mode=true
+   game.clear_run();game.coop.replicas.clear();game.coop.destinations.clear();game.elapsed=float(data.clock);game.campaign.endless=data.endless;game.campaign.cleared=data.endless;game.state="running";game.dev_boss_test=true;running_test=true;game.ui.render("running")
   "dev_start":
    var config:Dictionary=data.data;encounter=config.encounter;map_id=config.map;participants=int(config.participants);applied_participants=participants;hordes=config.hordes;online_builds=config.builds
    game.clear_run();game.coop.replicas.clear();game.coop.destinations.clear();game.arena.apply_map(map_id);game.selected_map=map_id
@@ -292,3 +301,29 @@ func clear_player_effects():
  for weapons in systems:
   weapons.projectiles.clear();weapons.slashes.clear();weapons.orbit_positions.clear();weapons.orbit_hits.clear();weapons.lightning_fx.clear();weapons.beams.clear()
   weapons.ground.reset();weapons.arsenal.reset();weapons.queue_redraw()
+
+func start_survival(infinite:bool=false):
+ if not is_host():return
+ if not active and not enter():return
+ if not start_encounter():return
+ survival_mode=true;clear_player_effects();game.clear_run();game.state="running";game.elapsed=1200 if infinite else 0
+ game.dev_boss_test=true;game.persistence_enabled=false;game.director.phase="active";game.director.elite_spawned=true
+ game.campaign.cleared=infinite;game.campaign.endless=infinite;game.horde_progress.tick();running_test=true;game.ui.render("running");game.ui.update_hud(game.snapshot())
+ broadcast({"type":"dev_survival","clock":game.elapsed,"endless":infinite})
+func set_survival_time(seconds:float):
+ if not active or not is_host():return
+ game.elapsed=maxf(0,seconds);game.horde_progress.tick();game.ui.update_hud(game.snapshot())
+ game.special_events.next_check=maxf(float(game.special_events.config.start),(floorf(game.elapsed/60)+1)*60)
+ game.chests.next_check=maxf(float(game.chests.config.first),(floorf(game.elapsed/30)+1)*30)
+func force_event(kind:String):
+ if not active or not is_host():return
+ if not running_test:start_survival()
+ if game.enemies.any(func(e):return e is HordeBoss):status="Inicie o teste contínuo para forçar eventos.";return
+ status="Evento iniciado" if game.special_events.start(kind) else "Evento aguardando espaço livre"
+func force_chest():
+ if not active or not is_host():return
+ if not running_test:start_survival()
+ status="Baú gerado" if game.chests.spawn_chest() else "Não há espaço ou já existe um baú fechado"
+func survival_info()->String:
+ var ev=game.special_events
+ return "Tempo %.1fs | Estágio %d | Resistência %.0f%% | Vida adicional +%.0f\nGeração %.1f/min | Vivos %d/%d | Dívida %.1f | Adiamentos %d\nEvento: %s | Cerco restante %.1fs | Família viva %d | Lotes pendentes %d\nBaús %d gerados / %d abertos | Tentativas %d"%[game.elapsed,game.horde_progress.stage(),100*game.horde_progress.resistance(),game.horde_progress.stage()*game.balance.horde_health_step,game.director.rate(),game.enemies.size(),game.balance.max_enemies,game.director.debt,game.director.deferred+ev.deferred,ev.active,maxf(0,45-ev.age) if ev.active=="siege" else 0,ev.members.size() if ev.active=="king" else 0,ev.pending.size()+game.slime_families.pending.size(),game.chests.generated,game.chests.opened,game.chests.attempts]

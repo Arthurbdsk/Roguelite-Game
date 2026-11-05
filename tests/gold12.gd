@@ -9,7 +9,7 @@ func run():
  print("GOLD12 sample deaths=10000 drops=",drops)
  g.gold_loot.reset();g.balance.gold_drop_chance=1
  for id in g.enemy_data:
-  if id in ["boss","ice_crystal","channel_totem"]:continue
+  if id in ["boss","ice_crystal","channel_totem","slime_king","event_blue","event_small"]:continue
   var enemy=g.spawn_enemy(id,Vector2(1100,630));var n:int=g.gold_loot.death_rolls
   g.enemy_killed(enemy);g.enemy_killed(enemy);assert(g.gold_loot.death_rolls==n+1 and g.gold_loot.coins[-1].value==1)
  g.balance.gold_drop_chance=0;g.gold_loot.reset();assert(not g.gold_loot.roll_death(Vector2.ZERO) and g.gold_loot.coins.is_empty())

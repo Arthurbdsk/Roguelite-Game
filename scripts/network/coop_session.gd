@@ -72,10 +72,14 @@ func receive(packet: Dictionary) -> void:
   "start": begin(packet)
   "left":
    remove_actor(packet.id)
+   game.campaign.check_votes()
   "closed": connection_lost(packet.reason)
   "action":
    if hosting and active and actors.has(packet.from) and packet.get("data") is Dictionary:
     var data: Dictionary = packet.data
+    if data.has("endless_vote"):
+     if data.endless_vote is bool:game.campaign.accept_vote(packet.from,data.endless_vote)
+     return
     if data.has("dev"):
      if game.dev_tools!=null and game.dev_tools.active:game.dev_tools.receive_request(packet.from,data.dev)
      return
@@ -177,6 +181,7 @@ func tick(delta: float, movement: Vector2) -> void:
 func host_tick(delta: float, local: Dictionary) -> void:
  if game.state != "running": return
  game.elapsed += delta
+ game.horde_progress.tick()
  game.campaign.tick()
  game.navigation.tick(delta)
  var local_actor: CoopActor = actors[connection.peer_id]
@@ -190,10 +195,13 @@ func host_tick(delta: float, local: Dictionary) -> void:
    actor.player.tick_visual(delta);continue
   var before: Vector2 = actor.player.position
   actor.player.movement_multiplier = game.boss_arena.slow_multiplier(before)
+  if action.revive:game.chests.try_open(actor.player)
   actor.player.tick(delta, action.movement)
   actor.mastery.tick(delta, before.distance_to(actor.player.position) if action.movement.length_squared() > 0 else 0)
  game.player = local_actor.player
  game.slime_families.tick(delta)
+ game.special_events.tick(delta)
+ game.chests.tick(delta)
  game.director.tick(delta)
  if ended: return
  game.gold_loot.tick(delta)
@@ -352,6 +360,7 @@ func flush_events() -> void:
  if connection.send_message({"type": "events", "data": batch}): outbox = outbox.slice(batch.size())
 
 func finish(won: bool) -> void:
+ won=won or game.campaign.cleared
  if game.dev_tools!=null and game.dev_tools.active:
   if hosting:game.dev_tools.complete(won)
   return
@@ -365,6 +374,8 @@ func finish(won: bool) -> void:
 
 func settle(result: Dictionary) -> void:
  if ended: return
+ result=result.duplicate(true);result.won=bool(result.get("won",false)) or game.campaign.cleared
+ game.chests.reset();game.special_events.stop()
  ended = true
  if is_instance_valid(team_hud): team_hud.hide()
  game.state = "result"
@@ -448,7 +459,7 @@ func broadcast_state(force: bool = false) -> void:
   if is_instance_valid(death.boss) and not visible_enemies.has(death.boss): visible_enemies.append(death.boss)
  for enemy in visible_enemies:
   if not is_instance_valid(enemy): continue
-  entities["e" + str(enemy.serial)] = {"kind": "enemy", "species": enemy.data.id, "position": enemy.position, "hp": enemy.hp, "max_hp": enemy.max_hp, "frame": enemy.sprite.frame, "flip": enemy.sprite.flip_h, "state": enemy.state, "charge_direction": enemy.charge_direction, "targetable": enemy.targetable, "visible": enemy.sprite.visible, "sprite_position": enemy.sprite.position, "alpha": enemy.sprite.modulate.a,"meals":enemy.meals if enemy is Devourer else 0,"enemy_damage":enemy.data.damage}
+  entities["e" + str(enemy.serial)] = {"kind": "enemy", "species": enemy.data.id, "position": enemy.position, "hp": enemy.hp, "max_hp": enemy.max_hp, "frame": enemy.sprite.frame, "flip": enemy.sprite.flip_h, "state": enemy.state, "charge_direction": enemy.charge_direction, "targetable": enemy.targetable, "visible": enemy.sprite.visible, "sprite_position": enemy.sprite.position, "alpha": enemy.sprite.modulate.a,"meals":enemy.meals if enemy is Devourer else 0,"enemy_damage":enemy.data.damage,"body_radius":enemy.radius,"body_scale":enemy.sprite.scale.x}
   entities["e" + str(enemy.serial)].merge({"locked_target":enemy.locked_target if enemy is LateBoss else Vector2.ZERO,"attack_time":enemy.attack_time,"summons_alive":game.boss_arena.summons.size()+game.late_arena.chain.count(enemy.serial) if enemy is HordeBoss else 0,"dev_frozen":enemy.dev_frozen if enemy is HordeBoss else false,"dev_repeat":enemy.dev_repeat if enemy is HordeBoss else "","form":enemy.form if enemy is HordeBoss else 1,"frozen":enemy.frozen_remaining,"slow":enemy.slow_remaining,"state_time": enemy.state_time, "elite": enemy.elite, "attack_name": enemy.attack_name if enemy is HordeBoss else "", "phase": enemy.phase if enemy is HordeBoss else 1,"ambush_at":enemy.ambush_at if enemy is SpecialEnemy else Vector2.ZERO})
  for id in actors:
   var actor: CoopActor = actors[id]
@@ -476,7 +487,7 @@ func broadcast_state(force: bool = false) -> void:
   var shots: Array = []
   for shot in weapons.projectiles: shots.append({"position": shot.position, "velocity": shot.velocity})
   weapon_fx[id] = {"projectiles": shots, "slashes": weapons.slashes, "orbit_positions": weapons.orbit_positions,"lightning_fx":weapons.lightning_fx,"beams":weapons.beams,"pools":weapons.ground.pools,"arsenal_shots":weapons.arsenal.shots,"arsenal_zones":weapons.arsenal.zones,"blade_points":weapons.arsenal.blade_points}
- var data := {"final_jobs":game.late_arena.patterns.jobs,"final_shots":game.late_arena.patterns.shots,"final_marks":game.late_arena.patterns.marks,"hordes_completed":game.horde_progress.completed,"chain_seeds":game.late_arena.seed_pending,"chain_stats":game.late_arena.chain.snapshot(),"late_areas":game.late_arena.areas,"late_shots":game.late_arena.shots,"changes": changes, "removals": removals, "elapsed": game.elapsed, "gold": game.gold, "kills": game.kills, "earned": game.earned, "wave": game.director.wave_number(), "pressure": "TESTE DEV" if game.dev_tools!=null and game.dev_tools.active else game.director.pressure(), "banner": game.banner, "arrows": game.enemy_projectiles.arrows, "hazards": game.hazards, "areas": game.boss_arena.areas, "summons": game.boss_arena.pending_summons, "swings": game.boss_arena.swings, "portal_age": game.boss_arena.portal_age, "stage": game.boss_arena.stage, "weapons": weapon_fx, "revives": revives.interactions, "event_claimed": game.event_claimed, "event_progress": game.event_progress, "numbers": game.numbers,"split_pending":game.slime_families.pending,"special_marks":game.specials.marks,"special_areas":game.specials.areas,"special_bolts":game.specials.bolts}
+ var data := {"reward_chest":game.chests.chest,"event_status":{"active":game.special_events.active,"age":game.special_events.age,"pending":game.special_events.pending.size()},"campaign_cleared":game.campaign.cleared,"endless":game.campaign.endless,"final_jobs":game.late_arena.patterns.jobs,"final_shots":game.late_arena.patterns.shots,"final_marks":game.late_arena.patterns.marks,"hordes_completed":game.horde_progress.completed,"chain_seeds":game.late_arena.seed_pending,"chain_stats":game.late_arena.chain.snapshot(),"late_areas":game.late_arena.areas,"late_shots":game.late_arena.shots,"changes": changes, "removals": removals, "elapsed": game.elapsed, "gold": game.gold, "kills": game.kills, "earned": game.earned, "wave": game.director.wave_number(), "pressure": "TESTE DEV" if game.dev_tools!=null and game.dev_tools.active else game.director.pressure(), "banner": game.banner, "arrows": game.enemy_projectiles.arrows, "hazards": game.hazards, "areas": game.boss_arena.areas, "summons": game.boss_arena.pending_summons, "swings": game.boss_arena.swings, "portal_age": game.boss_arena.portal_age, "stage": game.boss_arena.stage, "weapons": weapon_fx, "revives": revives.interactions, "event_claimed": game.event_claimed, "event_progress": game.event_progress, "numbers": game.numbers,"split_pending":game.slime_families.pending,"special_marks":game.specials.marks,"special_areas":game.specials.areas,"special_bolts":game.specials.bolts}
  var packet := {"type": "delta", "data": CoopWire.encode(data)}
  bytes_sent += JSON.stringify(packet).length()
  snapshot_count += 1
@@ -487,6 +498,10 @@ func apply_event(data: Dictionary) -> void:
   if game.dev_tools!=null and game.dev_tools.active:game.dev_tools.receive_event(data)
   return
  match data.get("type", ""):
+  "reward_chest":game.chests.show_receipt(data.data)
+  "campaign_won":game.campaign.remember_clear()
+  "endless_offer":game.campaign.remember_clear();game.campaign.deciding=true;game.state="endless_choice";game.ui.render("endless_choice")
+  "endless_continue":game.campaign.deciding=false;game.campaign.endless=true;game.state="running";game.ui.render("running")
   "gold_pickup":
    game.sound.play_cue("gold")
    if game.gold_loot.feedback.size() < 12: game.gold_loot.feedback.append({"at": CoopWire.vector(data.at) - Vector2(0,26), "life": 0.55, "amount": int(data.amount)})
@@ -576,7 +591,8 @@ func apply_delta(raw: Dictionary) -> void:
     enemy.hp = state.hp
     enemy.max_hp = state.max_hp
     enemy.data.damage=state.enemy_damage
-    if enemy is Devourer:enemy.meals=int(state.meals);enemy.growth_visual()
+    if enemy is Devourer:enemy.meals=int(state.meals)
+    enemy.radius=float(state.get("body_radius",enemy.radius));enemy.sprite.scale=Vector2.ONE*float(state.get("body_scale",1))
     enemy.state = state.state
     if enemy is LateBoss:enemy.locked_target=state.get("locked_target",Vector2.ZERO)
     if enemy is SpecialEnemy:enemy.ambush_at=state.ambush_at
@@ -602,6 +618,12 @@ func apply_delta(raw: Dictionary) -> void:
     enemy.queue_redraw()
    "coin": game.gold_loot.coins.append({"at": state.at, "age": maxf(0,data.elapsed-state.born), "value": state.value})
    "xp": game.pickups.append({"at": state.at, "xp": state.xp})
+ game.special_events.active=str(data.get("event_status",{}).get("active",""));game.special_events.age=float(data.get("event_status",{}).get("age",0));game.special_events.remote_pending=int(data.get("event_status",{}).get("pending",0))
+ game.special_events.members.clear()
+ for e in game.enemies:
+  if e.data.id in ["slime_king","event_blue","event_small"]:game.special_events.members.append(weakref(e))
+ game.chests.chest=data.get("reward_chest",{});game.chests.queue_redraw()
+ game.campaign.cleared=data.get("campaign_cleared",false);game.campaign.endless=data.get("endless",false)
  game.elapsed = data.elapsed
  game.horde_progress.completed=int(data.get("hordes_completed",0))
  game.late_arena.patterns.jobs.assign(data.get("final_jobs",[]));game.late_arena.patterns.shots.assign(data.get("final_shots",[]));game.late_arena.patterns.marks.assign(data.get("final_marks",[]))
@@ -653,6 +675,7 @@ func apply_delta(raw: Dictionary) -> void:
  game.ui.update_hud(hud)
 
 func client_tick(delta: float, action: Dictionary) -> void:
+ if game.state=="running":game.chests.visual_tick(delta)
  send_clock -= delta
  if send_clock <= 0:
   sequence += 1

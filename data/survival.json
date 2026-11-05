@@ -1,0 +1,43 @@
+{
+  "generation": {
+    "per_minute": 48,
+    "stage_seconds": 120,
+    "stage_rate": 0.1
+  },
+  "events": {
+    "start": 180.0,
+    "check_seconds": 60.0,
+    "siege_chance": 0.15,
+    "king_chance": 0.1,
+    "cooldown": 180.0,
+    "siege_count": 20,
+    "siege_radius": 420.0,
+    "siege_duration": 45.0,
+    "siege_health": 4.0,
+    "siege_extra_interval": 2.0,
+    "siege_range": 700.0,
+    "siege_arrow_range": 760.0,
+    "siege_arrow_lifetime": 6.0,
+    "king_health": 8.0,
+    "king_speed": 0.7,
+    "king_radius": 32.0,
+    "blue_health": 0.5,
+    "small_health": 2.0,
+    "small_speed": 1.25,
+    "entity_limit": 420,
+    "king_xp": 15.0,
+    "blue_xp": 1.0,
+    "small_xp": 0.4,
+    "king_gold": 5,
+    "blue_gold": 1
+  },
+  "chests": {
+    "first": 120.0,
+    "interval": 30.0,
+    "chance": 0.21,
+    "cooldown": 90.0,
+    "range": 34.0,
+    "gold_min": 50,
+    "gold_max": 200
+  }
+}

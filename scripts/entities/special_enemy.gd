@@ -48,11 +48,11 @@ func tick(delta:float):
 			if state_time>=data.recovery:state="approach"
 	elif data.id=="shadow":
 		if state=="approach" and attack_time<=0:
-			ambush_at=game.player.position;state="ambush";state_time=0;targetable=false;sprite.visible=false
+			ambush_at=game.player.position;state="ambush";state_time=0;targetable=false;sprite.visible=false;collision_layer=0
 		if state=="ambush":
 			movement=Vector2.ZERO
-			if state_time>=game.specials.balance.shadow_warning:
-				position=ambush_at;targetable=true;sprite.visible=true;state="recovery";state_time=0
+			if state_time>=game.specials.balance.shadow_warning and game.enemy_space_free(ambush_at,radius,self):
+				position=ambush_at;collision_layer=2;targetable=true;sprite.visible=true;state="recovery";state_time=0
 				for player in game.team_players():
 					if player.position.distance_to(ambush_at)<=game.specials.balance.shadow_radius+player.radius:
 						if player.take_damage(data.damage,ambush_at):player.root_remaining=game.specials.balance.shadow_root
@@ -64,6 +64,7 @@ func tick(delta:float):
 	if slow_remaining>0:movement*=slow_factor
 	velocity=movement+knockback
 	knockback=knockback.move_toward(Vector2.ZERO,delta*500)
+	velocity=game.crowd_velocity(self,velocity)
 	move_and_slide()
 	if data.frames>=16:
 		if state=="conjure_wait":sprite.frame=8+int(clock*4)%2

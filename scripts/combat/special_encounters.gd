@@ -49,7 +49,7 @@ func summon(caster)->bool:
   for attempt in 100:
    var at:Vector2=caster.position+Vector2.from_angle((i+attempt*.31)*TAU/count_value)*(85+attempt%8*20)
    if not game.arena.safe_position(at,18) or game.players_near(at,45):continue
-   if points.any(func(p):return p.distance_to(at)<30):continue
+   if points.any(func(p):return p.distance_to(at)<44):continue
    points.append(at);break
  if points.size()!=count_value:return false
  casters[owner]=weakref(caster)
@@ -77,7 +77,7 @@ func tick(delta:float):
    continue
   var batch=marks.filter(func(m):return m.owner==owner)
   if batch[0].age<balance.summon_warning or game.enemies.size()+batch.size()>game.balance.max_enemies:continue
-  if batch.any(func(m):return game.players_near(m.at,24) or not game.arena.safe_position(m.at,18)):continue
+  if batch.any(func(m):return game.players_near(m.at,24) or not game.enemy_space_free(m.at,18)):continue
   var spawned:Array=[]
   for i in batch.size():
    var mark:Dictionary=batch[i]

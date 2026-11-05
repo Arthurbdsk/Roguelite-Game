@@ -7,6 +7,7 @@ var search_clock:float=0
 var food:Dictionary={}
 func growth_visual():
 	var size:float=minf(game.balance.devour_max_scale,1+meals*game.balance.devour_growth_step)
+	if not game.enemy_space_free(position,data.radius*size,self):return
 	sprite.scale=Vector2.ONE*size
 	sprite.position.y=-12*size
 	radius=data.radius*size
@@ -16,6 +17,7 @@ func tick(delta:float):
 	if not alive or tick_control(delta):return
 	clock+=delta;attack_time-=delta;state_time+=delta;search_clock-=delta
 	if search_clock<=0:
+		if meals>0:growth_visual()
 		food=game.food_index.nearest(position);search_clock=game.balance.food_search_interval
 	if not food.is_empty() and (food.item.get("consumed",false) or food.item.get("attracted",false)):food={}
 	var destination:Vector2=game.player.position if food.is_empty() else food.item.at
@@ -40,6 +42,7 @@ func tick(delta:float):
 	if state=="approach":direction=game.navigation.steer(self,direction,destination).normalized()
 	velocity=(direction*data.speed*(slow_factor if slow_remaining>0 else 1) if state=="approach" else Vector2.ZERO)+knockback
 	knockback=knockback.move_toward(Vector2.ZERO,delta*500)
+	velocity=game.crowd_velocity(self,velocity)
 	move_and_slide()
 	sprite.frame=4 if state=="prepare" else int(clock*7)%4
 	sprite.flip_h=direction.x<0

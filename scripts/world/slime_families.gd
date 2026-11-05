@@ -10,7 +10,7 @@ func can_add()->bool:
 	return (reserved.size()+pending.size()+1)*game.balance.slime_children+maxi(game.balance.max_enemies,game.enemies.size())<=game.balance.split_entity_budget
 func schedule(enemy):
 	reserved.erase(enemy.serial)
-	pending.append({"at":enemy.position,"age":0.0,"points":[]})
+	pending.append({"at":enemy.position,"age":0.0,"points":[],"spawned":0})
 func tick(delta:float):
 	for batch in pending.duplicate():
 		if batch.points.is_empty():
@@ -23,14 +23,17 @@ func tick(delta:float):
 			if batch.points.size()!=game.balance.slime_children:batch.points.clear();continue
 		batch.age+=delta
 		if batch.age<game.balance.slime_split_warning:continue
-		for i in batch.points.size():
+		for i in range(int(batch.spawned),batch.points.size()):
+			if game.enemies.size()>=game.balance.split_entity_budget:break
 			var child=game.spawn_enemy("slime_small",batch.points[i])
+			if child==null:break
+			batch.spawned+=1
 			child.grace=game.balance.slime_grace
 			var gold:int=maxi(0,game.balance.slime_family_gold-game.enemy_data.slime_large.gold_value)
 			var xp:int=maxi(0,game.balance.slime_family_xp-game.enemy_data.slime_large.experience)
 			child.data.gold_value=gold/game.balance.slime_children+(1 if i<gold%game.balance.slime_children else 0)
 			child.data.experience=xp/game.balance.slime_children+(1 if i<xp%game.balance.slime_children else 0)
-		pending.erase(batch)
+		if batch.spawned==game.balance.slime_children:pending.erase(batch)
 	queue_redraw()
 func _draw():
 	if game==null or game.state not in ["running","paused","upgrading"]:return

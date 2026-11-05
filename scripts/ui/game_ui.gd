@@ -192,6 +192,12 @@ func render(which: String, data: Dictionary = {}) -> void:
    _label(menu,"Retorne com 40% da vida e 2 segundos de proteção.\nUma utilização por partida. Sua build será preservada.",Rect2(70,122,500,55),13,IVORY,true)
    _button(menu,"Usar retorno",Rect2(175,197,290,32),game.use_solo_revive,true)
    _button(menu,"Encerrar partida",Rect2(175,239,290,30),func():game.finish_run(false))
+  "endless_choice":
+   _backdrop(.92)
+   _label(menu,"CAMPANHA VENCIDA",Rect2(50,65,540,42),24,IVORY,true)
+   _label(menu,"Continue com sua build, ouro e tempo atuais.\nOnline: todos precisam concordar em até 30 segundos.",Rect2(70,120,500,60),13,IVORY,true)
+   _button(menu,"Continuar no infinito",Rect2(140,200,360,36),func():game.campaign.vote(true),true)
+   _button(menu,"Encerrar com vitória",Rect2(140,247,360,34),func():game.campaign.vote(false))
   "paused": _paused()
   "settings": _settings()
   "result": _result(data)
@@ -218,7 +224,7 @@ func _title() -> void:
  title.add_theme_font_size_override("font_size",36)
  column.add_child(title)
  var subtitle := Label.new()
- subtitle.text = "Sobreviva às hordas e derrote os chefes."
+ subtitle.text = "Sobreviva aos inimigos e derrote os chefes."
  subtitle.add_theme_font_size_override("font_size",12)
  column.add_child(subtitle)
  var row := HBoxContainer.new()
@@ -250,7 +256,7 @@ func _title() -> void:
  castle.custom_minimum_size.y = 100
  art.add_child(castle)
  var help := Label.new()
- help.text = "WASD / setas: mover. Esc: menu.\nElimine cada horda para avançar."
+ help.text = "WASD / setas: mover. Esc: menu.\nA dificuldade sobe a cada 2 minutos."
  help.add_theme_font_size_override("font_size",11)
  art.add_child(help)
  _footer()
@@ -431,7 +437,7 @@ func _result(data: Dictionary) -> void:
  _label(menu, "VITÓRIA" if won else "FIM DA PARTIDA", Rect2(24, 35, 592, 43), 28, ICE if won else IVORY, true)
  _label(menu, "Modo teste: saldo permanente não alterado." if data.get("dev", false) else ("Chefe final derrotado." if won else "Seu ouro foi somado ao saldo permanente."), Rect2(24, 87, 592, 24), 12, MUTED, true)
  _box(menu, Rect2(84, 121, 472, 132))
- _label(menu, "HORDA %d\n%s" % [int(data.get("wave", 1)), _clock(float(data.get("elapsed", 0)))], Rect2(99, 134, 142, 39), 13)
+ _label(menu, "ESTÁGIO %d\n%s" % [int(data.get("wave", 1)), _clock(float(data.get("elapsed", 0)))], Rect2(99, 134, 142, 39), 13)
  _label(menu, "ABATES\n%d" % int(data.get("kills", 0)), Rect2(252, 134, 135, 39), 13)
  _label(menu, "NÍVEL\n%d" % int(data.get("level", 1)), Rect2(405, 134, 136, 39), 13)
  _label(menu, "OURO RECEBIDO\n+%d" % int(data.get("gold", 0)), Rect2(99, 193, 142, 42), 12, Color("dfb969"))

@@ -5,7 +5,7 @@ import {resolve,dirname} from 'node:path';
 import {createRelay} from './server.mjs';
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
 const development=process.argv.includes('--dev');
-const exe=resolve(root,development?'build/Hordas-DEV-0.12.0/Hordas-DEV-0.12.0.exe':'build/Hordas-0.12.0/Hordas-0.12.0.exe');
+const exe=resolve(root,development?'build/Hordas-DEV-0.13.0/Hordas-DEV-0.13.0.exe':'build/Hordas-0.13.0/Hordas-0.13.0.exe');
 if(!existsSync(exe))throw Error(`Exporte ${exe} primeiro.`);
 const relay=createRelay({port:0}),address=await relay.listen();
 const argument=process.argv.find(v=>v.startsWith('--players='));

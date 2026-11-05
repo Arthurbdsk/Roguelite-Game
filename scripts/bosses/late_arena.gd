@@ -25,7 +25,9 @@ func begin_encounter(id:String)->bool:
   point=Vector2(900,630)+Vector2.from_angle(i*2.4)*(180+i%5*25)
   if game.arena.safe_position(point,36) and not game.players_near(point,100) and game.navigation.reachable(point,32):found=true;break
  if not found:return false
- active_boss=game.spawn_enemy(id,point);active_boss.combat_enabled=false;active_boss.targetable=false;active_boss.state="entry";active_boss.entry_age=0;active_boss.sprite.modulate.a=0
+ active_boss=game.spawn_enemy(id,point)
+ if active_boss==null:return false
+ active_boss.combat_enabled=false;active_boss.targetable=false;active_boss.state="entry";active_boss.entry_age=0;active_boss.sprite.modulate.a=0
  game.announce(active_boss.data.title,3)
  return true
 func damage(kind:String,boss)->float:
@@ -221,7 +223,7 @@ func tick_advanced(delta:float):
  for seed in seed_pending.duplicate():
   seed.age+=delta
   if seed.age<1.2 or game.players_near(seed.at,45) or game.enemies.size()>=game.balance.max_enemies:continue
-  if not game.arena.safe_position(seed.at,12):continue
+  if not game.enemy_space_free(seed.at,game.enemy_data.necromancer.radius):continue
   game.spawn_enemy("necromancer",seed.at,false,{"root":seed.root,"generation":0})
   seed_pending.erase(seed);chain.generated+=1
   chain.waiting[-int(seed.root)]=seed_pending.size()

@@ -74,3 +74,12 @@ Os testes pattern_spiral12, pattern_rings12, pattern_spears12, pattern_orbs12, p
 node relay/match-test.mjs --balance
 
 Quatro processos reais em relay local. Pode receber --packed=build/Hordas-DEV-0.12.0/Hordas-DEV-0.12.0.exe. Suítes --packed usam o Godot da mesma versão para carregar o PCK exportado; o executável nativo recebe teste de inicialização separado por tools/export_windows.py --smoke.
+
+## Sobrevivência 0.13
+
+python tools/validate_dev11.py body_collision13 continuous13 campaign13 endless13 voting13 events13 event_scheduler13 chests13 chest_frequency13 dev_survival13
+
+node relay/match-test.mjs --survival
+node relay/match-test.mjs --normal13
+
+render_survival13 gera capturas na arena; load_survival13 mede a carga renderizada com quatro atores e seis armas por jogador. Estes testes usam o motor real. A simulação estatística de baús não equivale a campanhas humanas completas. Testes antigos com valores fixos por horda são históricos, substituídos por continuous13 e campaign13.

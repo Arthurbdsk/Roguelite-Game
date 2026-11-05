@@ -4,6 +4,7 @@ extends CharacterBody2D
 var game
 var data: EnemyData
 var horde_health_bonus:float=0
+var difficulty_health_factor:float=1
 var hp: float
 var max_hp: float
 var radius: float
@@ -41,8 +42,11 @@ func setup(owner_game, stats: EnemyData, is_elite: bool = false) -> void:
 	attack_time = randf_range(1.5, 3.5)
 
 func _ready() -> void:
+	motion_mode=CharacterBody2D.MOTION_MODE_FLOATING
+	max_slides=8
+	platform_floor_layers=0
 	collision_layer = 2
-	collision_mask = 4
+	collision_mask = 6
 	var collision := CollisionShape2D.new()
 	var circle := CircleShape2D.new()
 	circle.radius = radius
@@ -105,6 +109,7 @@ func tick(delta: float) -> void:
 	if slow_remaining>0:movement*=slow_factor
 	velocity = movement + game.separation(self) * 14 + knockback
 	knockback = knockback.move_toward(Vector2.ZERO, delta * 500)
+	velocity=game.crowd_velocity(self,velocity)
 	move_and_slide()
 	if data.contact_damage and offset.length() < radius + game.player.radius:
 		game.player.take_damage(data.damage * (1.25 if elite else 1), position)

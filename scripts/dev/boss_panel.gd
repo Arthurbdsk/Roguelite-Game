@@ -11,6 +11,7 @@ var attack_box:OptionButton
 var host_controls:Array=[]
 var attack_signature:String=""
 var clock:float=0
+var survival_label:Label
 var permanent:CheckBox
 func setup(controller):
  lab=controller;add_theme_stylebox_override("panel",lab.game.ui._style(GameUI.INK,GameUI.LINE));position=Vector2(8,48);size=Vector2(624,302);rebuild()
@@ -49,12 +50,12 @@ func rebuild():
  var maps:=pick(r,{"courtyard":"Pátio","library":"Biblioteca","fields":"Campos"},lab.map_id);maps.item_selected.connect(func(i):lab.map_id=maps.get_item_metadata(i));host_controls.append(maps)
  label(r,"Escala")
  var count:=spin(r,lab.participants,1,4);count.value_changed.connect(func(value):lab.participants=int(value);lab.status="Escala será aplicada ao iniciar/reiniciar.");host_controls.append(count)
- var options:=row(encounter);var waves:=CheckBox.new();waves.text="Hordas normais";waves.add_theme_font_size_override("font_size",10);waves.button_pressed=lab.hordes;waves.toggled.connect(func(value):lab.hordes=value);options.add_child(waves);host_controls.append(waves)
+ var options:=row(encounter);var waves:=CheckBox.new();waves.text="Geração normal";waves.add_theme_font_size_override("font_size",10);waves.button_pressed=lab.hordes;waves.toggled.connect(func(value):lab.hordes=value);options.add_child(waves);host_controls.append(waves)
  label(options,"Tempo")
  var speed:=pick(options,{"0.5":"0,5x","1":"1x","2":"2x"},"0.5" if Engine.time_scale==.5 else "2" if Engine.time_scale==2 else "1");speed.item_selected.connect(func(i):lab.set_time(float(speed.get_item_metadata(i))));host_controls.append(speed)
  var actions:=row(encounter);button(actions,"Iniciar encontro",func():if read_build():lab.start_encounter(),true);button(actions,"Reiniciar",func():lab.start_encounter(),true)
  button(actions,"Sala DEV",lab.open_dev_room)
- label(encounter,"Escala simulada usa os mesmos multiplicadores da partida. Não substitui conexões reais. Mapa, hordas e escala passam a valer ao iniciar ou reiniciar.")
+ label(encounter,"Escala simulada usa os mesmos multiplicadores da partida. Não substitui conexões reais. Mapa, geração e escala passam a valer ao iniciar ou reiniciar.")
  label(encounter,"Na sala DEV: configure sua build, marque pronto e inicie a sala. Depois o host escolhe o encontro. Apenas builds de desenvolvimento podem entrar.")
  var player:=tab("Jogador");var pr:=row(player);label(pr,"Preset")
  var preset:=pick(pr,{"5":"5 minutos","10":"10 minutos","15":"15 minutos","20":"20 minutos"},lab.ENCOUNTERS[lab.encounter][2])
@@ -82,8 +83,19 @@ func rebuild():
  var values:=row(boss);var frozen:=CheckBox.new();frozen.text="Congelar chefe";frozen.add_theme_font_size_override("font_size",10);frozen.button_pressed=lab.frozen;frozen.toggled.connect(lab.freeze);values.add_child(frozen);host_controls.append(frozen)
  label(values,"Vida %");var percent:=spin(values,100,1,100,.1);button(values,"Definir vida",func():lab.health_percent(percent.value),true);button(values,"Próxima fase",lab.next_phase,true)
  label(boss,"Ataques aguardam os limites reais de efeitos e a recuperação. Congelar para o chefe, mas mantém projéteis e áreas já lançados. Vida 0: use Próxima fase ou cause dano na arena.")
+ var survival:=tab("Contínuo")
+ var actions13:=row(survival);button(actions13,"Iniciar contínuo",func():lab.start_survival(false),true);button(actions13,"Iniciar infinito",func():lab.start_survival(true),true)
+ var timing:=row(survival);label(timing,"Tempo em segundos")
+ var seconds:=spin(timing,lab.game.elapsed,0,864000,.1);button(timing,"Aplicar tempo",func():lab.set_survival_time(seconds.value),true)
+ var stage_row:=row(survival);label(stage_row,"Estágio")
+ var stage:=spin(stage_row,lab.game.horde_progress.stage(),0,7200);button(stage_row,"Aplicar estágio",func():lab.set_survival_time(stage.value*120),true)
+ var events13:=row(survival);button(events13,"Cerco",func():lab.force_event("siege"),true);button(events13,"Slime Rei",func():lab.force_event("king"),true);button(events13,"Gerar baú",lab.force_chest,true)
+ var debug13:=row(survival);var colliders:=CheckBox.new();colliders.text="Mostrar colisores";colliders.button_pressed=lab.show_colliders;colliders.toggled.connect(func(value):lab.show_colliders=value);debug13.add_child(colliders)
+ button(debug13,"Limpar eventos",func():
+  if lab.is_host():lab.game.special_events.stop();lab.game.chests.reset(),true)
+ survival_label=label(survival,lab.survival_info())
  status_label=label(base,lab.status);status_label.custom_minimum_size.y=14
- tabs.current_tab=clampi(selected,0,2);refresh()
+ tabs.current_tab=clampi(selected,0,3);refresh()
 func slots(parent:Node,title:String,definitions:Dictionary,equipped:Dictionary,count:int,records:Array):
  label(parent,title)
  var grid:=GridContainer.new();grid.columns=2;grid.add_theme_constant_override("h_separation",8);parent.add_child(grid)
@@ -106,6 +118,7 @@ func read_build()->bool:
  lab.build=result;return true
 func refresh():
  if not is_instance_valid(status_label):return
+ if is_instance_valid(survival_label):survival_label.text=lab.survival_info()
  status_label.text="Tempo: %.1fx | "%Engine.time_scale+lab.status;boss_label.text=lab.boss_info();build_label.text=lab.game.weapon_system.build_stats()
  var signature:String=str(lab.attacks())
  if signature!=attack_signature:

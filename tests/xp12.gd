@@ -3,7 +3,7 @@ func _initialize():call_deferred("run")
 func run():
  var g=load("res://scenes/main.tscn").instantiate();root.add_child(g);await process_frame;g.set_physics_process(false);g.start_run();g.sound.volume=0;g.director.phase="complete"
  for id in g.enemy_data:
-  if id=="boss":continue
+  if id in ["boss","slime_king","event_blue","event_small"]:continue
   g.pickups.clear();var e=g.spawn_enemy(id,Vector2(1100,630));var base:float=e.data.experience;g.enemy_killed(e)
   assert(is_equal_approx(g.pickups[0].xp,base*.75) if base>0 else g.pickups.is_empty())
  g.pickups.clear();g.xp=0;g.xp_needed=10000;g.weapon_system.passives={"crown":8};g.profile.data.upgrade_ranks={"experience":5};g.mastery.begin()

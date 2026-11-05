@@ -1,7 +1,7 @@
 class_name EncounterBalance
 extends Resource
 
-@export_group("Hordas")
+@export_group("Catálogo histórico de encontros")
 @export var waves: Array[Resource] = []
 @export var initial_preparation: float = 2.5
 @export var preparation_seconds: float = 2.5
@@ -50,3 +50,7 @@ extends Resource
 @export var horde_resistance_step:float=.05
 @export var horde_resistance_cap:float=.75
 @export var horde_health_step:float=35.0
+
+@export var difficulty_seconds:float=120
+@export var continuous_per_minute:float=48
+@export var continuous_stage_rate:float=.10

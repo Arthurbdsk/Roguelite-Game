@@ -113,6 +113,7 @@ func tick(delta: float) -> void:
 	var previous_position: Vector2 = position
 	if slow_remaining>0:movement*=slow_factor
 	velocity = movement
+	velocity=game.crowd_velocity(self,velocity)
 	move_and_slide()
 	if state == "charge":
 		var victim = game.projectile_victim(previous_position, position, radius)
