@@ -1,3 +1,11 @@
+# Validação do painel DEV 0.11
+
+`python tools/validate_dev11.py` verifica isolamento de save, seis encontros nos três mapas, 30 ataques, controle do jogador e painel renderizado. `node relay/match-test.mjs --dev` usa quatro processos reais com um relay local para verificar comandos do host, builds individuais, fases, reinícios e preservação dos perfis.
+
+O pacote público é verificado com `python tools/validate_dev11.py --packed=build/Hordas-0.11.0/Hordas-0.11.0.exe dev_public11`. O pacote DEV aceita as suítes `dev_feature11`, `dev_sandbox11`, `dev_encounters11`, `dev_attacks11` e `dev_panel11`. Instruções completas em `docs/MODO_DEV_0_11.md`.
+
+Os testes de atalhos de desenvolvimento antigos só fazem sentido no editor ou no pacote DEV. O pacote público deve rejeitá-los. Os registros abaixo são históricos.
+
 # Validação atual, versão 0.10
 
 `python tools/validate_campaign10.py` executa as verificações atuais por etapa, com perfis isolados. Os testes de captura precisam do renderizador real; o runner escolhe esse modo automaticamente. `tests/full_campaign10.gd` percorre a campanha completa com um bot invulnerável em passos 1/60. Não mede dificuldade humana nem FPS.

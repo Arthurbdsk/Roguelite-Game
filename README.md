@@ -2,11 +2,17 @@
 
 Projeto editável em Godot 4.7.2. Inclui código, cenas, mapas, dados de balanceamento, sprites e testes. Não precisa instalar Python ou Node.js para jogar no modo solo pelo editor.
 
-Para jogar no Windows sem instalar o Godot, baixe [Hordas 0.10.0](https://github.com/Arthurbdsk/Roguelite-Game/releases/tag/v0.10.0). O arquivo `.exe` contém todos os recursos. Todos os participantes precisam usar a mesma versão. O serviço público de salas está indisponível nesta publicação; o solo funciona e o cooperativo exige um relay configurado.
+Para jogar no Windows sem instalar o Godot, baixe [Hordas 0.11.0](https://github.com/Arthurbdsk/Roguelite-Game/releases/tag/v0.11.0). O arquivo `.exe` contém todos os recursos. Todos os participantes precisam usar a mesma versão. O serviço público de salas está indisponível nesta publicação; o solo funciona e o cooperativo exige um relay configurado.
+
+## Painel DEV 0.11.0
+
+Use `Hordas-DEV-0.11.0.exe` e pressione F8 no menu. O painel testa os seis encontros reais, configura builds e controla ataques, fases, tempo e reinícios. O perfil é temporário e o save original permanece intacto. O executável público `Hordas-0.11.0.exe` exclui o painel e seus presets.
+
+Guia e testes: [docs/MODO_DEV_0_11.md](docs/MODO_DEV_0_11.md). `Testar_Chefes_DEV.cmd` abre a build DEV exportada. O projeto aberto no Godot também habilita o F8. Para salas de desenvolvimento, todos precisam usar a mesma build DEV e abrir Sala DEV pelo painel.
 
 ## Campanha 0.10.0
 
-A partida continua após o Demônio dos dez minutos. Guardião aos quinze minutos; Abominação e True Form aos vinte. Inclui espera corrigida do herói, gelo com avisos próximos aos jogadores, paredes sólidas no novo chefe, explosão animada da bomba e novos sprites. Atalhos F9 e `Testar_Guardiao.cmd`, `Testar_Abominacao.cmd`, `Testar_True_Form.cmd` usam builds de desenvolvimento sem gravar progresso.
+A partida continua após o Demônio dos dez minutos. Guardião aos quinze minutos; Abominação e True Form aos vinte. Inclui espera corrigida do herói, gelo com avisos próximos aos jogadores, paredes sólidas no novo chefe, explosão animada da bomba e novos sprites. Na versão atual, F8 na build DEV substitui o laboratório F9. Os arquivos `Testar_*.cmd` dos chefes apontam para o executável DEV.
 
 A imagem da fonte Kingdom foi recebida, mas o arquivo TTF/OTF não foi fornecido. A fonte anterior continua ativa; o tema central está preparado para `assets/fonts/Kingdom.ttf`, com apoio para acentos.
 

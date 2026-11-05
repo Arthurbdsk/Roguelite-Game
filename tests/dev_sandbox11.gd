@@ -1,0 +1,21 @@
+extends SceneTree
+func _initialize():call_deferred("run")
+func run():
+ var g=load("res://scenes/main.tscn").instantiate();root.add_child(g);await process_frame;g.set_physics_process(false)
+ g.profile.path="user://dev_guard_"+str(OS.get_process_id())+".json";g.profile.data.gold=1234;g.profile.data.upgrade_ranks={"damage":3,"revive":1};g.persistence_enabled=true;assert(g.profile.save())
+ var original=g.profile;var bytes:PackedByteArray=FileAccess.get_file_as_bytes(original.path);var data:Dictionary=original.data.duplicate(true)
+ var event:=InputEventKey.new();event.physical_keycode=KEY_F8;event.pressed=true;Input.parse_input_event(event);await process_frame
+ assert(g.dev_tools.active and g.dev_tools.panel.visible and g.profile!=original)
+ g.profile.data.gold=99999;assert(not g.profile.save());assert(g.profile.reward(100,2,true,100,100)==0)
+ g.dev_tools.toggle();assert(not g.dev_tools.panel.visible and g.dev_tools.badge.visible)
+ g.dev_tools.encounter="executioner";g.dev_tools.build.permanent=true;g.dev_tools.build.invulnerable=false;g.dev_tools.start_encounter()
+ g.player.hp=1;g.player.invulnerable=0;g.player.take_damage(900,g.player.position)
+ assert(g.state=="revive_offer");g.use_solo_revive();assert(g.mastery.last_stand_spent)
+ g.weapon_system._fire_bolts();g.weapon_system._clock();assert(not g.weapon_system.projectiles.is_empty() and not g.weapon_system.beams.is_empty())
+ g.dev_tools.end_test();assert(g.profile==original and g.profile.data==data and FileAccess.get_file_as_bytes(original.path)==bytes)
+ assert(not g.dev_tools.active and g.state=="title" and g.persistence_enabled)
+ assert(g.weapon_system.projectiles.is_empty() and g.weapon_system.beams.is_empty() and g.weapon_system.lightning_fx.is_empty())
+ assert(not g.mastery.last_stand_spent and g.mastery.can_revive())
+ g.start_run();g.gold=7;g.finish_run(false);assert(g.profile.data.gold==1241 and g.profile.data.runs==1)
+ DirAccess.remove_absolute(original.path);DirAccess.remove_absolute(original.path+".bak")
+ g.queue_free();await process_frame;await create_timer(.3).timeout;print("DEV_SANDBOX11_PASS F8, temporary profile, no disk writes/rewards, exact original restored");quit()

@@ -138,7 +138,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--godot", type=Path, default=Path.home() / "Downloads" / "Godot_v4.7.2-stable_win64_console.exe")
     parser.add_argument("--template-only", action="store_true")
-    parser.add_argument("--output", type=Path, default=BUILD / "Hordas-0.10.0" / "Hordas-0.10.0.exe")
+    parser.add_argument("--output", type=Path, default=BUILD / "Hordas-0.11.0" / "Hordas-0.11.0.exe")
+    parser.add_argument("--dev", action="store_true", help="Export the development-only boss panel build")
     parser.add_argument("--smoke", action="store_true", help="Run exported executable headlessly for 120 frames")
     args = parser.parse_args()
     ensure_template()
@@ -148,11 +149,11 @@ def main():
         raise SystemExit(f"Godot not found: {args.godot}; pass --godot PATH")
     BUILD.mkdir(parents=True, exist_ok=True)
     ensure_license()
-    target = args.output.resolve()
+    target = ((BUILD / "Hordas-DEV-0.11.0" / "Hordas-DEV-0.11.0.exe") if args.dev and args.output == BUILD / "Hordas-0.11.0" / "Hordas-0.11.0.exe" else args.output).resolve()
     target.parent.mkdir(parents=True, exist_ok=True)
     export_result = subprocess.run([
         str(args.godot), "--headless", "--path", str(ROOT),
-        "--export-release", "Windows Desktop", str(target),
+        "--export-release", "Windows Development" if args.dev else "Windows Desktop", str(target),
     ], cwd=ROOT, capture_output=True, text=True)
     (BUILD / "export.log").write_text(export_result.stdout + export_result.stderr, encoding="utf-8")
     if export_result.returncode or not target.is_file():
@@ -160,11 +161,12 @@ def main():
     payload = target.read_bytes()
     manifest = {
         "file": target.name,
-        "game_version": "0.10.0",
+        "game_version": "0.11.0",
         "godot_version": VERSION,
         "size_bytes": len(payload),
         "sha256": hashlib.sha256(payload).hexdigest(),
         "embedded_pck": True,
+        "development_tools": args.dev,
         "smoke_test": "not_run",
     }
     if args.smoke:
@@ -179,6 +181,7 @@ def main():
         if outcome.returncode or "ERROR:" in log_text or "ERROR:" in outcome.stderr:
             raise SystemExit(f"Exported smoke failed: {outcome.returncode}")
     (BUILD / "build_manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+    (target.parent / "build_manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
     print(json.dumps(manifest, indent=2), flush=True)
 
 

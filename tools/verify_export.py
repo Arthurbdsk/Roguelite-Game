@@ -13,7 +13,7 @@ root = Path(__file__).resolve().parents[1]
 parser = argparse.ArgumentParser()
 markers = {name: name.upper() + '_PASS' for name in ['hordes_gold', 'skills_bosses', 'network_foundation', 'network_backpressure', 'coop_bosses', 'special_enemies', 'lightning', 'clock', 'crown', 'two_phase_boss', 'boss_patterns', 'devourer', 'slimes', 'lodo', 'holy_water', 'difficulty_v2', 'progression8', 'limits7', 'permanent_data9', 'permanent_effects9', 'permanent_coop9', 'idle_font10', 'campaign10', 'guardian10', 'horror10', 'true10', 'explosion10', 'ice10']}
 parser.add_argument('--suite', choices=list(markers), default='campaign10')
-parser.add_argument('--target', type=Path, default=root / 'build' / 'Hordas-0.10.0' / 'Hordas-0.10.0.exe')
+parser.add_argument('--target', type=Path, default=root / 'build' / 'Hordas-0.11.0' / 'Hordas-0.11.0.exe')
 args = parser.parse_args()
 target = args.target.resolve()
 log = root / 'test_output' / f'export_{args.suite}.log'

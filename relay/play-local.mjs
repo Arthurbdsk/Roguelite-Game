@@ -4,8 +4,9 @@ import {fileURLToPath} from 'node:url';
 import {resolve,dirname} from 'node:path';
 import {createRelay} from './server.mjs';
 const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
-const exe=resolve(root,'build/Hordas-0.10.0/Hordas-0.10.0.exe');
-if(!existsSync(exe))throw Error('Exporte build/Hordas-0.10.0/Hordas-0.10.0.exe primeiro.');
+const development=process.argv.includes('--dev');
+const exe=resolve(root,development?'build/Hordas-DEV-0.11.0/Hordas-DEV-0.11.0.exe':'build/Hordas-0.11.0/Hordas-0.11.0.exe');
+if(!existsSync(exe))throw Error(`Exporte ${exe} primeiro.`);
 const relay=createRelay({port:0}),address=await relay.listen();
 const argument=process.argv.find(v=>v.startsWith('--players='));
 const count=argument?Math.min(4,Math.max(2,Number(argument.split('=')[1])||4)):4;
@@ -13,7 +14,7 @@ console.log('Teste local: crie uma sala na primeira janela e entre com o código
 console.log('Marque todos como prontos e inicie. Os perfis deste teste são separados do seu progresso.');
 const children=[];
 await Promise.all(Array.from({length:count},(_,i)=>new Promise(resolve=>{
- const child=spawn(exe,['--',`--relay=ws://127.0.0.1:${address.port}`,`--profile-slot=coop_local_${i+1}`,'--online',`--name=Jogador${i+1}`],{cwd:root,windowsHide:false});
+ const child=spawn(exe,['--',`--relay=ws://127.0.0.1:${address.port}`,`--profile-slot=coop_local_${i+1}`,development?'--dev-room':'--online',`--name=Jogador${i+1}`],{cwd:root,windowsHide:false});
  children.push(child);child.on('close',resolve);child.on('error',error=>{console.error(error.message);resolve();});
 })));
 await relay.close();

@@ -44,7 +44,7 @@ func launch(id:String)->bool:
    zones.append({"kind":id,"at":at,"source":origin,"age":0.0,"flight_delay":(.7+i*.12)/weapons.projectile_factor(),"delay":.7+i*.12,"radius":weapons._stat(id,"area_radius"),"life":1.1+i*.12,"hit":false})
   else:shots.append({"speed_factor":weapons.projectile_factor(),"kind":id,"at":origin,"origin":origin,"direction":dir,"age":0.0,"leg":0,"flight":maxf(.25,origin.distance_to(target.position)/170) if target!=null else .9,"hits":{},"pierce":int(weapons._stat(id,"pierce"))})
  return true
-func tick(delta:float):
+func tick(delta:float,allow_attacks:bool=true):
  for shot in shots.duplicate():
   shot.age+=delta
   var start:Vector2=shot.at
@@ -73,7 +73,7 @@ func tick(delta:float):
     if weapons._valid_target(e) and e.position.distance_to(zone.at)<=zone.radius:weapons._hit(e,weapons._stat("bombs","damage"),Vector2.ZERO)
  zones=zones.filter(func(z):return z.age<z.life)
  blade_points.clear()
- if int(weapons.levels.get("blades",0))>0:
+ if allow_attacks and int(weapons.levels.get("blades",0))>0:
   angle+=delta*weapons._stat("blades","rotation_speed")
   for i in int(weapons._stat("blades","count")):blade_points.append(weapons.game.player.position+Vector2.from_angle(angle+i*TAU/weapons._stat("blades","count"))*weapons._stat("blades","reach"))
   for e in weapons.game.enemies.duplicate():

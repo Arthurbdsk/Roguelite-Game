@@ -200,17 +200,6 @@ func render(which: String, data: Dictionary = {}) -> void:
    var tree_view := SkillTreeView.new()
    menu.add_child(tree_view)
    tree_view.setup(game, self)
-  "lab":
-   _backdrop()
-   _label(menu, "LABORATÓRIO DE COMBATE", Rect2(24, 28, 592, 40), 25, IVORY, true)
-   _label(menu, "Carrasco: armas nível 4. Demônio: armas evoluídas nível 5.\nEncontros tardios: seis armas nos níveis 6 a 8. Sem aprimoramentos permanentes.\nO teste não salva nem concede ouro.", Rect2(80, 90, 480, 80), 12, MUTED, true)
-   var first := _button(menu, "Enfrentar o Carrasco", Rect2(28,175,280,30), game.start_boss_test.bind("executioner"), true)
-   _button(menu, "Portal do demônio", Rect2(332,175,280,30), game.start_boss_test.bind("demon"))
-   _button(menu,"Guardião (15 min)",Rect2(28,217,280,30),game.start_late_test.bind("guardian"))
-   _button(menu,"Abominação (20 min)",Rect2(332,217,280,30),game.start_late_test.bind("horror"))
-   _button(menu,"True Form",Rect2(180,260,280,28),game.start_late_test.bind("true"))
-   _button(menu, "Voltar", Rect2(180,305,280,26), game.show_title)
-   call_deferred("_grant_focus", first)
 
 func _title() -> void:
  _backdrop()
@@ -261,7 +250,7 @@ func _title() -> void:
  castle.custom_minimum_size.y = 100
  art.add_child(castle)
  var help := Label.new()
- help.text = "WASD / setas: mover. Esc: menu.\nElimine cada horda para avançar.\nF9: testar chefes."
+ help.text = "WASD / setas: mover. Esc: menu.\nElimine cada horda para avançar."
  help.add_theme_font_size_override("font_size",11)
  art.add_child(help)
  _footer()

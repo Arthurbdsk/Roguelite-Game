@@ -64,6 +64,7 @@ var boss_arena: BossArena
 var specials: SpecialEncounters
 var slime_families:SlimeFamilies
 var food_index:=FoodIndex.new()
+var dev_tools
 var coop: CoopSession
 
 func _ready() -> void:
@@ -132,6 +133,10 @@ func _ready() -> void:
  ui.setup(self)
  apply_settings()
  show_title()
+ if development_build() and ResourceLoader.exists("res://scripts/dev/boss_lab.gd"):
+  dev_tools=load("res://scripts/dev/boss_lab.gd").new();add_child(dev_tools);dev_tools.setup(self)
+ if dev_tools!=null and "--dev-room" in OS.get_cmdline_user_args():
+  dev_tools.enter();open_online()
  if "--online" in OS.get_cmdline_user_args():
   for argument in OS.get_cmdline_user_args():
    if argument.begins_with("--name="): coop.local_name = argument.trim_prefix("--name=")
@@ -139,9 +144,18 @@ func _ready() -> void:
  if "--play" in OS.get_cmdline_user_args():
   start_run()
  for argument in OS.get_cmdline_user_args():
-  if argument.begins_with("--encounter-test="):start_late_test(argument.get_slice("=",1))
-  if argument.begins_with("--boss-test="):
-   start_boss_test(argument.get_slice("=", 1))
+  if dev_tools!=null and argument.begins_with("--encounter-test="):dev_tools.launch_argument(argument.get_slice("=",1))
+  if dev_tools!=null and argument.begins_with("--boss-test="):
+   dev_tools.launch_argument("demon1" if argument.get_slice("=",1)=="demon" else "executioner")
+
+func development_build()->bool:return (OS.has_feature("editor") or OS.has_feature("dev_tools")) and ResourceLoader.exists("res://scripts/dev/boss_lab.gd") and FileAccess.file_exists("res://data/dev/presets.json")
+
+func _input(event:InputEvent):
+ if dev_tools!=null and event is InputEventKey and event.pressed and not event.echo:
+  if event.physical_keycode==KEY_F8:
+   dev_tools.toggle();get_viewport().set_input_as_handled()
+  elif event.physical_keycode==KEY_ESCAPE and dev_tools.panel.visible:
+   dev_tools.panel.hide();get_viewport().set_input_as_handled()
 
 func register_inputs() -> void:
  if not InputMap.has_action("revive"):
@@ -177,6 +191,7 @@ func _physics_process(delta: float) -> void:
   simulate(delta, Input.get_vector("move_left", "move_right", "move_up", "move_down"))
 
 func simulate(delta: float, movement: Vector2 = Vector2.ZERO) -> void:
+ if dev_tools!=null and dev_tools.active and dev_tools.panel.visible:movement=Vector2.ZERO
  if coop != null and coop.active:
   coop.tick(delta, movement)
   return
@@ -324,13 +339,17 @@ func team_players() -> Array:
 func collection_player(at: Vector2):
  return coop.nearest_player(at) if coop != null and coop.active else player
 
+func scaling_participants()->int:
+ if dev_tools!=null and dev_tools.active:return dev_tools.applied_participants if dev_tools.running_test else dev_tools.participants
+ return coop.initial_size if coop!=null and coop.active and coop.hosting else 1
+
 func enemy_scale() -> Dictionary:
- var scale:Dictionary=coop.rules.scaling(coop.initial_size) if coop != null and coop.active and coop.hosting else {"health":1.0,"damage":1.0,"speed":1.0,"count":1.0}
+ var scale:Dictionary=coop.rules.scaling(scaling_participants())
  for key in ["health","damage","count"]:scale[key]*=1+.05*run_challenge
  return scale
 
 func wave_composition(original: Dictionary) -> Dictionary:
- return coop.rules.composition(original,coop.initial_size if coop.active and coop.hosting else 1,1+.05*run_challenge)
+ return coop.rules.composition(original,scaling_participants(),1+.05*run_challenge)
 
 func hidden_spawn(at: Vector2, margin: float) -> bool:
  for member in team_players():
@@ -392,6 +411,7 @@ func weapon_hit(enemy, amount: float, force: Vector2) -> void:
  mastery.hit(enemy, amount, force)
 
 func start_boss_test(kind: String) -> void:
+ if not development_build():return
  start_run()
  run_challenge=0
  dev_boss_kind = "executioner" if kind == "executioner" else "demon"
@@ -416,6 +436,7 @@ func start_boss_test(kind: String) -> void:
  ui.update_hud(snapshot())
 
 func retry() -> void:
+ if dev_tools!=null and dev_tools.active:dev_tools.start_encounter();return
  if coop.active:
   coop.leave()
   open_online()
@@ -431,6 +452,7 @@ func retry() -> void:
  start_run(support)
 
 func abandon() -> void:
+ if dev_tools!=null and dev_tools.active:dev_tools.end_test();return
  if coop.active:
   coop.leave()
   return
@@ -441,6 +463,8 @@ func abandon() -> void:
   enter_hub()
 
 func finish_run(won: bool) -> void:
+ if dev_tools!=null and dev_tools.active:
+  dev_tools.complete(won);return
  if coop != null and coop.active:
   coop.finish(won)
   return
@@ -510,9 +534,6 @@ func _unhandled_input(event: InputEvent) -> void:
    close_skill_tree()
   elif state == "lab":
    show_title()
- if event is InputEventKey and event.pressed and event.physical_keycode == KEY_F9 and state in ["title", "hub", "lab"]:
-  state = "lab"
-  ui.render("lab")
  if state == "upgrading" and event is InputEventKey and event.pressed and not event.echo:
   var index: int = event.physical_keycode - KEY_1
   if index >= 0 and index < offers.size():
@@ -759,7 +780,7 @@ func camera_rect() -> Rect2:
  return Rect2(center - Vector2(320, 180), Vector2(640, 360))
 
 func snapshot() -> Dictionary:
- return {"hp": player.hp, "max_hp": player.max_hp, "xp": xp, "xp_needed": xp_needed, "elapsed": elapsed, "level": level, "kills": kills, "gold": gold+coop.local_gold_bonus(), "earned": earned + floori(elapsed / 30.0) + floori(kills / 30.0), "wave": director.wave_number(), "weapons": weapon_system.get_loadout(), "passives": weapon_system.get_passives(), "dev":dev_boss_test,"chain_debug":late_arena.chain.snapshot(),"true_form":is_instance_valid(boss) and boss.data.id=="horror" and boss.form==2,"boss_hp": boss.hp if is_instance_valid(boss) else 0, "boss_max": boss.max_hp if is_instance_valid(boss) else 0, "boss_name": "TRUE FORM" if is_instance_valid(boss) and boss.data.id=="horror" and boss.form==2 else (boss.data.title+" | Fase %d"%boss.form) if is_instance_valid(boss) and boss is HordeBoss and not boss.is_executioner else (boss.data.title if is_instance_valid(boss) else ""), "banner": banner, "pressure": director.pressure()}
+ return {"hp": player.hp, "max_hp": player.max_hp, "xp": xp, "xp_needed": xp_needed, "elapsed": elapsed, "level": level, "kills": kills, "gold": gold+coop.local_gold_bonus(), "earned": earned + floori(elapsed / 30.0) + floori(kills / 30.0), "wave": director.wave_number(), "weapons": weapon_system.get_loadout(), "passives": weapon_system.get_passives(), "dev":dev_boss_test,"chain_debug":late_arena.chain.snapshot(),"true_form":is_instance_valid(boss) and boss.data.id=="horror" and boss.form==2,"boss_hp": boss.hp if is_instance_valid(boss) else 0, "boss_max": boss.max_hp if is_instance_valid(boss) else 0, "boss_name": "TRUE FORM" if is_instance_valid(boss) and boss.data.id=="horror" and boss.form==2 else (boss.data.title+" | Fase %d"%boss.form) if is_instance_valid(boss) and boss is HordeBoss and not boss.is_executioner else (boss.data.title if is_instance_valid(boss) else ""), "banner": banner, "pressure": "TESTE DEV" if dev_tools!=null and dev_tools.active else director.pressure()}
 
 func _draw() -> void:
  if state in ["title", "hub"]:
@@ -809,6 +830,7 @@ func use_solo_revive():
  if state=="revive_offer" and mastery.use_revive():state="running";ui.render("running")
 
 func start_late_test(kind:String):
+ if not development_build():return
  if kind not in ["guardian","horror","true"]:return
  start_run();dev_boss_kind=kind;dev_boss_test=true;persistence_enabled=false;run_challenge=0;mastery.begin(false)
  director.phase="complete";elapsed=900 if kind=="guardian" else 1200

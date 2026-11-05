@@ -29,6 +29,7 @@ const MAX_WEAPONS: int = 6
 const MAX_PASSIVES: int = 4
 const MAX_PROJECTILES: int = 100
 
+var attacks_enabled:bool=true
 var game
 var lightning_texture=preload("res://assets/effects/lightning.png")
 var beam_texture=preload("res://assets/effects/clock_beam.png")
@@ -93,6 +94,7 @@ func reset(support_id: String = "none") -> void:
 
 
 func update_combat(delta: float, allow_attacks: bool = true) -> void:
+	allow_attacks=allow_attacks and attacks_enabled
 	if game == null or not is_instance_valid(game.player):
 		return
 	combat_time += delta
@@ -109,7 +111,7 @@ func update_combat(delta: float, allow_attacks: bool = true) -> void:
 	beams=beams.filter(func(beam):return beam.life>0)
 	for fx in lightning_fx:fx.life-=delta
 	lightning_fx=lightning_fx.filter(func(fx):return fx.life>0)
-	arsenal.tick(delta)
+	arsenal.tick(delta,allow_attacks)
 	ground.tick(delta,allow_attacks)
 	_update_projectiles(delta)
 	_update_orbit(delta, allow_attacks)

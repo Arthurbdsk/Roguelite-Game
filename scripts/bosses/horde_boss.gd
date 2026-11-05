@@ -1,6 +1,9 @@
 class_name HordeBoss
 extends HordeEnemy
 
+var dev_frozen:bool=false
+var dev_repeat:String=""
+var dev_next_attack:String=""
 var form:int=1
 var first_phase_hp:float=0
 var phase: int = 1
@@ -58,7 +61,7 @@ func enable_combat() -> void:
 	sprite.position.y = -float(sprite.texture.get_height()) * 0.5 + 4
 
 func tick(delta: float) -> void:
-	if not alive or not combat_enabled:
+	if dev_frozen or not alive or not combat_enabled:
 		return
 	tick_control(delta)
 	if state=="transform":
@@ -85,7 +88,7 @@ func tick(delta: float) -> void:
 	if state == "chase":
 		var speed: float = game.boss_balance.executioner_speed if is_executioner else game.boss_balance.demon_speed
 		movement = direction * speed * game.balance.enemy_speed_multiplier * game.enemy_scale().speed * (1.06 if phase >= 2 and is_executioner else 1.0)
-		if attack_time <= 0:
+		if attack_time <= 0 and dev_attack_ready():
 			begin_attack(choose_attack())
 			movement = Vector2.ZERO
 		if offset.length() < radius + game.player.radius and contact_timer <= 0:
@@ -128,7 +131,15 @@ func tick(delta: float) -> void:
 	sprite.modulate = Color(1.6, 1.6, 1.6) if hit_flash > 0 else Color.WHITE
 	queue_redraw()
 
+func dev_attack_ready()->bool:
+	var requested:String=dev_next_attack if not dev_next_attack.is_empty() else dev_repeat
+	if requested.is_empty() or requested in ["execute","charge","dash"]:return true
+	return game.late_arena.can_cast(requested) if self is LateBoss else game.boss_arena.can_cast(requested)
+
 func choose_attack() -> String:
+	if not dev_next_attack.is_empty():
+		var selected:String=dev_next_attack;dev_next_attack="";return selected
+	if not dev_repeat.is_empty():return dev_repeat
 	if is_executioner:
 		var chosen: String = "execute" if attack_index % 2 == 0 else "charge"
 		attack_index += 1
@@ -202,6 +213,7 @@ func take_damage(amount: float, _force: Vector2 = Vector2.ZERO) -> void:
 	if hp<=0 and not is_executioner and form==1:
 		first_phase_hp=max_hp
 		form=2
+		dev_repeat="";dev_next_attack=""
 		max_hp=first_phase_hp*game.boss_balance.second_health_multiplier
 		hp=max_hp
 		state="transform";state_time=0;targetable=false;velocity=Vector2.ZERO

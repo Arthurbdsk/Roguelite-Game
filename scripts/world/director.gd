@@ -42,7 +42,7 @@ func tick(delta: float) -> void:
 		return
 	if phase == "complete":
 		return
-	if not elite_spawned and game.elapsed >= game.boss_balance.executioner_arrival and phase != "boss":
+	if not game.dev_boss_test and not elite_spawned and game.elapsed >= game.boss_balance.executioner_arrival and phase != "boss":
 		spawn("executioner")
 	if phase == "boss":
 		return
@@ -70,7 +70,7 @@ func tick(delta: float) -> void:
 		wave_spawned += 1
 		cooldown += maxf(game.balance.minimum_spawn_interval, wave.spawn_interval)
 		budget -= 1
-	if queue.is_empty() and game.enemies.is_empty() and game.slime_families.pending.is_empty():
+	if queue.is_empty() and (game.enemies.filter(func(e):return not e is HordeBoss).is_empty() if game.dev_tools!=null and game.dev_tools.active else game.enemies.is_empty()) and game.slime_families.pending.is_empty():
 		phase = "preparing"
 		preparation_left = game.balance.preparation_seconds
 		game.enemy_projectiles.reset();game.hazards.clear()
@@ -90,7 +90,7 @@ func begin_wave() -> void:
 	for id in composition:
 		for i in int(composition[id]):
 			queue.append({"id": id, "elite": false})
-	var elite_count: int = game.coop.rules.wave_count(wave.elite_guards, game.coop.initial_size) if game.coop != null and game.coop.active else wave.elite_guards
+	var elite_count: int = game.coop.rules.wave_count(wave.elite_guards, game.scaling_participants())
 	elite_count=roundi(elite_count*(1+.05*game.run_challenge))
 	for i in elite_count:
 		queue.append({"id": "guard", "elite": true})

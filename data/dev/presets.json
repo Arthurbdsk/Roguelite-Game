@@ -1,0 +1,65 @@
+{
+  "5": {
+    "level": 18,
+    "weapons": {
+      "sword": 4,
+      "bolt": 3,
+      "orbit": 2
+    },
+    "passives": {
+      "boots": 2,
+      "ward": 2
+    }
+  },
+  "10": {
+    "level": 59,
+    "weapons": {
+      "sword": 8,
+      "bolt": 8,
+      "orbit": 6,
+      "lightning": 6,
+      "clock": 5,
+      "holy_water": 5
+    },
+    "passives": {
+      "heart": 4,
+      "ward": 4,
+      "boots": 4,
+      "crown": 4
+    }
+  },
+  "15": {
+    "level": 80,
+    "weapons": {
+      "sword": 8,
+      "bolt": 8,
+      "orbit": 8,
+      "lightning": 8,
+      "clock": 8,
+      "holy_water": 8
+    },
+    "passives": {
+      "heart": 8,
+      "ward": 8,
+      "boots": 8,
+      "crown": 8
+    }
+  },
+  "20": {
+    "level": 96,
+    "weapons": {
+      "sword": 8,
+      "bolt": 8,
+      "orbit": 8,
+      "lightning": 8,
+      "clock": 8,
+      "holy_water": 8
+    },
+    "passives": {
+      "heart": 8,
+      "ward": 8,
+      "boots": 8,
+      "crown": 8
+    }
+  }
+}

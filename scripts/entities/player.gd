@@ -1,6 +1,7 @@
 class_name Sentinel
 extends CharacterBody2D
 
+var dev_invulnerable:bool=false
 var game
 var visual_clock:float=0
 var swing_remaining:float=0
@@ -72,7 +73,7 @@ func tick(delta: float, movement: Vector2) -> void:
  queue_redraw()
 
 func take_damage(amount: float, source: Vector2) -> bool:
- if down or invulnerable > 0 or hp <= 0 or game.state != "running":
+ if dev_invulnerable or down or invulnerable > 0 or hp <= 0 or game.state != "running":
   return false
  hurt_remaining=.2
  damage_revision += 1
@@ -115,6 +116,7 @@ func clear_status():
  hurt_remaining=0
  revive_remaining=0
 func tick_status(delta:float):
+ if dev_invulnerable:return
  if poison_remaining<=0:return
  var active:float=minf(delta,poison_remaining)
  poison_remaining=maxf(0,poison_remaining-delta)

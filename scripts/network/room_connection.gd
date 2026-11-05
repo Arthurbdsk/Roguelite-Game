@@ -30,13 +30,14 @@ func _ready() -> void:
 		if argument.begins_with("--relay="):
 			endpoint = argument.trim_prefix("--relay=")
 
-func connect_room(create: bool, display_name: String, room_code: String = "", skills: Dictionary = {}, challenge:int=0,gold_remainder:float=0) -> void:
+func connect_room(create: bool, display_name: String, room_code: String = "", skills: Dictionary = {}, challenge:int=0,gold_remainder:float=0, development:bool=false) -> void:
 	if endpoint.is_empty():
 		connection_failed.emit("O serviço de salas está indisponível no momento.")
 		return
 	close()
 	pending = {"type": "create" if create else "join", "name": display_name.strip_edges(), "code": room_code.strip_edges().to_upper(), "skills": skills,"challenge":challenge,"gold_remainder":gold_remainder}
 	pending.game_version=ProjectSettings.get_setting("application/config/version","0.5.0")
+	if development and (OS.has_feature("editor") or OS.has_feature("dev_tools")):pending.game_version+="-dev"
 	socket = WebSocketPeer.new()
 	socket.inbound_buffer_size = 1048576
 	socket.outbound_buffer_size = 1048576

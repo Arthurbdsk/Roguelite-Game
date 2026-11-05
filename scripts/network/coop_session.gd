@@ -51,7 +51,7 @@ func setup(owner_game) -> void:
 
 func connect_room(create: bool, name_value: String, code: String = "") -> void:
  message = "Conectando..."
- connection.connect_room(create, name_value, code, game.profile.data.upgrade_ranks,game.profile.data.challenge_active,game.profile.data.gold_remainder)
+ connection.connect_room(create, name_value, code, game.profile.data.upgrade_ranks,game.profile.data.challenge_active,game.profile.data.gold_remainder,game.dev_tools!=null and game.dev_tools.active)
  game.ui.render("online")
 
 func receive(packet: Dictionary) -> void:
@@ -76,6 +76,9 @@ func receive(packet: Dictionary) -> void:
   "action":
    if hosting and active and actors.has(packet.from) and packet.get("data") is Dictionary:
     var data: Dictionary = packet.data
+    if data.has("dev"):
+     if game.dev_tools!=null and game.dev_tools.active:game.dev_tools.receive_request(packet.from,data.dev)
+     return
     var accepted: bool = inputs.accept(packet.from, data, world_clock)
     if accepted and data.get("self_revive",false)==true:perform_self_revive(packet.from)
     if accepted and data.has("choice") and (data.get("generation") is int or data.get("generation") is float):
@@ -132,6 +135,7 @@ func begin(packet: Dictionary) -> void:
  game.ui.root.add_child(team_hud)
  game.ui.root.move_child(team_hud, game.ui.menu.get_index())
  team_hud.session = self
+ if game.dev_tools!=null and game.dev_tools.active:game.dev_tools.coop_ready()
  if hosting: broadcast_state(true)
 
 func live_players() -> Array:
@@ -304,6 +308,7 @@ func mark_down(id: String) -> void:
  revives.interactions.erase(id)
 
 func share_xp(amount: int) -> void:
+ if game.dev_tools!=null and game.dev_tools.active:return
  for actor in actors.values(): actor.award_xp(amount)
 
 func on_gold(amount: int) -> void:
@@ -346,6 +351,9 @@ func flush_events() -> void:
  if connection.send_message({"type": "events", "data": batch}): outbox = outbox.slice(batch.size())
 
 func finish(won: bool) -> void:
+ if game.dev_tools!=null and game.dev_tools.active:
+  if hosting:game.dev_tools.complete(won)
+  return
  if ended: return
  var result := {"gold_fractions":{},"gold_bonuses":{},"won": won, "elapsed": game.elapsed, "kills": game.kills, "gold": game.gold, "earned": game.earned, "wave": game.director.wave_number()}
  for id in actors:
@@ -393,6 +401,7 @@ func connection_lost(reason: String) -> void:
  message = reason
  game.state = "online"
  game.ui.render("online")
+ if game.dev_tools!=null and game.dev_tools.active:game.dev_tools.end_test()
 
 func leave() -> void:
  if active and not ended: finish(false)
@@ -439,7 +448,7 @@ func broadcast_state(force: bool = false) -> void:
  for enemy in visible_enemies:
   if not is_instance_valid(enemy): continue
   entities["e" + str(enemy.serial)] = {"kind": "enemy", "species": enemy.data.id, "position": enemy.position, "hp": enemy.hp, "max_hp": enemy.max_hp, "frame": enemy.sprite.frame, "flip": enemy.sprite.flip_h, "state": enemy.state, "charge_direction": enemy.charge_direction, "targetable": enemy.targetable, "visible": enemy.sprite.visible, "sprite_position": enemy.sprite.position, "alpha": enemy.sprite.modulate.a,"meals":enemy.meals if enemy is Devourer else 0,"enemy_damage":enemy.data.damage}
-  entities["e" + str(enemy.serial)].merge({"locked_target":enemy.locked_target if enemy is LateBoss else Vector2.ZERO,"form":enemy.form if enemy is HordeBoss else 1,"frozen":enemy.frozen_remaining,"slow":enemy.slow_remaining,"state_time": enemy.state_time, "elite": enemy.elite, "attack_name": enemy.attack_name if enemy is HordeBoss else "", "phase": enemy.phase if enemy is HordeBoss else 1,"ambush_at":enemy.ambush_at if enemy is SpecialEnemy else Vector2.ZERO})
+  entities["e" + str(enemy.serial)].merge({"locked_target":enemy.locked_target if enemy is LateBoss else Vector2.ZERO,"attack_time":enemy.attack_time,"dev_frozen":enemy.dev_frozen if enemy is HordeBoss else false,"dev_repeat":enemy.dev_repeat if enemy is HordeBoss else "","form":enemy.form if enemy is HordeBoss else 1,"frozen":enemy.frozen_remaining,"slow":enemy.slow_remaining,"state_time": enemy.state_time, "elite": enemy.elite, "attack_name": enemy.attack_name if enemy is HordeBoss else "", "phase": enemy.phase if enemy is HordeBoss else 1,"ambush_at":enemy.ambush_at if enemy is SpecialEnemy else Vector2.ZERO})
  for id in actors:
   var actor: CoopActor = actors[id]
   entities[id] = {"kind": "player", "position": actor.player.position, "hp": actor.player.hp, "max_hp": actor.player.max_hp, "speed": actor.player.speed, "down": actor.down, "frame": actor.player.sprite.frame, "flip": actor.player.sprite.flip_h, "invulnerable": actor.player.invulnerable,"poison":actor.player.poison_remaining,"root":actor.player.root_remaining}
@@ -473,6 +482,9 @@ func broadcast_state(force: bool = false) -> void:
  if connection.send_message(packet): sent_entities = next_entities
 
 func apply_event(data: Dictionary) -> void:
+ if str(data.get("type","")).begins_with("dev_"):
+  if game.dev_tools!=null and game.dev_tools.active:game.dev_tools.receive_event(data)
+  return
  match data.get("type", ""):
   "gold_pickup":
    game.sound.play_cue("gold")
@@ -568,6 +580,7 @@ func apply_delta(raw: Dictionary) -> void:
     if enemy is LateBoss:enemy.locked_target=state.get("locked_target",Vector2.ZERO)
     if enemy is SpecialEnemy:enemy.ambush_at=state.ambush_at
     enemy.state_time = state.state_time
+    enemy.attack_time=state.attack_time
     enemy.frozen_remaining=state.frozen
     enemy.slow_remaining=state.slow
     enemy.charge_direction = state.charge_direction
@@ -578,6 +591,7 @@ func apply_delta(raw: Dictionary) -> void:
     enemy.sprite.position = state.sprite_position
     enemy.sprite.modulate.a = state.alpha
     if enemy is HordeBoss:
+     enemy.dev_frozen=state.get("dev_frozen",false);enemy.dev_repeat=state.get("dev_repeat","")
      enemy.combat_enabled = state.targetable
      enemy.attack_name = state.attack_name
      enemy.phase = int(state.phase)

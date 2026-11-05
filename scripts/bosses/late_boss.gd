@@ -20,7 +20,7 @@ func enable_combat():
  super.enable_combat()
  if data.id=="horror" and form==1:sprite.position.y=-14
 func tick(delta:float):
- if not alive or not combat_enabled:return
+ if dev_frozen or not alive or not combat_enabled:return
  tick_control(delta);clock+=delta;state_time+=delta;attack_time-=delta;hit_flash=maxf(0,hit_flash-delta)
  if state=="transform":
   apply_visual_form();sprite.frame=26+mini(3,int(fmod(state_time,.8)*5))
@@ -30,7 +30,7 @@ func tick(delta:float):
  var direction:Vector2=(game.player.position-position).normalized()
  if state=="chase":
   movement=game.navigation.steer(self,direction*data.speed)
-  if attack_time<=0:
+  if attack_time<=0 and dev_attack_ready():
    begin_attack(choose_attack());movement=Vector2.ZERO
  elif state=="windup" and state_time>=warning_duration():execute_attack()
  elif state=="charge":
@@ -58,6 +58,9 @@ func begin_attack(id:String):
  locked_target=target.position;charge_direction=(locked_target-position).normalized()
 func warning_duration()->float:return float(game.campaign.config.warning)
 func choose_attack()->String:
+ if not dev_next_attack.is_empty():
+  var selected:String=dev_next_attack;dev_next_attack="";return selected
+ if not dev_repeat.is_empty():return dev_repeat
  var order:Array=["cross","feathers","light_ring"] if data.id=="guardian" else ["fire","summon","ice","columns","dash","ice_sectors","light_bands"]
  if form==2:order=["fire","moving_ring","light_bands","dash","columns","ice_sectors"]
  var chosen:String=order[attack_index%order.size()];attack_index+=1;return chosen
@@ -72,6 +75,7 @@ func take_damage(amount:float,_force:Vector2=Vector2.ZERO):
  hp=maxf(0,hp-amount);hit_flash=.08;game.add_damage_number(position-Vector2(0,45),int(amount))
  if hp>0:return
  if data.id=="horror" and form==1:
+  dev_repeat="";dev_next_attack=""
   form=2;max_hp*=float(game.campaign.config.true_health_ratio);hp=max_hp;state="transform";state_time=0;targetable=false;velocity=Vector2.ZERO
   game.late_arena.clear_attacks(self);game.announce("TRUE FORM",3);return
  if death_paid:return
