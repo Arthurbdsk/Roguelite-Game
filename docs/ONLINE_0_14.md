@@ -2,7 +2,9 @@
 
 ## Estado da publicação
 
-O cliente e o relay usam protocolo 2. Não existe endpoint público configurado: `network.cfg` tem URL vazia. Não há servidor Node persistente com endpoint, domínio e credencial de implantação configurados nesta sessão. Portanto, esta entrega prepara a implantação e corrige o transporte, mas não afirma que os amigos já conseguem criar salas pela internet.
+Atualização 0.14.1: relay publicado em `wss://hordas-relay.onrender.com`, em instância Free do Render, por escolha do proprietário em 6 de novembro de 2026. HTTPS e protocolo 2 verificados. Quatro processos locais se conectaram pelo servidor público e passaram pelo fluxo de partida; isso não equivale a quatro máquinas em redes diferentes nem a trinta minutos nessa hospedagem.
+
+O plano gratuito suspende sem tráfego e pode demorar aproximadamente um minuto para iniciar. O cliente 0.14.1 consulta `/health` antes do WebSocket e tenta novamente por até noventa segundos. Não há polling permanente para evitar a suspensão. Limites de computação e tráfego do plano continuam aplicáveis. Não foi contratada hospedagem paga.
 
 Foi verificada também a alternativa Vercel. Ela suporta WebSockets, mas as conexões encerram ao atingir a duração máxima e novas conexões não têm afinidade garantida com uma instância. Um deploy direto das salas em memória não atende a esses requisitos; seria necessária coordenação externa e retomada de sessões. Essa migração não foi feita sem medição de benefício. [Documentação oficial](https://vercel.com/docs/functions/websockets).
 
@@ -12,7 +14,7 @@ Os testes com quatro processos locais, atraso e limitação de banda não substi
 
 ### Render
 
-O `render.yaml` na raiz prepara um serviço Node com uma única instância, health check e token de métricas gerado pelo provedor. Usa compute Starter pago, que só deve ser criado após conferir e autorizar o preço no painel. O arquivo sozinho não cria nem cobra um serviço.
+O `render.yaml` na raiz prepara um serviço Node Free com uma única instância, health check e token de métricas gerado pelo provedor. O serviço atual foi criado pelo formulário usando o repositório público; métricas permanecem desativadas, sem token configurado. O arquivo sozinho não cria nem cobra um serviço.
 
 Após entrar no Render, criar um Blueprint deste repositório, conferir a configuração e o custo antes de confirmar. Não é necessário comprar domínio: usar o endereço HTTPS/WSS `onrender.com` fornecido pelo serviço. Desativar deploy automático evita interromper salas a cada alteração no GitHub; um deploy manual ou reinício ainda encerra as salas em memória. Manter uma instância, sem autoscaling.
 

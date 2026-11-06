@@ -22,6 +22,8 @@ var players: Array = []
 var connected: bool = false
 var age: float = 0
 var endpoint: String = ""
+var warmup: HTTPRequest
+var warmup_started:int=0
 var last_close_code: int = 0
 var last_close_reason: String = ""
 var send_errors: int = 0
@@ -49,6 +51,46 @@ func connect_room(create: bool, display_name: String, room_code: String = "", sk
  pending.protocol=2
  pending.game_version=ProjectSettings.get_setting("application/config/version","0.5.0")
  if development and (OS.has_feature("editor") or OS.has_feature("dev_tools")):pending.game_version+="-dev"
+ if endpoint.begins_with("wss://") and endpoint.get_slice("/",2).ends_with(".onrender.com"):
+  warmup=HTTPRequest.new()
+  warmup_started=Time.get_ticks_msec()
+  warmup.timeout=90
+  warmup.body_size_limit=4096
+  add_child(warmup)
+  warmup.request_completed.connect(_warmup_finished)
+  if warmup.request("https://"+endpoint.get_slice("/",2)+"/health")!=OK:
+   close()
+   connection_failed.emit("Não foi possível iniciar o serviço de salas. Tente novamente.")
+  return
+ open_socket()
+
+func _warmup_finished(result:int,status:int,_headers:PackedStringArray,body:PackedByteArray)->void:
+ if warmup==null:return
+ var parser:=JSON.new()
+ var info=null
+ if parser.parse(body.get_string_from_utf8())==OK:info=parser.data
+ var supported:bool=false
+ if info is Dictionary:
+  for protocol in info.get("supported",[]):
+   if int(protocol)==2:supported=true
+ if result!=HTTPRequest.RESULT_SUCCESS or status!=200 or not info is Dictionary or not info.get("ok",false) or not supported:
+  log_connection("warmup_failed",{"result":result,"status":status})
+  if Time.get_ticks_msec()-warmup_started<90000:
+   var waiting:HTTPRequest=warmup
+   await get_tree().create_timer(2).timeout
+   if warmup==waiting and is_instance_valid(waiting):
+    waiting.request("https://"+endpoint.get_slice("/",2)+"/health")
+   return
+  warmup.queue_free()
+  warmup=null
+  pending.clear()
+  connection_failed.emit("O serviço de salas está iniciando ou indisponível. Aguarde e tente novamente.")
+  return
+ warmup.queue_free()
+ warmup=null
+ open_socket()
+
+func open_socket()->void:
  socket = WebSocketPeer.new()
  socket.inbound_buffer_size = 1048576
  socket.outbound_buffer_size = 1048576
@@ -153,6 +195,11 @@ func _process(delta: float) -> void:
   connection_failed.emit("Conexão encerrada (%d). %s" % [last_close_code, explanation])
 
 func close() -> void:
+ if warmup!=null:
+  warmup.cancel_request()
+  warmup.queue_free()
+  warmup=null
+ pending.clear()
  if socket != null:
   send_message({"type": "leave"})
   socket.close()

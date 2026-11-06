@@ -1,0 +1,275 @@
+{
+  "endpoint": "wss://hordas-relay.onrender.com",
+  "date": "2026-11-06",
+  "note": "Four processes on one PC through public internet relay; not four physical networks; no 30 minute remote soak.",
+  "runs": [
+    {
+      "stamp": 1793992425733,
+      "participants": [
+        {
+          "index": 0,
+          "metrics": [
+            {
+              "apply_us": {},
+              "decode_us": {},
+              "index": 0,
+              "metrics": {
+                "decode_us": 29,
+                "jitter_ms": 26.17313128448,
+                "max_queue_bytes": 0,
+                "packets_rx": 1208,
+                "packets_tx": 262,
+                "queue_age_ms": 0,
+                "queue_bytes": 0,
+                "rtt_ms": 132.0,
+                "rx_bytes": 173687,
+                "serialize_us": 12,
+                "tx_bytes": 325301
+              },
+              "peer_rtt_ms": {},
+              "relay_rtt_ms": {
+                "median": 126.0,
+                "p95": 291.0,
+                "p99": 291.0,
+                "samples": 11
+              },
+              "seconds": 23.2276703333333,
+              "serialize_us": {
+                "median": 117,
+                "p95": 1530,
+                "p99": 9616,
+                "samples": 191
+              },
+              "snapshot_age_ms": 0,
+              "snapshot_interval_ms": {}
+            }
+          ],
+          "evidence": [
+            "COOP_MATCH_PEER_PASS index=0 checks=34 failures=0"
+          ]
+        },
+        {
+          "index": 1,
+          "metrics": [
+            {
+              "apply_us": {
+                "median": 291,
+                "p95": 3428,
+                "p99": 34562,
+                "samples": 190
+              },
+              "decode_us": {
+                "median": 107,
+                "p95": 1503,
+                "p99": 9635,
+                "samples": 190
+              },
+              "index": 1,
+              "metrics": {
+                "apply_us": 262,
+                "correction_sum_px": 62.59814453125,
+                "decode_us": 18,
+                "jitter_ms": 26.0170942464,
+                "max_correction_px": 3.07080078125,
+                "max_queue_bytes": 0,
+                "packets_rx": 255,
+                "packets_tx": 410,
+                "peer_jitter_ms": 58.89070848,
+                "peer_rtt_ms": 529.0,
+                "queue_age_ms": 0,
+                "queue_bytes": 0,
+                "rtt_ms": 154.0,
+                "rx_bytes": 325929,
+                "serialize_us": 24,
+                "tx_bytes": 38925
+              },
+              "peer_rtt_ms": {
+                "median": 297.0,
+                "p95": 529.0,
+                "p99": 529.0,
+                "samples": 9
+              },
+              "relay_rtt_ms": {
+                "median": 154.0,
+                "p95": 317.0,
+                "p99": 317.0,
+                "samples": 10
+              },
+              "seconds": 22.0942490000002,
+              "serialize_us": {},
+              "snapshot_age_ms": 587,
+              "snapshot_interval_ms": {
+                "median": 103,
+                "p95": 117,
+                "p99": 187,
+                "samples": 189
+              }
+            }
+          ],
+          "evidence": [
+            "COOP_MATCH_PEER_PASS index=1 checks=32 failures=0"
+          ]
+        },
+        {
+          "index": 2,
+          "metrics": [
+            {
+              "apply_us": {
+                "median": 295,
+                "p95": 4074,
+                "p99": 33389,
+                "samples": 190
+              },
+              "decode_us": {
+                "median": 104,
+                "p95": 1500,
+                "p99": 8903,
+                "samples": 190
+              },
+              "index": 2,
+              "metrics": {
+                "apply_us": 216,
+                "correction_sum_px": 23.9998779296875,
+                "decode_us": 14,
+                "jitter_ms": 27.051479552,
+                "max_correction_px": 6.0,
+                "max_queue_bytes": 0,
+                "packets_rx": 256,
+                "packets_tx": 408,
+                "peer_jitter_ms": 6.53163776,
+                "peer_rtt_ms": 296.0,
+                "queue_age_ms": 0,
+                "queue_bytes": 0,
+                "rtt_ms": 154.0,
+                "rx_bytes": 325909,
+                "serialize_us": 21,
+                "tx_bytes": 38679
+              },
+              "peer_rtt_ms": {
+                "median": 283.0,
+                "p95": 297.0,
+                "p99": 297.0,
+                "samples": 9
+              },
+              "relay_rtt_ms": {
+                "median": 151.0,
+                "p95": 310.0,
+                "p99": 310.0,
+                "samples": 10
+              },
+              "seconds": 22.0922156666669,
+              "serialize_us": {},
+              "snapshot_age_ms": 579,
+              "snapshot_interval_ms": {
+                "median": 103,
+                "p95": 118,
+                "p99": 187,
+                "samples": 189
+              }
+            }
+          ],
+          "evidence": [
+            "COOP_MATCH_PEER_PASS index=2 checks=32 failures=0"
+          ]
+        },
+        {
+          "index": 3,
+          "metrics": [
+            {
+              "apply_us": {
+                "median": 290,
+                "p95": 3807,
+                "p99": 33017,
+                "samples": 187
+              },
+              "decode_us": {
+                "median": 107,
+                "p95": 1670,
+                "p99": 9271,
+                "samples": 187
+              },
+              "index": 3,
+              "metrics": {
+                "apply_us": 1647,
+                "correction_sum_px": 0.0,
+                "decode_us": 15,
+                "jitter_ms": 23.2308476928,
+                "max_correction_px": 0.0,
+                "max_queue_bytes": 0,
+                "packets_rx": 249,
+                "packets_tx": 401,
+                "peer_jitter_ms": 4.09024,
+                "peer_rtt_ms": 290.0,
+                "queue_age_ms": 0,
+                "queue_bytes": 0,
+                "rtt_ms": 141.0,
+                "rx_bytes": 321398,
+                "serialize_us": 6,
+                "tx_bytes": 38098
+              },
+              "peer_rtt_ms": {
+                "median": 276.0,
+                "p95": 290.0,
+                "p99": 290.0,
+                "samples": 9
+              },
+              "relay_rtt_ms": {
+                "median": 138.0,
+                "p95": 296.0,
+                "p99": 296.0,
+                "samples": 10
+              },
+              "seconds": 21.2119007777778,
+              "serialize_us": {},
+              "snapshot_age_ms": 25,
+              "snapshot_interval_ms": {
+                "median": 103,
+                "p95": 117,
+                "p99": 179,
+                "samples": 186
+              }
+            }
+          ],
+          "evidence": [
+            "COOP_MATCH_PEER_PASS index=3 checks=30 failures=0"
+          ]
+        }
+      ]
+    },
+    {
+      "stamp": 1793992450389,
+      "participants": [
+        {
+          "index": 0,
+          "metrics": [],
+          "evidence": [
+            "NETWORK_COLLISION13 225 moving bodies frames180 wall_s=3.037718 cpu_median_ms=12.293 p95=24.137",
+            "MOVING_OVERLAPS 0",
+            "COOP_MATCH_PEER_PASS index=0 survival13 checks=12 failures=0"
+          ]
+        },
+        {
+          "index": 1,
+          "metrics": [],
+          "evidence": [
+            "COOP_MATCH_PEER_PASS index=1 survival13 checks=16 failures=0"
+          ]
+        },
+        {
+          "index": 2,
+          "metrics": [],
+          "evidence": [
+            "COOP_MATCH_PEER_PASS index=2 survival13 checks=16 failures=0"
+          ]
+        },
+        {
+          "index": 3,
+          "metrics": [],
+          "evidence": [
+            "COOP_MATCH_PEER_PASS index=3 survival13 checks=15 failures=0"
+          ]
+        }
+      ]
+    }
+  ]
+}

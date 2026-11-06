@@ -1,11 +1,11 @@
-# Creates paid compute only after confirmation in the Render dashboard.
+# Free test deployment authorized by the project owner.
 services:
   - type: web
     name: hordas-relay
     runtime: node
     rootDir: relay
     region: virginia
-    plan: starter
+    plan: free
     numInstances: 1
     buildCommand: npm ci --omit=dev
     startCommand: node server.mjs
