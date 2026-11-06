@@ -5,7 +5,7 @@ var completed:int=0
 var applied_stage:int=0
 func reset():completed=0;applied_stage=0
 func stage()->int:return maxi(0,floori(game.elapsed/game.balance.difficulty_seconds))
-func resistance()->float:return clampf(stage()*game.balance.horde_resistance_step,0,minf(.95,game.balance.horde_resistance_cap))
+func resistance()->float:return 0.0
 func apply(enemy):
  if not enemy.alive or enemy.data.behavior=="hazard_target":return
  var bonus:float=stage()*game.balance.horde_health_step*enemy.difficulty_health_factor

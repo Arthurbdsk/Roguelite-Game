@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/data/weapon_data.gd" id="1"]
+[resource]
+script = ExtResource("1")
+id = "fire_wand"
+display_name = "Varinha de Fogo"
+icon = ""
+max_level = 8
+damage = PackedFloat32Array(33.6,38.4,43.2,48.0,52.8,57.6,63.6,70.8)
+cooldown = PackedFloat32Array(2.8,2.8,2.8,2.8,2.8,2.8,2.8,2.8)
+reach = PackedFloat32Array(300,300,300,300,300,300,300,300)
+count = PackedInt32Array(3,3,3,3,3,3,3,3)
+projectile_speed = PackedFloat32Array(160,160,180,180,205,205,230,230)
+duration = PackedFloat32Array(0,0,0,0,0,0,0,0)
+projectile_radius = PackedFloat32Array(4,4,4,4,4,4,4,4)
+pierce = PackedInt32Array(1,1,1,1,1,1,1,1)

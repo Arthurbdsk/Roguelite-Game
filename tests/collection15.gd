@@ -5,7 +5,7 @@ func check(ok:bool,label:String):
  if not ok:errors+=1;printerr("FAIL "+label)
 func run():
  var g=load("res://scenes/main.tscn").instantiate();root.add_child(g);await process_frame
- g.set_physics_process(false);g.persistence_enabled=false;g.test_mode=true;g.start_run();g.weapon_system.apply_upgrade("bolt");g.record_discovery("consumable:food")
+ g.set_physics_process(false);g.persistence_enabled=false;g.test_mode=true;g.start_run();g.weapon_system.apply_upgrade("sword");g.record_discovery("consumable:food")
  var old_gold:int=g.profile.data.gold
  var save_path:String="user://collection15_fixture.json"
  g.profile.path=save_path;check(g.profile.save(),"save additive discoveries")

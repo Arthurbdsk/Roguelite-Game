@@ -10,6 +10,7 @@ var max_hp: float
 var radius: float
 var alive: bool = true
 var suppress_split:bool=false
+var garlic_until:float=0
 var elite: bool = false
 var state: String = "approach"
 var clock: float = 0
@@ -178,7 +179,7 @@ func take_damage(amount: float, force: Vector2 = Vector2.ZERO) -> void:
 	amount=received_damage(amount)
 	hp -= amount
 	hit_flash = 0.09
-	knockback += force * (0.2 if data.behavior == "boss" else 1.0)
+	knockback += force * (0.2 if data.behavior == "boss" else (1.3 if game.elapsed<garlic_until else 1.0))
 	game.add_damage_number(position - Vector2(0, 18), amount)
 	game.sound.play_cue("hit")
 	if hp <= 0:
@@ -212,7 +213,7 @@ func apply_time_control(duration:float,resistance:float,boss_slow:float,boss_dur
 		slow_remaining=maxf(slow_remaining,boss_duration)
 		slow_factor=1-boss_slow
 	elif frozen_remaining<=0 and freeze_resistance<=0:
-		frozen_remaining=duration
+		frozen_remaining=minf(duration+1,duration*1.15) if game.elapsed<garlic_until else duration
 		resistance_duration=resistance
 	refresh_visual()
 func tick_control(delta:float)->bool:

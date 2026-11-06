@@ -23,6 +23,7 @@ func setup(owner,interface):
  grid=GridContainer.new();grid.name="CollectionGrid";grid.columns=8;grid.size_flags_horizontal=Control.SIZE_EXPAND_FILL;grid.add_theme_constant_override("h_separation",6);grid.add_theme_constant_override("v_separation",6);scroll.add_child(grid)
  for id in game.weapon_system.weapon_data:
   var d=game.weapon_system.weapon_data[id]
+  if d.icon.is_empty():continue
   entries.append({"key":"weapon:"+id,"name":d.display_name,"icon":d.icon,"description":d.description+"\n"+game.weapon_system.upgrade_values(id,0),"compatibility":weapon_compatibility(id)})
  for id in game.weapon_system.passive_data:
   var d=game.weapon_system.passive_data[id]

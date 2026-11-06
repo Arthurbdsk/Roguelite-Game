@@ -1,6 +1,6 @@
 {
   "generation": {
-    "per_minute": 48,
+    "per_minute": 60,
     "stage_seconds": 120,
     "stage_rate": 0.1
   },

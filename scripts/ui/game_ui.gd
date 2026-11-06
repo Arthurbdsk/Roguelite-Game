@@ -374,7 +374,7 @@ func _upgrades(data: Dictionary) -> void:
     var empty:=Label.new();empty.text="[  ]";empty.add_theme_font_size_override("font_size",10);icons.add_child(empty)
    for item in group:
     var stack:=VBoxContainer.new();icons.add_child(stack)
-    var icon:=TextureRect.new();icon.texture=load(item.icon);icon.custom_minimum_size=Vector2(18,18);icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;stack.add_child(icon)
+    var icon:=TextureRect.new();icon.texture=load(item.icon) if ResourceLoader.exists(item.icon) else null;icon.custom_minimum_size=Vector2(18,18);icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;stack.add_child(icon)
     var level_label:=Label.new();level_label.text=("MÁX" if item.level==8 else "Nv.%d"%item.level);level_label.add_theme_font_size_override("font_size",8);stack.add_child(level_label)
   build_stats_label=Label.new();build_stats_label.text=game.weapon_system.build_stats();build_stats_label.add_theme_font_size_override("font_size",9);build_stats_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;build.add_child(build_stats_label)
  _label(menu,"1 / 2 / 3 / 4: escolher. Esc: fechar no cooperativo.",Rect2(20,338,600,18),9,MUTED,true)

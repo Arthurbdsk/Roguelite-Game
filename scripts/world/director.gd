@@ -15,8 +15,13 @@ var queue:Array[Dictionary]=[]
 var wave_spawned:int=0
 var last_sector:int=0
 var debt:float=0
+var sector_last:Array=[-8,-7,-6,-5,-4,-3,-2,-1]
+var sector_counts:Array=[0,0,0,0,0,0,0,0]
+var blocked_reasons:Dictionary={}
+var player_cursor:int=0
 func setup(owner_game):game=owner_game;rng.randomize()
 func reset():
+ sector_last=[-8,-7,-6,-5,-4,-3,-2,-1];sector_counts=[0,0,0,0,0,0,0,0];blocked_reasons.clear();player_cursor=0
  cooldown=2.5;phase="active";queue.clear();debt=0;deferred=0;total_spawned=0;skipped_spawns=0;elite_spawned=false;boss_spawned=false;wave_index=-1
 func composition()->Dictionary:
  var t:float=game.elapsed
@@ -61,19 +66,25 @@ func spawn(id: String, elite: bool = false) -> bool:
  var view: Rect2 = game.camera_rect().grow(game.balance.spawn_margin)
  # Rotate through sectors. Jitter changes the precise entrance without
  # allowing every reinforcement to join the same single-file direction.
- last_sector = (last_sector + 1 + rng.randi_range(0, 1)) % 8
+ var ordered:Array=range(8)
+ ordered.sort_custom(func(a,b):return sector_last[a]<sector_last[b])
  var members: Array = game.team_players()
  if members.is_empty(): return false
  for attempt in 24:
-  var sector: int = (last_sector + attempt) % 8
+  var sector: int = ordered[int(attempt/3)]
   var angle: float = sector * TAU / 8 + rng.randf_range(-0.22, 0.22)
-  var anchor: Vector2 = members[(last_sector + attempt) % members.size()].position
+  var anchor: Vector2 = members[(player_cursor+int(attempt/8))%members.size()].position
   var point: Vector2 = anchor + Vector2.from_angle(angle) * rng.randf_range(game.balance.spawn_distance_min, game.balance.spawn_distance_max)
-  if view.has_point(point) or not game.hidden_spawn(point, game.balance.spawn_margin) or not game.arena.safe_position(point, 20) or not game.navigation.reachable(point,game.enemy_data[id].radius):
-   continue
-  if not game.enemy_space_free(point,game.enemy_data[id].radius):continue
+  var reason:String=""
+  if not game.hidden_spawn(point, game.balance.spawn_margin):reason="visible"
+  elif not game.arena.safe_position(point,maxf(20,game.enemy_data[id].radius)):reason="terrain"
+  elif not game.navigation.reachable(point,game.enemy_data[id].radius):reason="navigation"
+  elif not game.enemy_space_free(point,game.enemy_data[id].radius):reason="body"
+  if not reason.is_empty():
+   var key:String=str(sector)+":"+reason;blocked_reasons[key]=int(blocked_reasons.get(key,0))+1;continue
   if game.spawn_enemy(id, point, elite)==null:return false
   total_spawned += 1
+  sector_last[sector]=total_spawned;sector_counts[sector]+=1;player_cursor=(player_cursor+1)%members.size()
   last_sector = sector
   if id == "executioner":
    elite_spawned = true
@@ -88,5 +99,5 @@ func spawn(id: String, elite: bool = false) -> bool:
  return false
 
 func pressure()->String:
- return "ENCONTRO EM ANDAMENTO" if phase=="boss" else "ESTÁGIO %d | RESISTÊNCIA %d%%"%[game.horde_progress.stage(),roundi(game.horde_progress.resistance()*100)]
+ return "ENCONTRO EM ANDAMENTO" if phase=="boss" else "ESTÁGIO %d | VIDA +%.0f"%[game.horde_progress.stage(),game.horde_progress.stage()*game.balance.horde_health_step]
 func wave_number()->int:return game.horde_progress.stage()

@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/data/weapon_data.gd" id="1"]
+[resource]
+script = ExtResource("1")
+id = "runetracer"
+display_name = "Runa Traçante"
+icon = ""
+max_level = 8
+damage = PackedFloat32Array(12.0,14.4,14.4,18.0,18.0,21.6,21.6,26.4)
+cooldown = PackedFloat32Array(2.4,2.4,2.4,2.4,2.4,2.4,2.4,2.4)
+reach = PackedFloat32Array(300,300,300,300,300,300,300,300)
+count = PackedInt32Array(1,1,1,2,2,2,3,3)
+projectile_speed = PackedFloat32Array(155,155,180,180,200,200,220,220)
+duration = PackedFloat32Array(2.5,3,3,3,3.5,3.5,4,4.5)
+projectile_radius = PackedFloat32Array(4,4,4,4,4,4,4,4)
+pierce = PackedInt32Array(1,1,1,1,1,1,1,1)

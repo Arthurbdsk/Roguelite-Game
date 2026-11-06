@@ -1,5 +1,7 @@
 # Hordas
 
+Implementação experimental 0.16.0: Arco inicial, dano global +20%, resistência temporal removida e surgimentos por oito setores. Mecânicas de cinco armas novas estão no DEV; os visuais e a fonte Kingdom ainda estão pendentes. [Estado e tabelas](docs/EXPANSAO_0_16.md). A versão 0.15.0 abaixo permanece a entrega anterior com acabamento visual completo.
+
 Projeto editável em Godot 4.7.2. Inclui código, cenas, mapas, dados de balanceamento, sprites e testes. Não precisa instalar Python ou Node.js para jogar no modo solo pelo editor.
 
 Para jogar no Windows sem instalar o Godot, baixe [Hordas 0.15.0](https://github.com/Arthurbdsk/Roguelite-Game/releases/tag/v0.15.0). O arquivo `.exe` contém todos os recursos e o endereço público do relay. Todos os participantes precisam usar a mesma versão. A hospedagem gratuita no Render pode demorar cerca de um minuto para iniciar após ficar inativa; aguarde a conexão no menu Online.

@@ -2,6 +2,12 @@ extends Node2D
 class_name WeaponSystem
 
 const WEAPON_PATHS: Dictionary = {
+	"garlic":"res://data/weapons/garlic.tres",
+	"whip":"res://data/weapons/whip.tres",
+	"fire_wand":"res://data/weapons/fire_wand.tres",
+	"runetracer":"res://data/weapons/runetracer.tres",
+	"magic_wand":"res://data/weapons/magic_wand.tres",
+
 	"ice_wave":"res://data/weapons/ice_wave.tres",
 	"blades":"res://data/weapons/blades.tres",
 	"bombs":"res://data/weapons/bombs.tres",
@@ -33,9 +39,10 @@ var attacks_enabled:bool=true
 var game
 var lightning_texture=preload("res://assets/effects/lightning.png")
 var beam_texture=preload("res://assets/effects/clock_beam.png")
+var additions:=NewWeapons16.new()
 var arsenal:Arsenal
 var ground:GroundAttacks
-var levels: Dictionary = {"sword": 1, "bolt": 0, "orbit": 0}
+var levels: Dictionary = {"bolt": 1}
 var passives: Dictionary = {}
 var weapon_data: Dictionary = {}
 var passive_data: Dictionary = {}
@@ -70,10 +77,11 @@ func setup(game_ref) -> void:
 
 # Call after the player has reset its base statistics for a fresh expedition.
 func reset(support_id: String = "none") -> void:
+	additions.setup(self);additions.reset()
 	if arsenal!=null:arsenal.reset()
 	if ground!=null:ground.reset()
 	support = support_id
-	levels = {"sword": 1, "bolt": 0, "orbit": 0}
+	levels = {"bolt": 1}
 	passives.clear()
 	beams.clear()
 	clock_index=0
@@ -99,18 +107,19 @@ func update_combat(delta: float, allow_attacks: bool = true) -> void:
 		return
 	combat_time += delta
 	stat_cache.clear();cache_combat_stats=true
-	for id: String in ["sword", "bolt", "lightning", "clock", "holy_water", "axe", "boomerang", "bombs", "ice_wave"]:
+	for id: String in ["whip","fire_wand","runetracer","magic_wand","sword", "bolt", "lightning", "clock", "holy_water", "axe", "boomerang", "bombs", "ice_wave"]:
 		if not allow_attacks: continue
 		if int(levels.get(id,0)) <= 0:
 			continue
 		timers[id] = maxf(0.0, float(timers.get(id,0)) - delta)
 		if float(timers[id]) <= 0.0:
-			var fired: bool = arsenal.launch(id) if id in ["axe","boomerang","bombs","ice_wave"] else ground.launch_water() if id=="holy_water" else _clock() if id=="clock" else _lightning() if id=="lightning" else (_swing_sword() if id == "sword" else _fire_bolts())
+			var fired: bool = additions.launch(id) if id in NewWeapons16.IDS else arsenal.launch(id) if id in ["axe","boomerang","bombs","ice_wave"] else ground.launch_water() if id=="holy_water" else _clock() if id=="clock" else _lightning() if id=="lightning" else (_swing_sword() if id == "sword" else _fire_bolts())
 			timers[id] = _interval(id) if fired else 0.08
 	for beam in beams:beam.life-=delta
 	beams=beams.filter(func(beam):return beam.life>0)
 	for fx in lightning_fx:fx.life-=delta
 	lightning_fx=lightning_fx.filter(func(fx):return fx.life>0)
+	additions.tick(delta,allow_attacks)
 	arsenal.tick(delta,allow_attacks)
 	ground.tick(delta,allow_attacks)
 	_update_projectiles(delta)
@@ -130,9 +139,10 @@ func _stat(id: String, field: String) -> float:
 	var values = data.get(field)
 	var index: int = clampi(int(levels.get(id,0)) - 1, 0, values.size() - 1)
 	var value:float=float(values[index])
-	if (field=="reach" and id in ["sword","sludge","holy_water","ice_wave"]) or field=="area_radius" or (field=="beam_width" and id=="clock"):value*=area_factor()*(sqrt(1+permanent("area")) if id in ["sword","sludge","holy_water","ice_wave","bombs"] else 1)
-	if field=="duration" and id in ["sludge","holy_water","ice_wave"]:value*=1+.08*int(passives.get("hourglass",0))+permanent("duration")
-	if field=="count" and id in ["bolt","axe","boomerang","bombs","holy_water"]:value+=permanent("amount")
+	if field=="projectile_radius":value*=area_factor()*sqrt(1+permanent("area"))
+	if (field=="reach" and id in ["sword","sludge","holy_water","ice_wave","garlic","whip"]) or field=="area_radius" or (field=="beam_width" and id=="clock"):value*=area_factor()*(sqrt(1+permanent("area")) if id in ["sword","sludge","holy_water","ice_wave","bombs","garlic","whip"] else 1)
+	if field=="duration" and id in ["sludge","holy_water","ice_wave","runetracer"]:value*=1+.08*int(passives.get("hourglass",0))+permanent("duration")
+	if field=="count" and id in ["bolt","axe","boomerang","bombs","holy_water","whip","fire_wand","runetracer","magic_wand"]:value+=permanent("amount")
 	if cache_combat_stats:stat_cache[cache_key]=value
 	return value
 
@@ -399,6 +409,9 @@ func _weighted_pick(pool: Array[Dictionary]) -> Dictionary:
 
 
 func _weapon_available(id: String) -> bool:
+	if id in NewWeapons16.IDS and weapon_data[id].icon.is_empty():
+		var w=game.world if game is CoopActor else game
+		if not w.dev_boss_test:return false
 	var current: int = int(levels.get(id, 0))
 	var data = weapon_data[id]
 	if current >= data.max_level:
@@ -551,14 +564,17 @@ func offer_stat(id:String,field:String,index:int)->float:
 	if field=="cooldown":
 		value*=(1-.06*int(passives.get("cadence",0)))*(_mastery().interval_multiplier if _mastery()!=null else 1)
 		if support=="library" and id=="bolt":value*=1.15
-	if (field=="reach" and id in ["sword","sludge","holy_water","ice_wave"]) or field=="area_radius":value*=area_factor()*(sqrt(1+permanent("area")) if id in ["sword","sludge","holy_water","ice_wave","bombs"] else 1)
-	if field=="duration" and id in ["sludge","holy_water","ice_wave"]:value*=1+.08*int(passives.get("hourglass",0))+permanent("duration")
+	if (field=="reach" and id in ["sword","sludge","holy_water","ice_wave","garlic","whip"]) or field=="area_radius":value*=area_factor()*(sqrt(1+permanent("area")) if id in ["sword","sludge","holy_water","ice_wave","bombs","garlic","whip"] else 1)
+	if field=="duration" and id in ["sludge","holy_water","ice_wave","runetracer"]:value*=1+.08*int(passives.get("hourglass",0))+permanent("duration")
 	if field=="cooldown":value=maxf(.15,value)
-	if field=="count" and id in ["bolt","axe","boomerang","bombs","holy_water"]:value+=permanent("amount")
+	if field=="count" and id in ["bolt","axe","boomerang","bombs","holy_water","whip","fire_wand","runetracer","magic_wand"]:value+=permanent("amount")
 	return value
 func upgrade_values(id:String,current:int)->String:
 	var data=weapon_data[id]
 	var fields:Array[String]=[]
+	if id in NewWeapons16.IDS:
+		for f in ["projectile_speed","duration","pierce"]:
+			if current==0 or data.get(f)[current]!=data.get(f)[current-1]:fields.append(value_change({"projectile_speed":"Velocidade","duration":"Duração","pierce":"Perfuração"}[f],data.get(f)[maxi(0,current-1)],data.get(f)[current],current))
 	for spec in [["damage","Dano"],["cooldown","Intervalo"],["reach","Raio da poça" if id in ["sludge","holy_water"] else "Alcance"],["count","Alvos" if id=="lightning" else "Quantidade"]]:
 		var after:float=offer_stat(id,spec[0],current)
 		var before:float=offer_stat(id,spec[0],maxi(0,current-1))

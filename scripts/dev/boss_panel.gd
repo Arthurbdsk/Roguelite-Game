@@ -116,6 +116,8 @@ func rebuild():
  var perf_tab:=tab("Desempenho")
  var measure:=CheckBox.new();measure.text="Medir custos da simulação";measure.button_pressed=lab.game.perf_enabled;measure.toggled.connect(func(value):lab.game.perf_enabled=value);perf_tab.add_child(measure)
  performance_label=label(perf_tab,lab.performance_info())
+ var sectors:=CheckBox.new();sectors.text="Visualizar oito setores de surgimento";sectors.button_pressed=lab.show_spawn_sectors;sectors.toggled.connect(func(v):lab.show_spawn_sectors=v);perf_tab.add_child(sectors)
+ label(perf_tab,"Armas sem referência visual final só estão disponíveis nos testes DEV. Não possuem acabamento gráfico concluído.")
  status_label=label(base,lab.status);status_label.custom_minimum_size.y=14
  tabs.current_tab=clampi(selected,0,tabs.get_tab_count()-1);refresh()
 func slots(parent:Node,title:String,definitions:Dictionary,equipped:Dictionary,count:int,records:Array):

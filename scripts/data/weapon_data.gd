@@ -8,6 +8,8 @@ class_name WeaponData
 @export var affinity: String = ""
 @export var evolution_name: String = ""
 @export var max_level: int = 8
+@export var projectile_speed:PackedFloat32Array=PackedFloat32Array([200,200,200,200,200,200,200,200])
+@export var projectile_radius:PackedFloat32Array=PackedFloat32Array([4,4,4,4,4,4,4,4])
 @export var damage: PackedFloat32Array = PackedFloat32Array()
 @export var cooldown: PackedFloat32Array = PackedFloat32Array()
 @export var reach: PackedFloat32Array = PackedFloat32Array()
