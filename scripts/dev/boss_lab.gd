@@ -331,4 +331,11 @@ func survival_info()->String:
 func performance_info()->String:
  var net=game.coop.connection
  var metrics:Dictionary=net.metrics
- return "FPS %.1f | Corpos %d | Pares locais %d | Maior célula %d\nNavegação: consultas %d | Adiadas %d | Campos %d\nRede: protocolo 2 / WebSocket TCP | RTT %.0f ms | Jitter %.0f ms\nEnviados %d bytes | Recebidos %d bytes | Fila %d bytes / %d ms\nCodificação %.2f ms | Decodificação %.2f ms | Snapshot há %d ms\nTempos de simulação (microssegundos): %s"%[Engine.get_frames_per_second(),game.enemies.size(),game.crowd_pairs,game.crowded_cell_peak,game.navigation.queries,game.navigation.deferred,game.navigation.field_builds,metrics.rtt_ms,metrics.jitter_ms,metrics.tx_bytes,metrics.rx_bytes,metrics.queue_bytes,metrics.queue_age_ms,metrics.serialize_us/1000.0,metrics.decode_us/1000.0,Time.get_ticks_msec()-net.last_snapshot_ms if net.last_snapshot_ms>0 else 0,str(game.perf_us)]
+ var c=game.consumables
+ var consumable_info:String="Consumíveis: %d/%d | Chance %.1f%% | Próxima tentativa %.1fs\nRelógio %.1fs | Cristais pendentes %d\n"%[c.items.size(),c.config.limit,c.chance()*100,maxf(0,c.next_check-game.elapsed),c.freeze_left,c.magnet_jobs.size()]
+ return consumable_info+"FPS %.1f | Corpos %d | Pares locais %d | Maior célula %d\nNavegação: consultas %d | Adiadas %d | Campos %d\nRede: protocolo 2 / WebSocket TCP | RTT %.0f ms | Jitter %.0f ms\nEnviados %d bytes | Recebidos %d bytes | Fila %d bytes / %d ms\nCodificação %.2f ms | Decodificação %.2f ms | Snapshot há %d ms\nTempos de simulação (microssegundos): %s"%[Engine.get_frames_per_second(),game.enemies.size(),game.crowd_pairs,game.crowded_cell_peak,game.navigation.queries,game.navigation.deferred,game.navigation.field_builds,metrics.rtt_ms,metrics.jitter_ms,metrics.tx_bytes,metrics.rx_bytes,metrics.queue_bytes,metrics.queue_age_ms,metrics.serialize_us/1000.0,metrics.decode_us/1000.0,Time.get_ticks_msec()-net.last_snapshot_ms if net.last_snapshot_ms>0 else 0,str(game.perf_us)]
+
+func force_consumable(kind:String):
+ if not active or not is_host():return
+ if not running_test:start_survival()
+ status="Consumível gerado" if game.consumables.spawn_item(kind) else "Limite de dois itens ou falta de espaço"

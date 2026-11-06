@@ -92,6 +92,9 @@ func award_xp(amount: float) -> void:
 	xp += amount * (1.0+.07*int(weapon_system.passives.get("crown",0))+mastery.value("experience"))
 	prepare_offer()
 
+func record_discovery(key:String):
+	if id==session.connection.peer_id:world.record_discovery(key)
+
 func prepare_offer() -> void:
 	if xp < xp_needed or not offers.is_empty():
 		return

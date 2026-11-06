@@ -165,7 +165,7 @@
     "name": "Sorte",
     "cap": 3,
     "step": 0.1,
-    "description": "Chance de quarta opção. Um sorteio por seleção, respeitando os limites da build.",
+    "description": "+10 pontos percentuais de chance de quarta opção e +2 pontos percentuais de chance de consumível por nível. Online: média da Sorte para consumíveis.",
     "costs": [
       325,
       500,

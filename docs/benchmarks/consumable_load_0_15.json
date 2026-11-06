@@ -1,0 +1,18 @@
+{
+  "four_players": 4,
+  "frame_ms": {
+    "median": 16.691,
+    "p95": 17.21,
+    "p99": 24.518
+  },
+  "initial_enemies": 200,
+  "magnet_batch_ms": {
+    "median": 0.368,
+    "p95": 0.693,
+    "p99": 1.086
+  },
+  "pending_crystals": 2507,
+  "rendered": true,
+  "completion": "LOAD15_EXACT_XP 375.0 remaining=0",
+  "method": "Godot editor executable with rendered window; not native release FPS or four physical machines."
+}

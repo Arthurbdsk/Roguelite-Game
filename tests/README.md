@@ -75,6 +75,17 @@ node relay/match-test.mjs --balance
 
 Quatro processos reais em relay local. Pode receber --packed=build/Hordas-DEV-0.12.0/Hordas-DEV-0.12.0.exe. Suítes --packed usam o Godot da mesma versão para carregar o PCK exportado; o executável nativo recebe teste de inicialização separado por tools/export_windows.py --smoke.
 
+## Interface e consumíveis 0.15
+
+```powershell
+python tools/validate_dev11.py consumables15 consumable_frequency15
+Godot_v4.7.2-stable_win64_console.exe --path . --script tests/collection15.gd -- --self-test
+Godot_v4.7.2-stable_win64_console.exe --path . --script tests/load_consumables15.gd -- --self-test
+node relay/match-test.mjs --survival --harness=tests/consumables_network15.gd
+```
+
+`collection15` e `load_consumables15` usam janela real. A carga com quatro atores usa transporte simulado e não mede custo real de sockets. O harness de rede usa quatro processos com sockets reais e perfis temporários. Relatório em `docs/ATUALIZACAO_0_15.md`.
+
 ## Desempenho e rede 0.14
 
 ```powershell

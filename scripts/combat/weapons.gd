@@ -451,6 +451,9 @@ func apply_upgrade(id: String) -> bool:
 	else:
 		return false
 	_play("upgrade")
+	if game.has_method("record_discovery"):
+		if weapon_data.has(id):game.record_discovery("weapon:"+id)
+		elif passive_data.has(id):game.record_discovery("passive:"+id)
 	queue_redraw()
 	return true
 

@@ -2,9 +2,9 @@ class_name GameUI
 extends CanvasLayer
 
 const INK := Color("142238")
-const PANEL := Color("1c304e")
-const LINE := Color("94784d")
-const IVORY := Color("d7c9a1")
+const PANEL := Color("484f68")
+const LINE := Color("bca15d")
+const IVORY := Color("f2ecda")
 const MUTED := Color("b5c4d1")
 const COPPER := Color("b65f42")
 const ICE := Color("83c4bd")
@@ -65,8 +65,8 @@ func _build_theme() -> void:
  ui_theme.set_color("font_focus_color", "Button", Color("f0e6c8"))
  ui_theme.set_color("font_disabled_color", "Button", Color("60706c"))
  ui_theme.set_stylebox("normal", "Button", _style(PANEL, LINE))
- ui_theme.set_stylebox("hover", "Button", _style(Color("2d393b"), ICE))
- ui_theme.set_stylebox("pressed", "Button", _style(Color("374543"), IVORY))
+ ui_theme.set_stylebox("hover", "Button", _style(Color("59627b"), LINE))
+ ui_theme.set_stylebox("pressed", "Button", _style(Color("646c80"), IVORY))
  ui_theme.set_stylebox("focus", "Button", _style(Color(0, 0, 0, 0), IVORY, 2))
  ui_theme.set_stylebox("disabled", "Button", _style(Color("151e22"), Color("303c3c")))
  ui_theme.set_stylebox("background", "ProgressBar", _bar_style(Color("0c1216"), Color("45514d"), 1))
@@ -141,7 +141,7 @@ func _button(parent: Node, text: String, rect: Rect2, action: Callable, primary:
  b.pressed.connect(action)
  b.focus_entered.connect(_focus_sound)
  if primary:
-  b.add_theme_stylebox_override("normal", _style(Color("623e32"), COPPER))
+  b.add_theme_stylebox_override("normal", _style(Color("355e49"), LINE))
  parent.add_child(b)
  return b
 
@@ -185,6 +185,8 @@ func render(which: String, data: Dictionary = {}) -> void:
   "title": _title()
   "maps": _map_selection()
   "hub": _hub(data)
+  "collection":
+   var view:=CollectionView.new();menu.add_child(view);view.setup(game,self)
   "upgrading": _upgrades(data)
   "revive_offer":
    _backdrop(.9)
@@ -238,6 +240,7 @@ func _title() -> void:
  var play := _button(actions,"Jogar",Rect2(),func(): game.open_map_select(),true)
  _button(actions,"Cooperativo online",Rect2(),func(): game.open_online())
  _button(actions,"Base / habilidades",Rect2(),func(): game.enter_hub())
+ _button(actions,"Coleção",Rect2(),func(): render("collection"))
  var settings := HBoxContainer.new()
  settings.add_theme_constant_override("separation",8)
  actions.add_child(settings)

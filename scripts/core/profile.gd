@@ -54,6 +54,10 @@ func load_profile() -> bool:
  data = defaults()
  for key in parsed:
   if not data.has(key):data[key]=parsed[key]
+ data.discoveries={}
+ if parsed.get("discoveries",{}) is Dictionary:
+  for id in parsed.get("discoveries",{}):
+   if id is String and id.length()<=80 and parsed.discoveries[id]==true:data.discoveries[id]=true
  for key in ["upgrade_ranks","upgrade_spent"]:
   if parsed.has(key) and not parsed[key] is Dictionary:
    last_error="Aprimoramentos inválidos. Arquivo preservado.";return false

@@ -59,5 +59,5 @@ func effect(id:String,n:int)->String:
  if id=="regen":return "+%.1f vida/s"%v
  if id=="amount":return "+%d projétil"%int(v)
  if id=="revive":return "%d retorno por partida"%int(v)
- if id=="luck":return "%.0f%% de chance de quarta opção"%(v*100)
+ if id=="luck":return "Quarta opção: %.0f%% | Consumível: %.0f%%"%[v*100,15+n*2]
  return "%s%.0f%%"%["-" if id=="cooldown" else "+",v*100]

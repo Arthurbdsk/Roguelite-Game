@@ -1,0 +1,36 @@
+{
+  "stamp": 1793994607207,
+  "args": [
+    "--survival",
+    "--harness=tests/consumables_network15.gd",
+    "--packed=build/Hordas-DEV-0.15.0/Hordas-DEV-0.15.0.exe",
+    "--relay-url=wss://hordas-relay.onrender.com"
+  ],
+  "peers": [
+    {
+      "peer": 0,
+      "evidence": [
+        "COOP_MATCH_PEER_PASS index=0 survival13 checks=14 failures=0"
+      ]
+    },
+    {
+      "peer": 1,
+      "evidence": [
+        "COOP_MATCH_PEER_PASS index=1 survival13 checks=11 failures=0"
+      ]
+    },
+    {
+      "peer": 2,
+      "evidence": [
+        "COOP_MATCH_PEER_PASS index=2 survival13 checks=11 failures=0"
+      ]
+    },
+    {
+      "peer": 3,
+      "evidence": [
+        "COOP_MATCH_PEER_PASS index=3 survival13 checks=11 failures=0"
+      ]
+    }
+  ],
+  "method": "Four local processes through the public relay. Separate physical networks not tested."
+}

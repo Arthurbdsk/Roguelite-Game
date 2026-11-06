@@ -67,6 +67,7 @@ func flask(source:Vector2,at:Vector2,owner_root:int=0)->bool:
  areas.append({"root":owner_root,"at":at,"source":source,"age":0.0,"inside":[]})
  return true
 func tick(delta:float):
+ if game.consumables!=null and game.consumables.freeze_left>0:return
  var owners:Dictionary={}
  for mark in marks:mark.age+=delta;owners[mark.owner]=true
  for owner in owners:

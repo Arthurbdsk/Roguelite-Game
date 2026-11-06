@@ -1,0 +1,54 @@
+[
+  {
+    "luck": 0,
+    "mean": 4.98,
+    "retention": "immediate",
+    "seeds": 200,
+    "types": {
+      "cleanse": 81,
+      "food": 412,
+      "gold_bag": 195,
+      "stopwatch": 104,
+      "xp_magnet": 204
+    }
+  },
+  {
+    "luck": 0,
+    "mean": 4.98,
+    "retention": "expiry",
+    "seeds": 200,
+    "types": {
+      "cleanse": 81,
+      "food": 412,
+      "gold_bag": 195,
+      "stopwatch": 104,
+      "xp_magnet": 204
+    }
+  },
+  {
+    "luck": 3,
+    "mean": 6.82,
+    "retention": "immediate",
+    "seeds": 200,
+    "types": {
+      "cleanse": 101,
+      "food": 546,
+      "gold_bag": 280,
+      "stopwatch": 147,
+      "xp_magnet": 290
+    }
+  },
+  {
+    "luck": 3,
+    "mean": 6.82,
+    "retention": "expiry",
+    "seeds": 200,
+    "types": {
+      "cleanse": 101,
+      "food": 546,
+      "gold_bag": 280,
+      "stopwatch": 147,
+      "xp_magnet": 290
+    }
+  }
+]

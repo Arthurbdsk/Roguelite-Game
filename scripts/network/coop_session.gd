@@ -213,6 +213,7 @@ func host_tick(delta: float, local: Dictionary) -> void:
  game.slime_families.tick(delta)
  game.special_events.tick(delta)
  game.chests.tick(delta)
+ game.consumables.tick(delta)
  game.director.tick(delta)
  if ended: return
  perf_start=Time.get_ticks_usec() if game.perf_enabled else 0
@@ -397,6 +398,7 @@ func finish(won: bool) -> void:
  settle(result)
 
 func settle(result: Dictionary) -> void:
+ game.consumables.reset()
  if ended: return
  result=result.duplicate(true);result.won=bool(result.get("won",false)) or game.campaign.cleared
  game.chests.reset();game.special_events.stop()
@@ -513,6 +515,7 @@ func broadcast_state(force: bool = false) -> void:
   weapon_fx[id] = {"projectiles": shots, "slashes": weapons.slashes, "orbit_positions": weapons.orbit_positions,"lightning_fx":weapons.lightning_fx,"beams":weapons.beams,"pools":weapons.ground.pools,"arsenal_shots":weapons.arsenal.shots,"arsenal_zones":weapons.arsenal.zones,"blade_points":weapons.arsenal.blade_points}
  var data := {"reward_chest":game.chests.chest,"event_status":{"active":game.special_events.active,"age":game.special_events.age,"pending":game.special_events.pending.size()},"campaign_cleared":game.campaign.cleared,"endless":game.campaign.endless,"final_jobs":game.late_arena.patterns.jobs,"final_shots":game.late_arena.patterns.shots,"final_marks":game.late_arena.patterns.marks,"hordes_completed":game.horde_progress.completed,"chain_seeds":game.late_arena.seed_pending,"chain_stats":game.late_arena.chain.snapshot(),"late_areas":game.late_arena.areas,"late_shots":game.late_arena.shots,"full":true,"changes": changes, "removals": removals, "elapsed": game.elapsed, "gold": game.gold, "kills": game.kills, "earned": game.earned, "wave": game.director.wave_number(), "pressure": "TESTE DEV" if game.dev_tools!=null and game.dev_tools.active else game.director.pressure(), "banner": game.banner, "arrows": game.enemy_projectiles.arrows, "hazards": game.hazards, "areas": game.boss_arena.areas, "summons": game.boss_arena.pending_summons, "swings": game.boss_arena.swings, "portal_age": game.boss_arena.portal_age, "stage": game.boss_arena.stage, "weapons": weapon_fx, "revives": revives.interactions, "event_claimed": game.event_claimed, "event_progress": game.event_progress, "numbers": game.numbers,"split_pending":game.slime_families.pending,"special_marks":game.specials.marks,"special_areas":game.specials.areas,"special_bolts":game.specials.bolts}
  data.snapshot_serial=snapshot_count+1;data.room_run=room_run
+ data.consumables={"items":game.consumables.items,"freeze":game.consumables.freeze_left,"magnet":game.consumables.magnet_jobs.slice(0,48)}
  var packet := {"type": "delta", "data": data}
  snapshot_count += 1
  if connection.send_message(packet):
@@ -524,6 +527,9 @@ func apply_event(data: Dictionary) -> void:
   if game.dev_tools!=null and game.dev_tools.active:game.dev_tools.receive_event(data)
   return
  match data.get("type", ""):
+  "consumable_feedback":
+   data.at=CoopWire.vector(data.at)
+   game.consumables.show_feedback(data)
   "peer_pong":
    var value:float=Time.get_ticks_msec()-int(data.stamp)
    connection.metrics.peer_jitter_ms=lerpf(float(connection.metrics.get("peer_jitter_ms",0)),absf(value-float(connection.metrics.get("peer_rtt_ms",value))),.2)
@@ -544,6 +550,7 @@ func apply_event(data: Dictionary) -> void:
    actor.xp_needed = int(data.data.xp_needed)
    actor.weapon_system.levels = data.data.levels
    actor.weapon_system.passives = data.data.passives
+   game.discover_build()
    for key in data.data.stats:actor.player.set(key,data.data.stats[key])
    game.level = actor.level
    game.xp = actor.xp
@@ -668,6 +675,11 @@ func apply_delta(raw: Dictionary,native:bool=false) -> void:
  for e in game.enemies:
   if e.data.id in ["slime_king","event_blue","event_small"]:game.special_events.members.append(weakref(e))
  game.chests.chest=data.get("reward_chest",{});game.chests.queue_redraw()
+ var consumable_state:Dictionary=data.get("consumables",{})
+ game.consumables.items=consumable_state.get("items",[])
+ game.consumables.freeze_left=float(consumable_state.get("freeze",0))
+ game.consumables.magnet_visual=consumable_state.get("magnet",[])
+ game.consumables.queue_redraw()
  game.campaign.cleared=data.get("campaign_cleared",false);game.campaign.endless=data.get("endless",false)
  game.elapsed = data.elapsed
  game.horde_progress.completed=int(data.get("hordes_completed",0))
@@ -720,6 +732,7 @@ func apply_delta(raw: Dictionary,native:bool=false) -> void:
  game.ui.update_hud(hud)
 
 func client_tick(delta: float, action: Dictionary) -> void:
+ if game.state=="running":game.consumables.visual_tick(delta)
  if game.state=="running":game.chests.visual_tick(delta)
  peer_probe_clock+=delta
  send_clock -= delta

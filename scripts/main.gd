@@ -78,6 +78,7 @@ var boss_balance: BossBalance = preload("res://data/bosses/balance.tres")
 var boss_arena: BossArena
 var special_events
 var chests
+var consumables
 var specials: SpecialEncounters
 var slime_families:SlimeFamilies
 var food_index:=FoodIndex.new()
@@ -151,6 +152,7 @@ func _ready() -> void:
  slime_families=SlimeFamilies.new();slime_families.game=self;slime_families.z_index=2;add_child(slime_families)
  special_events=load("res://scripts/world/special_events.gd").new();add_child(special_events);special_events.setup(self)
  chests=load("res://scripts/world/reward_chests.gd").new();add_child(chests);chests.setup(self)
+ consumables=load("res://scripts/world/consumables.gd").new();add_child(consumables);consumables.setup(self)
  coop = CoopSession.new()
  add_child(coop)
  coop.setup(self)
@@ -240,6 +242,7 @@ func simulate(delta: float, movement: Vector2 = Vector2.ZERO) -> void:
  slime_families.tick(delta)
  special_events.tick(delta)
  chests.tick(delta)
+ consumables.tick(delta)
  director.tick(delta)
  if state != "running":
   return
@@ -315,6 +318,7 @@ func start_run(selected_support: String = "none") -> void:
  player.facing = Vector2.DOWN
  camera.reset_smoothing()
  weapon_system.reset(support)
+ discover_build()
  mastery.begin()
  director.reset()
  state = "running"
@@ -322,6 +326,7 @@ func start_run(selected_support: String = "none") -> void:
  ui.update_hud(snapshot())
 
 func clear_run() -> void:
+ if consumables!=null:consumables.reset()
  if chests!=null:chests.reset()
  if special_events!=null:special_events.reset()
  horde_progress.reset()
@@ -501,6 +506,7 @@ func abandon() -> void:
   enter_hub()
 
 func finish_run(won: bool) -> void:
+ consumables.reset()
  won=won or campaign.cleared
  if dev_tools!=null and dev_tools.active:
   dev_tools.complete(won);return
@@ -699,7 +705,9 @@ func enemy_killed(enemy) -> void:
   return
  reported_deaths[enemy.get_instance_id()] = true
  late_arena.chain.remove(enemy)
- if enemy.data.id=="slime_large":slime_families.schedule(enemy)
+ if enemy.data.id=="slime_large":
+  if not enemy.suppress_split:slime_families.schedule(enemy)
+  else:slime_families.reserved.erase(enemy.serial)
  kills += 1
  if enemy is Devourer:
   if enemy.swallowed_gold>0:gold_loot.refund(enemy.position,enemy.swallowed_gold)
@@ -895,6 +903,19 @@ func announce(text: String, duration: float) -> void:
 func camera_rect() -> Rect2:
  var center := player.position.clamp(Vector2(320, 180), Vector2(1480, 1020))
  return Rect2(center - Vector2(320, 180), Vector2(640, 360))
+
+func record_discovery(id:String):
+ if not profile.data.get("discoveries",{}) is Dictionary:profile.data.discoveries={}
+ if profile.data.get("discoveries",{}).has(id):return
+ if not profile.data.has("discoveries"):profile.data.discoveries={}
+ profile.data.discoveries[id]=true
+ if persistence_enabled and not dev_boss_test and not (dev_tools!=null and dev_tools.active):profile.save()
+
+func discover_build():
+ for id in weapon_system.levels:
+  if int(weapon_system.levels[id])>0:record_discovery("weapon:"+id)
+ for id in weapon_system.passives:
+  if int(weapon_system.passives[id])>0:record_discovery("passive:"+id)
 
 func render_rect()->Rect2:
  var view_size:Vector2=get_viewport_rect().size/camera.zoom

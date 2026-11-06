@@ -95,11 +95,29 @@ func rebuild():
  button(debug13,"Limpar eventos",func():
   if lab.is_host():lab.game.special_events.stop();lab.game.chests.reset(),true)
  survival_label=label(survival,lab.survival_info())
+ var consumable_tab:=tab("Consumíveis")
+ for d in lab.game.consumables.config.items:
+  button(consumable_tab,"Gerar "+str(d.name),func():lab.force_consumable(str(d.id)),true)
+ var heal_row:=row(consumable_tab)
+ button(heal_row,"Vida cheia",func():
+  if lab.is_host():lab.game.player.hp=lab.game.player.max_hp,true)
+ button(heal_row,"Vida 25%",func():
+  if lab.is_host():lab.game.player.hp=lab.game.player.max_hp*.25,true)
+ button(consumable_tab,"Gerar 500 cristais",func():
+  if lab.is_host():
+   for i in 500:lab.game.drop_xp(lab.game.player.position+Vector2.from_angle(i*2.39996)*sqrt(i+1)*8,.125),true)
+ button(consumable_tab,"Limpar consumíveis",func():
+  if lab.is_host():lab.game.consumables.items.clear(),true)
+ button(consumable_tab,"Slimes e necromante",func():
+  if lab.is_host():
+   for i in 6:
+    var at:Vector2=lab.game.free_enemy_position(lab.game.player.position+Vector2.from_angle(i*TAU/6)*95,18)
+    if at!=Vector2.INF:lab.game.spawn_enemy("slime_large" if i%2==0 else "necromancer",at),true)
  var perf_tab:=tab("Desempenho")
  var measure:=CheckBox.new();measure.text="Medir custos da simulação";measure.button_pressed=lab.game.perf_enabled;measure.toggled.connect(func(value):lab.game.perf_enabled=value);perf_tab.add_child(measure)
  performance_label=label(perf_tab,lab.performance_info())
  status_label=label(base,lab.status);status_label.custom_minimum_size.y=14
- tabs.current_tab=clampi(selected,0,4);refresh()
+ tabs.current_tab=clampi(selected,0,tabs.get_tab_count()-1);refresh()
 func slots(parent:Node,title:String,definitions:Dictionary,equipped:Dictionary,count:int,records:Array):
  label(parent,title)
  var grid:=GridContainer.new();grid.columns=2;grid.add_theme_constant_override("h_separation",8);parent.add_child(grid)

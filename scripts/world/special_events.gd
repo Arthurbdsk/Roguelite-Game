@@ -47,7 +47,7 @@ func start(kind:String)->bool:
  active=kind;age=0;last_event=game.elapsed;return true
 func on_death(enemy)->bool:
  if enemy.data.id not in ["slime_king","event_blue","event_small"]:return false
- if enemy.data.id!="event_small":pending.append({"at":enemy.position,"kind":"event_blue" if enemy.data.id=="slime_king" else "event_small","left":15,"age":0.0})
+ if enemy.data.id!="event_small" and not enemy.suppress_split:pending.append({"at":enemy.position,"kind":"event_blue" if enemy.data.id=="slime_king" else "event_small","left":15,"age":0.0})
  var xp:float=float(config.king_xp) if enemy.data.id=="slime_king" else float(config.blue_xp) if enemy.data.id=="event_blue" else float(config.small_xp)
  var gold:int=int(config.king_gold) if enemy.data.id=="slime_king" else int(config.blue_gold) if enemy.data.id=="event_blue" else 0
  if gold>0:game.gold_loot.drop(enemy.position,gold)

@@ -9,6 +9,7 @@ var hp: float
 var max_hp: float
 var radius: float
 var alive: bool = true
+var suppress_split:bool=false
 var elite: bool = false
 var state: String = "approach"
 var clock: float = 0
@@ -215,6 +216,11 @@ func apply_time_control(duration:float,resistance:float,boss_slow:float,boss_dur
 		resistance_duration=resistance
 	refresh_visual()
 func tick_control(delta:float)->bool:
+	if game.consumables!=null and game.consumables.freeze_left>0 and not self is HordeBoss:
+		frozen_remaining=maxf(frozen_remaining,game.consumables.freeze_left)
+		velocity=Vector2.ZERO
+		refresh_visual()
+		return true
 	freeze_resistance=maxf(0,freeze_resistance-delta)
 	slow_remaining=maxf(0,slow_remaining-delta)
 	if frozen_remaining>0:

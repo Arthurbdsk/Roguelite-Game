@@ -58,6 +58,7 @@ func tick(delta: float) -> void:
 		return
 	for i in range(arrows.size() - 1, -1, -1):
 		var arrow: Dictionary = arrows[i]
+		if game.consumables!=null and game.consumables.paused_projectile(arrow):continue
 		arrow.life -= delta
 		if arrow.life <= 0:
 			arrows.remove_at(i)

@@ -10,8 +10,8 @@ var title_label:Label
 var refund_button:Button
 var scroll:ScrollContainer
 var last_purchase:int=-1000
-const BG=Color("494c70")
-const CARD=Color("898b88")
+const BG=Color("484f68")
+const CARD=Color("69717e")
 const GOLD=Color("d9b454")
 func frame(color:Color,border:Color=GOLD,width:int=2)->StyleBoxFlat:
  var s:=StyleBoxFlat.new();s.bg_color=color;s.border_color=border;s.set_border_width_all(width);s.set_content_margin_all(5);return s
