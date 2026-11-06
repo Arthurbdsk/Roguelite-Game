@@ -1,0 +1,20 @@
+# Creates paid compute only after confirmation in the Render dashboard.
+services:
+  - type: web
+    name: hordas-relay
+    runtime: node
+    rootDir: relay
+    region: virginia
+    plan: starter
+    numInstances: 1
+    buildCommand: npm ci --omit=dev
+    startCommand: node server.mjs
+    healthCheckPath: /health
+    autoDeployTrigger: "off"
+    envVars:
+      - key: HOST
+        value: 0.0.0.0
+      - key: NODE_VERSION
+        value: "22"
+      - key: METRICS_TOKEN
+        generateValue: true

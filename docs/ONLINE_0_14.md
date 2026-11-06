@@ -10,6 +10,18 @@ Os testes com quatro processos locais, atraso e limitação de banda não substi
 
 ## Implantação permanente
 
+### Render
+
+O `render.yaml` na raiz prepara um serviço Node com uma única instância, health check e token de métricas gerado pelo provedor. Usa compute Starter pago, que só deve ser criado após conferir e autorizar o preço no painel. O arquivo sozinho não cria nem cobra um serviço.
+
+Após entrar no Render, criar um Blueprint deste repositório, conferir a configuração e o custo antes de confirmar. Não é necessário comprar domínio: usar o endereço HTTPS/WSS `onrender.com` fornecido pelo serviço. Desativar deploy automático evita interromper salas a cada alteração no GitHub; um deploy manual ou reinício ainda encerra as salas em memória. Manter uma instância, sem autoscaling.
+
+Quando o serviço estiver Live, validar `/health`, configurar a URL com `tools/configure_relay.py`, executar os testes externos e exportar os clientes com o endereço real. Não distribuir um hostname presumido antes de o Render fornecer o endereço.
+
+O plano Free pode suspender após quinze minutos sem tráfego e tem outras restrições; não é apresentado como hospedagem permanente de produção. [Limitações oficiais](https://render.com/docs/free). [Configuração Blueprint](https://render.com/docs/blueprint-spec).
+
+### Servidor próprio com Docker
+
 Requisitos externos: servidor Linux com Docker Compose, domínio com DNS apontando para o servidor e portas 80/443 acessíveis no servidor. Nenhum jogador precisa configurar portas no roteador.
 
 1. Copiar a pasta `relay` para o servidor.
