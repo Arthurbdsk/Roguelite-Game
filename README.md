@@ -2,7 +2,7 @@
 
 Entrega Android 0.20.0-android.1, baseada no PC 0.20.0 (`4b6e2e5dd1a86c2feb8ed169c8da305c0fd5d0a8`). Esta branch é exclusiva do Android e fica congelada depois da entrega. Atualizações genéricas do jogo continuam sendo somente para PC.
 
-APK: `build/Hordas-Android-0.20.0-1.apk`. Envie esse arquivo ao celular, abra e permita instalar por esse aplicativo quando o Android solicitar. Android 7 ou mais recente, OpenGL ES 3. Não desinstale para atualizar: instale o próximo APK autorizado por cima, com o mesmo pacote e assinatura.
+[Baixar o APK de teste](https://github.com/Arthurbdsk/Roguelite-Game/releases/download/android-v0.20.0-1/Hordas-Android-0.20.0-1.apk). Arquivo local: `build/Hordas-Android-0.20.0-1.apk`. Envie esse arquivo ao celular, abra e permita instalar por esse aplicativo quando o Android solicitar. Android 7 ou mais recente, OpenGL ES 3. Não desinstale para atualizar: instale o próximo APK autorizado por cima, com o mesmo pacote e assinatura.
 
 Use o joystick à esquerda. Os ataques são automáticos. Os botões à direita abrem pausa, build e opções; Interagir aparece perto de baús e Segure: ajudar aparece perto de aliados caídos. Nas salas, o botão Teclado permite preencher nome e código por toque. Todos marcam Estou pronto; o anfitrião inicia. Cooperação verificada com PC **0.20.0 público**, protocolo 2. Outras versões são recusadas.
 
