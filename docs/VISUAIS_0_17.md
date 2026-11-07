@@ -35,8 +35,11 @@ As texturas são compartilhadas e desenhadas no CanvasItem existente. Não são 
 5. `visual_integration17`: disponibilidade pública, bloqueio no nível máximo, alinhamento dos ícones, identidade de projétil, deduplicação/expiração de impacto e limpeza dos quatro jogadores.
 6. Quatro processos reais passaram localmente e pelo relay público WSS do Render, com um cliente renderizado. Todos usavam seis armas no nível 8. O roteiro verifica replicação de projéteis, região fixa das runas e preservação dos saves isolados. No roteiro WSS curto: host tick mediano 4,502 ms, p95 8,418 ms; 210.140 bytes enviados pelo host durante o roteiro. Isso não é taxa sustentada em bytes/s.
 7. Executáveis público e DEV exportados, cada um executado por 120 frames em smoke headless. O público foi verificado sem F8 ou recursos DEV.
+8. O roteiro cooperativo normal do pacote público também passou pelo endpoint embutido WSS, em quatro processos: movimento, escolhas individuais, chefes, quinze filhos de slime, crescimento do Devorador, poças, reanimação, dois mil objetos de ouro, liquidação e recarga do saldo. Duração aproximada de 23 s; host enviou 341.886 bytes. A asserção antiga que esperava 48 inimigos-base/min foi atualizada para os 60/min da versão 0.16, sem mudar a geração do jogo.
 
 O primeiro ensaio WSS foi encerrado pelo prazo de cinco segundos da ferramenta de teste antes de criar a sala. O endpoint respondeu saudável, protocolo 2. A ferramenta agora permite os mesmos 90 segundos de aquecimento da build, com margem de dez segundos; o ensaio seguinte passou. Isso não modifica timeouts de gameplay.
+
+O roteiro cooperativo normal variou entre tentativas: uma apresentou RTT de até aproximadamente 7,9 s e falhou nos prazos de reanimação/coleta; a repetição seguinte passou em todos os quatro processos, com RTT mediano do relay de 138 a 159 ms e RTT entre participantes de 284 a 310 ms. Portanto há instabilidade observada no caminho público. Um resultado aprovado não elimina essa limitação nem substitui sessão prolongada em redes distintas.
 
 ## Ensaio renderizado de carga
 

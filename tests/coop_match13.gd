@@ -190,7 +190,7 @@ func host_scenario() -> void:
  game.boss = null
  game.director.wave_index = -1
  game.director.begin_wave()
- check(game.director.queue.is_empty() and is_equal_approx(game.director.rate(),48*3.4), "continuous rate applies four-player quantity once")
+ check(game.director.queue.is_empty() and is_equal_approx(game.director.rate(),60*3.4), "continuous rate applies four-player quantity once")
  game.director.queue.clear()
  game.director.phase = "complete"
  var executioner = game.spawn_enemy("executioner", Vector2(1200, 750))
