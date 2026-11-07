@@ -1,0 +1,127 @@
+{
+  "before": [
+    {
+      "draw_calls": 547.0,
+      "enemies": 200,
+      "frame_ms": {
+        "median": 61.843,
+        "p95": 77.477,
+        "p99": 80.401
+      },
+      "frames": 180,
+      "host_tick_ms": {
+        "median": 27.154,
+        "p95": 42.62,
+        "p99": 45.232
+      },
+      "map": "courtyard",
+      "memory_bytes": 67172511,
+      "peak_new_projectiles": 26,
+      "players": 4,
+      "rendered": true
+    },
+    {
+      "draw_calls": 535.0,
+      "enemies": 200,
+      "frame_ms": {
+        "median": 63.965,
+        "p95": 77.833,
+        "p99": 81.874
+      },
+      "frames": 180,
+      "host_tick_ms": {
+        "median": 29.04,
+        "p95": 42.125,
+        "p99": 46.269
+      },
+      "map": "library",
+      "memory_bytes": 67536611,
+      "peak_new_projectiles": 28,
+      "players": 4,
+      "rendered": true
+    },
+    {
+      "draw_calls": 533.0,
+      "enemies": 200,
+      "frame_ms": {
+        "median": 62.228,
+        "p95": 75.098,
+        "p99": 81.148
+      },
+      "frames": 180,
+      "host_tick_ms": {
+        "median": 26.901,
+        "p95": 41.529,
+        "p99": 46.426
+      },
+      "map": "fields",
+      "memory_bytes": 68356665,
+      "peak_new_projectiles": 28,
+      "players": 4,
+      "rendered": true
+    }
+  ],
+  "after": [
+    {
+      "draw_calls": 555.0,
+      "enemies": 200,
+      "frame_ms": {
+        "median": 66.946,
+        "p95": 81.94,
+        "p99": 89.406
+      },
+      "frames": 180,
+      "host_tick_ms": {
+        "median": 31.976,
+        "p95": 44.978,
+        "p99": 52.944
+      },
+      "map": "courtyard",
+      "memory_bytes": 68926988,
+      "peak_new_projectiles": 26,
+      "players": 4,
+      "rendered": true
+    },
+    {
+      "draw_calls": 533.0,
+      "enemies": 200,
+      "frame_ms": {
+        "median": 64.408,
+        "p95": 80.283,
+        "p99": 85.876
+      },
+      "frames": 180,
+      "host_tick_ms": {
+        "median": 30.046,
+        "p95": 44.743,
+        "p99": 49.57
+      },
+      "map": "library",
+      "memory_bytes": 69281644,
+      "peak_new_projectiles": 28,
+      "players": 4,
+      "rendered": true
+    },
+    {
+      "draw_calls": 547.0,
+      "enemies": 200,
+      "frame_ms": {
+        "median": 64.997,
+        "p95": 79.853,
+        "p99": 85.66
+      },
+      "frames": 180,
+      "host_tick_ms": {
+        "median": 30.773,
+        "p95": 43.122,
+        "p99": 49.946
+      },
+      "map": "fields",
+      "memory_bytes": 69833448,
+      "peak_new_projectiles": 28,
+      "players": 4,
+      "rendered": true
+    }
+  ],
+  "note": "Editor window / GL Compatibility / Ryzen 5600 RX6600 / 640x360 logical, 1280x720 window. 60 warmup + 180 samples/map. Other user games open and additional headless regressions during after run: indicative only, not isolated performance comparison. Same 200 enemies and four simulated actors, six weapons level 8."
+}

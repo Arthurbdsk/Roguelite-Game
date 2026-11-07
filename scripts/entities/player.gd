@@ -34,6 +34,12 @@ var damage_clock:float=0
 var attacker_until:Dictionary={}
 var next_attacker_cleanup:float=0
 var poison_attacker:int=0
+var tiny_soldier:bool=false
+var bow_remaining:float=0
+var death_visual_age:float=0
+var visual_defeated:bool=false
+var remote_prepare_left:float=0
+var remote_prepare_frame:int=0
 
 func _ready() -> void:
  collision_layer = 1
@@ -44,10 +50,18 @@ func _ready() -> void:
  shape.shape = circle
  add_child(shape)
  sprite = Sprite2D.new()
- sprite.texture = load("res://assets/v08/hero.png")
- sprite.hframes = 32
- sprite.position.y = -28
+ tiny_soldier=TinyCharacters.install(sprite,"soldier")
+ if not tiny_soldier:
+  sprite.texture = load("res://assets/v08/hero.png")
+  sprite.hframes = 32
+  sprite.position.y = -28
  add_child(sprite)
+ set_process(false)
+
+func _process(delta:float):
+ # Solo defeat settles immediately as before; only the body keeps animating.
+ if tiny_soldier and hp<=0 and not down:tick_visual(delta,false)
+ else:set_process(false)
 
 func tick(delta: float, movement: Vector2) -> void:
  if down:
@@ -93,6 +107,7 @@ func take_damage(amount: float, source: Vector2,attacker:int=0,scheduled_time:fl
  var direction := (position - source).normalized()
  move_and_collide(direction * 5)
  if hp <= 0:
+  set_process(true)
   if not game.mastery.save_from_death():
    game.finish_run(false)
  return true
@@ -125,6 +140,7 @@ func clear_status():
  hurt_remaining=0
  revive_remaining=0
  damage_clock=0;attacker_until.clear();next_attacker_cleanup=0;poison_attacker=0
+ bow_remaining=0;death_visual_age=0;visual_defeated=false;remote_prepare_left=0;set_process(false)
 func tick_status(delta:float):
  damage_clock+=delta
  if damage_clock>=next_attacker_cleanup:
@@ -145,8 +161,53 @@ func tick_status(delta:float):
 func begin_swing(direction:Vector2):
  swing_remaining=.3
  sprite.flip_h=direction.x<0
+func begin_bow(direction:Vector2):
+ bow_remaining=.18
+ if absf(direction.x)>.05:sprite.flip_h=direction.x<0
+
+func receive_visual_frame(value:int,flipped:bool):
+ sprite.frame=clampi(value,0,sprite.hframes-1);sprite.flip_h=flipped
+ if not tiny_soldier:
+  if value in range(10,16):swing_remaining=(16-value)*.05
+  if value in [8,9]:anticipation_remaining=.12 if value==8 else .06
+  return
+ remote_prepare_left=0
+ if TinyCharacters.contains("soldier","hurt",value):hurt_remaining=(39-value)*.05
+ elif value in range(17,20):swing_remaining=(20-value)*.1
+ elif value in [33,34]:bow_remaining=(35-value)*.09
+ elif value in range(14,17) or value in range(26,33):remote_prepare_left=.15;remote_prepare_frame=value
+ elif TinyCharacters.contains("soldier","idle",value) or TinyCharacters.contains("soldier","walk",value):swing_remaining=0;bow_remaining=0
+
+func walking_frame()->bool:
+ return TinyCharacters.contains("soldier","walk",sprite.frame) if tiny_soldier else sprite.frame in range(16,24)
+func stop_walking_visual():
+ if walking_frame():sprite.frame=TinyCharacters.frame("soldier","idle",visual_clock, true) if tiny_soldier else 0
+
+func tiny_tick_visual(delta:float,moving:bool):
+ bow_remaining=maxf(0,bow_remaining-delta);remote_prepare_left=maxf(0,remote_prepare_left-delta)
+ var defeated:bool=down or hp<=0
+ if defeated and not visual_defeated:death_visual_age=0
+ visual_defeated=defeated
+ if defeated:
+  death_visual_age+=delta;sprite.frame=TinyCharacters.frame("soldier","death",death_visual_age/.45)
+ elif revive_remaining>0:sprite.frame=TinyCharacters.frame("soldier","death",revive_remaining/.45)
+ elif hurt_remaining>0:sprite.frame=TinyCharacters.frame("soldier","hurt",1-hurt_remaining/.2)
+ elif swing_remaining>0:sprite.frame=17+clampi(int((1-swing_remaining/.3)*3),0,2)
+ elif bow_remaining>0:sprite.frame=33+int(bow_remaining<=.09)
+ elif remote_prepare_left>0:sprite.frame=remote_prepare_frame
+ else:
+  var w=game.weapon_system
+  var target=w.bow_visual_target.get_ref() if w.bow_visual_target!=null else null
+  var preparing:bool=w.attacks_enabled and int(w.levels.get("bolt",0))>0 and float(w.timers.get("bolt",1))<=.21 and is_instance_valid(target) and target.alive and target.position.distance_to(position)<=w._stat("bolt","reach")
+  if preparing and not (game.coop.active and not game.coop.hosting):
+   sprite.frame=26+clampi(int((1-float(w.timers.get("bolt",0))/.21)*7),0,6)
+   if absf(target.position.x-position.x)>1:sprite.flip_h=target.position.x<position.x
+  elif not (game.coop.active and not game.coop.hosting) and w.attacks_enabled and int(w.levels.get("sword",0))>0 and float(w.timers.get("sword",1))<.12 and game.nearest_enemy(position,w._stat("sword","reach")+25)!=null:sprite.frame=14+clampi(int((1-float(w.timers.get("sword",0))/.12)*3),0,2)
+  elif moving:sprite.frame=TinyCharacters.frame("soldier","walk",visual_clock*1.25,true)
+  else:sprite.frame=TinyCharacters.frame("soldier","idle",visual_clock,true)
 func tick_visual(delta:float,moving:bool=false):
  visual_clock+=delta;swing_remaining=maxf(0,swing_remaining-delta);anticipation_remaining=maxf(0,anticipation_remaining-delta);hurt_remaining=maxf(0,hurt_remaining-delta);revive_remaining=maxf(0,revive_remaining-delta)
+ if tiny_soldier:tiny_tick_visual(delta,moving);return
  if sprite.hframes<32:
   sprite.frame=int(animation)%4;return
  sprite.rotation=0

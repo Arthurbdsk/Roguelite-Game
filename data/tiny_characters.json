@@ -1,0 +1,110 @@
+{
+  "soldier": {
+    "texture": "res://assets/tiny_rpg/soldier.png",
+    "frames": 43,
+    "cell": [
+      112,
+      80
+    ],
+    "offset": [
+      0.0,
+      -24.0
+    ],
+    "clips": {
+      "idle": {
+        "start": 0,
+        "count": 6
+      },
+      "walk": {
+        "start": 6,
+        "count": 8
+      },
+      "sword": {
+        "start": 14,
+        "count": 6
+      },
+      "sword2": {
+        "start": 20,
+        "count": 6
+      },
+      "bow": {
+        "start": 26,
+        "count": 9
+      },
+      "hurt": {
+        "start": 35,
+        "count": 4
+      },
+      "death": {
+        "start": 39,
+        "count": 4
+      }
+    },
+    "source": "Characters(100x100 split)\\Soldier\\Soldier\\Soldier.png",
+    "source_sha256": "3223806c12462bbe7a352aa12dc25791f11394afe2d44c17a4520dff753e1691",
+    "shadow": false,
+    "scale": 2,
+    "source_frame": [
+      100,
+      100
+    ],
+    "crop": [
+      22,
+      28,
+      78,
+      68
+    ]
+  },
+  "orc": {
+    "texture": "res://assets/tiny_rpg/orc.png",
+    "frames": 34,
+    "cell": [
+      112,
+      80
+    ],
+    "offset": [
+      -4.0,
+      -18.0
+    ],
+    "clips": {
+      "idle": {
+        "start": 0,
+        "count": 6
+      },
+      "walk": {
+        "start": 6,
+        "count": 8
+      },
+      "attack": {
+        "start": 14,
+        "count": 6
+      },
+      "attack2": {
+        "start": 20,
+        "count": 6
+      },
+      "hurt": {
+        "start": 26,
+        "count": 4
+      },
+      "death": {
+        "start": 30,
+        "count": 4
+      }
+    },
+    "source": "Characters(100x100 split)\\Orc\\Orc\\Orc.png",
+    "source_sha256": "8e5452bcc3c5d9897c8caef2064145759b606d18167289f6f50e0dbe981010d9",
+    "shadow": false,
+    "scale": 2,
+    "source_frame": [
+      100,
+      100
+    ],
+    "crop": [
+      22,
+      28,
+      78,
+      68
+    ]
+  }
+}

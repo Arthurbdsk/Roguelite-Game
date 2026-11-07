@@ -1,0 +1,5 @@
+Tiny RPG Character Asset Pack 01 v2.0
+Autor: Zerie
+Origem e termos: https://zerie.itch.io/tiny-rpg-character-asset-pack
+Consultado em 07/11/2026. Permite uso e modificação em jogos pessoais ou comerciais. Não permite revender, redistribuir ou republicar os assets separadamente, modificados ou não. Proibido uso para treino de IA ou NFT.
+Somente folhas derivadas usadas no jogo são incluídas no executável. Os PNGs avulsos ficam fora do repositório público. Os arquivos-fonte fornecidos pelo usuário permanecem nos Downloads.

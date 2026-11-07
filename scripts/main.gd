@@ -62,6 +62,7 @@ var closing:bool=false
 var ui: GameUI
 var entities: Node2D
 var camera: Camera2D
+var character_remains:CharacterRemains
 var enemy_data: Dictionary = {}
 var balance: EncounterBalance = preload("res://data/encounters/default.tres")
 var gold_loot: GoldLoot
@@ -117,6 +118,7 @@ func _ready() -> void:
  entities = Node2D.new()
  entities.y_sort_enabled = true
  add_child(entities)
+ character_remains=CharacterRemains.new();character_remains.setup(self);add_child(character_remains)
  player = preload("res://scenes/entities/player.tscn").instantiate()
  player.game = self
  player.position = Vector2(900, 630)
@@ -330,6 +332,7 @@ func start_run(selected_support: String = "none") -> void:
  ui.update_hud(snapshot())
 
 func clear_run() -> void:
+ if character_remains!=null:character_remains.reset()
  if consumables!=null:consumables.reset()
  if chests!=null:chests.reset()
  if special_events!=null:special_events.reset()
@@ -718,6 +721,7 @@ func enemy_killed(enemy) -> void:
  if reported_deaths.has(enemy.get_instance_id()):
   return
  reported_deaths[enemy.get_instance_id()] = true
+ character_remains.died(enemy)
  late_arena.chain.remove(enemy)
  if enemy.data.id=="slime_large":
   if not enemy.suppress_split:slime_families.schedule(enemy)

@@ -539,6 +539,7 @@ func apply_event(data: Dictionary) -> void:
    connection.metrics.peer_rtt_ms=value;peer_rtt_samples.append(value)
    if peer_rtt_samples.size()>900:peer_rtt_samples.pop_front()
   "reward_chest":game.chests.show_receipt(data.data)
+  "tiny_death":game.character_remains.receive(data)
   "campaign_won":game.campaign.remember_clear()
   "endless_offer":game.campaign.remember_clear();game.campaign.deciding=true;game.state="endless_choice";game.ui.render("endless_choice")
   "endless_continue":game.campaign.deciding=false;game.campaign.endless=true;game.state="running";game.ui.render("running")
@@ -624,10 +625,7 @@ func apply_delta(raw: Dictionary,native:bool=false) -> void:
     actor.player.speed = state.speed
     actor.down = state.down
     actor.player.down = state.down
-    actor.player.sprite.frame = int(state.frame)
-    if int(state.frame) in range(10,16):actor.player.swing_remaining=(16-int(state.frame))*.05
-    if int(state.frame) in [8,9]:actor.player.anticipation_remaining=.12 if int(state.frame)==8 else .06
-    actor.player.sprite.flip_h = state.flip
+    actor.player.receive_visual_frame(int(state.frame),state.flip)
     actor.player.invulnerable = state.invulnerable
     actor.player.sprite.rotation = 0
     actor.player.queue_redraw()
@@ -765,7 +763,7 @@ func client_tick(delta: float, action: Dictionary) -> void:
    connection.metrics.max_correction_px=maxf(float(connection.metrics.get("max_correction_px",0)),node.position.distance_to(corrected))
    connection.metrics.correction_sum_px=float(connection.metrics.get("correction_sum_px",0))+node.position.distance_to(corrected)
   node.position=corrected
-  if actors.has(id) and id!=connection.peer_id and node.position.distance_to(destinations[id])<.25 and node.sprite.frame in range(16,24):node.sprite.frame=0
+  if actors.has(id) and id!=connection.peer_id and node.position.distance_to(destinations[id])<.25:node.stop_walking_visual()
  for actor in actors.values():
   actor.player.sprite.modulate.a = 0.55 if actor.player.invulnerable > 0 and int(world_clock * 10) % 2 == 0 else 1.0
  for arrow in game.enemy_projectiles.arrows:

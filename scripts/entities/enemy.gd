@@ -31,6 +31,10 @@ var knockback: Vector2 = Vector2.ZERO
 var charge_direction: Vector2 = Vector2.ZERO
 var sprite: Sprite2D
 var serial: int = 0
+var tiny_kind:String=""
+var visual_attack_left:float=0
+var visual_attack_cooldown:float=0
+var visual_attack_clip:String="attack"
 var targetable: bool = true
 var summoner_id: int = 0
 var chain_root:int=0
@@ -79,10 +83,13 @@ func _ready() -> void:
 	collision.shape = circle
 	add_child(collision)
 	sprite = Sprite2D.new()
-	sprite.texture = load(data.texture)
-	sprite.hframes = data.frames
-	sprite.position.y = -float(sprite.texture.get_height()) * 0.5 + 4
-	if elite:
+	if data.id=="ghoul" and TinyCharacters.install(sprite,"orc"):
+		tiny_kind="orc"
+	else:
+		sprite.texture = load(data.texture if ResourceLoader.exists(data.texture) else "res://assets/ghoul.png")
+		sprite.hframes = data.frames if ResourceLoader.exists(data.texture) else 4
+		sprite.position.y = -float(sprite.texture.get_height()) * 0.5 + 4
+	if elite and tiny_kind.is_empty():
 		sprite.scale = Vector2(1.2, 1.2)
 	add_child(sprite)
 
@@ -136,9 +143,22 @@ func tick(delta: float) -> void:
 	velocity = movement + game.separation(self) * 14 + knockback
 	knockback = knockback.move_toward(Vector2.ZERO, delta * 500)
 	velocity=game.crowd_velocity(self,velocity)
+	var before_visual:Vector2=position
 	move_body()
 	if data.contact_damage and offset.length() < radius + game.player.radius:
 		game.player.take_damage(data.damage * (1.25 if elite else 1), position,get_instance_id())
+		if not tiny_kind.is_empty() and visual_attack_cooldown<=0:
+			visual_attack_left=.22;visual_attack_cooldown=game.balance.same_attacker_interval;visual_attack_clip="attack" if serial%2==0 else "attack2"
+	if not tiny_kind.is_empty():
+		visual_attack_left=maxf(0,visual_attack_left-delta);visual_attack_cooldown=maxf(0,visual_attack_cooldown-delta)
+		if hit_flash>0:sprite.frame=TinyCharacters.frame(tiny_kind,"hurt",1-hit_flash/.09)
+		elif visual_attack_left>0:sprite.frame=TinyCharacters.frame(tiny_kind,visual_attack_clip,.5+.5*(1-visual_attack_left/.22))
+		elif position.distance_squared_to(before_visual)>pow(delta*2,2):sprite.frame=TinyCharacters.frame(tiny_kind,"walk",clock*1.25,true)
+		else:sprite.frame=TinyCharacters.frame(tiny_kind,"idle",clock,true)
+		sprite.flip_h=direction.x<0
+		sprite.position.x=float(TinyCharacters.data(tiny_kind).offset[0])*(-1 if sprite.flip_h else 1)
+		sprite.modulate=Color(1.3,.8,.6) if elite else Color.WHITE
+		refresh_visual();return
 	sprite.frame = int(clock * 7) % 4
 	if data.frames >= 6 and state in ["prepare", "recovery"]:
 		sprite.frame = 4 if state == "prepare" else 5
@@ -215,8 +235,9 @@ func _draw() -> void:
 	if elite:
 		draw_arc(Vector2.ZERO, radius + 3, 0, TAU, 20, Color("b65f42"), 1, false)
 	if hp < max_hp and data.behavior != "boss":
-		draw_rect(Rect2(-11, -sprite.texture.get_height() + 1, 22, 2), Color("12191d"))
-		draw_rect(Rect2(-11, -sprite.texture.get_height() + 1, 22 * hp / max_hp, 2), Color("b65f42"))
+		var bar_y:float=-sprite.texture.get_height()+1 if tiny_kind.is_empty() else -35
+		draw_rect(Rect2(-11,bar_y,22,2), Color("12191d"))
+		draw_rect(Rect2(-11,bar_y,22 * hp / max_hp,2), Color("b65f42"))
 
 func apply_time_control(duration:float,resistance:float,boss_slow:float,boss_duration:float):
 	if self is HordeBoss:

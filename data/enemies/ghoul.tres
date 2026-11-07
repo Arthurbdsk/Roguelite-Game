@@ -3,11 +3,11 @@
 [resource]
 script = ExtResource("1")
 id = "ghoul"
-title = "Zumbi"
+title = "Orc"
 health = 24.0
 speed = 25.0
 damage = 8.0
 experience = 2
 radius = 8.0
-texture = "res://assets/ghoul.png"
+texture = "res://assets/tiny_rpg/orc.png"
 behavior = "chase"

@@ -15,3 +15,6 @@ __pycache__/
 /assets/fonts/AurusenthialGothic.ttf
 
 /docs/*.png.import
+
+# Tiny RPG: game use is licensed; do not re-upload standalone art.
+/assets/tiny_rpg/*.png

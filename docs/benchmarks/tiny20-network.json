@@ -1,0 +1,33 @@
+{
+  "stamp": 1794051918668,
+  "relay": "wss://hordas-relay.onrender.com",
+  "packed": "Hordas-DEV-0.20.0.exe",
+  "method": "Four separate local processes; one rendered. Public WSS relay, not four physical networks.",
+  "peers": [
+    {
+      "peer": 0,
+      "evidence": [
+        "NETWORK20_CPU median=7.544 p95=13.519 tx_bytes=215061",
+        "COOP_MATCH_PEER_PASS index=0 survival13 checks=17 failures=0"
+      ]
+    },
+    {
+      "peer": 1,
+      "evidence": [
+        "COOP_MATCH_PEER_PASS index=1 survival13 checks=298 failures=0"
+      ]
+    },
+    {
+      "peer": 2,
+      "evidence": [
+        "COOP_MATCH_PEER_PASS index=2 survival13 checks=298 failures=0"
+      ]
+    },
+    {
+      "peer": 3,
+      "evidence": [
+        "COOP_MATCH_PEER_PASS index=3 survival13 checks=298 failures=0"
+      ]
+    }
+  ]
+}

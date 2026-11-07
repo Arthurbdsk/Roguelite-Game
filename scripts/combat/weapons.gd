@@ -65,6 +65,7 @@ var last_offer_ids: Array[String] = []
 var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var stat_cache:Dictionary={}
 var cache_combat_stats:bool=false
+var bow_visual_target:WeakRef
 
 
 func setup(game_ref) -> void:
@@ -83,6 +84,7 @@ func setup(game_ref) -> void:
 
 # Call after the player has reset its base statistics for a fresh expedition.
 func reset(support_id: String = "none") -> void:
+	bow_visual_target=null
 	additions.setup(self);additions.reset()
 	if arsenal!=null:arsenal.reset()
 	if ground!=null:ground.reset()
@@ -209,9 +211,12 @@ func _fire_bolts() -> bool:
 	var reach: float = _stat("bolt", "reach")
 	var target = game.nearest_enemy(game.player.position, reach)
 	if not is_instance_valid(target):
+		bow_visual_target=null
 		return false
 	var direction: Vector2 = (target.position - game.player.position).normalized()
 	var count: int = int(_stat("bolt", "count"))
+	bow_visual_target=weakref(target)
+	var previous_shots:int=projectiles.size()
 	for index: int in count:
 		if projectiles.size() >= MAX_PROJECTILES:
 			break
@@ -221,6 +226,7 @@ func _fire_bolts() -> bool:
 			"distance": 0.0, "reach": reach, "damage": _stat("bolt", "damage"),
 			"pierce": (2 if int(levels.get("bolt",0)) >= 2 else 1) + (_mastery().rank("bolt_pierce") if _mastery() != null else 0),
 			"bounce": 1 if int(levels.get("bolt",0)) >= 5 else 0, "hits": []})
+	if projectiles.size()>previous_shots and game.player.has_method("begin_bow"):game.player.begin_bow(direction)
 	_play("bolt")
 	return true
 
