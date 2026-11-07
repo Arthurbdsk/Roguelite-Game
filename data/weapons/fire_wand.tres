@@ -4,7 +4,8 @@
 script = ExtResource("1")
 id = "fire_wand"
 display_name = "Varinha de Fogo"
-icon = ""
+icon = "res://assets/v17/fire_wand.png"
+description = "Rajada em leque contra um alvo aleatório. Cada bola de fogo segue reta, atinge um inimigo e é bloqueada por paredes."
 max_level = 8
 damage = PackedFloat32Array(33.6,38.4,43.2,48.0,52.8,57.6,63.6,70.8)
 cooldown = PackedFloat32Array(2.8,2.8,2.8,2.8,2.8,2.8,2.8,2.8)

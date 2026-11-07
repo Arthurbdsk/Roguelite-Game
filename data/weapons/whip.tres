@@ -4,7 +4,8 @@
 script = ExtResource("1")
 id = "whip"
 display_name = "Chicote"
-icon = ""
+icon = "res://assets/v17/whip.png"
+description = "Golpes horizontais que atravessam inimigos e obstáculos. Golpes adicionais alternam os lados e sobem ligeiramente."
 max_level = 8
 damage = PackedFloat32Array(21.6,21.6,26.4,31.2,36.0,42.0,48.0,55.2)
 cooldown = PackedFloat32Array(1.3,1.3,1.3,1.3,1.3,1.3,1.3,1.3)

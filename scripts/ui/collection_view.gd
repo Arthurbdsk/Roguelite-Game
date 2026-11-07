@@ -56,7 +56,7 @@ func select(index:int):
  detail.text=e.name+"\n"+e.description+"\n"+e.compatibility if known else "?\nItem não descoberto. Encontre ou equipe este item durante uma partida."
  for i in buttons.size():buttons[i].add_theme_stylebox_override("normal",ui._style(Color("182133"),Color("fff0ac") if i==index else GameUI.LINE,2 if i==index else 1))
 func weapon_compatibility(id:String)->String:
- var area:bool=id in ["sword","sludge","holy_water","ice_wave","bombs","blades","clock"]
- var duration:bool=id in ["sludge","holy_water","ice_wave"]
- var amount:bool=id in ["bolt","axe","boomerang","bombs","holy_water"]
+ var area:bool=id in ["sword","sludge","holy_water","ice_wave","bombs","blades","clock","garlic","whip","fire_wand","runetracer","magic_wand"]
+ var duration:bool=id in ["sludge","holy_water","ice_wave","runetracer"]
+ var amount:bool=id in ["bolt","axe","boomerang","bombs","holy_water","whip","fire_wand","runetracer","magic_wand"]
  return "Lupa: %s | Ampulheta: %s | Quantidade permanente: %s"%["largura" if id=="clock" else "sim" if area else "não","sim" if duration else "não","sim" if amount else "não"]

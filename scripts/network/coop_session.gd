@@ -518,7 +518,7 @@ func broadcast_state(force: bool = false) -> void:
  data.consumables={"items":game.consumables.items,"freeze":game.consumables.freeze_left,"magnet":game.consumables.magnet_jobs.slice(0,48)}
  data.weapons16={}
  for id in actors:
-  data.weapons16[id]={"shots":actors[id].weapon_system.additions.shots,"strikes":actors[id].weapon_system.additions.strikes}
+  data.weapons16[id]={"shots":actors[id].weapon_system.additions.shots,"strikes":actors[id].weapon_system.additions.strikes,"impacts":actors[id].weapon_system.additions.impact_log}
  var packet := {"type": "delta", "data": data}
  snapshot_count += 1
  if connection.send_message(packet):
@@ -687,6 +687,7 @@ func apply_delta(raw: Dictionary,native:bool=false) -> void:
   if actors.has(id):
    actors[id].weapon_system.additions.shots=data.weapons16[id].shots
    actors[id].weapon_system.additions.strikes=data.weapons16[id].strikes
+   actors[id].weapon_system.additions.receive_impacts(data.weapons16[id].get("impacts",[]))
  game.campaign.cleared=data.get("campaign_cleared",false);game.campaign.endless=data.get("endless",false)
  game.elapsed = data.elapsed
  game.horde_progress.completed=int(data.get("hordes_completed",0))
@@ -804,6 +805,9 @@ func client_tick(delta: float, action: Dictionary) -> void:
   actor.weapon_system.ground.queue_redraw()
   for shot in actor.weapon_system.projectiles: shot.position += shot.velocity * delta
   for slash in actor.weapon_system.slashes: slash.remaining = maxf(0, slash.remaining - delta)
+  actor.weapon_system.additions.visual.tick(delta)
+  for strike in actor.weapon_system.additions.strikes:strike.age+=delta
+  actor.weapon_system.additions.strikes=actor.weapon_system.additions.strikes.filter(func(s):return s.age<s.delay+.22)
   actor.weapon_system.queue_redraw()
  game.enemy_projectiles.queue_redraw()
  game.boss_arena.queue_redraw()

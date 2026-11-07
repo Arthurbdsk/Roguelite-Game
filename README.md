@@ -1,6 +1,6 @@
 # Hordas
 
-Implementação experimental 0.16.0: Arco inicial, dano global +20%, resistência temporal removida e surgimentos por oito setores. Mecânicas de cinco armas novas estão no DEV; os visuais e a fonte Kingdom ainda estão pendentes. [Estado e tabelas](docs/EXPANSAO_0_16.md). A versão 0.15.0 abaixo permanece a entrega anterior com acabamento visual completo.
+Versão 0.17.0: visuais animados e ícones de Alho, Chicote, Varinha de Fogo, Runa Traçante e Varinha Mágica, com referências pesquisadas no Pinterest. As cinco armas estão disponíveis nas partidas normais, melhorias, baús, coleção e DEV. [Referências, implementação e testes](docs/VISUAIS_0_17.md). As tabelas de dano e os demais valores permanecem os da versão 0.16.0.
 
 Projeto editável em Godot 4.7.2. Inclui código, cenas, mapas, dados de balanceamento, sprites e testes. Não precisa instalar Python ou Node.js para jogar no modo solo pelo editor.
 

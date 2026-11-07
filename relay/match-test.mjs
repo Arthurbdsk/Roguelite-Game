@@ -26,8 +26,10 @@ await mkdir(resolve(root,'test_output'),{recursive:true});
 function peer(index,args){const child=spawn(godot,[...(process.argv.includes('--render-one')&&index===1?['--resolution','960x540','--max-fps','30']:['--headless']),'--log-file',resolve(root,`test_output/coop-${stamp}-${index}.runtime.log`),...runtime,'--script',harness,'--',...endpointArgs,`--index=${index}`,`--profile-slot=cooptest${stamp}_${index}`,...args],{cwd:packedArgument?dirname(packedPath):root,windowsHide:true});children.push(child);let out='';child.stdout.on('data',d=>out+=d);child.stderr.on('data',d=>out+=d);return new Promise((ok,bad)=>{child.on('error',bad);child.on('close',async code=>{await writeFile(resolve(root,`test_output/coop-${scenario}-peer-${index}.log`),out);console.log(out.trim());if(code===0&&out.includes('COOP_MATCH_PEER_PASS')&&!out.includes('ERROR:'))ok();else bad(Error(`Match peer ${index} failed ${code}`));});});}
 try{
  const extra=process.argv.filter(v=>v==='--disconnect'||v.startsWith('--soak-seconds=')||v.startsWith('--soak-rate=')||v.startsWith('--map='));
- await rm(codeFile,{force:true});const host=peer(0,['--host',`--code-file=${codeFile}`,...extra]);
- let code='';for(let i=0;i<100;i++){try{code=await readFile(codeFile,'utf8');if(code)break;}catch{}await new Promise(r=>setTimeout(r,50));}
+ await rm(codeFile,{force:true});const host=peer(0,['--host',`--code-file=${codeFile}`,...extra]);host.catch(()=>{});
+ // Free public hosting can wake for up to 90s. Keep the harness aligned with the game's preflight.
+ const codeDeadline=Date.now()+(externalArgument?100000:10000);
+ let code='';while(Date.now()<codeDeadline){try{code=await readFile(codeFile,'utf8');if(code)break;}catch{}await new Promise(r=>setTimeout(r,50));}
  if(!code)throw Error('Host did not publish a room code');
  const results=await Promise.allSettled([host,...Array.from({length:3},(_,i)=>peer(i+1,[`--room=${code}`,...extra]))]);
  for(const result of results)if(result.status==='rejected')throw result.reason;

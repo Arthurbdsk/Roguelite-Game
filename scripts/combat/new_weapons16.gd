@@ -7,8 +7,21 @@ var strikes:Array=[]
 var bursts:Array=[]
 var aura_hits:Dictionary={}
 var wall_query:=PhysicsRayQueryParameters2D.new()
+var visual:=NewWeaponVisuals17.new()
+var shot_serial:int=0
+var impact_serial:int=0
+var impact_log:Array=[]
+var received_impact:int=0
 func setup(owner):weapons=owner
-func reset():shots.clear();strikes.clear();bursts.clear();aura_hits.clear()
+func reset():shots.clear();strikes.clear();bursts.clear();aura_hits.clear();visual.reset();shot_serial=0;impact_serial=0;impact_log.clear();received_impact=0
+func impact(kind:String,at:Vector2):
+ if kind=="runetracer":return
+ visual.impact(kind,at);impact_serial+=1
+ impact_log.append({"id":impact_serial,"kind":kind,"at":at,"time":weapons.combat_time})
+ if impact_log.size()>32:impact_log.pop_front()
+func receive_impacts(log:Array):
+ for fx in log:
+  if int(fx.id)>received_impact:visual.impact(fx.kind,fx.at);received_impact=int(fx.id)
 func world():return weapons.game.world if weapons.game is CoopActor else weapons.game
 func candidates(a:Vector2,b:Vector2)->Array:return weapons.arsenal.candidates(a,b)
 func launch(id:String)->bool:
@@ -28,8 +41,11 @@ func launch(id:String)->bool:
  return true
 func projectile(kind:String,direction:Vector2):
  var at:Vector2=weapons.game.player.position;var center:Vector2=at.clamp(Vector2(320,180),Vector2(1480,1020))
- shots.append({"kind":kind,"at":at,"velocity":direction*weapons._stat(kind,"projectile_speed")*weapons.projectile_factor(),"age":0.0,"life":weapons._stat(kind,"duration") if kind=="runetracer" else 4.0,"hits":{},"pierce":int(weapons._stat(kind,"pierce")),"bounds":Rect2(center-Vector2(320,180),Vector2(640,360)),"trail":[]})
+ shot_serial+=1
+ shots.append({"id":shot_serial,"kind":kind,"at":at,"velocity":direction*weapons._stat(kind,"projectile_speed")*weapons.projectile_factor(),"age":0.0,"life":weapons._stat(kind,"duration") if kind=="runetracer" else 4.0,"hits":{},"pierce":int(weapons._stat(kind,"pierce")),"bounds":Rect2(center-Vector2(320,180),Vector2(640,360)),"trail":[]})
 func tick(delta:float,allow:bool):
+ visual.tick(delta)
+ impact_log=impact_log.filter(func(fx):return weapons.combat_time-float(fx.time)<.35)
  var origin:Vector2=weapons.game.player.position
  if allow and int(weapons.levels.get("garlic",0))>0:
   var radius:float=weapons._stat("garlic","reach")
@@ -88,10 +104,12 @@ func tick(delta:float,allow:bool):
     weapons._hit(e,weapons._stat(shot.kind,"damage"),shot.velocity.normalized()*65 if shot.kind=="magic_wand" else Vector2.ZERO)
     if shot.kind!="runetracer":
      shot.pierce-=1
-     if shot.pierce<=0:shot.alive=false;break
+     if shot.pierce<=0:shot.alive=false;impact(shot.kind,Geometry2D.get_closest_point_to_segment(e.position,start,end));break
    shot.at=end
    if normal!=Vector2.ZERO:
-    if shot.kind!="runetracer":shot.alive=false;break
+    if shot.kind!="runetracer":
+     if shot.get("alive",true):impact(shot.kind,end)
+     shot.alive=false;break
     shot.velocity=Vector2(shot.velocity).bounce(normal);shot.at+=normal*.2;remaining*=1-fraction
    else:remaining=0
 

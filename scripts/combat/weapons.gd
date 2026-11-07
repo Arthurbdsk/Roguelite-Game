@@ -409,9 +409,6 @@ func _weighted_pick(pool: Array[Dictionary]) -> Dictionary:
 
 
 func _weapon_available(id: String) -> bool:
-	if id in NewWeapons16.IDS and weapon_data[id].icon.is_empty():
-		var w=game.world if game is CoopActor else game
-		if not w.dev_boss_test:return false
 	var current: int = int(levels.get(id, 0))
 	var data = weapon_data[id]
 	if current >= data.max_level:
@@ -508,6 +505,7 @@ func _draw() -> void:
 	var world=game.world if game is CoopActor else game
 	if not is_instance_valid(world):return
 	var visible:Rect2=world.render_rect().grow(100)
+	additions.visual.paint(self,additions,visible)
 	for beam in beams:
 		var length:float=beam.origin.distance_to(beam.end)
 		draw_set_transform(beam.origin.round(),(beam.end-beam.origin).angle())

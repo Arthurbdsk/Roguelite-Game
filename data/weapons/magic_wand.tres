@@ -4,7 +4,8 @@
 script = ExtResource("1")
 id = "magic_wand"
 display_name = "Varinha Mágica"
-icon = ""
+icon = "res://assets/v17/magic_wand.png"
+description = "Projéteis azuis em sequência contra o inimigo vivo mais próximo. Direção fixa, empurrão moderado e colisão com paredes."
 max_level = 8
 damage = PackedFloat32Array(13.2,13.2,13.2,13.2,19.2,19.2,19.2,26.4)
 cooldown = PackedFloat32Array(1,1,0.85,0.85,0.85,0.85,0.85,0.85)

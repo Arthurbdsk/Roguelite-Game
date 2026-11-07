@@ -14,8 +14,8 @@ func run():
   root.size=size_px;g.ui.root.size=Vector2(size_px);g.ui.menu.size=Vector2(size_px);g.ui.render("collection")
   await process_frame;await process_frame
   var v=g.ui.menu.get_child(0)
-  check(v.entries.size()==25 and v.buttons.size()==25,"only twelve weapons, eight passives and five consumables")
-  check(v.counter.text=="Coleção: 3 de 25","exact discovery count")
+  check(v.entries.size()==30 and v.buttons.size()==30,"seventeen weapons, eight passives and five consumables")
+  check(v.counter.text=="Coleção: 3 de 30","exact discovery count")
   var scroll=v.find_child("CollectionScroll",true,false);var details=v.find_child("CollectionDetails",true,false)
   check(scroll.get_global_rect().end.y<=details.get_global_rect().position.y+1,"fixed details do not overlap scroll")
   await RenderingServer.frame_post_draw
