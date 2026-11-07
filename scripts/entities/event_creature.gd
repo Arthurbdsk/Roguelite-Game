@@ -4,6 +4,7 @@ func tick(delta:float):
  if event_kind!="siege":super.tick(delta);return
  if not alive or tick_control(delta):return
  clock+=delta;state_time+=delta;attack_time-=delta
+ hit_flash=maxf(0,hit_flash-delta)
  if state=="prepare":
   if state_time>=data.windup:
    game.enemy_projectiles.fire(position+charge_direction*12,charge_direction,data,get_instance_id())
@@ -12,7 +13,8 @@ func tick(delta:float):
   if state_time>=data.recovery:state="approach";state_time=0
  elif attack_time<=0 and position.distance_to(game.player.position)<=data.attack_range and game.enemy_projectiles.clear_shot(position,game.player.position):
   state="prepare";state_time=0;charge_direction=(game.player.position-position).normalized()
- sprite.frame=4 if state=="prepare" else 5 if state=="recovery" else int(clock*4)%4
+ if tiny_kind.begins_with("original_"):original_visual((game.player.position-position).normalized(),false)
+ else:sprite.frame=4 if state=="prepare" else 5 if state=="recovery" else int(clock*4)%4
  sprite.flip_h=game.player.position.x<position.x
  sprite.modulate=Color("b7d8e7")
  refresh_visual()

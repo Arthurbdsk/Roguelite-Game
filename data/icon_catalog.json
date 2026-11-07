@@ -60,9 +60,9 @@
   "weapon:holy_water": {
     "name": "Água Benta",
     "category": "weapon",
-    "asset": "res://assets/icons/holy_water.png",
-    "origin": "Asset atual preservado",
-    "reason": "Referência específica ou correspondência superior ao pacote."
+    "asset": "res://assets/v22/water_vial.png",
+    "origin": "Arte original Hordas 0.22",
+    "reason": "Frasco criado a partir da referência fornecida pelo usuário, igual ao projétil."
   },
   "weapon:ice_wave": {
     "name": "Onda de gelo",

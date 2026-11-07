@@ -111,12 +111,18 @@ func _ready() -> void:
  for pair in [["siege_archer","skeleton_archer"],["slime_king","slime_large"],["event_blue","slime_large"],["event_small","slime_small"]]:
   enemy_data[pair[0]]=enemy_data[pair[1]].duplicate();enemy_data[pair[0]].id=pair[0]
  enemy_data.siege_archer.title="Arqueiro do cerco";enemy_data.siege_archer.speed=0;enemy_data.siege_archer.attack_interval+=survival_config.events.siege_extra_interval;enemy_data.siege_archer.attack_range=survival_config.events.siege_range;enemy_data.siege_archer.arrow_range=survival_config.events.siege_arrow_range;enemy_data.siege_archer.arrow_lifetime=survival_config.events.siege_arrow_lifetime
- enemy_data.slime_king.title="Slime Rei";enemy_data.slime_king.health*=survival_config.events.king_health;enemy_data.slime_king.speed*=survival_config.events.king_speed;enemy_data.slime_king.radius=survival_config.events.king_radius;enemy_data.slime_king.texture="res://assets/v13/slime_king.png";enemy_data.slime_king.frames=8
+ enemy_data.event_blue.visual_family="original_slime_blue";enemy_data.event_small.visual_family="original_slime_blue_small"
+ enemy_data.slime_king.title="Slime Rei";enemy_data.slime_king.health*=survival_config.events.king_health;enemy_data.slime_king.speed*=survival_config.events.king_speed;enemy_data.slime_king.radius=survival_config.events.king_radius
+ enemy_data.slime_king.visual_family="original_slime_king"
  enemy_data["boss"] = enemy_data.demon
  variant_data=JSON.parse_string(FileAccess.get_file_as_string("res://data/variants21.json"))
  for id in variant_data:
   var v:Dictionary=variant_data[id];enemy_data[id]=enemy_data[v.base].duplicate();enemy_data[id].id=id;enemy_data[id].title=v.name;enemy_data[id].damage_resistance=v.resistance
-  enemy_data[id].visual_family="orc" if v.base=="ghoul" else ""
+  enemy_data[id].visual_family=v.get("visual_family","orc" if v.base=="ghoul" else "")
+ for id in enemy_data:
+  var family:String=enemy_data[id].visual_family
+  if not family.is_empty() and TinyCharacters.available(family):
+   enemy_data[id].texture=TinyCharacters.data(family).texture;enemy_data[id].frames=int(TinyCharacters.data(family).frames)
  arena = RuinedArena.new()
  arena.z_index = -20
  add_child(arena)

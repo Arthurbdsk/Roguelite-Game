@@ -18,3 +18,6 @@ __pycache__/
 
 # Tiny RPG: game use is licensed; do not re-upload standalone art.
 /assets/tiny_rpg/*.png
+
+/docs/**/*.png.import
+/assets/v22/sources/*.png.import

@@ -3,7 +3,10 @@ extends RefCounted
 static var definitions:Dictionary={}
 static var textures:Dictionary={}
 static func data(kind:String)->Dictionary:
- if definitions.is_empty():definitions=JSON.parse_string(FileAccess.get_file_as_string("res://data/tiny_characters.json"))
+ if definitions.is_empty():
+  definitions=JSON.parse_string(FileAccess.get_file_as_string("res://data/tiny_characters.json"))
+  if FileAccess.file_exists("res://data/original_characters22.json"):
+   definitions.merge(JSON.parse_string(FileAccess.get_file_as_string("res://data/original_characters22.json")))
  return definitions.get(kind,{})
 static func available(kind:String)->bool:
  var d:=data(kind)

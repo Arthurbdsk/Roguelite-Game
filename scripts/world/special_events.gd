@@ -52,7 +52,6 @@ func on_death(enemy)->bool:
  var gold:int=int(config.king_gold) if enemy.data.id=="slime_king" else int(config.blue_gold) if enemy.data.id=="event_blue" else 0
  if gold>0:game.gold_loot.drop(enemy.position,gold)
  game.drop_xp(enemy.position,xp*game.balance.death_experience_multiplier)
- if enemy.data.id=="slime_king":death_fx.append({"at":enemy.position,"age":0.0})
  return true
 func tick(delta:float):
  if game.state!="running":return
@@ -97,8 +96,6 @@ func tick(delta:float):
    if roll<float(config.siege_chance):start("siege")
    elif roll<float(config.siege_chance)+float(config.king_chance):start("king")
  queue_redraw()
-func _draw():
- for fx in death_fx:draw_texture_rect_region(preload("res://assets/v13/slime_king.png"),Rect2(fx.at-Vector2(36,66),Vector2(72,72)),Rect2((4+mini(3,int(fx.age/.65*4)))*72,0,72,72))
 
 func stop():
  for owner in owners:game.enemy_projectiles.remove_owner(owner)

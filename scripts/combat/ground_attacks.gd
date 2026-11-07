@@ -7,9 +7,8 @@ var last_trail:Vector2=Vector2.INF
 var trail_clock:float=0
 var pool_cells:Dictionary={}
 var cells_dirty:bool=true
-var water_texture=preload("res://assets/v08/holy_water.png")
-var vial_texture=preload("res://assets/effects/holy_water_vial.png")
-var splash_texture=preload("res://assets/effects/holy_water_splash.png")
+var water_texture=preload("res://assets/v22/water_pool.png")
+var vial_texture=preload("res://assets/v22/water_vial.png")
 var sludge_texture=preload("res://assets/effects/sludge.png")
 func setup(system):
  weapons=system;z_index=-6

@@ -3,7 +3,7 @@ func _initialize():call_deferred("run")
 func run():
  var g=load("res://scenes/main.tscn").instantiate();root.add_child(g);await process_frame;g.set_physics_process(false);g.start_run();g.sound.volume=0;g.director.phase="complete";g.elapsed=240;g.horde_progress.tick()
  var ev=g.special_events;assert(ev.start("siege"));assert(g.enemies.size()==20 and g.banner.find("cerco")==-1)
- var normal=g.spawn_enemy("skeleton_archer",Vector2(1100,600));var siege=g.enemies[0];assert(is_equal_approx(siege.max_hp,normal.max_hp*4));assert(siege.data.attack_interval==normal.data.attack_interval+2 and siege.data.arrow_range>=760)
+ var normal=g.spawn_enemy("skeleton_archer",Vector2(1100,600));var siege=g.enemies[0];assert(is_equal_approx(siege.max_hp,normal.max_hp*4));assert(is_equal_approx(siege.data.attack_interval,normal.data.attack_interval+2*g.balance.enemy_attack_interval_multiplier) and siege.data.arrow_range>=760)
  var at:Vector2=siege.position;g.player.position+=Vector2(70,0);siege.tick(.2);assert(siege.position==at)
  ev.tick(45);assert(g.gold_loot.death_rolls==0);ev.tick(.36);assert(g.enemies.size()==1)
  g.clear_run();g.elapsed=240;g.state="running";g.horde_progress.tick();assert(ev.start("king"));var king=g.enemies[0];assert(king.max_hp>1000)
@@ -16,5 +16,5 @@ func run():
  ev.tick(.1);assert(ev.active=="" and ev.pending.is_empty());var gold:int=0;var xp:float=0
  for c in g.gold_loot.coins:gold+=c.value
  for p in g.pickups:xp+=p.xp
- assert(gold==20 and is_equal_approx(xp,90))
- g.queue_free();await process_frame;await create_timer(.2).timeout;print("EVENTS13_PASS 20 fixed archers, x4 current health, +2s cadence, 45s no-reward expiry; king ->15 blue ->225 small, exact ratios and family budget 20 gold/90 XP");quit()
+ assert(gold==20 and is_equal_approx(xp,120*g.balance.death_experience_multiplier))
+ g.queue_free();await process_frame;await create_timer(.2).timeout;print("EVENTS13_PASS 20 fixed archers, x4 current health, configured cadence, 45s no-reward expiry; king ->15 blue ->225 small, exact ratios and configured family budget");quit()

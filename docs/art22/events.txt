@@ -1,0 +1,3 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+EVENTS13_PASS 20 fixed archers, x4 current health, configured cadence, 45s no-reward expiry; king ->15 blue ->225 small, exact ratios and configured family budget

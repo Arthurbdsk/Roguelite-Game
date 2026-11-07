@@ -6,6 +6,7 @@ func tick(delta:float):
 	if not alive:return
 	if tick_control(delta):return
 	clock+=delta;state_time+=delta;attack_time-=delta;summon_cooldown-=delta
+	visual_cast_release=maxf(0,visual_cast_release-delta)
 	hit_flash=maxf(0,hit_flash-delta)
 	var offset:Vector2=game.player.position-position
 	var direction:Vector2=offset.normalized()
@@ -66,6 +67,8 @@ func tick(delta:float):
 	knockback=knockback.move_toward(Vector2.ZERO,delta*500)
 	velocity=game.crowd_velocity(self,velocity)
 	move_body()
+	if tiny_kind.begins_with("original_"):
+		original_visual(direction,movement.length()>2);refresh_visual();return
 	if data.frames>=16:
 		if state=="conjure_wait":sprite.frame=8+int(clock*4)%2
 		elif state=="prepare":sprite.frame=8+mini(3,int(state_time/maxf(.01,data.windup)*4))

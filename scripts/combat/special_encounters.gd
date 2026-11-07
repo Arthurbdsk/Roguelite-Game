@@ -87,6 +87,7 @@ func tick(delta:float):
     spawned.append(weakref(child))
     if child.chain_root>0:game.late_arena.chain.generated+=1
   children[owner]=spawned
+  caster.visual_cast_release=.18
   marks=marks.filter(func(m):return m.owner!=owner)
   casters.erase(owner)
  for area in areas:
