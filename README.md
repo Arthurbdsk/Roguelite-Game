@@ -1,5 +1,7 @@
 # Hordas
 
+Android é mantido **somente sob pedido explícito de celular, Android ou versão mobile**, separado em `codex/android-mobile`. Pedidos genéricos continuam exclusivos do PC. [Política de congelamento e base identificada](docs/ANDROID_POLICY.md).
+
 Versão 0.20.0: Soldado e Orc animados da coleção Tiny RPG, com os atributos e IDs anteriores preservados. Escopo limitado aos dois personagens gratuitos, conforme escolhido. [Comparação, animações, licença e testes](docs/TINY_RPG_0_20.md).
 
 Projeto editável em Godot 4.7.2. Inclui código, cenas, mapas, dados de balanceamento, sprites e testes. Não precisa instalar Python ou Node.js para jogar no modo solo pelo editor. Para usar/exportar a fonte decorativa licenciada do cronômetro a partir do código, copie seu arquivo autorizado para `assets/fonts/AurusenthialGothic.ttf`; o TTF avulso fica fora do GitHub, enquanto os executáveis incluem a fonte autorizada.
