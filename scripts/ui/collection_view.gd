@@ -28,19 +28,20 @@ func setup(owner,interface):
  for id in game.weapon_system.passive_data:
   var d=game.weapon_system.passive_data[id]
   entries.append({"key":"passive:"+id,"name":d.display_name,"icon":d.icon,"description":d.level_descriptions[0],"compatibility":"Passiva da partida, até nível 8. Usa um dos quatro espaços."})
- for d in game.consumables.config.items:entries.append({"key":"consumable:"+str(d.id),"name":d.name,"icon":"res://assets/v15/"+d.id+".png","description":d.description,"compatibility":"Coleta imediata. Sem níveis e sem ocupar espaços."})
+ for d in game.consumables.config.items:entries.append({"key":"consumable:"+str(d.id),"name":d.name,"icon":GameIcons.path("consumable:"+str(d.id),"res://assets/v15/"+d.id+".png"),"description":d.description,"compatibility":"Coleta imediata. Sem níveis e sem ocupar espaços."})
  var found:int=0
  for i in entries.size():
   var e:Dictionary=entries[i];var known:bool=game.profile.data.get("discoveries",{}).get(e.key,false)==true
   found+=int(known)
   var b:=Button.new();b.custom_minimum_size=Vector2(56,54);b.size_flags_horizontal=Control.SIZE_EXPAND_FILL;b.tooltip_text=e.name if known else "Não descoberto";b.pressed.connect(select.bind(i));b.focus_entered.connect(select.bind(i));grid.add_child(b);buttons.append(b)
   if known:
-   var icon:=TextureRect.new();icon.texture=load(e.icon);icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;icon.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);icon.offset_left=12;icon.offset_top=10;icon.offset_right=-12;icon.offset_bottom=-10;icon.mouse_filter=Control.MOUSE_FILTER_IGNORE;icon.texture_filter=CanvasItem.TEXTURE_FILTER_NEAREST;b.add_child(icon)
+   var center:=CenterContainer.new();center.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);center.mouse_filter=Control.MOUSE_FILTER_IGNORE;b.add_child(center)
+   var icon:=TextureRect.new();icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;icon.custom_minimum_size=Vector2(32,32);icon.texture=load(e.icon);icon.mouse_filter=Control.MOUSE_FILTER_IGNORE;icon.texture_filter=CanvasItem.TEXTURE_FILTER_NEAREST;center.add_child(icon)
   else:b.text="?"
  counter.text="Coleção: %d de %d"%[found,entries.size()]
  var fixed:=PanelContainer.new();fixed.name="CollectionDetails";fixed.custom_minimum_size.y=112;fixed.add_theme_stylebox_override("panel",ui._style(Color("606b7b"),GameUI.LINE));column.add_child(fixed)
  var row:=HBoxContainer.new();row.add_theme_constant_override("separation",10);fixed.add_child(row)
- detail_icon=TextureRect.new();detail_icon.custom_minimum_size=Vector2(44,44);detail_icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;detail_icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;detail_icon.texture_filter=CanvasItem.TEXTURE_FILTER_NEAREST;row.add_child(detail_icon)
+ detail_icon=TextureRect.new();detail_icon.custom_minimum_size=Vector2(32,32);detail_icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;detail_icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;detail_icon.texture_filter=CanvasItem.TEXTURE_FILTER_NEAREST;row.add_child(detail_icon)
  detail=RichTextLabel.new();detail.name="CollectionDescription";detail.size_flags_horizontal=Control.SIZE_EXPAND_FILL;detail.add_theme_font_size_override("normal_font_size",12);detail.scroll_active=true;row.add_child(detail)
  var initial:int=0
  for i in entries.size():

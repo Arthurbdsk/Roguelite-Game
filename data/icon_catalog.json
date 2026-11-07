@@ -1,0 +1,500 @@
+{
+  "weapon:axe": {
+    "name": "Machado",
+    "category": "weapon",
+    "asset": "res://assets/v18/axe.png",
+    "origin": "Asset atual preservado",
+    "reason": "Referência específica ou correspondência superior ao pacote."
+  },
+  "weapon:bolt": {
+    "name": "Arco",
+    "category": "weapon",
+    "asset": "res://assets/raven/fa1514.tres",
+    "origin": "Clockwork Raven",
+    "source_file": "fa1514.png",
+    "source_resolution": 16,
+    "source_url": "https://clockworkraven.itch.io/raven-fantasy-icons",
+    "pixel_sha256": "fd1ad589dd15a51561fc9ef47e96b3c7a087587b3ed8b363959872ac8223afd3"
+  },
+  "weapon:bombs": {
+    "name": "Bombas",
+    "category": "weapon",
+    "asset": "res://assets/raven/fa771.tres",
+    "origin": "Clockwork Raven",
+    "source_file": "fa771.png",
+    "source_resolution": 16,
+    "source_url": "https://clockworkraven.itch.io/raven-fantasy-icons",
+    "pixel_sha256": "81f75807a89af4411f7e2cc5c264cd213bd099bcd974ef3d142f33d5ae599d20"
+  },
+  "weapon:boomerang": {
+    "name": "Bumerangue",
+    "category": "weapon",
+    "asset": "res://assets/v08/boomerang_icon.png",
+    "origin": "Asset atual preservado",
+    "reason": "Referência específica ou correspondência superior ao pacote."
+  },
+  "weapon:clock": {
+    "name": "Lança Relógio",
+    "category": "weapon",
+    "asset": "res://assets/icons/clock.png",
+    "origin": "Asset atual preservado",
+    "reason": "Referência específica ou correspondência superior ao pacote."
+  },
+  "weapon:fire_wand": {
+    "name": "Varinha de Fogo",
+    "category": "weapon",
+    "asset": "res://assets/raven/fa1691.tres",
+    "origin": "Clockwork Raven",
+    "source_file": "fa1691.png",
+    "source_resolution": 16,
+    "source_url": "https://clockworkraven.itch.io/raven-fantasy-icons",
+    "pixel_sha256": "4d20c2fec67f7e82da420f10e532d2f7580435784b11b9aa849d3f1bbcc05cc4"
+  },
+  "weapon:garlic": {
+    "name": "Alho",
+    "category": "weapon",
+    "asset": "res://assets/v17/garlic.png",
+    "origin": "Asset atual preservado",
+    "reason": "Referência específica ou correspondência superior ao pacote."
+  },
+  "weapon:holy_water": {
+    "name": "Água Benta",
+    "category": "weapon",
+    "asset": "res://assets/icons/holy_water.png",
+    "origin": "Asset atual preservado",
+    "reason": "Referência específica ou correspondência superior ao pacote."
+  },
+  "weapon:ice_wave": {
+    "name": "Onda de gelo",
+    "category": "weapon",
+    "asset": "res://assets/icons/ice_wave.png",
+    "origin": "Asset atual preservado",
+    "reason": "Referência específica ou correspondência superior ao pacote."
+  },
+  "weapon:lightning": {
+    "name": "Raio",
+    "category": "weapon",
+    "asset": "res://assets/icons/lightning.png",
+    "origin": "Asset atual preservado",
+    "reason": "Referência específica ou correspondência superior ao pacote."
+  },
+  "weapon:magic_wand": {
+    "name": "Varinha Mágica",
+    "category": "weapon",
+    "asset": "res://assets/raven/fa1690.tres",
+    "origin": "Clockwork Raven",
+    "source_file": "fa1690.png",
+    "source_resolution": 16,
+    "source_url": "https://clockworkraven.itch.io/raven-fantasy-icons",
+    "pixel_sha256": "f868623206610eb7d2276875416723dc5670be2d7313aa36a98a62b6bc8d8bfc"
+  },
+  "weapon:orbit": {
+    "name": "Orbes",
+    "category": "weapon",
+    "asset": "res://assets/raven/fa695.tres",
+    "origin": "Clockwork Raven",
+    "source_file": "fa695.png",
+    "source_resolution": 16,
+    "source_url": "https://clockworkraven.itch.io/raven-fantasy-icons",
+    "pixel_sha256": "19dd8970f1f60821dfa3701e1aa02591b9d6ae498238cd2a37d5b5888b5cd099"
+  },
+  "weapon:runetracer": {
+    "name": "Runa Traçante",
+    "category": "weapon",
+    "asset": "res://assets/v17/runetracer.png",
+    "origin": "Asset atual preservado",
+    "reason": "Referência específica ou correspondência superior ao pacote."
+  },
+  "weapon:sludge": {
+    "name": "Lodo",
+    "category": "weapon",
+    "asset": "res://assets/icons/sludge.png",
+    "origin": "Asset atual preservado",
+    "reason": "Referência específica ou correspondência superior ao pacote."
+  },
+  "weapon:sword": {
+    "name": "Espada",
+    "category": "weapon",
+    "asset": "res://assets/raven/fa671.tres",
+    "origin": "Clockwork Raven",
+    "source_file": "fa671.png",
+    "source_resolution": 16,
+    "source_url": "https://clockworkraven.itch.io/raven-fantasy-icons",
+    "pixel_sha256": "9d4ad0b80147c4101d194bb74b517f72599eacfd16fde8a47cb81b485b85c3b9"
+  },
+  "weapon:whip": {
+    "name": "Chicote",
+    "category": "weapon",
+    "asset": "res://assets/raven/fa1088.tres",
+    "origin": "Clockwork Raven",
+    "source_file": "fa1088.png",
+    "source_resolution": 16,
+    "source_url": "https://clockworkraven.itch.io/raven-fantasy-icons",
+    "pixel_sha256": "56346eb324583f729ee2c5638342169c60f607f8042a75fa833daf4c9d6334ba"
+  },
+  "passive:boots": {
+    "name": "Botas",
+    "category": "passive",
+    "asset": "res://assets/raven/fa1853.tres",
+    "origin": "Clockwork Raven",
+    "source_file": "fa1853.png",
+    "source_resolution": 16,
+    "source_url": "https://clockworkraven.itch.io/raven-fantasy-icons",
+    "pixel_sha256": "37d13a7df7fd0b372b955c9a9bd014218b0370023aec3e20cbe1fcf89dc30427"
+  },
+  "passive:cadence": {
+    "name": "Luvas",
+    "category": "passive",
+    "asset": "res://assets/raven/fa2049.tres",
+    "origin": "Clockwork Raven",
+    "source_file": "fa2049.png",
+    "source_resolution": 16,
+    "source_url": "https://clockworkraven.itch.io/raven-fantasy-icons",
+    "pixel_sha256": "142ab94e6c87cfd6bec9e4a3fb18f4a13753ac3875dd4f242c81f0189e2d919d"
+  },
+  "passive:crown": {
+    "name": "Coroa",
+    "category": "passive",
+    "asset": "res://assets/raven/fa1568.tres",
+    "origin": "Clockwork Raven",
+    "source_file": "fa1568.png",
+    "source_resolution": 16,
+    "source_url": "https://clockworkraven.itch.io/raven-fantasy-icons",
+    "pixel_sha256": "a633a928ec64d3e3ff659c87da537916cdb8a1c036fd98d10ca0d6e7284404bf"
+  },
+  "passive:heart": {
+    "name": "Coração",
+    "category": "passive",
+    "asset": "res://assets/raven/fa659.tres",
+    "origin": "Clockwork Raven",
+    "source_file": "fa659.png",
+    "source_resolution": 16,
+    "source_url": "https://clockworkraven.itch.io/raven-fantasy-icons",
+    "pixel_sha256": "008fda78691557c593bc7d078728ab43fe3711bd067fda04963b54fe2110249b"
+  },
+  "passive:hourglass": {
+    "name": "Ampulheta",
+    "category": "passive",
+    "asset": "res://assets/raven/fa999.tres",
+    "origin": "Clockwork Raven",
+    "source_file": "fa999.png",
+    "source_resolution": 16,
+    "source_url": "https://clockworkraven.itch.io/raven-fantasy-icons",
+    "pixel_sha256": "c4d3f2109df338cdd994406ea0f4059cc9e39dc2760c99616300ab5a41026402"
+  },
+  "passive:lens": {
+    "name": "Lupa",
+    "category": "passive",
+    "asset": "res://assets/raven/fa119.tres",
+    "origin": "Clockwork Raven",
+    "source_file": "fa119.png",
+    "source_resolution": 16,
+    "source_url": "https://clockworkraven.itch.io/raven-fantasy-icons",
+    "pixel_sha256": "8f7eefe21903e6ef272ab8e37fff13c5274aa9ad26921961bcb6aac3e2279c3f"
+  },
+  "passive:magnet": {
+    "name": "Ímã",
+    "category": "passive",
+    "asset": "res://assets/icons/magnet.png",
+    "origin": "Asset atual preservado",
+    "reason": "Referência específica ou correspondência superior ao pacote."
+  },
+  "passive:ward": {
+    "name": "Armadura",
+    "category": "passive",
+    "asset": "res://assets/raven/fa2059.tres",
+    "origin": "Clockwork Raven",
+    "source_file": "fa2059.png",
+    "source_resolution": 16,
+    "source_url": "https://clockworkraven.itch.io/raven-fantasy-icons",
+    "pixel_sha256": "462919529c71c00a7c32581b8c1fe36f9c7adf78f9841c71af81ebce831cab96"
+  },
+  "permanent:damage": {
+    "name": "Dano",
+    "category": "permanent",
+    "asset": "res://assets/raven/fa671.tres",
+    "origin": "Clockwork Raven",
+    "source_file": "fa671.png",
+    "source_resolution": 16,
+    "source_url": "https://clockworkraven.itch.io/raven-fantasy-icons",
+    "pixel_sha256": "9d4ad0b80147c4101d194bb74b517f72599eacfd16fde8a47cb81b485b85c3b9"
+  },
+  "permanent:armor": {
+    "name": "Armadura",
+    "category": "permanent",
+    "asset": "res://assets/raven/fa2059.tres",
+    "origin": "Clockwork Raven",
+    "source_file": "fa2059.png",
+    "source_resolution": 16,
+    "source_url": "https://clockworkraven.itch.io/raven-fantasy-icons",
+    "pixel_sha256": "462919529c71c00a7c32581b8c1fe36f9c7adf78f9841c71af81ebce831cab96"
+  },
+  "permanent:health": {
+    "name": "Vida máxima",
+    "category": "permanent",
+    "asset": "res://assets/raven/fa659.tres",
+    "origin": "Clockwork Raven",
+    "source_file": "fa659.png",
+    "source_resolution": 16,
+    "source_url": "https://clockworkraven.itch.io/raven-fantasy-icons",
+    "pixel_sha256": "008fda78691557c593bc7d078728ab43fe3711bd067fda04963b54fe2110249b"
+  },
+  "permanent:regen": {
+    "name": "Regeneração",
+    "category": "permanent",
+    "asset": "res://assets/raven/fa969.tres",
+    "origin": "Clockwork Raven",
+    "source_file": "fa969.png",
+    "source_resolution": 16,
+    "source_url": "https://clockworkraven.itch.io/raven-fantasy-icons",
+    "pixel_sha256": "1e92c3ca1d2e6943828cec921b2164b02bc5dbee0ee546a292eabc12e7694132"
+  },
+  "permanent:cooldown": {
+    "name": "Recarga",
+    "category": "permanent",
+    "asset": "res://assets/raven/fa333.tres",
+    "origin": "Clockwork Raven",
+    "source_file": "fa333.png",
+    "source_resolution": 16,
+    "source_url": "https://clockworkraven.itch.io/raven-fantasy-icons",
+    "pixel_sha256": "c42e897c09c4562441ec3709776b83889ef02dfa89660faba3682a26c5b621dc"
+  },
+  "permanent:area": {
+    "name": "Área",
+    "category": "permanent",
+    "asset": "res://assets/raven/fa990.tres",
+    "origin": "Clockwork Raven",
+    "source_file": "fa990.png",
+    "source_resolution": 16,
+    "source_url": "https://clockworkraven.itch.io/raven-fantasy-icons",
+    "pixel_sha256": "19b43b1ae62439333adc306da53bfbb264eba0b67c7d9eb8d25129a91e30831f"
+  },
+  "permanent:projectile_speed": {
+    "name": "Velocidade dos projéteis",
+    "category": "permanent",
+    "asset": "res://assets/raven/fa402.tres",
+    "origin": "Clockwork Raven",
+    "source_file": "fa402.png",
+    "source_resolution": 16,
+    "source_url": "https://clockworkraven.itch.io/raven-fantasy-icons",
+    "pixel_sha256": "74e9bc8a201518e3d80c9454c2ba3229677de6fb8c4a9af64365916cea6bf03a"
+  },
+  "permanent:duration": {
+    "name": "Duração",
+    "category": "permanent",
+    "asset": "res://assets/raven/fa999.tres",
+    "origin": "Clockwork Raven",
+    "source_file": "fa999.png",
+    "source_resolution": 16,
+    "source_url": "https://clockworkraven.itch.io/raven-fantasy-icons",
+    "pixel_sha256": "c4d3f2109df338cdd994406ea0f4059cc9e39dc2760c99616300ab5a41026402"
+  },
+  "permanent:amount": {
+    "name": "Quantidade",
+    "category": "permanent",
+    "asset": "res://assets/raven/fa985.tres",
+    "origin": "Clockwork Raven",
+    "source_file": "fa985.png",
+    "source_resolution": 16,
+    "source_url": "https://clockworkraven.itch.io/raven-fantasy-icons",
+    "pixel_sha256": "2c5a4ff53438a0d93025d5ae3cad0bb73bf8c3d0692ed229d8f1b53baa4d6f65"
+  },
+  "permanent:move": {
+    "name": "Movimento",
+    "category": "permanent",
+    "asset": "res://assets/raven/fa658.tres",
+    "origin": "Clockwork Raven",
+    "source_file": "fa658.png",
+    "source_resolution": 16,
+    "source_url": "https://clockworkraven.itch.io/raven-fantasy-icons",
+    "pixel_sha256": "3bc97c73df6f1cffaa830b1a5aa00c21968767d7a7ef9964f1c0b64be10c7c20"
+  },
+  "permanent:pickup": {
+    "name": "Coleta",
+    "category": "permanent",
+    "asset": "res://assets/raven/fa924.tres",
+    "origin": "Clockwork Raven",
+    "source_file": "fa924.png",
+    "source_resolution": 16,
+    "source_url": "https://clockworkraven.itch.io/raven-fantasy-icons",
+    "pixel_sha256": "f26033e5b8eadba117b7db8b7ed3c74e51a50dcf8e37268506b59d30292b2a9a"
+  },
+  "permanent:luck": {
+    "name": "Sorte",
+    "category": "permanent",
+    "asset": "res://assets/raven/fa668.tres",
+    "origin": "Clockwork Raven",
+    "source_file": "fa668.png",
+    "source_resolution": 16,
+    "source_url": "https://clockworkraven.itch.io/raven-fantasy-icons",
+    "pixel_sha256": "e95ea71b076b307ea3d1b61750ace3321cec711c4c8810dae193a20837a0e88b"
+  },
+  "permanent:experience": {
+    "name": "Experiência",
+    "category": "permanent",
+    "asset": "res://assets/raven/fa165.tres",
+    "origin": "Clockwork Raven",
+    "source_file": "fa165.png",
+    "source_resolution": 16,
+    "source_url": "https://clockworkraven.itch.io/raven-fantasy-icons",
+    "pixel_sha256": "01b492d13c57e101ea77650e9b22f56bb79d1231a22040b7bfbada1dc4d6573f"
+  },
+  "permanent:gold": {
+    "name": "Ouro",
+    "category": "permanent",
+    "asset": "res://assets/raven/fa131.tres",
+    "origin": "Clockwork Raven",
+    "source_file": "fa131.png",
+    "source_resolution": 16,
+    "source_url": "https://clockworkraven.itch.io/raven-fantasy-icons",
+    "pixel_sha256": "caa368ea439a9bb353a108d67b13c384a302e7afa77f065a0a43d3b4cc91fa2d"
+  },
+  "permanent:challenge": {
+    "name": "Desafio",
+    "category": "permanent",
+    "asset": "res://assets/raven/fa223.tres",
+    "origin": "Clockwork Raven",
+    "source_file": "fa223.png",
+    "source_resolution": 16,
+    "source_url": "https://clockworkraven.itch.io/raven-fantasy-icons",
+    "pixel_sha256": "fe71149527f520a20c9666e447d6c7b9eb6332deff601ef56c629153262e9ad4"
+  },
+  "permanent:revive": {
+    "name": "Reviver",
+    "category": "permanent",
+    "asset": "res://assets/raven/fa1082.tres",
+    "origin": "Clockwork Raven",
+    "source_file": "fa1082.png",
+    "source_resolution": 16,
+    "source_url": "https://clockworkraven.itch.io/raven-fantasy-icons",
+    "pixel_sha256": "9f619dd132a36a8915ec3aa94095e728655b83489c8251400f0c2268226f4857"
+  },
+  "consumable:cleanse": {
+    "name": "Limpeza",
+    "category": "consumable",
+    "asset": "res://assets/v15/cleanse.png",
+    "origin": "Asset atual preservado",
+    "reason": "Referência fornecida pelo usuário."
+  },
+  "consumable:food": {
+    "name": "Comida",
+    "category": "consumable",
+    "asset": "res://assets/raven/fa486.tres",
+    "origin": "Clockwork Raven",
+    "source_file": "fa486.png",
+    "source_resolution": 16,
+    "source_url": "https://clockworkraven.itch.io/raven-fantasy-icons",
+    "pixel_sha256": "b83b74d26afc02a1ce0d90d8e436ebf2e8b554206deead23cbedeb296d6966c2"
+  },
+  "consumable:gold_bag": {
+    "name": "Bolsa de Ouro",
+    "category": "consumable",
+    "asset": "res://assets/v15/gold_bag.png",
+    "origin": "Asset atual preservado",
+    "reason": "Referência fornecida pelo usuário."
+  },
+  "consumable:xp_magnet": {
+    "name": "Ímã de Experiência",
+    "category": "consumable",
+    "asset": "res://assets/v15/xp_magnet.png",
+    "origin": "Asset atual preservado",
+    "reason": "Referência fornecida pelo usuário."
+  },
+  "consumable:stopwatch": {
+    "name": "Relógio",
+    "category": "consumable",
+    "asset": "res://assets/raven/fa333.tres",
+    "origin": "Clockwork Raven",
+    "source_file": "fa333.png",
+    "source_resolution": 16,
+    "source_url": "https://clockworkraven.itch.io/raven-fantasy-icons",
+    "pixel_sha256": "c42e897c09c4562441ec3709776b83889ef02dfa89660faba3682a26c5b621dc"
+  },
+  "attribute:gold": {
+    "name": "Ouro",
+    "category": "attribute",
+    "asset": "res://assets/raven/fa131.tres",
+    "source_file": "fa131.png",
+    "source_resolution": 16,
+    "origin": "Clockwork Raven",
+    "source_url": "https://clockworkraven.itch.io/raven-fantasy-icons",
+    "pixel_sha256": "caa368ea439a9bb353a108d67b13c384a302e7afa77f065a0a43d3b4cc91fa2d"
+  },
+  "attribute:experience": {
+    "name": "Experiência",
+    "category": "attribute",
+    "asset": "res://assets/raven/fa165.tres",
+    "source_file": "fa165.png",
+    "source_resolution": 16,
+    "origin": "Clockwork Raven",
+    "source_url": "https://clockworkraven.itch.io/raven-fantasy-icons",
+    "pixel_sha256": "01b492d13c57e101ea77650e9b22f56bb79d1231a22040b7bfbada1dc4d6573f"
+  },
+  "status:poison": {
+    "name": "Veneno",
+    "category": "status",
+    "asset": "res://assets/raven/fa1111.tres",
+    "source_file": "fa1111.png",
+    "source_resolution": 16,
+    "origin": "Clockwork Raven",
+    "source_url": "https://clockworkraven.itch.io/raven-fantasy-icons",
+    "pixel_sha256": "4985e831b09bcbd29044071f6ad67618eaef93a4b248b3d3e7fc66cf3d553388"
+  },
+  "status:root": {
+    "name": "Preso",
+    "category": "status",
+    "asset": "res://assets/raven/fa971.tres",
+    "source_file": "fa971.png",
+    "source_resolution": 16,
+    "origin": "Clockwork Raven",
+    "source_url": "https://clockworkraven.itch.io/raven-fantasy-icons",
+    "pixel_sha256": "383cdb5b2e8bbc4dba079efb4ea168a184a3265822a490fba1a91ca0e3f8a374"
+  },
+  "status:slow": {
+    "name": "Lentidão",
+    "category": "status",
+    "asset": "res://assets/raven/fa658.tres",
+    "source_file": "fa658.png",
+    "source_resolution": 16,
+    "origin": "Clockwork Raven",
+    "source_url": "https://clockworkraven.itch.io/raven-fantasy-icons",
+    "pixel_sha256": "3bc97c73df6f1cffaa830b1a5aa00c21968767d7a7ef9964f1c0b64be10c7c20"
+  },
+  "status:frozen": {
+    "name": "Congelado / tempo parado",
+    "category": "status",
+    "asset": "res://assets/icons/ice_wave.png",
+    "origin": "Asset atual preservado",
+    "reason": "Floco já aprovado comunica melhor o estado que os ícones de golpes do pacote."
+  },
+  "ui:heal": {
+    "name": "Recuperar vida",
+    "category": "ui",
+    "asset": "res://assets/raven/fa659.tres",
+    "source_file": "fa659.png",
+    "source_resolution": 16,
+    "origin": "Clockwork Raven",
+    "source_url": "https://clockworkraven.itch.io/raven-fantasy-icons",
+    "pixel_sha256": "008fda78691557c593bc7d078728ab43fe3711bd067fda04963b54fe2110249b"
+  },
+  "ui:gold": {
+    "name": "Receber ouro",
+    "category": "ui",
+    "asset": "res://assets/raven/fa131.tres",
+    "source_file": "fa131.png",
+    "source_resolution": 16,
+    "origin": "Clockwork Raven",
+    "source_url": "https://clockworkraven.itch.io/raven-fantasy-icons",
+    "pixel_sha256": "caa368ea439a9bb353a108d67b13c384a302e7afa77f065a0a43d3b4cc91fa2d"
+  },
+  "passive:regeneration": {
+    "name": "Regeneração",
+    "category": "passive",
+    "asset": "res://assets/raven/fa969.tres",
+    "origin": "Clockwork Raven",
+    "source_file": "fa969.png",
+    "source_resolution": 16,
+    "source_url": "https://clockworkraven.itch.io/raven-fantasy-icons",
+    "pixel_sha256": "1e92c3ca1d2e6943828cec921b2164b02bc5dbee0ee546a292eabc12e7694132"
+  }
+}

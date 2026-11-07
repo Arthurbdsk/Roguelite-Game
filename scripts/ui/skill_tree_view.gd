@@ -11,13 +11,13 @@ var refund_button:Button
 var scroll:ScrollContainer
 var last_purchase:int=-1000
 const BG=Color("484f68")
-const CARD=Color("69717e")
+const CARD=Color("4f5a6e")
 const GOLD=Color("d9b454")
 func frame(color:Color,border:Color=GOLD,width:int=2)->StyleBoxFlat:
  var s:=StyleBoxFlat.new();s.bg_color=color;s.border_color=border;s.set_border_width_all(width);s.set_content_margin_all(5);return s
 func label(parent,text:String,font_size:int=12)->Label:
  var l:=Label.new();l.text=DisplayNumbers.clean(text);l.add_theme_font_size_override("font_size",font_size);l.add_theme_color_override("font_color",Color("f7f3e5"));parent.add_child(l);return l
-func icon(parent,path:String,size_px:int=26):
+func icon(parent,path:String,size_px:int=32):
  var n:=TextureRect.new();n.texture=load(path);n.custom_minimum_size=Vector2(size_px,size_px);n.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;n.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;n.texture_filter=CanvasItem.TEXTURE_FILTER_NEAREST;parent.add_child(n);return n
 func setup(owner_game,interface):
  game=owner_game;ui=interface
@@ -40,7 +40,7 @@ func setup(owner_game,interface):
   card.pressed.connect(select.bind(d.id));card.focus_entered.connect(select.bind(d.id))
   var stack:=VBoxContainer.new();stack.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);stack.offset_left=4;stack.offset_right=-4;stack.offset_top=4;stack.offset_bottom=-3;stack.mouse_filter=Control.MOUSE_FILTER_IGNORE;card.add_child(stack)
   var name_label:=label(stack,d.title,11);name_label.name="CardTitle";name_label.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;name_label.text_overrun_behavior=TextServer.OVERRUN_TRIM_ELLIPSIS;name_label.mouse_filter=Control.MOUSE_FILTER_IGNORE
-  icon(stack,d.icon,27).mouse_filter=Control.MOUSE_FILTER_IGNORE
+  icon(stack,d.icon,32).mouse_filter=Control.MOUSE_FILTER_IGNORE
   var dots:=HBoxContainer.new();dots.name="Levels";dots.alignment=BoxContainer.ALIGNMENT_CENTER;dots.mouse_filter=Control.MOUSE_FILTER_IGNORE;stack.add_child(dots)
   for i in d.max_rank():
    var box:=Panel.new();box.custom_minimum_size=Vector2(9,7);box.mouse_filter=Control.MOUSE_FILTER_IGNORE;dots.add_child(box)
@@ -70,9 +70,9 @@ func refresh():
   for i in dots.get_child_count():dots.get_child(i).add_theme_stylebox_override("panel",frame(Color("eed270") if i<n else Color("342342"),GOLD,1))
  for child in details.get_children():details.remove_child(child);child.queue_free()
  var d=game.skills.by_id[ui.selected_skill];var n:int=game.skills.rank(d.id);var info:Dictionary=game.skills.state(d.id)
- var title_row:=HBoxContainer.new();details.add_child(title_row);icon(title_row,d.icon,22)
+ var title_row:=HBoxContainer.new();details.add_child(title_row);icon(title_row,d.icon,16)
  label(title_row,d.title+(" | MÁXIMO" if n==d.max_rank() else " | %d/%d"%[n,d.max_rank()]),12)
- var desc:=label(details,d.description,9);desc.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+ var desc:=label(details,d.description,11);desc.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
  var effect:=label(details,"Atual: "+game.skills.effect(d.id,n)+( "   Após: "+game.skills.effect(d.id,n+1) if n<d.max_rank() else ""),10)
  var action:=HBoxContainer.new();details.add_child(action)
  var price:=label(action,"Próximo: %d ouro"%info.cost if info.status!="maxed" else "Nível máximo",11);price.size_flags_horizontal=Control.SIZE_EXPAND_FILL

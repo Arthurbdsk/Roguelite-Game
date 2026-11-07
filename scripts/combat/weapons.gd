@@ -21,6 +21,7 @@ const WEAPON_PATHS: Dictionary = {
 	"orbit": "res://data/weapons/orbit.tres",
 }
 const PASSIVE_PATHS: Dictionary = {
+	"regeneration":"res://data/upgrades/regeneration.tres",
 	"hourglass":"res://data/upgrades/hourglass.tres",
 	"lens":"res://data/upgrades/lens.tres",
 	"crown":"res://data/upgrades/crown.tres",
@@ -70,8 +71,10 @@ func setup(game_ref) -> void:
 	game = game_ref
 	for id: String in WEAPON_PATHS:
 		weapon_data[id] = load(WEAPON_PATHS[id])
+		weapon_data[id].icon=GameIcons.path("weapon:"+id,weapon_data[id].icon)
 	for id: String in PASSIVE_PATHS:
 		passive_data[id] = load(PASSIVE_PATHS[id])
+		passive_data[id].icon=GameIcons.path("passive:"+id,passive_data[id].icon)
 	arsenal=Arsenal.new();add_child(arsenal);arsenal.setup(self)
 	ground=GroundAttacks.new();add_child(ground);ground.setup(self)
 	rng.randomize()
@@ -380,7 +383,7 @@ func get_offers() -> Array[Dictionary]:
 		result.append(selected)
 		pool.erase(selected)
 	if result.is_empty():
-		result=[{"id":"heal","name":"Recuperar vida","description":"Recupera até 35 de vida.","detail":"Efeito imediato","icon":"res://assets/icons/heart.png"},{"id":"supplies","name":"Receber ouro","description":"Recebe 10 de ouro.","detail":"Efeito imediato","icon":"res://assets/icons/crown.png"}]
+		result=[{"id":"heal","name":"Recuperar vida","description":"Recupera até 35 de vida.","detail":"Efeito imediato","icon":GameIcons.path("ui:heal","res://assets/icons/heart.png")},{"id":"supplies","name":"Receber ouro","description":"Recebe 10 de ouro.","detail":"Efeito imediato","icon":GameIcons.path("ui:gold","res://assets/icons/crown.png")}]
 	# The guaranteed weapon need not always occupy the first UI card.
 	for index: int in range(result.size() - 1, 0, -1):
 		var swap_index: int = rng.randi_range(0, index)
@@ -613,7 +616,7 @@ func build_stats()->String:
 	var text:String="Vida: %d/%d | Defesa: %d\nMovimento: %d px/s\nDano: +%d%% | Vel. ataque: +%d%%\nColeta XP: %d | Ouro: %d\nExperiência: +%d%%"%[p.hp,p.max_hp,p.armor,p.speed,damage,(1/interval-1)*100,p.pickup_radius,p.gold_collection_radius(),7*int(passives.get("crown",0))+roundi(100*permanent("experience"))]
 	for id in weapon_data:
 		if int(levels.get(id,0))>0:text+="\n%s: %s dano | %s | %spx"%[weapon_data[id].display_name,number_text(_stat(id,"damage")*(1+damage/100)),DisplayNumbers.seconds(_interval(id)),number_text(_stat(id,"reach"))]
-	text+="\nÁrea permanente: +%.0f%% | Duração: +%.0f%%\nVel. projéteis: +%d%% | Redução: %.0f%%\nRegen: %s | Ouro: +%.0f%%"%[100*permanent("area"),100*permanent("duration"),(projectile_factor()-1)*100,100*p.damage_reduction,DisplayNumbers.regeneration(permanent("regen")),100*permanent("gold")]
+	text+="\nÁrea permanente: +%.0f%% | Duração: +%.0f%%\nVel. projéteis: +%d%% | Redução: %.0f%%\nRegeneração: %s | Ouro: +%.0f%%"%[100*permanent("area"),100*permanent("duration"),(projectile_factor()-1)*100,100*p.damage_reduction,DisplayNumbers.regeneration(_mastery().regeneration_rate() if _mastery()!=null else 0),100*permanent("gold")]
 	return text
 
 func area_factor()->float:

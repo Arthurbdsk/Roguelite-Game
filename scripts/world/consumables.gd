@@ -21,7 +21,7 @@ var magnet_batch_us:int=0
 var magnet_credited:float=0
 func setup(owner):
  game=owner;rng.randomize();z_index=4
- for d in config.items:textures[d.id]=load("res://assets/v15/"+d.id+".png")
+ for d in config.items:textures[d.id]=GameIcons.texture("consumable:"+str(d.id),"res://assets/v15/"+d.id+".png")
  var layer:=CanvasLayer.new();layer.layer=24;add_child(layer)
  toast=Label.new();toast.position=Vector2(160,274);toast.size=Vector2(320,40);toast.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;toast.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;toast.mouse_filter=Control.MOUSE_FILTER_IGNORE;toast.add_theme_font_override("font",GameFonts.interface_font());toast.add_theme_font_size_override("font_size",11);layer.add_child(toast);toast.hide()
 func reset():
@@ -131,7 +131,7 @@ func show_feedback(event:Dictionary):
  if feedback.size()>8:feedback.pop_front()
  if not game.coop.active or event.collector==game.coop.connection.peer_id:
   game.record_discovery("consumable:"+str(event.kind))
-  var names={"food":"+%s de vida"%str(event.amount),"gold_bag":"+%s de ouro"%str(event.amount),"xp_magnet":"Experiência atraída","stopwatch":"Tempo parado: 10 s","cleanse":"Área limpa"}
+  var names={"food":"+%s de vida"%DisplayNumbers.number(event.amount),"gold_bag":"+%s de ouro"%DisplayNumbers.number(event.amount),"xp_magnet":"Experiência atraída","stopwatch":"Tempo parado: 10 s","cleanse":"Área limpa"}
   toast.text=names.get(event.kind,event.kind);toast_left=2;toast.show();game.sound.play_cue("gold" if event.kind=="gold_bag" else "pickup")
  queue_redraw()
 func visual_tick(delta:float):
@@ -165,7 +165,7 @@ func _draw():
   if not bounds.has_point(item.at):continue
   if item.age>float(config.lifetime)-float(config.warning) and int(item.age*4)%2==0:continue
   draw_rect(Rect2(item.at-Vector2(8,0),Vector2(16,3)),Color(0,0,0,.4))
-  draw_texture_rect(textures[item.kind],Rect2(item.at.round()-Vector2(13,21),Vector2(26,26)),false)
+  draw_texture_rect(textures[item.kind],Rect2(item.at.round()-Vector2(8,13),Vector2(16,16)),false)
  for fx in feedback:
   if fx.kind=="cleanse":
    var area:=Rect2(fx.area_at,fx.area_size)

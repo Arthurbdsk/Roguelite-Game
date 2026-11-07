@@ -1,0 +1,177 @@
+{
+  "hardware": {
+    "cpu": "AMD Ryzen 5 5600 6-Core Processor",
+    "gpu": "AMD Radeon RX 6600",
+    "driver": "26.8.1.260806"
+  },
+  "engine": "Godot 4.7.2 console with exported release main-pack",
+  "renderer": "GL Compatibility, OpenGL 3.3",
+  "configured_window": [
+    1280,
+    720
+  ],
+  "logical_viewport": [
+    640,
+    360
+  ],
+  "seed": 18018,
+  "weapon_seeds": [
+    18001,
+    18002,
+    18003,
+    18004
+  ],
+  "warmup_frames": 60,
+  "measured_frames_per_map": 180,
+  "simulated_seconds_per_map": 4,
+  "players": 4,
+  "enemies": 200,
+  "weapons_per_player": 6,
+  "weapon_level": 8,
+  "passives_per_player": 4,
+  "passive_level": 8,
+  "concurrent_load_observed": "VALORANT-Win64-Shipping: 476% processor time across 12 logical processors, also Chrome/DWM. Not an isolated benchmark.",
+  "before_sha256": "44f07d0a1d7e5812e4f53e86db7827c550be7e1515ab2979f2d538ad60b3280f",
+  "after_sha256": "0510d1e1f957fae026252094df1a38b36d38a9304fbccf408a67dd2baeba75b4",
+  "before": [
+    {
+      "draw_calls": 539.0,
+      "enemies": 200,
+      "frame_ms": {
+        "median": 24.832,
+        "p95": 37.411,
+        "p99": 39.353
+      },
+      "frames": 180,
+      "host_tick_ms": {
+        "median": 20.835,
+        "p95": 32.114,
+        "p99": 34.56
+      },
+      "map": "courtyard",
+      "memory_bytes": 66873346,
+      "peak_new_projectiles": 28,
+      "players": 4,
+      "rendered": true
+    },
+    {
+      "draw_calls": 512.0,
+      "enemies": 200,
+      "frame_ms": {
+        "median": 24.451,
+        "p95": 36.984,
+        "p99": 41.873
+      },
+      "frames": 180,
+      "host_tick_ms": {
+        "median": 20.102,
+        "p95": 32.347,
+        "p99": 37.195
+      },
+      "map": "library",
+      "memory_bytes": 67446234,
+      "peak_new_projectiles": 28,
+      "players": 4,
+      "rendered": true
+    },
+    {
+      "draw_calls": 539.0,
+      "enemies": 200,
+      "frame_ms": {
+        "median": 24.093,
+        "p95": 35.649,
+        "p99": 41.809
+      },
+      "frames": 180,
+      "host_tick_ms": {
+        "median": 19.831,
+        "p95": 32.26,
+        "p99": 37.755
+      },
+      "map": "fields",
+      "memory_bytes": 68025140,
+      "peak_new_projectiles": 28,
+      "players": 4,
+      "rendered": true
+    }
+  ],
+  "after": [
+    {
+      "draw_calls": 554.0,
+      "enemies": 200,
+      "frame_ms": {
+        "median": 27.645,
+        "p95": 40.098,
+        "p99": 46.381
+      },
+      "frames": 180,
+      "host_tick_ms": {
+        "median": 22.722,
+        "p95": 34.712,
+        "p99": 40.767
+      },
+      "map": "courtyard",
+      "memory_bytes": 67042359,
+      "peak_new_projectiles": 28,
+      "players": 4,
+      "rendered": true
+    },
+    {
+      "draw_calls": 560.0,
+      "enemies": 200,
+      "frame_ms": {
+        "median": 28.312,
+        "p95": 38.164,
+        "p99": 47.402
+      },
+      "frames": 180,
+      "host_tick_ms": {
+        "median": 23.511,
+        "p95": 33.22,
+        "p99": 41.536
+      },
+      "map": "library",
+      "memory_bytes": 67422235,
+      "peak_new_projectiles": 28,
+      "players": 4,
+      "rendered": true
+    },
+    {
+      "draw_calls": 564.0,
+      "enemies": 200,
+      "frame_ms": {
+        "median": 24.87,
+        "p95": 39.715,
+        "p99": 42.645
+      },
+      "frames": 180,
+      "host_tick_ms": {
+        "median": 20.432,
+        "p95": 34.337,
+        "p99": 36.601
+      },
+      "map": "fields",
+      "memory_bytes": 67949881,
+      "peak_new_projectiles": 28,
+      "players": 4,
+      "rendered": true
+    }
+  ],
+  "network": {
+    "transport": "public WSS Render",
+    "peers": 4,
+    "machines": 1,
+    "rendered_peers": 1,
+    "checks": [
+      17,
+      43,
+      43,
+      43
+    ],
+    "result": "PASS",
+    "dev_sha256": "773fab39ba6812842551e327d3af193a57866ba429f8f0a95f164aec09e94639",
+    "host_initial_segment_tx_bytes": 209978,
+    "host_tick_initial_segment_median_ms": 6.873,
+    "host_tick_initial_segment_p95_ms": 11.944
+  }
+}

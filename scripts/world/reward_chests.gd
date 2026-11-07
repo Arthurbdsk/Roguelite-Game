@@ -14,6 +14,7 @@ var receipt:Dictionary={}
 var receipt_left:float=0
 var presentation:CanvasLayer
 var result_label:Label
+var result_icon:TextureRect
 var texture=preload("res://assets/v13/chest.png")
 func setup(owner_game):
  game=owner_game;config=game.survival_config.chests.duplicate(true);rng.randomize();z_index=2
@@ -22,9 +23,12 @@ func setup(owner_game):
  result_label.add_theme_font_override("font",GameFonts.interface_font());result_label.add_theme_font_size_override("font_size",12)
  var box:=StyleBoxFlat.new();box.bg_color=Color("142238");box.border_color=Color("bda05e");box.set_border_width_all(1);box.set_content_margin_all(8)
  result_label.add_theme_stylebox_override("normal",box);presentation.add_child(result_label);result_label.hide()
+ result_icon=TextureRect.new();result_icon.position=Vector2(178,76);result_icon.size=Vector2(32,32);result_icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;result_icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;result_icon.mouse_filter=Control.MOUSE_FILTER_IGNORE;presentation.add_child(result_icon);result_icon.hide()
+ box.content_margin_left=48
 func reset():
  chest.clear();next_check=120;last_spawn=-1000;serial=0;attempts=0;generated=0;opened=0;received.clear();receipt.clear();receipt_left=0
  if is_instance_valid(result_label):result_label.hide()
+ if is_instance_valid(result_icon):result_icon.hide()
  queue_redraw()
 func spawn_chest()->bool:
  if not chest.is_empty() and not chest.get("opened",false):return false
@@ -77,6 +81,8 @@ func show_receipt(result:Dictionary):
  received[int(result.chest)]=true;receipt=result;receipt_left=4
  result_label.text=("Todos os itens estão no nível máximo" if str(result.item).is_empty() else "%s | Nível %d → %d"%[result.item,result.before,result.after])+"\n+%d de ouro"%int(result.gold)
  result_label.show();game.sound.play_cue("gold")
+ var icon_path:String=str(result.get("icon",""))
+ result_icon.texture=load(icon_path) if ResourceLoader.exists(icon_path) else GameIcons.texture("attribute:gold");result_icon.show()
 func tick(delta:float):
  if game.state!="running":return
  visual_tick(delta)
@@ -90,7 +96,7 @@ func tick(delta:float):
 func visual_tick(delta:float):
  if not chest.is_empty():chest.age+=delta
  receipt_left=maxf(0,receipt_left-delta)
- if receipt_left<=0:result_label.hide()
+ if receipt_left<=0:result_label.hide();result_icon.hide()
  queue_redraw()
 func _draw():
  if chest.is_empty():return

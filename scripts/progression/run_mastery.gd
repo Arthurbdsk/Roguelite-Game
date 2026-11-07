@@ -20,7 +20,12 @@ func begin(use_skills:bool=true):
  game.player.damage_reduction=value("armor");game.player.movement_multiplier=1;game.player.time_since_damage=0
  damage_multiplier=1+value("damage");interval_multiplier=1-value("cooldown")
 func tick(delta:float,_distance_moved:float):
- if not game.player.down and game.player.hp>0:game.player.hp=minf(game.player.max_hp,game.player.hp+delta*value("regen"))
+ if game.coop.active and not game.coop.hosting:return
+ if not game.player.down and game.player.hp>0:game.player.hp=minf(game.player.max_hp,game.player.hp+delta*regeneration_rate())
+func regeneration_rate()->float:
+ var n:int=clampi(int(game.weapon_system.passives.get("regeneration",0)),0,8)
+ var data=game.weapon_system.passive_data.get("regeneration")
+ return value("regen")+(float(data.regeneration[n-1]) if n>0 and data!=null else 0.0)
 func hit(enemy,amount:float,force:Vector2):enemy.take_damage(amount*damage_multiplier,force)
 func can_revive()->bool:return rank("revive")>0 and not last_stand_spent
 func use_revive()->bool:

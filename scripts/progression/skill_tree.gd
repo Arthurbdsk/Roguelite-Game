@@ -10,7 +10,7 @@ func setup(owner_game) -> void:
  game=owner_game
  definitions.clear();by_id.clear()
  for row in JSON.parse_string(FileAccess.get_file_as_string("res://data/permanent.json")):
-  var d:=SkillDefinition.new();d.id=row.id;d.title=row.name;d.description=row.description;d.icon=row.icon
+  var d:=SkillDefinition.new();d.id=row.id;d.title=row.name;d.description=row.description;d.icon=GameIcons.path("permanent:"+d.id,row.icon)
   d.costs=PackedInt32Array(row.costs)
   for i in int(row.cap):d.values.append(float(row.step)*(i+1))
   definitions.append(d);by_id[d.id]=d

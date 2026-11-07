@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="UpgradeData" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/data/upgrade_data.gd" id="1"]
+[resource]
+script = ExtResource("1")
+id = "regeneration"
+display_name = "Regeneração"
+description = "Recupera vida continuamente. Soma à regeneração permanente. Não cura enquanto estiver caído."
+icon = "res://assets/raven/fa969.tres"
+max_level = 8
+regeneration = PackedFloat32Array(0.2, 0.4, 0.6, 0.8, 1, 1.2, 1.4, 1.6)
+level_descriptions = PackedStringArray("Total: 1 de vida a cada 5 s. Não cura enquanto estiver caído.", "Total: 2 de vida a cada 5 s. +1 de vida a cada 5 s.", "Total: 3 de vida a cada 5 s. +1 de vida a cada 5 s.", "Total: 4 de vida a cada 5 s. +1 de vida a cada 5 s.", "Total: 1 de vida por segundo. +1 de vida a cada 5 s.", "Total: 6 de vida a cada 5 s. +1 de vida a cada 5 s.", "Total: 7 de vida a cada 5 s. +1 de vida a cada 5 s.", "Total: 8 de vida a cada 5 s. +1 de vida a cada 5 s.")

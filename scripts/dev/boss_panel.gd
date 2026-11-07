@@ -97,7 +97,8 @@ func rebuild():
  survival_label=label(survival,lab.survival_info())
  var consumable_tab:=tab("Consumíveis")
  for d in lab.game.consumables.config.items:
-  button(consumable_tab,"Gerar "+str(d.name),func():lab.force_consumable(str(d.id)),true)
+  var spawn_button:=button(consumable_tab,"Gerar "+str(d.name),func():lab.force_consumable(str(d.id)),true)
+  spawn_button.icon=lab.game.consumables.textures[d.id];spawn_button.add_theme_constant_override("icon_max_width",16)
  var heal_row:=row(consumable_tab)
  button(heal_row,"Vida cheia",func():
   if lab.is_host():lab.game.player.hp=lab.game.player.max_hp,true)
@@ -129,6 +130,10 @@ func slots(parent:Node,title:String,definitions:Dictionary,equipped:Dictionary,c
   for id in definitions:options[id]=definitions[id].display_name
   var current:String=ids[i] if i<ids.size() else ""
   var item:=pick(r,options,current);item.custom_minimum_size.x=205
+  item.add_theme_constant_override("icon_max_width",16);item.get_popup().add_theme_constant_override("icon_max_width",16)
+  for j in item.item_count:
+   var id:String=str(item.get_item_metadata(j))
+   if definitions.has(id):item.set_item_icon(j,load(definitions[id].icon))
   var rank:=spin(r,equipped.get(current,1),1,8);records.append({"item":item,"rank":rank})
 func read_build()->bool:
  var result:Dictionary=lab.build.duplicate(true);result.level=int(level_box.value);result.permanent=permanent.button_pressed

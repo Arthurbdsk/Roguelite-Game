@@ -31,11 +31,12 @@ var dev_chain_label:Label
 var build_stats_label:Label
 var status_text:Label
 var status_icon:TextureRect
+var status_labels:Dictionary={}
+var status_row:HBoxContainer
 var pause_hint: Label
-var loadout: HBoxContainer
+var loadout: BuildStrip
 var passive_text: Label
 var ui_theme: Theme
-var last_loadout: String = ""
 var previous_data: Dictionary = {}
 var selected_skill: String = "edge"
 
@@ -63,7 +64,7 @@ func _build_theme() -> void:
  ui_theme.set_color("font_color", "Button", IVORY)
  ui_theme.set_color("font_hover_color", "Button", Color("f0e6c8"))
  ui_theme.set_color("font_focus_color", "Button", Color("f0e6c8"))
- ui_theme.set_color("font_disabled_color", "Button", Color("60706c"))
+ ui_theme.set_color("font_disabled_color", "Button", Color("aeb8c2"))
  ui_theme.set_stylebox("normal", "Button", _style(PANEL, LINE))
  ui_theme.set_stylebox("hover", "Button", _style(Color("59627b"), LINE))
  ui_theme.set_stylebox("pressed", "Button", _style(Color("646c80"), IVORY))
@@ -240,7 +241,7 @@ func _title() -> void:
  row.add_child(actions)
  var play := _button(actions,"Jogar",Rect2(),func(): game.open_map_select(),true)
  _button(actions,"Cooperativo online",Rect2(),func(): game.open_online())
- _button(actions,"Base / habilidades",Rect2(),func(): game.enter_hub())
+ _button(actions,"Base e aprimoramentos",Rect2(),func(): game.enter_hub())
  _button(actions,"Coleção",Rect2(),func(): render("collection"))
  var settings := HBoxContainer.new()
  settings.add_theme_constant_override("separation",8)
@@ -337,7 +338,7 @@ func _building_card(id: String, title: String, desc: String, owned: bool, pos: V
 
 func _upgrades(data: Dictionary) -> void:
  _backdrop(0.97)
- _label(menu,"SUBIU DE NÍVEL",Rect2(20,10,600,32),24,IVORY,true)
+ _label(menu,"Subiu de nível",Rect2(20,10,600,32),24,IVORY,true)
  var margin:=MarginContainer.new()
  margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
  for spec in [["left",20],["right",20],["top",52],["bottom",28]]:margin.add_theme_constant_override("margin_"+str(spec[0]),int(spec[1]))
@@ -349,24 +350,25 @@ func _upgrades(data: Dictionary) -> void:
  for i in mini(4,offers.size()):
   var offer:Dictionary=offers[i]
   var button:=_button(choices,"",Rect2(),func():game.choose_upgrade(offer.id))
+  for state_name in ["normal","hover","pressed"]:button.add_theme_stylebox_override(state_name,_style(Color("293c54") if state_name=="hover" else Color("203047"),LINE))
   button.custom_minimum_size.y=88
   button.size_flags_vertical=Control.SIZE_EXPAND_FILL
   var inset:=MarginContainer.new();inset.mouse_filter=Control.MOUSE_FILTER_IGNORE;inset.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
   for edge in ["left","right","top","bottom"]:inset.add_theme_constant_override("margin_"+edge,7)
   button.add_child(inset)
   var line:=HBoxContainer.new();line.mouse_filter=Control.MOUSE_FILTER_IGNORE;line.add_theme_constant_override("separation",8);inset.add_child(line)
-  var icon:=TextureRect.new();icon.custom_minimum_size=Vector2(22,22);icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;icon.mouse_filter=Control.MOUSE_FILTER_IGNORE
+  var icon:=TextureRect.new();icon.custom_minimum_size=Vector2(32,32);icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;icon.mouse_filter=Control.MOUSE_FILTER_IGNORE
   if ResourceLoader.exists(offer.get("icon","")):icon.texture=load(offer.icon)
   line.add_child(icon)
   var column:=VBoxContainer.new();column.size_flags_horizontal=Control.SIZE_EXPAND_FILL;column.mouse_filter=Control.MOUSE_FILTER_IGNORE;column.add_theme_constant_override("separation",2);line.add_child(column)
   var name_label:=Label.new();name_label.text="%d. %s"%[i+1,offer.name];name_label.add_theme_font_size_override("font_size",12);column.add_child(name_label)
   var level_label:=Label.new();level_label.text=offer.get("detail","Novo");level_label.add_theme_font_size_override("font_size",9);level_label.modulate=ICE;column.add_child(level_label)
-  var desc:=Label.new();desc.text=DisplayNumbers.clean(offer.description);desc.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;desc.add_theme_font_size_override("font_size",10);column.add_child(desc)
+  var desc:=Label.new();desc.text=DisplayNumbers.clean(offer.description);desc.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;desc.add_theme_font_size_override("font_size",11);column.add_child(desc)
   inset.minimum_size_changed.connect(func():button.custom_minimum_size.y=maxf(88,inset.get_combined_minimum_size().y))
   if i==0:call_deferred("_grant_focus",button)
  var build_scroll:=ScrollContainer.new();build_scroll.custom_minimum_size.x=220;build_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;row.add_child(build_scroll)
  var build:=VBoxContainer.new();build.name="BuildPanel";build.custom_minimum_size.x=204;build.add_theme_constant_override("separation",4);build_scroll.add_child(build)
- var heading:=Label.new();heading.text="BUILD ATUAL";heading.add_theme_font_size_override("font_size",14);build.add_child(heading)
+ var heading:=Label.new();heading.text="Build atual";heading.add_theme_font_size_override("font_size",14);build.add_child(heading)
  if game.get("weapon_system")!=null:
   for group in [game.weapon_system.get_loadout(),game.weapon_system.get_passives()]:
    var is_weapon:bool=group==game.weapon_system.get_loadout()
@@ -376,9 +378,9 @@ func _upgrades(data: Dictionary) -> void:
     var empty:=Label.new();empty.text="[  ]";empty.add_theme_font_size_override("font_size",10);icons.add_child(empty)
    for item in group:
     var stack:=VBoxContainer.new();icons.add_child(stack)
-    var icon:=TextureRect.new();icon.texture=load(item.icon) if ResourceLoader.exists(item.icon) else null;icon.custom_minimum_size=Vector2(18,18);icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;stack.add_child(icon)
+    var icon:=TextureRect.new();icon.texture=load(item.icon) if ResourceLoader.exists(item.icon) else null;icon.custom_minimum_size=Vector2(16,16);icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;stack.add_child(icon)
     var level_label:=Label.new();level_label.text=("MÁX" if item.level==8 else "Nv.%d"%item.level);level_label.add_theme_font_size_override("font_size",8);stack.add_child(level_label)
-  build_stats_label=Label.new();build_stats_label.text=game.weapon_system.build_stats();build_stats_label.add_theme_font_size_override("font_size",9);build_stats_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;build.add_child(build_stats_label)
+  build_stats_label=Label.new();build_stats_label.text=game.weapon_system.build_stats();build_stats_label.add_theme_font_size_override("font_size",10);build_stats_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;build.add_child(build_stats_label)
  _label(menu,"1 / 2 / 3 / 4: escolher. Esc: fechar no cooperativo.",Rect2(20,338,600,18),9,MUTED,true)
 
 func _paused() -> void:
@@ -485,35 +487,49 @@ func _build_hud() -> void:
  _box(hud,Rect2(440,10,190,39),Color("142238ed"))
  dev_chain_label=_label(hud,"",Rect2(10,105,360,30),8,MUTED)
  true_health=TrueHealthBar.new();hud.add_child(true_health);true_health.visible=false
- status_icon=TextureRect.new()
- status_icon.texture=load("res://assets/icons/poison.png")
- status_icon.position=Vector2(180,33)
- status_icon.size=Vector2(12,12)
- status_icon.visible=false
- hud.add_child(status_icon)
- status_text = _label(hud,"",Rect2(197,30,110,20),10,Color("a6b85b"))
+ status_row=HBoxContainer.new();status_row.position=Vector2(12,267);status_row.add_theme_constant_override("separation",5);hud.add_child(status_row)
+ for id in ["poison","root","slow","frozen"]:
+  var panel:=PanelContainer.new();panel.add_theme_stylebox_override("panel",_style(Color("142238"),Color("647085")));status_row.add_child(panel)
+  var row:=HBoxContainer.new();row.add_theme_constant_override("separation",4);panel.add_child(row)
+  var icon:=TextureRect.new();icon.texture=GameIcons.texture("status:"+id);icon.custom_minimum_size=Vector2(16,16);icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;row.add_child(icon)
+  var text:=Label.new();text.add_theme_font_size_override("font_size",10);row.add_child(text);panel.hide();status_labels[id]={"panel":panel,"label":text}
+  if id=="poison":status_icon=icon;status_text=text
  life_text = _label(hud, "VIDA", Rect2(17, 14, 151, 15), 10)
  life_bar = _bar(hud, Rect2(17, 33, 151, 7), COPPER)
  time_text = _label(hud, "00:00", Rect2(263, 11, 114, 31), 24, IVORY, true)
+ time_text.add_theme_font_override("font",GameFonts.timer_font())
  pressure_text = _label(hud, "ARENA", Rect2(452, 12, 176, 18), 11, MUTED)
  pressure_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
  counts_text = _label(hud, "", Rect2(452, 31, 176, 18), 11, IVORY)
  counts_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
- loadout = HBoxContainer.new()
- loadout.position = Vector2(11, 57)
- loadout.size = Vector2(180, 26)
- loadout.add_theme_constant_override("separation", 5)
+ _hud_icon("GoldIcon","attribute:gold",Vector2(444,31))
+ counts_text.position.x=464;counts_text.size.x=164
+ loadout = BuildStrip.new()
+ loadout.position = Vector2(11, 55)
+ loadout.size = Vector2(230, 28)
  loadout.mouse_filter = Control.MOUSE_FILTER_IGNORE
- loadout.visible=false
+ loadout.visible=true
  hud.add_child(loadout)
  passive_text = _label(hud, "", Rect2(12, 57, 220, 20), 10, MUTED)
+ passive_text.hide()
  banner_text = _label(hud, "", Rect2(170, 85, 300, 38), 17, IVORY, true)
  boss_text = _label(hud, "", Rect2(162, 300, 316, 18), 11, IVORY, true)
  boss_bar = _bar(hud, Rect2(162, 321, 316, 6), COPPER)
- level_text = _label(hud, "NÍVEL 1", Rect2(12, 322, 130, 16), 10, ICE)
+ _hud_icon("ExperienceIcon","attribute:experience",Vector2(12,320))
+ level_text = _label(hud, "Nível 1", Rect2(32, 322, 110, 16), 10, ICE)
  pause_hint = _label(hud, "ESC: PAUSA", Rect2(520, 322, 108, 16), 10, MUTED)
  pause_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
  experience_bar = _bar(hud, Rect2(12, 343, 616, 5), ICE)
+
+func _hud_icon(node_name:String,key:String,at:Vector2):
+ var icon:=TextureRect.new()
+ icon.name=node_name
+ icon.expand_mode=TextureRect.EXPAND_IGNORE_SIZE
+ icon.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+ icon.texture=GameIcons.texture(key)
+ icon.mouse_filter=Control.MOUSE_FILTER_IGNORE
+ hud.add_child(icon)
+ icon.position=at;icon.size=Vector2(16,16)
 
 func _bar(parent: Node, rect: Rect2, color: Color) -> ProgressBar:
  var bar := ProgressBar.new()
@@ -531,11 +547,14 @@ func _bar(parent: Node, rect: Rect2, color: Color) -> ProgressBar:
 func update_hud(data: Dictionary) -> void:
  if hud == null:
   return
+ _update_build_icons(data)
  if screen=="upgrading" and is_instance_valid(build_stats_label):build_stats_label.text=game.weapon_system.build_stats()
  pause_hint.text = "ESC: MENU" if game.get("coop") != null and game.coop.active else "ESC: PAUSA"
  if game.get("player")!=null:
-  status_icon.visible=game.player.poison_remaining>0
-  status_text.text="Veneno %ds"%ceili(game.player.poison_remaining) if status_icon.visible else ""
+  var p=game.player
+  var states:Dictionary={"poison":"Veneno: %d s"%ceili(p.poison_remaining) if p.poison_remaining>0 else "","root":"Preso: "+DisplayNumbers.seconds(p.root_remaining) if p.root_remaining>0 else "","slow":"Lentidão: %d%%"%roundi((1-p.movement_multiplier)*100) if p.movement_multiplier<1 else "","frozen":"Tempo parado: %d s"%ceili(game.consumables.freeze_left) if game.consumables.freeze_left>0 else ""}
+  for id in status_labels:
+   status_labels[id].label.text=states[id];status_labels[id].panel.visible=not states[id].is_empty()
  life_bar.max_value = maxf(1.0, float(data.get("max_hp", 100.0)))
  life_bar.value = float(data.get("hp", 100.0))
  life_text.text = "VIDA   %d / %d" % [ceili(data.get("hp", 100)), ceili(life_bar.max_value)]
@@ -564,6 +583,9 @@ func update_hud(data: Dictionary) -> void:
   var compact_name: String = str(passive.get("name", "")).get_slice(" ", 0)
   passive_names.append("%s %d" % [compact_name, int(passive.get("level", 1))])
  passive_text.text = " / ".join(passive_names)
+
+func _update_build_icons(data:Dictionary):
+ loadout.set_build([data.get("weapons",[]),data.get("passives",[])])
 
 func _clock(value: float) -> String:
  var seconds: int = maxi(0, int(value))

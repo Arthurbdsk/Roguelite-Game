@@ -1,0 +1,55 @@
+﻿ID,Nome,Categoria,Asset no jogo,Arquivo original,Origem,Uso
+weapon:axe,Machado,weapon,res://assets/v18/axe.png,Preservado,Asset atual preservado,"Melhorias, build, HUD, coleção, baús, DEV"
+weapon:bolt,Arco,weapon,res://assets/raven/fa1514.tres,fa1514.png,Clockwork Raven,"Melhorias, build, HUD, coleção, baús, DEV"
+weapon:bombs,Bombas,weapon,res://assets/raven/fa771.tres,fa771.png,Clockwork Raven,"Melhorias, build, HUD, coleção, baús, DEV"
+weapon:boomerang,Bumerangue,weapon,res://assets/v08/boomerang_icon.png,Preservado,Asset atual preservado,"Melhorias, build, HUD, coleção, baús, DEV"
+weapon:clock,Lança Relógio,weapon,res://assets/icons/clock.png,Preservado,Asset atual preservado,"Melhorias, build, HUD, coleção, baús, DEV"
+weapon:fire_wand,Varinha de Fogo,weapon,res://assets/raven/fa1691.tres,fa1691.png,Clockwork Raven,"Melhorias, build, HUD, coleção, baús, DEV"
+weapon:garlic,Alho,weapon,res://assets/v17/garlic.png,Preservado,Asset atual preservado,"Melhorias, build, HUD, coleção, baús, DEV"
+weapon:holy_water,Água Benta,weapon,res://assets/icons/holy_water.png,Preservado,Asset atual preservado,"Melhorias, build, HUD, coleção, baús, DEV"
+weapon:ice_wave,Onda de gelo,weapon,res://assets/icons/ice_wave.png,Preservado,Asset atual preservado,"Melhorias, build, HUD, coleção, baús, DEV"
+weapon:lightning,Raio,weapon,res://assets/icons/lightning.png,Preservado,Asset atual preservado,"Melhorias, build, HUD, coleção, baús, DEV"
+weapon:magic_wand,Varinha Mágica,weapon,res://assets/raven/fa1690.tres,fa1690.png,Clockwork Raven,"Melhorias, build, HUD, coleção, baús, DEV"
+weapon:orbit,Orbes,weapon,res://assets/raven/fa695.tres,fa695.png,Clockwork Raven,"Melhorias, build, HUD, coleção, baús, DEV"
+weapon:runetracer,Runa Traçante,weapon,res://assets/v17/runetracer.png,Preservado,Asset atual preservado,"Melhorias, build, HUD, coleção, baús, DEV"
+weapon:sludge,Lodo,weapon,res://assets/icons/sludge.png,Preservado,Asset atual preservado,"Melhorias, build, HUD, coleção, baús, DEV"
+weapon:sword,Espada,weapon,res://assets/raven/fa671.tres,fa671.png,Clockwork Raven,"Melhorias, build, HUD, coleção, baús, DEV"
+weapon:whip,Chicote,weapon,res://assets/raven/fa1088.tres,fa1088.png,Clockwork Raven,"Melhorias, build, HUD, coleção, baús, DEV"
+passive:boots,Botas,passive,res://assets/raven/fa1853.tres,fa1853.png,Clockwork Raven,"Melhorias, build, HUD, coleção, baús, DEV"
+passive:cadence,Luvas,passive,res://assets/raven/fa2049.tres,fa2049.png,Clockwork Raven,"Melhorias, build, HUD, coleção, baús, DEV"
+passive:crown,Coroa,passive,res://assets/raven/fa1568.tres,fa1568.png,Clockwork Raven,"Melhorias, build, HUD, coleção, baús, DEV"
+passive:heart,Coração,passive,res://assets/raven/fa659.tres,fa659.png,Clockwork Raven,"Melhorias, build, HUD, coleção, baús, DEV"
+passive:hourglass,Ampulheta,passive,res://assets/raven/fa999.tres,fa999.png,Clockwork Raven,"Melhorias, build, HUD, coleção, baús, DEV"
+passive:lens,Lupa,passive,res://assets/raven/fa119.tres,fa119.png,Clockwork Raven,"Melhorias, build, HUD, coleção, baús, DEV"
+passive:magnet,Ímã,passive,res://assets/icons/magnet.png,Preservado,Asset atual preservado,"Melhorias, build, HUD, coleção, baús, DEV"
+passive:ward,Armadura,passive,res://assets/raven/fa2059.tres,fa2059.png,Clockwork Raven,"Melhorias, build, HUD, coleção, baús, DEV"
+permanent:damage,Dano,permanent,res://assets/raven/fa671.tres,fa671.png,Clockwork Raven,Grade e painel de aprimoramentos
+permanent:armor,Armadura,permanent,res://assets/raven/fa2059.tres,fa2059.png,Clockwork Raven,Grade e painel de aprimoramentos
+permanent:health,Vida máxima,permanent,res://assets/raven/fa659.tres,fa659.png,Clockwork Raven,Grade e painel de aprimoramentos
+permanent:regen,Regeneração,permanent,res://assets/raven/fa969.tres,fa969.png,Clockwork Raven,Grade e painel de aprimoramentos
+permanent:cooldown,Recarga,permanent,res://assets/raven/fa333.tres,fa333.png,Clockwork Raven,Grade e painel de aprimoramentos
+permanent:area,Área,permanent,res://assets/raven/fa990.tres,fa990.png,Clockwork Raven,Grade e painel de aprimoramentos
+permanent:projectile_speed,Velocidade dos projéteis,permanent,res://assets/raven/fa402.tres,fa402.png,Clockwork Raven,Grade e painel de aprimoramentos
+permanent:duration,Duração,permanent,res://assets/raven/fa999.tres,fa999.png,Clockwork Raven,Grade e painel de aprimoramentos
+permanent:amount,Quantidade,permanent,res://assets/raven/fa985.tres,fa985.png,Clockwork Raven,Grade e painel de aprimoramentos
+permanent:move,Movimento,permanent,res://assets/raven/fa658.tres,fa658.png,Clockwork Raven,Grade e painel de aprimoramentos
+permanent:pickup,Coleta,permanent,res://assets/raven/fa924.tres,fa924.png,Clockwork Raven,Grade e painel de aprimoramentos
+permanent:luck,Sorte,permanent,res://assets/raven/fa668.tres,fa668.png,Clockwork Raven,Grade e painel de aprimoramentos
+permanent:experience,Experiência,permanent,res://assets/raven/fa165.tres,fa165.png,Clockwork Raven,Grade e painel de aprimoramentos
+permanent:gold,Ouro,permanent,res://assets/raven/fa131.tres,fa131.png,Clockwork Raven,Grade e painel de aprimoramentos
+permanent:challenge,Desafio,permanent,res://assets/raven/fa223.tres,fa223.png,Clockwork Raven,Grade e painel de aprimoramentos
+permanent:revive,Reviver,permanent,res://assets/raven/fa1082.tres,fa1082.png,Clockwork Raven,Grade e painel de aprimoramentos
+consumable:cleanse,Limpeza,consumable,res://assets/v15/cleanse.png,Preservado,Asset atual preservado,"Chão, coleção, DEV"
+consumable:food,Comida,consumable,res://assets/raven/fa486.tres,fa486.png,Clockwork Raven,"Chão, coleção, DEV"
+consumable:gold_bag,Bolsa de Ouro,consumable,res://assets/v15/gold_bag.png,Preservado,Asset atual preservado,"Chão, coleção, DEV"
+consumable:xp_magnet,Ímã de Experiência,consumable,res://assets/v15/xp_magnet.png,Preservado,Asset atual preservado,"Chão, coleção, DEV"
+consumable:stopwatch,Relógio,consumable,res://assets/raven/fa333.tres,fa333.png,Clockwork Raven,"Chão, coleção, DEV"
+attribute:gold,Ouro,attribute,res://assets/raven/fa131.tres,fa131.png,Clockwork Raven,HUD: ouro e experiência
+attribute:experience,Experiência,attribute,res://assets/raven/fa165.tres,fa165.png,Clockwork Raven,HUD: ouro e experiência
+status:poison,Veneno,status,res://assets/raven/fa1111.tres,fa1111.png,Clockwork Raven,"HUD: símbolo, nome e duração/percentual"
+status:root,Preso,status,res://assets/raven/fa971.tres,fa971.png,Clockwork Raven,"HUD: símbolo, nome e duração/percentual"
+status:slow,Lentidão,status,res://assets/raven/fa658.tres,fa658.png,Clockwork Raven,"HUD: símbolo, nome e duração/percentual"
+status:frozen,Congelado / tempo parado,status,res://assets/icons/ice_wave.png,Preservado,Asset atual preservado,"HUD: símbolo, nome e duração/percentual"
+ui:heal,Recuperar vida,ui,res://assets/raven/fa659.tres,fa659.png,Clockwork Raven,Escolhas de cura/ouro após maximizar build
+ui:gold,Receber ouro,ui,res://assets/raven/fa131.tres,fa131.png,Clockwork Raven,Escolhas de cura/ouro após maximizar build
+passive:regeneration,Regeneração,passive,res://assets/raven/fa969.tres,fa969.png,Clockwork Raven,"Melhorias, build, HUD, coleção, baús, DEV"
