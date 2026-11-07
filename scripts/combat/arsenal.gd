@@ -57,11 +57,13 @@ func tick(delta:float,allow_attacks:bool=true):
    shot.at+=shot.direction*250*delta*speed if shot.leg==0 else (weapons.game.player.position-shot.at).normalized()*300*delta*speed
   for e in candidates(start,shot.at):
    if not weapons._valid_target(e) or shot.hits.has(e.serial):continue
-   if Geometry2D.get_closest_point_to_segment(e.position,start,shot.at).distance_to(e.position)<=e.radius+5:
+   if Geometry2D.get_closest_point_to_segment(e.position,start,shot.at).distance_to(e.position)<=e.radius+(5.75 if shot.kind=="axe" else 5):
     shot.hits[e.serial]=true;weapons._hit(e,weapons._stat(shot.kind,"damage"),Vector2.ZERO)
     if shot.kind=="axe":shot.pierce-=1
     if shot.kind=="axe" and shot.pierce<=0:break
-  if travel>3 or (shot.kind=="axe" and (shot.pierce<=0 or travel>shot.flight+.2)) or (shot.kind=="boomerang" and shot.leg==1 and shot.at.distance_to(weapons.game.player.position)<12):shots.erase(shot)
+  var center:Vector2=weapons.game.player.position.clamp(Vector2(320,180),Vector2(1480,1020))
+  var outside:bool=not Rect2(center-Vector2(320,180),Vector2(640,360)).grow(14).has_point(shot.at)
+  if (shot.kind=="axe" and (shot.pierce<=0 or outside)) or (shot.kind=="boomerang" and (travel>3 or (shot.leg==1 and shot.at.distance_to(weapons.game.player.position)<12))):shots.erase(shot)
  for zone in zones:
   zone.age+=delta
   if zone.kind=="ice_wave":
@@ -79,7 +81,7 @@ func tick(delta:float,allow_attacks:bool=true):
 func _draw():
  for shot in shots:
   draw_set_transform(shot.at.round(),shot.age*12)
-  if shot.kind=="axe":draw_texture_rect(textures.axe,Rect2(-8,-8,16,16),false)
+  if shot.kind=="axe":draw_texture_rect(textures.axe,Rect2(-9.2,-9.2,18.4,18.4),false)
   else:draw_texture(textures[shot.kind],-textures[shot.kind].get_size()*.5)
   draw_set_transform(Vector2.ZERO)
  for zone in zones:

@@ -8,8 +8,8 @@ var food:Dictionary={}
 func growth_visual():
 	var size:float=minf(game.balance.devour_max_scale,1+meals*game.balance.devour_growth_step)
 	if not game.enemy_space_free(position,data.radius*size,self):return
-	sprite.scale=Vector2.ONE*size
-	sprite.position.y=-12*size
+	sprite.scale=Vector2.ONE*size*1.1
+	sprite.position.y=-12*size*1.1
 	radius=data.radius*size
 	var shape=get_child(0) as CollisionShape2D
 	if shape!=null:shape.shape.radius=radius

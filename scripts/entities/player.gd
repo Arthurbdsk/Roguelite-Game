@@ -56,6 +56,8 @@ func _ready() -> void:
   sprite.hframes = 32
   sprite.position.y = -28
  add_child(sprite)
+ sprite.scale=Vector2.ONE*1.1
+ sprite.position*=1.1
  set_process(false)
 
 func _process(delta:float):
@@ -113,7 +115,6 @@ func take_damage(amount: float, source: Vector2,attacker:int=0,scheduled_time:fl
  return true
 
 func _draw() -> void:
- draw_ellipse_shadow()
  # The fallen marker remains useful for revives; living players use names.
  if down:draw_arc(Vector2(0,1),10,0,TAU,16,Color("b65f42"),1,false)
  if not display_name.is_empty():

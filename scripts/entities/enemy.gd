@@ -95,6 +95,8 @@ func _ready() -> void:
 	if elite and tiny_kind.is_empty():
 		sprite.scale = Vector2(1.2, 1.2)
 	add_child(sprite)
+	sprite.scale*=1.1
+	sprite.position*=1.1
 	if data.damage_resistance>0 and not tiny_kind.begins_with("original_"):
 		var badge:=Sprite2D.new();badge.texture=load(GameIcons.path("permanent:armor","res://assets/permanent/armor.png"));badge.texture_filter=CanvasItem.TEXTURE_FILTER_NEAREST;badge.position=Vector2(0,-28 if not tiny_kind.is_empty() else -sprite.texture.get_height()-8);badge.scale=Vector2.ONE*10/badge.texture.get_width();add_child(badge)
 

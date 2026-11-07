@@ -512,7 +512,7 @@ func broadcast_state(force: bool = false) -> void:
  for id in actors:
   var weapons: WeaponSystem = actors[id].weapon_system
   var shots: Array = []
-  for shot in weapons.projectiles: shots.append({"position": shot.position, "velocity": shot.velocity})
+  for shot in weapons.projectiles: shots.append({"id":shot.get("id",0),"age":shot.get("age",0),"life":shot.get("life",2),"position": shot.position, "velocity": shot.velocity})
   weapon_fx[id] = {"levels":weapons.levels,"passives":weapons.passives,"projectiles": shots, "slashes": weapons.slashes, "orbit_positions": weapons.orbit_positions,"lightning_fx":weapons.lightning_fx,"beams":weapons.beams,"pools":weapons.ground.pools,"arsenal_shots":weapons.arsenal.shots,"arsenal_zones":weapons.arsenal.zones,"blade_points":weapons.arsenal.blade_points}
  var data := {"reward_chest":game.chests.chest,"event_status":{"active":game.special_events.active,"age":game.special_events.age,"pending":game.special_events.pending.size()},"campaign_cleared":game.campaign.cleared,"endless":game.campaign.endless,"final_jobs":game.late_arena.patterns.jobs,"final_shots":game.late_arena.patterns.shots,"final_marks":game.late_arena.patterns.marks,"hordes_completed":game.horde_progress.completed,"chain_seeds":game.late_arena.seed_pending,"chain_stats":game.late_arena.chain.snapshot(),"late_areas":game.late_arena.areas,"late_shots":game.late_arena.shots,"full":true,"changes": changes, "removals": removals, "elapsed": game.elapsed, "gold": game.gold, "kills": game.kills, "earned": game.earned, "wave": game.director.wave_number(), "pressure": "TESTE DEV" if game.dev_tools!=null and game.dev_tools.active else game.director.pressure(), "banner": game.banner, "arrows": game.enemy_projectiles.arrows, "hazards": game.hazards, "areas": game.boss_arena.areas, "summons": game.boss_arena.pending_summons, "swings": game.boss_arena.swings, "portal_age": game.boss_arena.portal_age, "stage": game.boss_arena.stage, "weapons": weapon_fx, "revives": revives.interactions, "event_claimed": game.event_claimed, "event_progress": game.event_progress, "numbers": game.numbers,"split_pending":game.slime_families.pending,"special_marks":game.specials.marks,"special_areas":game.specials.areas,"special_bolts":game.specials.bolts}
  data.snapshot_serial=snapshot_count+1;data.room_run=room_run
@@ -805,7 +805,9 @@ func client_tick(delta: float, action: Dictionary) -> void:
   for pool in actor.weapon_system.ground.pools:pool.age+=delta
   actor.weapon_system.ground.pools=actor.weapon_system.ground.pools.filter(func(p):return p.age<p.flight+p.duration)
   actor.weapon_system.ground.queue_redraw()
-  for shot in actor.weapon_system.projectiles: shot.position += shot.velocity * delta
+  for shot in actor.weapon_system.projectiles:
+   shot.position += shot.velocity * delta;shot.age=float(shot.get("age",0))+delta
+  actor.weapon_system.projectiles=actor.weapon_system.projectiles.filter(func(s):return float(s.get("age",0))<float(s.get("life",2)))
   for slash in actor.weapon_system.slashes: slash.remaining = maxf(0, slash.remaining - delta)
   actor.weapon_system.additions.advance_shots(delta,false)
   actor.weapon_system.additions.visual.tick(delta)

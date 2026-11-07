@@ -1,0 +1,23 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+FIXES23_CLIENT_STATE index=3 map=courtyard failures=0
+FIXES23_CLIENT_STATE index=3 map=library failures=0
+FIXES23_CLIENT_STATE index=3 map=fields failures=0
+COOP_MATCH_PEER_PASS fixes23 index=3 failures=0
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+FIXES23_CLIENT_STATE index=2 map=courtyard failures=0
+FIXES23_CLIENT_STATE index=2 map=library failures=0
+FIXES23_CLIENT_STATE index=2 map=fields failures=0
+COOP_MATCH_PEER_PASS fixes23 index=2 failures=0
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+OpenGL API 3.3.0 Core Profile Context 26.8.1.260806 - Compatibility - Using Device: ATI Technologies Inc. - AMD Radeon RX 6600
+
+FIXES23_CLIENT_STATE index=1 map=courtyard failures=0
+FIXES23_CLIENT_STATE index=1 map=library failures=0
+FIXES23_CLIENT_STATE index=1 map=fields failures=0
+COOP_MATCH_PEER_PASS fixes23 index=1 failures=0
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+COOP_MATCH_PEER_PASS fixes23 index=0 failures=0
+FOUR_PLAYER_CUSTOM_PASS: C:\Users\Arthur\Documents\Projetos\Jogo Teste\tests\art_network23.gd

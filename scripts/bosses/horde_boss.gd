@@ -28,7 +28,7 @@ func apply_visual_form() -> void:
 	visual_form=shown
 	sprite.texture=load("res://assets/v08/demon_"+str(shown)+".png")
 	sprite.hframes=32
-	sprite.position.y=-float(sprite.texture.get_height())*.5+4
+	sprite.position.y=(-float(sprite.texture.get_height())*.5+4)*1.1
 
 func animate_demon(moving:bool) -> void:
 	apply_visual_form()
@@ -59,7 +59,7 @@ func enable_combat() -> void:
 	contact_timer = game.boss_balance.activation_grace
 	sprite.visible = true
 	sprite.modulate = Color.WHITE
-	sprite.position.y = -float(sprite.texture.get_height()) * 0.5 + 4
+	sprite.position.y = (-float(sprite.texture.get_height()) * 0.5 + 4)*1.1
 
 func tick(delta: float) -> void:
 	if dev_frozen or not alive or not combat_enabled:

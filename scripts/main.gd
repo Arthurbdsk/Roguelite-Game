@@ -690,6 +690,7 @@ func spawn_enemy(id: String, point: Vector2, elite: bool = false, chain_meta:Dic
   stats.damage=enemy_data.ghoul.damage*balance.slime_small_damage_ratio
  var scale: Dictionary = enemy_scale()
  if enemy is HazardTarget:stats.health=float(late_arena.patterns.config.crystal_health if id=="ice_crystal" else late_arena.patterns.config.totem_health)
+ if not enemy is HazardTarget:stats.health+=30
  stats.health *= 1.0 if enemy is HazardTarget else balance.enemy_health_multiplier
  stats.health *= 1.0 if enemy is HazardTarget else scale.health
  stats.damage *= scale.damage

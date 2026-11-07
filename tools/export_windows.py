@@ -139,7 +139,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--godot", type=Path, default=Path.home() / "Downloads" / "Godot_v4.7.2-stable_win64_console.exe")
     parser.add_argument("--template-only", action="store_true")
-    parser.add_argument("--output", type=Path, default=BUILD / "Hordas-0.22.0" / "Hordas-0.22.0.exe")
+    parser.add_argument("--output", type=Path, default=BUILD / "Hordas-0.23.0" / "Hordas-0.23.0.exe")
     parser.add_argument("--dev", action="store_true", help="Export the development-only boss panel build")
     parser.add_argument("--smoke", action="store_true", help="Run exported executable headlessly for 120 frames")
     args = parser.parse_args()
@@ -155,7 +155,7 @@ def main():
         raise SystemExit(f"Godot not found: {args.godot}; pass --godot PATH")
     BUILD.mkdir(parents=True, exist_ok=True)
     ensure_license()
-    target = ((BUILD / "Hordas-DEV-0.22.0" / "Hordas-DEV-0.22.0.exe") if args.dev and args.output == BUILD / "Hordas-0.22.0" / "Hordas-0.22.0.exe" else args.output).resolve()
+    target = ((BUILD / "Hordas-DEV-0.23.0" / "Hordas-DEV-0.23.0.exe") if args.dev and args.output == BUILD / "Hordas-0.23.0" / "Hordas-0.23.0.exe" else args.output).resolve()
     if os.name == "nt":
         probe = subprocess.run(["powershell", "-NoProfile", "-Command", "Get-CimInstance Win32_Process | Select-Object ExecutablePath,CommandLine | ConvertTo-Json -Compress"],capture_output=True,text=True,encoding="utf-8",errors="replace")
         if probe.returncode == 0:
@@ -178,7 +178,7 @@ def main():
     payload = target.read_bytes()
     manifest = {
         "file": target.name,
-        "game_version": "0.22.0",
+        "game_version": "0.23.0",
         "godot_version": VERSION,
         "size_bytes": len(payload),
         "sha256": hashlib.sha256(payload).hexdigest(),

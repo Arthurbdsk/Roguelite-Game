@@ -16,11 +16,11 @@ func apply_visual_form():
  if visual_form==shown:return
  visual_form=shown
  var path:String="res://assets/v10/guardian.png" if data.id=="guardian" else ("res://assets/v10/horror.png" if shown==1 else "res://assets/v10/true_form.png")
- sprite.texture=load(path);sprite.hframes=32;sprite.position.y=-sprite.texture.get_height()*.5+4
- if data.id=="horror" and shown==1:sprite.position.y=-14
+ sprite.texture=load(path);sprite.hframes=32;sprite.position.y=(-sprite.texture.get_height()*.5+4)*1.1
+ if data.id=="horror" and shown==1:sprite.position.y=-15.4
 func enable_combat():
  super.enable_combat()
- if data.id=="horror" and form==1:sprite.position.y=-14
+ if data.id=="horror" and form==1:sprite.position.y=-15.4
 func tick(delta:float):
  if dev_frozen or not alive or not combat_enabled:return
  tick_control(delta);clock+=delta;state_time+=delta;attack_time-=delta;hit_flash=maxf(0,hit_flash-delta)

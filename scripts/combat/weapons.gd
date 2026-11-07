@@ -66,6 +66,7 @@ var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var stat_cache:Dictionary={}
 var cache_combat_stats:bool=false
 var bow_visual_target:WeakRef
+var projectile_serial:int=0
 
 
 func setup(game_ref) -> void:
@@ -228,7 +229,8 @@ func _fire_bolts() -> bool:
 		if not _valid_target(selected):continue
 		var origin:Vector2=game.player.position+Vector2(0,-10)+direction*8+direction.orthogonal()*(index-(count-1)*.5)*2
 		var velocity: Vector2 = (selected.position-origin).normalized() * 275.0 * projectile_factor()
-		projectiles.append({"position": origin, "velocity": velocity,
+		projectile_serial+=1
+		projectiles.append({"id":projectile_serial,"age":0.0,"life":(reach+weapon_data.bolt.flight_padding)/maxf(1,velocity.length()),"position": origin, "velocity": velocity,
 			"distance": 0.0, "reach": reach+weapon_data.bolt.flight_padding, "selection_range":reach, "damage": _stat("bolt", "damage"),
 			"pierce": (2 if int(levels.get("bolt",0)) >= 2 else 1) + (_mastery().rank("bolt_pierce") if _mastery() != null else 0),
 			"bounce": 1 if int(levels.get("bolt",0)) >= 5 else 0, "hits": []})
@@ -240,6 +242,7 @@ func _fire_bolts() -> bool:
 func _update_projectiles(delta: float) -> void:
 	for index: int in range(projectiles.size() - 1, -1, -1):
 		var shot: Dictionary = projectiles[index]
+		shot.age=float(shot.get("age",0))+delta
 		var start: Vector2 = shot["position"]
 		var travel:Vector2=Vector2(shot.velocity)*delta
 		travel=travel.limit_length(maxf(0,float(shot.reach)-float(shot.distance)))
