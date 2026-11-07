@@ -39,6 +39,7 @@ var passive_text: Label
 var ui_theme: Theme
 var previous_data: Dictionary = {}
 var selected_skill: String = "edge"
+var mobile_screens:=MobileScreens.new()
 
 func setup(game_ref) -> void:
  game = game_ref
@@ -175,6 +176,7 @@ func _backdrop(alpha: float = 1.0) -> void:
 func render(which: String, data: Dictionary = {}) -> void:
  if root == null:
   return
+ if game.mobile!=null and game.mobile.active:mobile_screens.ui=self;mobile_screens.remember()
  screen = which
  previous_data = data.duplicate(true)
  for child in menu.get_children():
@@ -182,6 +184,9 @@ func render(which: String, data: Dictionary = {}) -> void:
   child.queue_free()
  menu.visible = which != "running"
  hud.visible = which in ["running", "paused", "upgrading", "result"]
+ if game.mobile!=null and game.mobile.active:
+  game.mobile.reset()
+  if mobile_screens.render(self,which,data):return
  match which:
   "online", "lobby", "online_pause": CoopMenu.build(self, which)
   "title": _title()
@@ -550,6 +555,7 @@ func update_hud(data: Dictionary) -> void:
  _update_build_icons(data)
  if screen=="upgrading" and is_instance_valid(build_stats_label):build_stats_label.text=game.weapon_system.build_stats()
  pause_hint.text = "ESC: MENU" if game.get("coop") != null and game.coop.active else "ESC: PAUSA"
+ if game.mobile!=null and game.mobile.active:pause_hint.hide()
  if game.get("player")!=null:
   var p=game.player
   var states:Dictionary={"poison":"Veneno: %d s"%ceili(p.poison_remaining) if p.poison_remaining>0 else "","root":"Preso: "+DisplayNumbers.seconds(p.root_remaining) if p.root_remaining>0 else "","slow":"Lentidão: %d%%"%roundi((1-p.movement_multiplier)*100) if p.movement_multiplier<1 else "","frozen":"Tempo parado: %d s"%ceili(game.consumables.freeze_left) if game.consumables.freeze_left>0 else ""}

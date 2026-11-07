@@ -50,6 +50,7 @@ func paint(canvas:Node2D,a,visible:Rect2):
     track.trail.append(at)
     if track.trail.size()>5:track.trail.pop_front()
    for i in track.trail.size():
+    if i<track.trail.size()-ceili(track.trail.size()*clampf(w.game.effects,0,1)):continue
     var point:Vector2=track.trail[i]
     if visible.has_point(point):
      var k:float=float(i+1)/track.trail.size()

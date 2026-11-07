@@ -87,6 +87,10 @@ var slime_families:SlimeFamilies
 var food_index:=FoodIndex.new()
 var dev_tools
 var coop: CoopSession
+var mobile:MobileControls
+var mobile_backgrounded:bool=false
+var mobile_performance:MobilePerformance
+var mobile_keyboard:MobileKeyboard
 
 func _ready() -> void:
  DisplayServer.window_set_title("Hordas")
@@ -164,8 +168,14 @@ func _ready() -> void:
  ui = GameUI.new()
  add_child(ui)
  ui.setup(self)
+ mobile=MobileControls.new();add_child(mobile);mobile.setup(self)
+ if mobile.active:
+  Engine.max_fps=60
+  mobile_performance=MobilePerformance.new();mobile_performance.setup(self);add_child(mobile_performance)
  apply_settings()
  show_title()
+ if OS.has_feature("mobile_qa") and ResourceLoader.exists("res://scripts/mobile/qa.gd"):
+  var mobile_qa=load("res://scripts/mobile/qa.gd").new();add_child(mobile_qa);mobile_qa.call_deferred("setup",self)
  if "--smoke-shutdown" in OS.get_cmdline_user_args():call_deferred("smoke_shutdown")
  if development_build() and ResourceLoader.exists("res://scripts/dev/boss_lab.gd"):
   dev_tools=load("res://scripts/dev/boss_lab.gd").new();add_child(dev_tools);dev_tools.setup(self)
@@ -187,7 +197,7 @@ func _ready() -> void:
    if not OS.get_cmdline_user_args().has("--profile-slot=benchmark14"):get_tree().quit(2);return
    var runner=load("res://scripts/diagnostics/benchmark14.gd").new();add_child(runner);runner.call_deferred("setup",self,arg.trim_prefix("--benchmark14="))
 
-func development_build()->bool:return (OS.has_feature("editor") or OS.has_feature("dev_tools")) and ResourceLoader.exists("res://scripts/dev/boss_lab.gd") and FileAccess.file_exists("res://data/dev/presets.json")
+func development_build()->bool:return not (mobile!=null and mobile.active) and (OS.has_feature("editor") or OS.has_feature("dev_tools")) and ResourceLoader.exists("res://scripts/dev/boss_lab.gd") and FileAccess.file_exists("res://data/dev/presets.json")
 
 func _input(event:InputEvent):
  if dev_tools!=null and event is InputEventKey and event.pressed and not event.echo:
@@ -227,7 +237,18 @@ func register_inputs() -> void:
 
 func _physics_process(delta: float) -> void:
  if not test_mode:
-  simulate(delta, Input.get_vector("move_left", "move_right", "move_up", "move_down"))
+  var movement:=Input.get_vector("move_left", "move_right", "move_up", "move_down")
+  simulate(delta,mobile.movement(movement) if mobile.active else movement)
+
+func open_mobile_panel(panel:String):
+ mobile.reset()
+ if coop.active:coop.menu_open=true
+ else:state="paused"
+ if panel=="build":ui.render("mobile_build")
+ else:ui._open_settings("online_pause" if coop.active else "paused")
+func open_mobile_keyboard(field:LineEdit,title:String):
+ if is_instance_valid(mobile_keyboard):mobile_keyboard.close()
+ mobile_keyboard=MobileKeyboard.new();add_child(mobile_keyboard);mobile_keyboard.setup(self,field,title)
 
 func simulate(delta: float, movement: Vector2 = Vector2.ZERO) -> void:
  campaign.decision_tick(delta)
@@ -554,8 +575,56 @@ func smoke_shutdown():
  request_quit()
 
 func _notification(what: int) -> void:
+ if mobile!=null and mobile.active:
+  if what==NOTIFICATION_APPLICATION_PAUSED:mobile_suspend(true)
+  elif what==NOTIFICATION_APPLICATION_FOCUS_OUT:mobile_suspend(false)
+  elif what in [NOTIFICATION_APPLICATION_RESUMED,NOTIFICATION_APPLICATION_FOCUS_IN]:mobile_resume()
+  elif what==NOTIFICATION_WM_GO_BACK_REQUEST:mobile_back();return
  if what == NOTIFICATION_WM_CLOSE_REQUEST and is_instance_valid(ui):
   request_quit()
+
+func mobile_suspend(disconnect_online:bool):
+ mobile_backgrounded=true;mobile.reset();player.velocity=Vector2.ZERO
+ if is_instance_valid(mobile_keyboard):mobile_keyboard.close()
+ for action in ["move_left","move_right","move_up","move_down","revive"]:Input.action_release(action)
+ var network_open:bool=coop.active or coop.connection.connected or not coop.connection.code.is_empty() or coop.connection.warmup!=null
+ if network_open and disconnect_online:
+  var was_host:bool=coop.hosting
+  coop.leave();coop.message="A sala foi encerrada porque o anfitrião entrou em segundo plano." if was_host else "Você saiu da sala ao colocar o aplicativo em segundo plano. Os outros jogadores continuam."
+  state="online";ui.render("online")
+ elif coop.active:
+  if not coop.hosting:
+   coop.sequence+=1;coop.connection.send_message({"type":"action","data":{"sequence":coop.sequence,"movement":[0,0],"revive":false,"self_revive":false}})
+ elif state=="running":state="paused";ui.render("paused")
+ if persistence_enabled:profile.save()
+ if music!=null:music.player.stream_paused=true
+func mobile_resume():
+ mobile_backgrounded=false;mobile.reset()
+ if music!=null:music.player.stream_paused=false
+func mobile_back():
+ mobile.reset()
+ if is_instance_valid(mobile_keyboard):mobile_keyboard.close();return
+ var focus=get_viewport().gui_get_focus_owner()
+ if focus is LineEdit or (DisplayServer.has_feature(DisplayServer.FEATURE_VIRTUAL_KEYBOARD) and DisplayServer.virtual_keyboard_get_height()>0):
+  DisplayServer.virtual_keyboard_hide()
+  if is_instance_valid(focus):focus.release_focus()
+  return
+ match ui.screen:
+  "running","paused","online_pause":toggle_pause()
+  "mobile_build":ui.mobile_screens.close_run_panel()
+  "settings":ui.render(ui.return_screen,profile.data)
+  "upgrading":
+   if coop.active:coop.close_menu()
+  "tree":close_skill_tree()
+  "online","lobby":coop.leave()
+  "revive_offer","endless_choice":pass
+  "title":
+   var existing=ui.menu.find_child("MobileExit",true,false)
+   if existing!=null:existing.queue_free();return
+   var dialog:=ConfirmationDialog.new();dialog.name="MobileExit";dialog.title="Fechar o jogo";dialog.dialog_text="Seu progresso permanente já está salvo.";dialog.ok_button_text="Fechar";dialog.cancel_button_text="Continuar";dialog.theme=ui.ui_theme;ui.menu.add_child(dialog)
+   for b in [dialog.get_ok_button(),dialog.get_cancel_button()]:b.custom_minimum_size=Vector2(120,44)
+   dialog.confirmed.connect(request_quit);dialog.canceled.connect(dialog.queue_free);dialog.popup_centered(Vector2i(380,160))
+  _:show_title()
 
 func toggle_pause() -> void:
  if coop.active and not coop.ended:
@@ -660,7 +729,7 @@ func apply_settings() -> void:
  effects = profile.data.settings.effects
  sound.volume = profile.data.settings.volume
  music.volume=float(profile.data.settings.get("music",.35))
- if not test_mode:
+ if not test_mode and not (mobile!=null and mobile.active):
   DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN if profile.data.settings.fullscreen else DisplayServer.WINDOW_MODE_WINDOWED)
 
 func spawn_enemy(id: String, point: Vector2, elite: bool = false, chain_meta:Dictionary={}):
@@ -911,7 +980,7 @@ func update_event(delta: float) -> void:
   event_progress = maxf(0, event_progress - delta * 0.5)
 
 func add_damage_number(point: Vector2, amount: float) -> void:
- if numbers.size() < int(20 * effects):
+ if numbers.size() < mini(int(20 * effects),12 if mobile!=null and mobile.active else 20):
   numbers.append({"at": point, "value": DisplayNumbers.number(amount), "life": 0.55})
 
 func announce(text: String, duration: float) -> void:

@@ -31,10 +31,12 @@ var previous_poll: int = 0
 var max_poll_gap_ms: int = 0
 
 func _ready() -> void:
+ endpoint=str(ProjectSettings.get_setting("network/relay_endpoint",""))
  var config := ConfigFile.new()
  var candidates: Array[String] = ["res://network.cfg"]
  if not OS.has_feature("editor"): candidates.push_front(OS.get_executable_path().get_base_dir().path_join("network.cfg"))
  for path in candidates:
+  if not endpoint.is_empty():break
   if config.load(path) == OK:
    endpoint = str(config.get_value("relay", "url", ""))
    break
@@ -47,9 +49,9 @@ func connect_room(create: bool, display_name: String, room_code: String = "", sk
   connection_failed.emit("O serviço de salas está indisponível no momento.")
   return
  close()
- pending = {"type": "create" if create else "join", "name": display_name.strip_edges(), "code": room_code.strip_edges().to_upper(), "skills": skills,"challenge":challenge,"gold_remainder":gold_remainder}
+ pending = {"type": "create" if create else "join", "name": display_name.strip_edges().left(8), "code": room_code.strip_edges().to_upper(), "skills": skills,"challenge":challenge,"gold_remainder":gold_remainder}
  pending.protocol=2
- pending.game_version=ProjectSettings.get_setting("application/config/version","0.5.0")
+ pending.game_version=ProjectSettings.get_setting("network/compatible_game_version",ProjectSettings.get_setting("application/config/version","0.5.0"))
  if development and (OS.has_feature("editor") or OS.has_feature("dev_tools")):pending.game_version+="-dev"
  if endpoint.begins_with("wss://") and endpoint.get_slice("/",2).ends_with(".onrender.com"):
   warmup=HTTPRequest.new()

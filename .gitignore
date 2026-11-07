@@ -18,3 +18,9 @@ __pycache__/
 
 # Tiny RPG: game use is licensed; do not re-upload standalone art.
 /assets/tiny_rpg/*.png
+
+# Android signing material must never enter this repository.
+*.keystore
+*.jks
+/signing.json
+/local.properties

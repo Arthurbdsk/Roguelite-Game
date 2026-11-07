@@ -69,6 +69,7 @@ func receive(packet: Dictionary) -> void:
    game.ui.render("lobby")
   "error":
    message = packet.get("reason", "Falha na sala.")
+   if game.mobile!=null and game.mobile.active and message.contains("Versões diferentes"):message="Versão incompatível. Este Android só conecta ao PC 0.20.0 ou ao Android com a mesma base. Versões futuras de PC exigem uma atualização mobile solicitada."
    game.ui.render("lobby" if not connection.code.is_empty() else "online")
   "prepare":
    game.selected_map=packet.get("map","courtyard");game.arena.apply_map(game.selected_map)
@@ -169,7 +170,7 @@ func nearest_player(at: Vector2):
 
 func local_action(movement: Vector2) -> Dictionary:
  if not local_input_override.is_empty(): return local_input_override.duplicate(true)
- return {"movement": Vector2.ZERO if menu_open else movement, "revive": Input.is_action_pressed("revive") and not menu_open,"self_revive":Input.is_physical_key_pressed(KEY_R) and not menu_open}
+ return {"movement": Vector2.ZERO if menu_open else movement, "revive": (Input.is_action_pressed("revive") or (game.mobile!=null and game.mobile.active and (game.mobile.interact_held or game.mobile.revive_held))) and not menu_open,"self_revive":Input.is_physical_key_pressed(KEY_R) and not menu_open}
 
 func tick(delta: float, movement: Vector2) -> void:
  if ended: return

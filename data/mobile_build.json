@@ -1,0 +1,11 @@
+{
+  "mobile_version": "0.20.0-android.1",
+  "android_version_code": 1,
+  "base_pc_version": "0.20.0",
+  "base_pc_commit": "4b6e2e5dd1a86c2feb8ed169c8da305c0fd5d0a8",
+  "branch_base_policy_commit": "9f4982d",
+  "protocol": 2,
+  "compatible_game_version": "0.20.0",
+  "application_id": "com.socialy.hordas.android",
+  "maintenance": "Frozen after first delivery; explicit mobile request required."
+}

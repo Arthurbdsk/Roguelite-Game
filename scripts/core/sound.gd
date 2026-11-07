@@ -10,7 +10,7 @@ var volume: float = 0.55
 var stopping:bool=false
 
 func _ready() -> void:
-	for i in 8:
+	for i in (4 if OS.has_feature("android") or "--mobile-preview" in OS.get_cmdline_user_args() else 8):
 		var voice := AudioStreamPlayer.new()
 		add_child(voice)
 		voices.append(voice)
@@ -57,11 +57,13 @@ func synth(hz: float, length: float) -> AudioStreamWAV:
 func play_cue(id: String) -> void:
 	if stopping or not cues.has(id) or volume <= 0:
 		return
-	var interval := 0.10 if id in ["hit", "pickup", "orbit", "gold", "arrow"] else 0.04
+	var important:bool=id in ["hurt","boss","elite","portal","level"]
+	var interval := (0.16 if voices.size()==4 else 0.10) if id in ["hit", "pickup", "orbit", "gold", "arrow"] else 0.04
 	if clock - float(limits.get(id, -99.0)) < interval:
 		return
 	for voice in voices:
-		if not voice.playing:
+		if voices.size()==4 and voice==voices[0] and not important:continue
+		if not voice.playing or (important and voice==voices[0]):
 			voice.stream = cues[id]
 			voice.volume_db = linear_to_db(volume * 0.65)
 			voice.pitch_scale = randf_range(0.96, 1.04)

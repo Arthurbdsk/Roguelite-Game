@@ -1,0 +1,42 @@
+[
+  {
+    "wall_seconds": 0.72,
+    "pss_kb": 12306
+  },
+  {
+    "wall_seconds": 16.08,
+    "pss_kb": 159354
+  },
+  {
+    "wall_seconds": 31.36,
+    "pss_kb": 159454
+  },
+  {
+    "wall_seconds": 46.65,
+    "pss_kb": 155666
+  },
+  {
+    "wall_seconds": 61.93,
+    "pss_kb": 155758
+  },
+  {
+    "wall_seconds": 77.24,
+    "pss_kb": 156526
+  },
+  {
+    "wall_seconds": 92.55,
+    "pss_kb": 156582
+  },
+  {
+    "wall_seconds": 107.82,
+    "pss_kb": 156582
+  },
+  {
+    "wall_seconds": 123.13,
+    "pss_kb": 156590
+  },
+  {
+    "wall_seconds": 138.42,
+    "pss_kb": 158650
+  }
+]

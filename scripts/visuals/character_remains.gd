@@ -18,7 +18,8 @@ func receive(event:Dictionary):
  var age:float=maxf(0,game.elapsed-float(event.clock))
  if age>.5 or float(event.clock)>game.elapsed+1:return
  seen[id]=game.elapsed
- if effects.size()>=LIMIT:effects.pop_front();cosmetic_discards+=1
+ var cap:int=24 if game.mobile!=null and game.mobile.active else LIMIT
+ if effects.size()>=cap:effects.pop_front();cosmetic_discards+=1
  effects.append({"id":id,"kind":event.kind,"at":event.at if event.at is Vector2 else CoopWire.vector(event.at),"flip":event.flip,"scale":event.scale,"age":age})
  if seen.size()>1024:
   for key in seen.keys():

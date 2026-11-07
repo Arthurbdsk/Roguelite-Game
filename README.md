@@ -1,4 +1,16 @@
-# Hordas
+# Hordas Android
+
+Entrega Android 0.20.0-android.1, baseada no PC 0.20.0 (`4b6e2e5dd1a86c2feb8ed169c8da305c0fd5d0a8`). Esta branch é exclusiva do Android e fica congelada depois da entrega. Atualizações genéricas do jogo continuam sendo somente para PC.
+
+APK: `build/Hordas-Android-0.20.0-1.apk`. Envie esse arquivo ao celular, abra e permita instalar por esse aplicativo quando o Android solicitar. Android 7 ou mais recente, OpenGL ES 3. Não desinstale para atualizar: instale o próximo APK autorizado por cima, com o mesmo pacote e assinatura.
+
+Use o joystick à esquerda. Os ataques são automáticos. Os botões à direita abrem pausa, build e opções; Interagir aparece perto de baús e Segure: ajudar aparece perto de aliados caídos. Nas salas, o botão Teclado permite preencher nome e código por toque. Todos marcam Estou pronto; o anfitrião inicia. Cooperação verificada com PC **0.20.0 público**, protocolo 2. Outras versões são recusadas.
+
+[Entrega, testes, desempenho e limitações](docs/ANDROID_0_20_1.md). [Política de manutenção somente sob demanda](docs/ANDROID_POLICY.md). O APK não contém painel DEV. Não há publicação em loja nem rotina automática de Android.
+
+Exportação manual autorizada: `python tools/android/export_android.py --android-request`. Exige a chave original fora do repositório e os assets licenciados locais. O script recusa execução fora de `codex/android-mobile`. `--qa` cria outro pacote, isolado, exclusivo de validação. Não distribuir esse pacote como jogo público.
+
+## Histórico da base de PC
 
 Android é mantido **somente sob pedido explícito de celular, Android ou versão mobile**, separado em `codex/android-mobile`. Pedidos genéricos continuam exclusivos do PC. [Política de congelamento e base identificada](docs/ANDROID_POLICY.md).
 

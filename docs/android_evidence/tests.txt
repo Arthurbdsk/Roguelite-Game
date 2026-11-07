@@ -1,0 +1,32 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+TOUCH_ENGINE_PRESS state=running fingers={ 7: "pause" }
+TOUCH_ENGINE_RELEASE state=paused fingers={  }
+MOBILE_TOUCH_PASS
+
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+MOBILE_KEYBOARD_PASS
+
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+MOBILE_LIFECYCLE_PASS
+
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+OpenGL API 3.3.0 Core Profile Context 26.8.1.260806 - Compatibility - Using Device: ATI Technologies Inc. - AMD Radeon RX 6600
+
+MOBILE_UI_PASS
+
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+MOBILE_REVIVE_READY
+MOBILE_BACKGROUND_READY
+MOBILE_CROSS_PC_PASS index=0 failures=0
+
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+MOBILE_CROSS_PC_PASS index=1 failures=0
+
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+MOBILE_CROSS_PC_PASS index=2 failures=0
