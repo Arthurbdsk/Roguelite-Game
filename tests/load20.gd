@@ -70,4 +70,3 @@ func run():
   actor.weapon_system.reset();check(actor.weapon_system.additions.visual.tracks.is_empty(),"four-player visual cleanup")
  g.queue_free();await process_frame;await create_timer(.3).timeout;AudioServer.set_bus_mute(0,muted)
  print("LOAD20_"+("PASS" if errors==0 else "FAIL"));quit(int(errors>0))
-
