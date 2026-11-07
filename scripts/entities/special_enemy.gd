@@ -52,7 +52,7 @@ func tick(delta:float):
 		if state=="ambush":
 			movement=Vector2.ZERO
 			if state_time>=game.specials.balance.shadow_warning and game.enemy_space_free(ambush_at,radius,self):
-				position=ambush_at;collision_layer=2;targetable=true;sprite.visible=true;state="recovery";state_time=0
+				position=ambush_at;motion_start=position;collision_layer=2;targetable=true;sprite.visible=true;state="recovery";state_time=0
 				for player in game.team_players():
 					if player.position.distance_to(ambush_at)<=game.specials.balance.shadow_radius+player.radius:
 						if player.take_damage(data.damage,ambush_at,get_instance_id()):player.root_remaining=game.specials.balance.shadow_root

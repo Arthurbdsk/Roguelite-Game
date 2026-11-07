@@ -64,6 +64,7 @@ var entities: Node2D
 var camera: Camera2D
 var character_remains:CharacterRemains
 var enemy_data: Dictionary = {}
+var variant_data:Dictionary={}
 var balance: EncounterBalance = preload("res://data/encounters/default.tres")
 var gold_loot: GoldLoot
 var enemy_projectiles: EnemyProjectiles
@@ -112,6 +113,10 @@ func _ready() -> void:
  enemy_data.siege_archer.title="Arqueiro do cerco";enemy_data.siege_archer.speed=0;enemy_data.siege_archer.attack_interval+=survival_config.events.siege_extra_interval;enemy_data.siege_archer.attack_range=survival_config.events.siege_range;enemy_data.siege_archer.arrow_range=survival_config.events.siege_arrow_range;enemy_data.siege_archer.arrow_lifetime=survival_config.events.siege_arrow_lifetime
  enemy_data.slime_king.title="Slime Rei";enemy_data.slime_king.health*=survival_config.events.king_health;enemy_data.slime_king.speed*=survival_config.events.king_speed;enemy_data.slime_king.radius=survival_config.events.king_radius;enemy_data.slime_king.texture="res://assets/v13/slime_king.png";enemy_data.slime_king.frames=8
  enemy_data["boss"] = enemy_data.demon
+ variant_data=JSON.parse_string(FileAccess.get_file_as_string("res://data/variants21.json"))
+ for id in variant_data:
+  var v:Dictionary=variant_data[id];enemy_data[id]=enemy_data[v.base].duplicate();enemy_data[id].id=id;enemy_data[id].title=v.name;enemy_data[id].damage_resistance=v.resistance
+  enemy_data[id].visual_family="orc" if v.base=="ghoul" else ""
  arena = RuinedArena.new()
  arena.z_index = -20
  add_child(arena)
@@ -258,6 +263,7 @@ func simulate(delta: float, movement: Vector2 = Vector2.ZERO) -> void:
  prepare_crowd()
  for enemy in enemies.duplicate():
   if is_instance_valid(enemy) and enemy.alive:
+   enemy.motion_start=enemy.position
    enemy.tick(delta)
    if state != "running":
     return
@@ -682,7 +688,7 @@ func spawn_enemy(id: String, point: Vector2, elite: bool = false, chain_meta:Dic
  stats.health *= 1.0 if enemy is HazardTarget else scale.health
  stats.damage *= scale.damage
  if not enemy is HordeBoss:stats.attack_interval*=balance.enemy_attack_interval_multiplier
- if id in ["ghoul","skeleton_sword","skeleton_archer"]:stats.speed*=balance.common_speed_multiplier
+ if id in ["ghoul","skeleton_sword","skeleton_archer"] or variant_data.has(id):stats.speed*=balance.common_speed_multiplier
  stats.speed *= balance.enemy_speed_multiplier
  stats.speed *= scale.speed
  var health_factor:float=float(survival_config.events.siege_health) if id=="siege_archer" else float(survival_config.events.blue_health) if id=="event_blue" else float(survival_config.events.small_health) if id=="event_small" else 1
@@ -703,7 +709,7 @@ func spawn_enemy(id: String, point: Vector2, elite: bool = false, chain_meta:Dic
  entities.add_child(enemy)
  if coop.active and not coop.hosting:enemy.collision_mask=0
  enemies.append(enemy)
- enemy_collision_margin=maxf(enemy_collision_margin,enemy.radius+5)
+ enemy_collision_margin=maxf(enemy_collision_margin,enemy.radius+5+(enemy.position.distance_to(enemy.motion_start) if enemy.motion_start!=Vector2.INF else 0))
  var cell:=Vector2i(floori(enemy.position.x/40),floori(enemy.position.y/40))
  if not grid.has(cell):grid[cell]=[]
  grid[cell].append(enemy)
@@ -789,7 +795,7 @@ func rebuild_grid() -> void:
  for enemy in enemies:
   if not is_instance_valid(enemy) or not enemy.alive:
    continue
-  enemy_collision_margin=maxf(enemy_collision_margin,enemy.radius+5)
+  enemy_collision_margin=maxf(enemy_collision_margin,enemy.radius+5+(enemy.position.distance_to(enemy.motion_start) if enemy.motion_start!=Vector2.INF else 0))
   var cell := Vector2i(floori(enemy.position.x / 40), floori(enemy.position.y / 40))
   if not grid.has(cell):
    grid[cell] = []

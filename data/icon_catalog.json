@@ -153,7 +153,7 @@
     "pixel_sha256": "142ab94e6c87cfd6bec9e4a3fb18f4a13753ac3875dd4f242c81f0189e2d919d"
   },
   "passive:crown": {
-    "name": "Coroa",
+    "name": "Toque do Midas",
     "category": "passive",
     "asset": "res://assets/raven/fa1568.tres",
     "origin": "Clockwork Raven",

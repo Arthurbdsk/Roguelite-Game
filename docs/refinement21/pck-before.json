@@ -1,0 +1,85 @@
+{
+  "cpu": "AMD Ryzen 5 5600 6-Core Processor",
+  "gpu": "AMD Radeon RX 6600",
+  "renderer": "gl_compatibility",
+  "resolution": "1280x720, logical640x360",
+  "results": [
+    {
+      "enemies": 150,
+      "fps": 60.00187892739,
+      "frame_ms": {
+        "median": 16.665,
+        "p95": 16.735,
+        "p99": 16.879
+      },
+      "frames": 601,
+      "map": "courtyard",
+      "peaks": {
+        "draw_calls": 723.0,
+        "nodes": 578.0,
+        "pools": 60,
+        "projectiles": 50
+      },
+      "players": 4,
+      "simulation_ms": {
+        "median": 8.013,
+        "p95": 11.453,
+        "p99": 12.939
+      }
+    },
+    {
+      "enemies": 150,
+      "fps": 60.0025498587742,
+      "frame_ms": {
+        "median": 16.665,
+        "p95": 16.728,
+        "p99": 16.762
+      },
+      "frames": 601,
+      "map": "library",
+      "peaks": {
+        "draw_calls": 723.0,
+        "nodes": 610.0,
+        "pools": 60,
+        "projectiles": 57
+      },
+      "players": 4,
+      "simulation_ms": {
+        "median": 7.757,
+        "p95": 11.52,
+        "p99": 12.826
+      }
+    },
+    {
+      "enemies": 150,
+      "fps": 60.0023941055086,
+      "frame_ms": {
+        "median": 16.666,
+        "p95": 16.719,
+        "p99": 16.753
+      },
+      "frames": 601,
+      "map": "fields",
+      "peaks": {
+        "draw_calls": 737.0,
+        "nodes": 736.0,
+        "pools": 60,
+        "projectiles": 52
+      },
+      "players": 4,
+      "simulation_ms": {
+        "median": 7.712,
+        "p95": 11.134,
+        "p99": 12.444
+      }
+    }
+  ],
+  "sample_seconds": 10,
+  "seed": 21007,
+  "version": "0.20.0",
+  "warmup_seconds": 2,
+  "windowed": true,
+  "runtime": "Godot editor executing the shipped PCK in an empty resource directory, not native release FPS",
+  "rss_peak_bytes": 243445760,
+  "wall_seconds": 37.82491000000027
+}

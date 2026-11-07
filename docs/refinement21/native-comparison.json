@@ -1,0 +1,1030 @@
+{
+  "before": {
+    "cpu": "AMD Ryzen 5 5600 6-Core Processor",
+    "frame_cap": 120,
+    "gpu": "AMD Radeon RX 6600",
+    "renderer": "gl_compatibility",
+    "resolution": "1280x720 viewport640x360",
+    "results": [
+      {
+        "coins": 0,
+        "enemies": 12,
+        "frame_ms": {
+          "median": 7.272,
+          "p95": 10.402,
+          "p99": 10.806
+        },
+        "frames": 1201,
+        "peaks": {
+          "crowd_pairs": 24.0,
+          "draw_calls": 81.0,
+          "effects": 14.0,
+          "enemies": 12.0,
+          "memory_mb": 0.0,
+          "nodes": 323.0,
+          "objects": 1337.0,
+          "pools": 0.0,
+          "projectiles": 0.0
+        },
+        "physics_ms": 2.266,
+        "process_ms": 0.847,
+        "projectiles": 0,
+        "scenario": "initial",
+        "sections_ms": {
+          "collection": {
+            "median": 0.031,
+            "p95": 0.045,
+            "p99": 0.062
+          },
+          "enemy_ai_physics": {
+            "median": 0.455,
+            "p95": 0.679,
+            "p99": 0.801
+          },
+          "enemy_effects": {
+            "median": 0.034,
+            "p95": 0.046,
+            "p99": 0.063
+          },
+          "navigation": {
+            "median": 0.004,
+            "p95": 0.006,
+            "p99": 0.007
+          },
+          "navigation_planning": {
+            "median": 0.028,
+            "p95": 0.067,
+            "p99": 0.096
+          },
+          "physics_bodies": {
+            "median": 0.041,
+            "p95": 0.071,
+            "p99": 0.113
+          },
+          "render_cpu": {
+            "median": 0.36599999666214,
+            "p95": 0.477999985218048,
+            "p99": 0.541000008583069
+          },
+          "render_gpu": {
+            "median": 0.224999994039536,
+            "p95": 0.361000001430511,
+            "p99": 0.647000014781952
+          },
+          "weapons_damage": {
+            "median": 0.179,
+            "p95": 0.288,
+            "p99": 0.402
+          },
+          "xp_collection": {
+            "median": 0.01,
+            "p95": 0.014,
+            "p99": 0.017
+          }
+        },
+        "simulation_ms": {
+          "median": 1.2,
+          "p95": 1.724,
+          "p99": 2.232
+        },
+        "xp": 0
+      },
+      {
+        "coins": 0,
+        "enemies": 225,
+        "frame_ms": {
+          "median": 11.761,
+          "p95": 20.401,
+          "p99": 24.606
+        },
+        "frames": 1044,
+        "peaks": {
+          "crowd_pairs": 559.0,
+          "draw_calls": 945.0,
+          "effects": 42.0,
+          "enemies": 225.0,
+          "memory_mb": 0.0,
+          "nodes": 981.0,
+          "objects": 2746.0,
+          "pools": 120.0,
+          "projectiles": 0.0
+        },
+        "physics_ms": 23.256,
+        "process_ms": 2.619,
+        "projectiles": 0,
+        "scenario": "four_builds",
+        "sections_ms": {
+          "collection": {
+            "median": 0.03,
+            "p95": 0.042,
+            "p99": 0.072
+          },
+          "enemy_ai_physics": {
+            "median": 6.544,
+            "p95": 9.985,
+            "p99": 11.028
+          },
+          "enemy_effects": {
+            "median": 0.031,
+            "p95": 0.05,
+            "p99": 0.089
+          },
+          "navigation": {
+            "median": 0.003,
+            "p95": 0.005,
+            "p99": 0.006
+          },
+          "navigation_planning": {
+            "median": 0.31,
+            "p95": 0.557,
+            "p99": 0.673
+          },
+          "physics_bodies": {
+            "median": 0.985,
+            "p95": 1.93,
+            "p99": 2.245
+          },
+          "render_cpu": {
+            "median": 1.34200000762939,
+            "p95": 2.01500010490417,
+            "p99": 2.3050000667572
+          },
+          "render_gpu": {
+            "median": 0.52700001001358,
+            "p95": 0.879000008106232,
+            "p99": 1.43599998950958
+          },
+          "weapons_damage": {
+            "median": 2.992,
+            "p95": 4.787,
+            "p99": 6.872
+          },
+          "xp_collection": {
+            "median": 0.01,
+            "p95": 0.017,
+            "p99": 0.023
+          }
+        },
+        "simulation_ms": {
+          "median": 10.567,
+          "p95": 16.956,
+          "p99": 21.557
+        },
+        "xp": 0
+      },
+      {
+        "coins": 0,
+        "enemies": 240,
+        "frame_ms": {
+          "median": 15.935,
+          "p95": 60.914,
+          "p99": 123.746
+        },
+        "frames": 471,
+        "peaks": {
+          "crowd_pairs": 583.0,
+          "draw_calls": 1033.0,
+          "effects": 42.0,
+          "enemies": 240.0,
+          "memory_mb": 0.0,
+          "nodes": 1053.0,
+          "objects": 3082.0,
+          "pools": 120.0,
+          "projectiles": 95.0
+        },
+        "physics_ms": 30.984,
+        "process_ms": 2.127,
+        "projectiles": 1,
+        "scenario": "boss_necro",
+        "sections_ms": {
+          "collection": {
+            "median": 0.027,
+            "p95": 0.038,
+            "p99": 0.061
+          },
+          "enemy_ai_physics": {
+            "median": 8.498,
+            "p95": 13.148,
+            "p99": 15.4
+          },
+          "enemy_effects": {
+            "median": 0.342,
+            "p95": 0.791,
+            "p99": 0.95
+          },
+          "navigation": {
+            "median": 0.003,
+            "p95": 0.004,
+            "p99": 0.005
+          },
+          "navigation_planning": {
+            "median": 0.325,
+            "p95": 0.695,
+            "p99": 1.57
+          },
+          "physics_bodies": {
+            "median": 0.994,
+            "p95": 2.583,
+            "p99": 3.933
+          },
+          "render_cpu": {
+            "median": 1.53400003910065,
+            "p95": 2.30100011825562,
+            "p99": 2.64199995994568
+          },
+          "render_gpu": {
+            "median": 0.624000012874603,
+            "p95": 1.20000004768372,
+            "p99": 1.62300002574921
+          },
+          "weapons_damage": {
+            "median": 3.07,
+            "p95": 5.213,
+            "p99": 6.207
+          },
+          "xp_collection": {
+            "median": 0.01,
+            "p95": 0.017,
+            "p99": 0.024
+          }
+        },
+        "simulation_ms": {
+          "median": 13.296,
+          "p95": 21.007,
+          "p99": 26.229
+        },
+        "xp": 0
+      },
+      {
+        "coins": 16,
+        "enemies": 225,
+        "frame_ms": {
+          "median": 13.345,
+          "p95": 24.274,
+          "p99": 35.37
+        },
+        "frames": 873,
+        "peaks": {
+          "crowd_pairs": 660.0,
+          "draw_calls": 953.0,
+          "effects": 30.0,
+          "enemies": 225.0,
+          "memory_mb": 0.0,
+          "nodes": 1019.0,
+          "objects": 2996.0,
+          "pools": 120.0,
+          "projectiles": 0.0
+        },
+        "physics_ms": 25.321,
+        "process_ms": 2.866,
+        "projectiles": 0,
+        "scenario": "king_225",
+        "sections_ms": {
+          "collection": {
+            "median": 0.052,
+            "p95": 0.111,
+            "p99": 0.175
+          },
+          "enemy_ai_physics": {
+            "median": 7.461,
+            "p95": 10.946,
+            "p99": 12.143
+          },
+          "enemy_effects": {
+            "median": 0.032,
+            "p95": 0.049,
+            "p99": 0.062
+          },
+          "navigation": {
+            "median": 0.003,
+            "p95": 0.005,
+            "p99": 0.006
+          },
+          "navigation_planning": {
+            "median": 0.3,
+            "p95": 0.556,
+            "p99": 0.664
+          },
+          "physics_bodies": {
+            "median": 1.013,
+            "p95": 2.064,
+            "p99": 2.541
+          },
+          "render_cpu": {
+            "median": 1.42400002479553,
+            "p95": 2.15199995040894,
+            "p99": 2.44700002670288
+          },
+          "render_gpu": {
+            "median": 0.465000003576279,
+            "p95": 0.867999970912933,
+            "p99": 1.53999996185303
+          },
+          "weapons_damage": {
+            "median": 2.967,
+            "p95": 4.923,
+            "p99": 6.514
+          },
+          "xp_collection": {
+            "median": 0.021,
+            "p95": 0.032,
+            "p99": 0.04
+          }
+        },
+        "simulation_ms": {
+          "median": 11.646,
+          "p95": 19.178,
+          "p99": 23.818
+        },
+        "xp": 16
+      },
+      {
+        "coins": 0,
+        "enemies": 20,
+        "frame_ms": {
+          "median": 8.332,
+          "p95": 11.134,
+          "p99": 11.621
+        },
+        "frames": 1202,
+        "peaks": {
+          "crowd_pairs": 0.0,
+          "draw_calls": 238.0,
+          "effects": 4.0,
+          "enemies": 20.0,
+          "memory_mb": 0.0,
+          "nodes": 423.0,
+          "objects": 2135.0,
+          "pools": 120.0,
+          "projectiles": 16.0
+        },
+        "physics_ms": 3.072,
+        "process_ms": 1.691,
+        "projectiles": 7,
+        "scenario": "siege",
+        "sections_ms": {
+          "collection": {
+            "median": 0.034,
+            "p95": 0.05,
+            "p99": 0.077
+          },
+          "enemy_ai_physics": {
+            "median": 0.285,
+            "p95": 0.395,
+            "p99": 0.484
+          },
+          "enemy_effects": {
+            "median": 0.127,
+            "p95": 0.217,
+            "p99": 0.322
+          },
+          "navigation": {
+            "median": 0.004,
+            "p95": 0.006,
+            "p99": 0.007
+          },
+          "render_cpu": {
+            "median": 0.614000022411346,
+            "p95": 0.810999989509583,
+            "p99": 0.959999978542328
+          },
+          "render_gpu": {
+            "median": 0.312999993562698,
+            "p95": 0.476999998092651,
+            "p99": 0.939000010490417
+          },
+          "weapons_damage": {
+            "median": 0.469,
+            "p95": 0.946,
+            "p99": 1.141
+          },
+          "xp_collection": {
+            "median": 0.01,
+            "p95": 0.014,
+            "p99": 0.021
+          }
+        },
+        "simulation_ms": {
+          "median": 1.458,
+          "p95": 2.296,
+          "p99": 2.647
+        },
+        "xp": 0
+      },
+      {
+        "coins": 0,
+        "enemies": 240,
+        "frame_ms": {
+          "median": 14.346,
+          "p95": 33.771,
+          "p99": 51.882
+        },
+        "frames": 708,
+        "peaks": {
+          "crowd_pairs": 588.0,
+          "draw_calls": 1065.0,
+          "effects": 42.0,
+          "enemies": 240.0,
+          "memory_mb": 0.0,
+          "nodes": 1102.0,
+          "objects": 3377.0,
+          "pools": 120.0,
+          "projectiles": 0.0
+        },
+        "physics_ms": 30.303,
+        "process_ms": 2.205,
+        "projectiles": 0,
+        "scenario": "infinite30",
+        "sections_ms": {
+          "collection": {
+            "median": 0.028,
+            "p95": 0.041,
+            "p99": 0.07
+          },
+          "enemy_ai_physics": {
+            "median": 7.84,
+            "p95": 11.9,
+            "p99": 13.575
+          },
+          "enemy_effects": {
+            "median": 0.031,
+            "p95": 0.049,
+            "p99": 0.06
+          },
+          "navigation": {
+            "median": 0.003,
+            "p95": 0.005,
+            "p99": 0.006
+          },
+          "navigation_planning": {
+            "median": 0.338,
+            "p95": 0.604,
+            "p99": 0.884
+          },
+          "physics_bodies": {
+            "median": 1.064,
+            "p95": 2.057,
+            "p99": 2.402
+          },
+          "render_cpu": {
+            "median": 1.61800003051758,
+            "p95": 2.33999991416931,
+            "p99": 2.68499994277954
+          },
+          "render_gpu": {
+            "median": 0.607999980449677,
+            "p95": 0.984000027179718,
+            "p99": 1.4889999628067
+          },
+          "weapons_damage": {
+            "median": 3.138,
+            "p95": 5.161,
+            "p99": 6.06
+          },
+          "xp_collection": {
+            "median": 0.01,
+            "p95": 0.018,
+            "p99": 0.02
+          }
+        },
+        "simulation_ms": {
+          "median": 12.346,
+          "p95": 19.776,
+          "p99": 25.948
+        },
+        "xp": 0
+      }
+    ],
+    "sample_seconds": 10,
+    "seed": 140031,
+    "tag": "before_final",
+    "warmup_seconds": 2,
+    "windowed": true,
+    "exe_sha256": "e0a03c9ee4e5abea6338922e26251e88d030b6a6e3262b6b0e74222751518398",
+    "duration_wall_seconds": 74.15885650000018,
+    "rss_peak_mb": {
+      "infinite30": 297.03515625,
+      "initial": 280.3046875,
+      "four_builds": 290.74609375,
+      "boss_necro": 295.2109375,
+      "king_225": 295.71484375,
+      "siege": 294.82421875
+    },
+    "rss_source": "Windows GetProcessMemoryInfo WorkingSetSize, sampled 20Hz"
+  },
+  "after": {
+    "cpu": "AMD Ryzen 5 5600 6-Core Processor",
+    "frame_cap": 120,
+    "gpu": "AMD Radeon RX 6600",
+    "renderer": "gl_compatibility",
+    "resolution": "1280x720 viewport640x360",
+    "results": [
+      {
+        "coins": 0,
+        "enemies": 12,
+        "frame_ms": {
+          "median": 9.255,
+          "p95": 10.286,
+          "p99": 10.634
+        },
+        "frames": 1201,
+        "peaks": {
+          "crowd_pairs": 24.0,
+          "draw_calls": 77.0,
+          "effects": 14.0,
+          "enemies": 12.0,
+          "memory_mb": 0.0,
+          "nodes": 323.0,
+          "objects": 1333.0,
+          "pools": 0.0,
+          "projectiles": 0.0
+        },
+        "physics_ms": 2.368,
+        "process_ms": 0.914,
+        "projectiles": 0,
+        "scenario": "initial",
+        "sections_ms": {
+          "collection": {
+            "median": 0.031,
+            "p95": 0.046,
+            "p99": 0.077
+          },
+          "enemy_ai_physics": {
+            "median": 0.452,
+            "p95": 0.633,
+            "p99": 0.735
+          },
+          "enemy_effects": {
+            "median": 0.032,
+            "p95": 0.046,
+            "p99": 0.056
+          },
+          "navigation": {
+            "median": 0.004,
+            "p95": 0.006,
+            "p99": 0.007
+          },
+          "navigation_planning": {
+            "median": 0.028,
+            "p95": 0.064,
+            "p99": 0.08
+          },
+          "physics_bodies": {
+            "median": 0.04,
+            "p95": 0.07,
+            "p99": 0.088
+          },
+          "render_cpu": {
+            "median": 0.375,
+            "p95": 0.483999997377396,
+            "p99": 0.598999977111816
+          },
+          "render_gpu": {
+            "median": 0.218999996781349,
+            "p95": 0.361999988555908,
+            "p99": 0.667999982833862
+          },
+          "weapons_damage": {
+            "median": 0.173,
+            "p95": 0.276,
+            "p99": 0.344
+          },
+          "xp_collection": {
+            "median": 0.009,
+            "p95": 0.014,
+            "p99": 0.019
+          }
+        },
+        "simulation_ms": {
+          "median": 1.164,
+          "p95": 1.72,
+          "p99": 1.991
+        },
+        "xp": 0
+      },
+      {
+        "coins": 0,
+        "enemies": 225,
+        "frame_ms": {
+          "median": 12.514,
+          "p95": 21.651,
+          "p99": 43.694
+        },
+        "frames": 943,
+        "peaks": {
+          "crowd_pairs": 570.0,
+          "draw_calls": 947.0,
+          "effects": 42.0,
+          "enemies": 225.0,
+          "memory_mb": 0.0,
+          "nodes": 981.0,
+          "objects": 2763.0,
+          "pools": 120.0,
+          "projectiles": 0.0
+        },
+        "physics_ms": 27.131,
+        "process_ms": 2.262,
+        "projectiles": 0,
+        "scenario": "four_builds",
+        "sections_ms": {
+          "collection": {
+            "median": 0.027,
+            "p95": 0.035,
+            "p99": 0.067
+          },
+          "enemy_ai_physics": {
+            "median": 6.931,
+            "p95": 11.089,
+            "p99": 12.439
+          },
+          "enemy_effects": {
+            "median": 0.033,
+            "p95": 0.05,
+            "p99": 0.076
+          },
+          "navigation": {
+            "median": 0.003,
+            "p95": 0.005,
+            "p99": 0.006
+          },
+          "navigation_planning": {
+            "median": 0.319,
+            "p95": 0.621,
+            "p99": 0.761
+          },
+          "physics_bodies": {
+            "median": 0.947,
+            "p95": 1.901,
+            "p99": 2.267
+          },
+          "render_cpu": {
+            "median": 1.34899997711182,
+            "p95": 1.99699997901917,
+            "p99": 2.28699994087219
+          },
+          "render_gpu": {
+            "median": 0.501999974250793,
+            "p95": 0.938000023365021,
+            "p99": 1.59500002861023
+          },
+          "weapons_damage": {
+            "median": 3.15,
+            "p95": 5.048,
+            "p99": 6.434
+          },
+          "xp_collection": {
+            "median": 0.01,
+            "p95": 0.017,
+            "p99": 0.022
+          }
+        },
+        "simulation_ms": {
+          "median": 11.211,
+          "p95": 17.94,
+          "p99": 23.562
+        },
+        "xp": 0
+      },
+      {
+        "coins": 0,
+        "enemies": 240,
+        "frame_ms": {
+          "median": 16.976,
+          "p95": 49.567,
+          "p99": 80.391
+        },
+        "frames": 488,
+        "peaks": {
+          "crowd_pairs": 575.0,
+          "draw_calls": 1015.0,
+          "effects": 42.0,
+          "enemies": 240.0,
+          "memory_mb": 0.0,
+          "nodes": 1053.0,
+          "objects": 3058.0,
+          "pools": 120.0,
+          "projectiles": 95.0
+        },
+        "physics_ms": 29.254,
+        "process_ms": 2.539,
+        "projectiles": 1,
+        "scenario": "boss_necro",
+        "sections_ms": {
+          "collection": {
+            "median": 0.027,
+            "p95": 0.037,
+            "p99": 0.055
+          },
+          "enemy_ai_physics": {
+            "median": 8.56,
+            "p95": 12.505,
+            "p99": 15.177
+          },
+          "enemy_effects": {
+            "median": 0.336,
+            "p95": 0.803,
+            "p99": 0.904
+          },
+          "navigation": {
+            "median": 0.003,
+            "p95": 0.005,
+            "p99": 0.006
+          },
+          "navigation_planning": {
+            "median": 0.323,
+            "p95": 0.716,
+            "p99": 1.948
+          },
+          "physics_bodies": {
+            "median": 0.865,
+            "p95": 2.522,
+            "p99": 3.951
+          },
+          "render_cpu": {
+            "median": 1.50600004196167,
+            "p95": 2.22199988365173,
+            "p99": 2.53900003433228
+          },
+          "render_gpu": {
+            "median": 0.578999996185303,
+            "p95": 1.01699995994568,
+            "p99": 1.99100005626678
+          },
+          "weapons_damage": {
+            "median": 3.099,
+            "p95": 5.319,
+            "p99": 7.068
+          },
+          "xp_collection": {
+            "median": 0.01,
+            "p95": 0.018,
+            "p99": 0.027
+          }
+        },
+        "simulation_ms": {
+          "median": 13.166,
+          "p95": 20.473,
+          "p99": 24.914
+        },
+        "xp": 0
+      },
+      {
+        "coins": 16,
+        "enemies": 225,
+        "frame_ms": {
+          "median": 13.504,
+          "p95": 23.366,
+          "p99": 36.825
+        },
+        "frames": 871,
+        "peaks": {
+          "crowd_pairs": 663.0,
+          "draw_calls": 928.0,
+          "effects": 30.0,
+          "enemies": 225.0,
+          "memory_mb": 0.0,
+          "nodes": 1019.0,
+          "objects": 2953.0,
+          "pools": 120.0,
+          "projectiles": 0.0
+        },
+        "physics_ms": 23.121,
+        "process_ms": 2.522,
+        "projectiles": 0,
+        "scenario": "king_225",
+        "sections_ms": {
+          "collection": {
+            "median": 0.05,
+            "p95": 0.096,
+            "p99": 0.152
+          },
+          "enemy_ai_physics": {
+            "median": 7.577,
+            "p95": 11.093,
+            "p99": 12.261
+          },
+          "enemy_effects": {
+            "median": 0.032,
+            "p95": 0.051,
+            "p99": 0.063
+          },
+          "navigation": {
+            "median": 0.003,
+            "p95": 0.005,
+            "p99": 0.006
+          },
+          "navigation_planning": {
+            "median": 0.313,
+            "p95": 0.563,
+            "p99": 0.664
+          },
+          "physics_bodies": {
+            "median": 1.086,
+            "p95": 2.074,
+            "p99": 2.485
+          },
+          "render_cpu": {
+            "median": 1.37300002574921,
+            "p95": 2.0550000667572,
+            "p99": 2.28800010681152
+          },
+          "render_gpu": {
+            "median": 0.439000010490417,
+            "p95": 0.834999978542328,
+            "p99": 1.19900000095367
+          },
+          "weapons_damage": {
+            "median": 3.01,
+            "p95": 4.742,
+            "p99": 6.65
+          },
+          "xp_collection": {
+            "median": 0.02,
+            "p95": 0.032,
+            "p99": 0.036
+          }
+        },
+        "simulation_ms": {
+          "median": 12.028,
+          "p95": 18.276,
+          "p99": 22.381
+        },
+        "xp": 16
+      },
+      {
+        "coins": 0,
+        "enemies": 20,
+        "frame_ms": {
+          "median": 9.489,
+          "p95": 10.955,
+          "p99": 11.497
+        },
+        "frames": 1201,
+        "peaks": {
+          "crowd_pairs": 0.0,
+          "draw_calls": 222.0,
+          "effects": 4.0,
+          "enemies": 20.0,
+          "memory_mb": 0.0,
+          "nodes": 423.0,
+          "objects": 2119.0,
+          "pools": 120.0,
+          "projectiles": 16.0
+        },
+        "physics_ms": 3.699,
+        "process_ms": 1.131,
+        "projectiles": 7,
+        "scenario": "siege",
+        "sections_ms": {
+          "collection": {
+            "median": 0.032,
+            "p95": 0.048,
+            "p99": 0.063
+          },
+          "enemy_ai_physics": {
+            "median": 0.273,
+            "p95": 0.393,
+            "p99": 0.492
+          },
+          "enemy_effects": {
+            "median": 0.121,
+            "p95": 0.189,
+            "p99": 0.212
+          },
+          "navigation": {
+            "median": 0.004,
+            "p95": 0.006,
+            "p99": 0.007
+          },
+          "render_cpu": {
+            "median": 0.547999978065491,
+            "p95": 0.754999995231628,
+            "p99": 0.867999970912933
+          },
+          "render_gpu": {
+            "median": 0.312000006437302,
+            "p95": 0.474000006914139,
+            "p99": 0.927999973297119
+          },
+          "weapons_damage": {
+            "median": 0.439,
+            "p95": 0.914,
+            "p99": 1.127
+          },
+          "xp_collection": {
+            "median": 0.01,
+            "p95": 0.014,
+            "p99": 0.022
+          }
+        },
+        "simulation_ms": {
+          "median": 1.413,
+          "p95": 2.198,
+          "p99": 2.699
+        },
+        "xp": 0
+      },
+      {
+        "coins": 0,
+        "enemies": 240,
+        "frame_ms": {
+          "median": 13.399,
+          "p95": 27.565,
+          "p99": 39.841
+        },
+        "frames": 826,
+        "peaks": {
+          "crowd_pairs": 576.0,
+          "draw_calls": 1041.0,
+          "effects": 43.0,
+          "enemies": 240.0,
+          "memory_mb": 0.0,
+          "nodes": 1104.0,
+          "objects": 3358.0,
+          "pools": 120.0,
+          "projectiles": 2.0
+        },
+        "physics_ms": 24.625,
+        "process_ms": 2.578,
+        "projectiles": 1,
+        "scenario": "infinite30",
+        "sections_ms": {
+          "collection": {
+            "median": 0.029,
+            "p95": 0.04,
+            "p99": 0.077
+          },
+          "enemy_ai_physics": {
+            "median": 7.291,
+            "p95": 10.807,
+            "p99": 11.727
+          },
+          "enemy_effects": {
+            "median": 0.048,
+            "p95": 0.102,
+            "p99": 0.126
+          },
+          "navigation": {
+            "median": 0.003,
+            "p95": 0.005,
+            "p99": 0.006
+          },
+          "navigation_planning": {
+            "median": 0.34,
+            "p95": 0.619,
+            "p99": 0.828
+          },
+          "physics_bodies": {
+            "median": 1.047,
+            "p95": 1.869,
+            "p99": 2.216
+          },
+          "render_cpu": {
+            "median": 1.55900001525879,
+            "p95": 2.26200008392334,
+            "p99": 2.51399993896484
+          },
+          "render_gpu": {
+            "median": 0.541000008583069,
+            "p95": 1.07200002670288,
+            "p99": 1.47200000286102
+          },
+          "weapons_damage": {
+            "median": 3.181,
+            "p95": 5.337,
+            "p99": 6.788
+          },
+          "xp_collection": {
+            "median": 0.01,
+            "p95": 0.018,
+            "p99": 0.023
+          }
+        },
+        "simulation_ms": {
+          "median": 12.006,
+          "p95": 18.552,
+          "p99": 23.158
+        },
+        "xp": 0
+      }
+    ],
+    "sample_seconds": 10,
+    "seed": 140031,
+    "tag": "pc21_delivery",
+    "warmup_seconds": 2,
+    "windowed": true,
+    "exe_sha256": "d3dc6b198f215b2a963bdbb34cf97728b6108cfed09a41917fa4748131c4cc92",
+    "duration_wall_seconds": 74.07646810000006,
+    "rss_peak_mb": {
+      "loading": 181.734375,
+      "initial": 200.41015625,
+      "four_builds": 210.94140625,
+      "boss_necro": 214.15234375,
+      "king_225": 213.10546875,
+      "siege": 211.85546875,
+      "infinite30": 214.78125
+    },
+    "rss_source": "Windows GetProcessMemoryInfo WorkingSetSize, sampled 20Hz"
+  },
+  "note": "Legacy diagnostic emitted retained-object/resource warnings at exit in both versions. Not a long-session leak check."
+}

@@ -26,7 +26,7 @@ func run():
   check(e.sprite.texture==TinyCharacters.texture("orc") and e.sprite.texture_filter==CanvasItem.TEXTURE_FILTER_NEAREST,"shared nearest atlas")
   e.velocity=Vector2.ZERO;e.clock=.2;e.tick(.016)
   check(TinyCharacters.contains("orc","walk",e.sprite.frame),"walking uses actual displacement")
-  check(e.sprite.position==Vector2(4,-18),"left facing physical pivot")
+  check(e.sprite.position==Vector2(2,-9),"left facing physical pivot")
   await capture(map_id+"-walk")
   g.player.dev_invulnerable=false;g.player.invulnerable=0;g.player.armor=0;g.player.damage_reduction=0;g.player.clear_status();g.player.hp=100
   e.position=g.player.position+Vector2(14,0);g.rebuild_grid();e.tick(.01)

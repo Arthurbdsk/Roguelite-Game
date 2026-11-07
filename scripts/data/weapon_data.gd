@@ -27,6 +27,7 @@ class_name WeaponData
 @export var trail_distance:float=18
 @export var pool_limit:int=60
 @export var flight_time:float=.7
+@export var flight_padding:float=32.0
 
 @export var pierce:PackedInt32Array=PackedInt32Array([2,2,3,3,4,4,5,6])
 @export var area_radius:PackedFloat32Array=PackedFloat32Array([40,40,44,44,48,48,52,56])

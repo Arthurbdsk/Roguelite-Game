@@ -18,7 +18,7 @@ def main():
  c=CONFIG[a.kind];who=c['source'];src=a.source/'Characters(100x100 split)'/who/who/(who+'.png')
  if not src.is_file():raise SystemExit('Missing official sheet: '+str(src))
  im=Image.open(src).convert('RGBA');dest=ROOT/'assets/tiny_rpg';dest.mkdir(exist_ok=True)
- cell=(112,80);crop=(22,28,78,68);total=sum(c['counts']);atlas=Image.new('RGBA',(cell[0]*total,cell[1]));clips={};index=0;bounds=[]
+ cell=(56,40);crop=(22,28,78,68);total=sum(c['counts']);atlas=Image.new('RGBA',(cell[0]*total,cell[1]));clips={};index=0;bounds=[]
  for row,(count,name) in enumerate(zip(c['counts'],c['names'])):
   clips[name]={'start':index,'count':count}
   for n in range(count):
@@ -27,8 +27,8 @@ def main():
    bounds.append(b);frame=frame.crop(crop).resize(cell,Image.Resampling.NEAREST);atlas.paste(frame,(index*cell[0],0));index+=1
  atlas.save(dest/(a.kind+'.png'))
  data_path=ROOT/'data/tiny_characters.json';data=json.loads(data_path.read_text(encoding='utf8')) if data_path.exists() else {}
- pivot=[(c['pivot'][0]-crop[0])*2,(c['pivot'][1]-crop[1])*2]
- data[a.kind]={'texture':f'res://assets/tiny_rpg/{a.kind}.png','frames':total,'cell':cell,'offset':[cell[0]/2-pivot[0],cell[1]/2-pivot[1]],'clips':clips,'source':str(src.relative_to(a.source)),'source_sha256':hashlib.sha256(src.read_bytes()).hexdigest(),'shadow':False,'scale':2,'source_frame':[100,100],'crop':crop}
+ pivot=[c['pivot'][0]-crop[0],c['pivot'][1]-crop[1]]
+ data[a.kind]={'texture':f'res://assets/tiny_rpg/{a.kind}.png','frames':total,'cell':cell,'offset':[cell[0]/2-pivot[0],cell[1]/2-pivot[1]],'clips':clips,'source':str(src.relative_to(a.source)),'source_sha256':hashlib.sha256(src.read_bytes()).hexdigest(),'shadow':False,'scale':1,'source_frame':[100,100],'crop':crop}
  data_path.write_text(json.dumps(data,indent=2)+'\n',encoding='utf8')
  out=ROOT/'build/tiny_rpg_catalog';out.mkdir(parents=True,exist_ok=True)
  preview=Image.new('RGB',(9*120,len(clips)*100),'#203047');draw=ImageDraw.Draw(preview)

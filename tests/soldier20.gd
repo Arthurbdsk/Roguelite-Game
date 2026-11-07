@@ -18,7 +18,7 @@ func run():
  var p=g.player;var w=g.weapon_system
  check(p.tiny_soldier and p.sprite.hframes==43,"official Soldier, 43 aligned frames")
  check(p.radius==7 and p.speed==96 and p.max_hp==100,"body and baseline attributes unchanged")
- check(p.sprite.position==Vector2(0,-24),"fixed feet pivot")
+ check(p.sprite.position==Vector2(0,-12),"fixed feet pivot")
  check(p.sprite.texture==TinyCharacters.texture("soldier"),"shared texture")
  for map_id in ["courtyard","library","fields"]:
   g.clear_run();g.arena.apply_map(map_id);g.state="running";g.player.position=Vector2(900,630);g.camera.position=Vector2.ZERO;p.display_name="Jogador 1";w.reset();g.ui.render("running")
@@ -35,7 +35,7 @@ func run():
   var before:int=w.projectiles.size();check(w._fire_bolts(),"real initial bow fires")
   w.timers.bolt=w._interval("bolt")
   check(w.projectiles.size()==before+1,"one actual arrow, no animation-generated extra")
-  check(w.projectiles.back().damage==w._stat("bolt","damage") and w.projectiles.back().velocity.length()==275,"unchanged arrow damage and speed")
+  check(w.projectiles.back().damage==w._stat("bolt","damage") and is_equal_approx(w.projectiles.back().velocity.length(),275),"unchanged arrow damage and speed")
   p.tick_visual(0,true);check(p.sprite.frame==33,"real firing event shows release frame")
   await capture(map_id+"-bow")
   p.tick_visual(.1,true);check(p.sprite.frame==34,"movement cannot interrupt bow recovery")

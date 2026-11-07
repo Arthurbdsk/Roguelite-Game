@@ -1,0 +1,5 @@
+{
+  "orc_armored": {"base":"ghoul","name":"Orc com armadura","starts_at":240,"share":0.10,"resistance":0.05,"sprite_pending":"Orc Armored original Tiny RPG"},
+  "orc_elite": {"base":"ghoul","name":"Orc de elite","starts_at":480,"share":0.05,"resistance":0.15,"sprite_pending":"Orc Elite original Tiny RPG"},
+  "skeleton_armored": {"base":"skeleton_sword","name":"Esqueleto com armadura","starts_at":360,"share":0.10,"resistance":0.10,"sprite_pending":"Skeleton Armored original Tiny RPG"}
+}

@@ -2,13 +2,17 @@
 
 Android é mantido **somente sob pedido explícito de celular, Android ou versão mobile**, separado em `codex/android-mobile`. Pedidos genéricos continuam exclusivos do PC. [Política de congelamento e base identificada](docs/ANDROID_POLICY.md).
 
+Versão PC 0.21.0: correções de flechas, proporções e morte do Orc, Runa mirando inimigos com ricochete na câmera atual do dono, Alho com raio 15% maior e variantes com reduções de dano próprias. Tempos sem milissegundos na interface, Toque do Midas preservando experiência e marcador azul removido. Os nove personagens adicionais Tiny RPG e o novo visual da Água Benta continuam pendentes de assets adequados; as prévias com texto não foram usadas como sprites. [Valores, testes, desempenho e pendências](docs/AJUSTES_PC_0_21.md).
+
+Executável atual: `build/Hordas-0.21.0/Hordas-0.21.0.exe`. DEV: `build/Hordas-DEV-0.21.0/Hordas-DEV-0.21.0.exe`, F8. Todos os participantes precisam usar PC 0.21.0. Esta versão não sincroniza nem atualiza o Android congelado em 0.20.0.
+
 Versão 0.20.0: Soldado e Orc animados da coleção Tiny RPG, com os atributos e IDs anteriores preservados. Escopo limitado aos dois personagens gratuitos, conforme escolhido. [Comparação, animações, licença e testes](docs/TINY_RPG_0_20.md).
 
 Projeto editável em Godot 4.7.2. Inclui código, cenas, mapas, dados de balanceamento, sprites e testes. Não precisa instalar Python ou Node.js para jogar no modo solo pelo editor. Para usar/exportar a fonte decorativa licenciada do cronômetro a partir do código, copie seu arquivo autorizado para `assets/fonts/AurusenthialGothic.ttf`; o TTF avulso fica fora do GitHub, enquanto os executáveis incluem a fonte autorizada.
 
 Para editar os novos personagens, baixe o pacote gratuito oficial de [Zerie](https://zerie.itch.io/tiny-rpg-character-asset-pack), instale Pillow e execute `python tools/tiny_rpg20.py --kind soldier` e `python tools/tiny_rpg20.py --kind orc`. Use `--source "pasta do pacote"` quando estiver fora de Downloads. Os atlas Tiny RPG avulsos ficam fora do GitHub devido à proibição de republicar os assets separadamente; estão incorporados nos executáveis.
 
-Para jogar no Windows sem instalar o Godot, baixe [Hordas 0.20.0](https://github.com/Arthurbdsk/Roguelite-Game/releases/tag/v0.20.0). O arquivo `.exe` contém todos os recursos e o endereço público do relay. Todos os participantes precisam usar a mesma versão. A hospedagem gratuita no Render pode demorar cerca de um minuto para iniciar após ficar inativa; aguarde a conexão no menu Online.
+Para jogar no Windows sem instalar o Godot, baixe [Hordas 0.21.0](https://github.com/Arthurbdsk/Roguelite-Game/releases/tag/v0.21.0). O arquivo `.exe` contém todos os recursos e o endereço público do relay. Todos os participantes precisam usar a mesma versão. A hospedagem gratuita no Render pode demorar cerca de um minuto para iniciar após ficar inativa; aguarde a conexão no menu Online.
 
 ## Atualização 0.15.0
 

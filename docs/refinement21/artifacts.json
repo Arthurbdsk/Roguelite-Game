@@ -1,0 +1,22 @@
+[
+  {
+    "file": "Hordas-0.21.0.exe",
+    "game_version": "0.21.0",
+    "godot_version": "4.7.2-stable",
+    "size_bytes": 114571008,
+    "sha256": "d3dc6b198f215b2a963bdbb34cf97728b6108cfed09a41917fa4748131c4cc92",
+    "embedded_pck": true,
+    "development_tools": false,
+    "smoke_test": "headless_120_frames_exit_0"
+  },
+  {
+    "file": "Hordas-DEV-0.21.0.exe",
+    "game_version": "0.21.0",
+    "godot_version": "4.7.2-stable",
+    "size_bytes": 114605512,
+    "sha256": "57526d82b1e8d1a01e5c0240182d7e6c8f0dee275ee3264e376116c02264cac0",
+    "embedded_pck": true,
+    "development_tools": true,
+    "smoke_test": "headless_120_frames_exit_0"
+  }
+]

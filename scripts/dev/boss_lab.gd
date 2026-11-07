@@ -342,3 +342,11 @@ func force_consumable(kind:String):
  if not active or not is_host():return
  if not running_test:start_survival()
  status="Consumível gerado" if game.consumables.spawn_item(kind) else "Limite de dois itens ou falta de espaço"
+
+func force_variant(kind:String):
+ if not active or not is_host() or not game.variant_data.has(kind):return
+ if not running_test:start_survival()
+ var at:Vector2=game.free_enemy_position(game.player.position+Vector2(100,0),game.enemy_data[kind].radius)
+ if at!=Vector2.INF:
+  game.spawn_enemy(kind,at);status=game.enemy_data[kind].title+" gerado"
+ else:status="Sem espaço livre"

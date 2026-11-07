@@ -1,0 +1,149 @@
+[
+  {
+    "test": "refinement21",
+    "passed": true,
+    "evidence": [
+      "BOW21_PASS checks=12"
+    ]
+  },
+  {
+    "test": "rune21",
+    "passed": true,
+    "evidence": [
+      "RUNE21_PASS random targets, moving owner bounds, no teleport or flip loop, walls and fallback"
+    ]
+  },
+  {
+    "test": "garlic21",
+    "passed": true,
+    "evidence": [
+      "GARLIC21_PASS radius +15% once in eight levels, damage and slow preserved; max radius=99.0019097038032"
+    ]
+  },
+  {
+    "test": "variants21",
+    "passed": true,
+    "evidence": [
+      "VARIANTS21_PASS reductions 5/10/15%, gates 4/6/8 minutes, preserved budget; 50000 draws { \"ghoul\": 22024, \"orc_armored\": 2652, \"orc_elite\": 1319 }"
+    ]
+  },
+  {
+    "test": "presentation21",
+    "passed": true,
+    "evidence": [
+      "PRESENTATION21_PASS all weapon levels without ms/decimals; Midas retains +56% experience"
+    ]
+  },
+  {
+    "test": "adjustments18",
+    "passed": true,
+    "evidence": [
+      "ADJUSTMENTS18_PASS"
+    ]
+  },
+  {
+    "test": "weapons16",
+    "passed": true,
+    "evidence": [
+      "WEAPONS16_PASS"
+    ]
+  },
+  {
+    "test": "limits7",
+    "passed": true,
+    "evidence": [
+      "LIMITS7_PASS"
+    ]
+  },
+  {
+    "test": "permanent_data9",
+    "passed": true,
+    "evidence": [
+      "PERMANENT_DATA9_PASS 16 definitions, backup, one-time migration, exact ledger refund, stale click rejected"
+    ]
+  },
+  {
+    "test": "permanent_effects9",
+    "passed": true,
+    "evidence": [
+      "PERMANENT_EFFECTS9_PASS base stats, regen, damage floor, area sqrt, projectiles, fractions, additive XP, luck, solo revive once, restart"
+    ]
+  },
+  {
+    "test": "network_foundation",
+    "passed": true,
+    "evidence": [
+      "NETWORK_FOUNDATION_PASS checks=66 failures=0"
+    ]
+  },
+  {
+    "test": "network_backpressure",
+    "passed": true,
+    "evidence": [
+      "NETWORK_BACKPRESSURE_PASS checks=10 failures=0"
+    ]
+  },
+  {
+    "test": "spatial14",
+    "passed": true,
+    "evidence": [
+      "SPATIAL14_PASS mixed radii, cell edges, 120 moving physical bodies, obstacle oracle and dynamic ice invalidation"
+    ]
+  },
+  {
+    "test": "devourer",
+    "passed": true,
+    "evidence": [
+      "DEVOURER_PASS growth, decimals, attraction lock, exact protected refunds and cleanup"
+    ]
+  },
+  {
+    "test": "slimes",
+    "passed": true,
+    "evidence": [
+      "SLIME_PASS exactly fifteen, valid positions, grace, no recursion, family reward budget"
+    ]
+  },
+  {
+    "test": "holy_water",
+    "passed": true,
+    "evidence": [
+      "WATER_PASS random visible valid positions, fixed flight, damage timing, no stacking and expiry"
+    ]
+  },
+  {
+    "test": "water12",
+    "passed": true,
+    "evidence": [
+      "WATER12_PASS diameter 55%, levels 1/8, max area/duration, damage boundary, simultaneous pool cleanup"
+    ]
+  },
+  {
+    "test": "soldier20",
+    "passed": true,
+    "evidence": [
+      "SOLDIER20_PASS checks=91"
+    ]
+  },
+  {
+    "test": "orc20",
+    "passed": true,
+    "evidence": [
+      "ORC20_PASS checks=54"
+    ]
+  },
+  {
+    "test": "death21",
+    "passed": true,
+    "evidence": [
+      "DEATH21_PASS eight pixel-identical comparisons and 40 consecutive deaths"
+    ]
+  },
+  {
+    "test": "visual19",
+    "passed": true,
+    "evidence": [
+      "VISUAL19_PASS checks=1357"
+    ]
+  }
+]

@@ -39,10 +39,13 @@ func _draw():
  for fx in effects:
   if not visible.has_point(fx.at):continue
   var d:Dictionary=TinyCharacters.data(fx.kind)
-  var size_px:=Vector2(float(d.cell[0]),float(d.cell[1]))*float(fx.scale)
-  var offset:=Vector2(float(d.offset[0])*(-1 if fx.flip else 1),float(d.offset[1]))*float(fx.scale)
-  var dest:=Rect2(Vector2(fx.at)+offset-size_px*.5,size_px)
-  if fx.flip:dest.position.x+=dest.size.x;dest.size.x=-dest.size.x
+  var size_px:=Vector2(float(d.cell[0]),float(d.cell[1]))
+  var offset:=Vector2(float(d.offset[0]),float(d.offset[1]))
+  var dest:=Rect2(offset-size_px*.5,size_px)
+  # Flip the local coordinate system around the same physical pivot as Sprite2D.
+  # A negative destination width flips UVs, but does not relocate its origin.
+  draw_set_transform(fx.at,0,Vector2(-1 if fx.flip else 1,1)*float(fx.scale))
   var frame:int=TinyCharacters.frame(fx.kind,"death",float(fx.age)/.5)
   var alpha:float=minf(1,(.5-float(fx.age))/.08)
   draw_texture_rect_region(TinyCharacters.texture(fx.kind),dest,Rect2(frame*float(d.cell[0]),0,float(d.cell[0]),float(d.cell[1])),Color(1,1,1,alpha))
+  draw_set_transform(Vector2.ZERO)

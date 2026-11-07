@@ -37,7 +37,14 @@ func launch(id:String)->bool:
   var direction:Vector2=Vector2.from_angle(weapons.rng.randf()*TAU)
   for i in n:projectile(id,direction.rotated((i-(n-1)*.5)*.14))
  elif id=="runetracer":
-  for i in n:projectile(id,Vector2.from_angle(weapons.rng.randf()*TAU))
+  var targets:Array=[];var reach:float=weapons._stat(id,"reach")
+  for e in world().query_enemies(p.position,reach):
+   if weapons._valid_target(e) and e.position.distance_to(p.position)<=reach:targets.append(e)
+  for i in n:
+   var direction:Vector2=Vector2.from_angle(weapons.rng.randf()*TAU)
+   if not targets.is_empty():direction=(targets[weapons.rng.randi_range(0,targets.size()-1)].position-p.position).normalized()
+   if direction==Vector2.ZERO:direction=Vector2.UP
+   projectile(id,direction)
  return true
 func projectile(kind:String,direction:Vector2):
  var at:Vector2=weapons.game.player.position;var center:Vector2=at.clamp(Vector2(320,180),Vector2(1480,1020))
@@ -86,10 +93,23 @@ func tick(delta:float,allow:bool):
   for e in candidates(strike.at-Vector2(0,half),end+Vector2(0,half)):
    if weapons._valid_target(e) and absf(e.position.y-strike.at.y)<=half+e.radius and (e.position.x-strike.at.x)*strike.side>=-e.radius and (e.position.x-strike.at.x)*strike.side<=reach+e.radius:weapons._hit(e,weapons._stat("whip","damage"),Vector2(strike.side*60,0))
  strikes=strikes.filter(func(s):return s.age<s.delay+.22)
+ advance_shots(delta)
+func advance_shots(delta:float,authoritative:bool=true):
+ var origin:Vector2=weapons.game.player.position
  for shot in shots:
   shot.age+=delta
   if shot.age>=shot.life:shot.alive=false;continue
   var remaining:float=delta
+  var boundary_axes:Dictionary={}
+  if shot.kind=="runetracer":
+   var center:Vector2=origin.clamp(Vector2(320,180),Vector2(1480,1020))
+   shot.bounds=Rect2(center-Vector2(320,180),Vector2(640,360))
+   var inner:Rect2=shot.bounds.grow(-weapons._stat(shot.kind,"projectile_radius"))
+   # A fast-moving camera can leave a rune outside. Steer it inward once,
+   # preserving its position and speed instead of clamping/teleporting it.
+   for axis in 2:
+    if (shot.at[axis]<inner.position[axis] and shot.velocity[axis]<0) or (shot.at[axis]>inner.end[axis] and shot.velocity[axis]>0):
+     shot.velocity[axis]=-shot.velocity[axis];boundary_axes[axis]=true
   for bounce in 4:
    if remaining<=.00001 or not shot.get("alive",true):break
    var start:Vector2=shot.at;var end:Vector2=start+shot.velocity*remaining
@@ -98,17 +118,17 @@ func tick(delta:float,allow:bool):
    var bounds:Rect2=shot.bounds.grow(-radius)
    if shot.kind=="runetracer":
     for axis in 2:
+     if boundary_axes.has(axis):continue
      var low:float=bounds.position[axis];var high:float=bounds.end[axis]
-     if end[axis]<low or end[axis]>high:
+     if start[axis]>=low and start[axis]<=high and (end[axis]<low or end[axis]>high):
       var t:float=((low if end[axis]<low else high)-start[axis])/(end[axis]-start[axis])
       if t<fraction:fraction=maxf(0,t);normal=Vector2.ZERO;normal[axis]=1 if end[axis]<low else -1
-   wall_query.from=start;wall_query.to=end;wall_query.collision_mask=4
-   var wall:Dictionary=world().get_world_2d().direct_space_state.intersect_ray(wall_query)
+   var wall:Dictionary=CombatSweep.wall(world().arena,start,end,radius)
    if not wall.is_empty():
-    var f:float=start.distance_to(wall.position)/maxf(.0001,start.distance_to(end))
+    var f:float=wall.fraction
     if f<fraction:fraction=f;normal=wall.normal
    end=start.lerp(end,fraction)
-   var near:Array=candidates(start-Vector2.ONE*radius,end+Vector2.ONE*radius)
+   var near:Array=candidates(start-Vector2.ONE*radius,end+Vector2.ONE*radius) if authoritative else []
    near.sort_custom(func(a,b):return start.distance_squared_to(a.position)<start.distance_squared_to(b.position))
    for e in near:
     if not weapons._valid_target(e) or weapons.combat_time<float(shot.hits.get(e.serial,-1)):continue
@@ -123,6 +143,9 @@ func tick(delta:float,allow:bool):
     if shot.kind!="runetracer":
      if shot.get("alive",true):impact(shot.kind,end)
      shot.alive=false;break
+    if wall.is_empty() or fraction<wall.fraction:
+     for axis in 2:
+      if normal[axis]!=0:boundary_axes[axis]=true
     shot.velocity=Vector2(shot.velocity).bounce(normal);shot.at+=normal*.2;remaining*=1-fraction
    else:remaining=0
 

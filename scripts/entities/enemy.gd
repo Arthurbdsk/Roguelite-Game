@@ -32,6 +32,7 @@ var charge_direction: Vector2 = Vector2.ZERO
 var sprite: Sprite2D
 var serial: int = 0
 var tiny_kind:String=""
+var motion_start:=Vector2.INF
 var visual_attack_left:float=0
 var visual_attack_cooldown:float=0
 var visual_attack_clip:String="attack"
@@ -83,7 +84,7 @@ func _ready() -> void:
 	collision.shape = circle
 	add_child(collision)
 	sprite = Sprite2D.new()
-	if data.id=="ghoul" and TinyCharacters.install(sprite,"orc"):
+	if (data.id=="ghoul" or data.visual_family=="orc") and TinyCharacters.install(sprite,"orc"):
 		tiny_kind="orc"
 	else:
 		sprite.texture = load(data.texture if ResourceLoader.exists(data.texture) else "res://assets/ghoul.png")
@@ -92,6 +93,8 @@ func _ready() -> void:
 	if elite and tiny_kind.is_empty():
 		sprite.scale = Vector2(1.2, 1.2)
 	add_child(sprite)
+	if data.damage_resistance>0:
+		var badge:=Sprite2D.new();badge.texture=load(GameIcons.path("permanent:armor","res://assets/permanent/armor.png"));badge.texture_filter=CanvasItem.TEXTURE_FILTER_NEAREST;badge.position=Vector2(0,-28 if not tiny_kind.is_empty() else -sprite.texture.get_height()-8);badge.scale=Vector2.ONE*10/badge.texture.get_width();add_child(badge)
 
 func tick(delta: float) -> void:
 	if not alive:
@@ -235,7 +238,7 @@ func _draw() -> void:
 	if elite:
 		draw_arc(Vector2.ZERO, radius + 3, 0, TAU, 20, Color("b65f42"), 1, false)
 	if hp < max_hp and data.behavior != "boss":
-		var bar_y:float=-sprite.texture.get_height()+1 if tiny_kind.is_empty() else -35
+		var bar_y:float=-sprite.texture.get_height()+1 if tiny_kind.is_empty() else -22
 		draw_rect(Rect2(-11,bar_y,22,2), Color("12191d"))
 		draw_rect(Rect2(-11,bar_y,22 * hp / max_hp,2), Color("b65f42"))
 
@@ -264,4 +267,4 @@ func tick_control(delta:float)->bool:
 	return false
 
 func received_damage(amount:float)->float:
-	return maxf(0,amount)*(1-game.horde_progress.resistance()) if data.behavior!="hazard_target" else maxf(0,amount)
+	return maxf(0,amount)*(1-clampf(data.damage_resistance,0,.75)) if data.behavior!="hazard_target" else maxf(0,amount)
