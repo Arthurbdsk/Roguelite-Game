@@ -11,3 +11,7 @@ relay/node_modules/
 !.env.example
 *.log
 __pycache__/
+
+/assets/fonts/AurusenthialGothic.ttf
+
+/docs/*.png.import

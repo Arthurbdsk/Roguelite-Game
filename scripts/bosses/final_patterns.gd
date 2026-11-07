@@ -87,7 +87,7 @@ func start(kind:String,boss,lanes:Array)->bool:
  sequence+=1
  var players:Array=game.team_players()
  var player=players[sequence%players.size()]
- var job:Dictionary={"id":sequence,"kind":kind,"owner":boss.serial,"at":boss.position,"age":0.0,"warning":float(config.warning),"step":0,"next":float(config.warning),"lanes":lanes,"gap":(player.position-boss.position).angle(),"phase":boss.form,"damage":game.late_arena.damage("column",boss)*(float(config.phase2_damage) if boss.form==2 else 1.0)}
+ var job:Dictionary={"id":sequence,"kind":kind,"owner":boss.serial,"attacker":boss.get_instance_id(),"at":boss.position,"age":0.0,"warning":float(config.warning),"step":0,"next":float(config.warning),"lanes":lanes,"gap":(player.position-boss.position).angle(),"phase":boss.form,"damage":game.late_arena.damage("column",boss)*(float(config.phase2_damage) if boss.form==2 else 1.0)}
  if kind=="orbs":
   var points:Array=plan_points(player.position,int(config.orb_count),220,14,lanes,true)
   if points.size()!=int(config.orb_count):return false
@@ -117,7 +117,7 @@ func shot_batch(job:Dictionary,at:Vector2,angles:Array,speed:float=-1)->bool:
  if shots.size()+angles.size()>int(config.max_projectiles):blocked+=1;return false
  if speed<0:speed=float(config.projectile_speed)*(float(config.phase2_speed) if job.phase==2 else 1)
  for angle in angles:
-  shots.append({"at":at,"velocity":Vector2.from_angle(angle)*speed,"age":0.0,"life":float(config.projectile_life),"radius":float(config.projectile_radius),"owner":job.owner,"damage":job.damage,"phase":job.phase})
+  shots.append({"at":at,"velocity":Vector2.from_angle(angle)*speed,"age":0.0,"life":float(config.projectile_life),"radius":float(config.projectile_radius),"owner":job.owner,"attacker":job.get("attacker",0),"damage":job.damage,"phase":job.phase})
  emitted+=angles.size();return true
 func tick(delta:float):
  cooldown=maxf(0,cooldown-delta)
@@ -141,7 +141,7 @@ func tick(delta:float):
   var hit:Dictionary=get_world_2d().direct_space_state.intersect_ray(PhysicsRayQueryParameters2D.create(shot.at,stop,4))
   if not hit.is_empty():stop=hit.position;shot.age=shot.life
   var victim=game.projectile_victim(shot.at,stop,shot.radius)
-  if victim!=null:victim.take_damage(shot.damage,shot.at);shot.age=shot.life
+  if victim!=null:victim.take_damage(shot.damage,shot.at,int(shot.get("attacker",0)));shot.age=shot.life
   if shot.age>=shot.life:impacts.append({"at":stop,"age":0.0})
   shot.at=stop
   if game.state!="running":return
@@ -151,7 +151,7 @@ func tick(delta:float):
  if jobs.is_empty() and marks.is_empty():cooldown=maxf(cooldown,float(config.recovery)) if not shots.is_empty() else cooldown
  queue_redraw()
 func add_mark(job:Dictionary,kind:String,at:Vector2,warning:float,duration:float)->Dictionary:
- var mark:Dictionary={"kind":kind,"owner":job.owner,"at":at,"age":0.0,"warning":warning,"duration":duration,"damage":job.damage,"hits":{},"radius":float(config.seal_radius),"width":float(config.spear_width),"length":640.0,"angle":0.0}
+ var mark:Dictionary={"kind":kind,"owner":job.owner,"attacker":job.get("attacker",0),"at":at,"age":0.0,"warning":warning,"duration":duration,"damage":job.damage,"hits":{},"radius":float(config.seal_radius),"width":float(config.spear_width),"length":640.0,"angle":0.0}
  marks.append(mark);return mark
 func tick_marks(delta:float):
  for mark in marks:
@@ -161,7 +161,7 @@ func tick_marks(delta:float):
    if mark.hits.has(player.get_instance_id()):continue
    var offset:Vector2=(player.position-mark.at).rotated(-mark.angle)
    var inside:bool=absf(offset.x)<=mark.length*.5+player.radius and absf(offset.y)<=mark.width*.5+player.radius if mark.kind=="spear" else offset.length()<=mark.radius+player.radius
-   if inside:mark.hits[player.get_instance_id()]=true;player.take_damage(mark.damage,mark.at)
+   if inside:mark.hits[player.get_instance_id()]=true;player.take_damage(mark.damage,mark.at,int(mark.get("attacker",0)))
    if game.state!="running":return
  marks=marks.filter(func(m):return m.age<m.warning+m.duration)
 func target_removed(serial:int,kind:String="ice_crystal"):
@@ -200,7 +200,7 @@ func tick_job(job:Dictionary,_delta:float):
     for segment in beam_segments(job):
      if Geometry2D.get_closest_point_to_segment(player.position,segment.source,segment.end).distance_to(player.position)<=float(config.beam_width)*.5+player.radius:
       if not job.has("hits"):job.hits={}
-      job.hits[player.get_instance_id()]=job.age+.8;player.take_damage(job.damage,job.at);break
+      job.hits[player.get_instance_id()]=job.age+.8;player.take_damage(job.damage,job.at,int(job.get("attacker",0)));break
     if game.state!="running":return
   if job.age>=job.warning+float(config.beam_duration):jobs.erase(job)
 

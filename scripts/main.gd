@@ -57,6 +57,8 @@ var weapon_system: WeaponSystem
 var horde_progress:=HordeProgress.new()
 var director := HordeDirector.new()
 var sound: GameSound
+var music:GameMusic
+var closing:bool=false
 var ui: GameUI
 var entities: Node2D
 var camera: Camera2D
@@ -135,6 +137,7 @@ func _ready() -> void:
  director.setup(self)
  sound = GameSound.new()
  add_child(sound)
+ music=GameMusic.new();music.setup(self);add_child(music)
  gold_loot = GoldLoot.new()
  add_child(gold_loot)
  gold_loot.setup(self)
@@ -161,6 +164,7 @@ func _ready() -> void:
  ui.setup(self)
  apply_settings()
  show_title()
+ if "--smoke-shutdown" in OS.get_cmdline_user_args():call_deferred("smoke_shutdown")
  if development_build() and ResourceLoader.exists("res://scripts/dev/boss_lab.gd"):
   dev_tools=load("res://scripts/dev/boss_lab.gd").new();add_child(dev_tools);dev_tools.setup(self)
  if dev_tools!=null and "--dev-room" in OS.get_cmdline_user_args():
@@ -415,14 +419,14 @@ func projectile_victim(start: Vector2, end: Vector2, radius: float):
    if candidate < distance: best = member; distance = candidate
  return best
 
-func damage_team_area(at: Vector2, radius: float, amount: float) -> void:
+func damage_team_area(at: Vector2, radius: float, amount: float,attacker:int=0) -> void:
  for member in team_players():
-  if member.position.distance_to(at) <= radius + member.radius: member.take_damage(amount, at)
+  if member.position.distance_to(at) <= radius + member.radius: member.take_damage(amount, at,attacker)
 
-func damage_team_cone(at: Vector2, direction: Vector2, reach: float, half_angle: float, amount: float) -> void:
+func damage_team_cone(at: Vector2, direction: Vector2, reach: float, half_angle: float, amount: float,attacker:int=0) -> void:
  for member in team_players():
   var offset: Vector2 = member.position - at
-  if offset.length() <= reach + member.radius and absf(direction.angle_to(offset.normalized())) <= half_angle: member.take_damage(amount, at)
+  if offset.length() <= reach + member.radius and absf(direction.angle_to(offset.normalized())) <= half_angle: member.take_damage(amount, at,attacker)
 
 func enter_hub() -> void:
  if coop != null and coop.active: coop.leave()
@@ -531,12 +535,20 @@ func finish_run(won: bool) -> void:
  ui.render("result", {"won": won, "elapsed": elapsed, "kills": kills, "earned": banked_reward, "level": level, "gold": banked_gold, "total_gold": profile.data.gold, "wave": director.wave_number(), "dev": dev_boss_test})
 
 func request_quit() -> void:
+ if closing:return
+ closing=true
  if coop != null and coop.active:
   coop.finish(false)
   if coop.connection.socket != null: coop.connection.socket.poll()
  if state in ["running", "paused", "upgrading", "revive_offer", "endless_choice"]:
   finish_run(false)
+ music.shutdown();sound.stop_all()
+ await get_tree().create_timer(.25,true,false,true).timeout
  get_tree().quit()
+
+func smoke_shutdown():
+ for frame in 120:await get_tree().process_frame
+ request_quit()
 
 func _notification(what: int) -> void:
  if what == NOTIFICATION_WM_CLOSE_REQUEST and is_instance_valid(ui):
@@ -636,7 +648,7 @@ func buy_building(id: String) -> void:
 func set_option(key: String, value) -> void:
  if not profile.data.settings.has(key):
   return
- profile.data.settings[key] = clampf(float(value), 0, 1) if key in ["volume", "effects"] else bool(value)
+ profile.data.settings[key] = clampf(float(value), 0, 1) if key in ["volume", "effects","music"] else bool(value)
  apply_settings()
  if not test_mode:
   profile.save()
@@ -644,6 +656,7 @@ func set_option(key: String, value) -> void:
 func apply_settings() -> void:
  effects = profile.data.settings.effects
  sound.volume = profile.data.settings.volume
+ music.volume=float(profile.data.settings.get("music",.35))
  if not test_mode:
   DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN if profile.data.settings.fullscreen else DisplayServer.WINDOW_MODE_WINDOWED)
 
@@ -665,6 +678,7 @@ func spawn_enemy(id: String, point: Vector2, elite: bool = false, chain_meta:Dic
  stats.health *= 1.0 if enemy is HazardTarget else balance.enemy_health_multiplier
  stats.health *= 1.0 if enemy is HazardTarget else scale.health
  stats.damage *= scale.damage
+ if not enemy is HordeBoss:stats.attack_interval*=balance.enemy_attack_interval_multiplier
  if id in ["ghoul","skeleton_sword","skeleton_archer"]:stats.speed*=balance.common_speed_multiplier
  stats.speed *= balance.enemy_speed_multiplier
  stats.speed *= scale.speed
@@ -864,10 +878,10 @@ func update_pickups(delta: float) -> void:
    if state != "running":
     return
 
-func add_hazard(point: Vector2, radius: float, warning: float, damage: float) -> void:
+func add_hazard(point: Vector2, radius: float, warning: float, damage: float,attacker:int=0) -> void:
  if hazards.size() >= 32:
   return
- hazards.append({"at": point, "radius": radius, "life": warning + 0.25, "warning": warning, "damage": damage, "age": 0.0, "hit": false})
+ hazards.append({"at": point, "radius": radius, "life": warning + 0.25, "warning": warning, "damage": damage,"attacker":attacker, "age": 0.0, "hit": false})
 
 func update_hazards(delta: float) -> void:
  for hazard in hazards:
@@ -875,7 +889,7 @@ func update_hazards(delta: float) -> void:
   hazard.life -= delta
   if hazard.age >= hazard.warning and not hazard.hit:
    hazard.hit = true
-   damage_team_area(hazard.at, hazard.radius, hazard.damage)
+   damage_team_area(hazard.at, hazard.radius, hazard.damage,int(hazard.get("attacker",0)))
  hazards = hazards.filter(func(h): return h.life > 0)
 
 func update_event(delta: float) -> void:
@@ -894,7 +908,7 @@ func update_event(delta: float) -> void:
 
 func add_damage_number(point: Vector2, amount: float) -> void:
  if numbers.size() < int(20 * effects):
-  numbers.append({"at": point, "value": str(roundi(amount)) if is_equal_approx(amount,roundf(amount)) else ("%.2f"%amount).trim_suffix("0"), "life": 0.55})
+  numbers.append({"at": point, "value": DisplayNumbers.number(amount), "life": 0.55})
 
 func announce(text: String, duration: float) -> void:
  banner = text

@@ -1,0 +1,5 @@
+Trilha principal fornecida pelo usuário Arthur para integração ao jogo.
+Arquivo original: welc0mei0-221109-piano-gothic-fantasy-mystery-horror-155650.mp3
+Título indicado pelo nome do arquivo: Piano Gothic Fantasy Mystery Horror.
+O MP3 foi copiado sem alterar seus bytes. Não possui tags ID3 ou arquivo de licença acompanhante nos arquivos fornecidos.
+O volume, loop e fades são controlados pelo jogo, preservando os efeitos sonoros.

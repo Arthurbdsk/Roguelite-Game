@@ -1,0 +1,4 @@
+Elementos extraídos de UIBundleFree/freefantasy.png, pacote fornecido e autorizado pelo usuário para esta integração.
+Utilizados: uma placa retangular de madeira para botões e uma moldura de madeira/metal, com centro ajustado à paleta azul existente.
+O ZIP fornecido não contém README, LICENSE ou indicação de autor. Não foi atribuída uma licença presumida ao pacote.
+Somente os dois elementos utilizados estão no executável, não as folhas completas ou os demais estilos do pacote.

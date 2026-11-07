@@ -32,7 +32,7 @@ func tick(delta:float):
 	if food.is_empty():
 		if state=="prepare":
 			if state_time>=data.windup:
-				game.damage_team_cone(position,charge_direction,radius+20,.9,data.damage)
+				game.damage_team_cone(position,charge_direction,radius+20,.9,data.damage,get_instance_id())
 				state="recovery";state_time=0;attack_time=data.attack_interval
 		elif state=="recovery":
 			if state_time>=data.recovery:state="approach"
@@ -40,7 +40,7 @@ func tick(delta:float):
 			state="prepare";state_time=0;charge_direction=direction
 	else:state="approach"
 	if state=="approach":direction=game.navigation.steer(self,direction,destination).normalized()
-	velocity=(direction*data.speed*(slow_factor if slow_remaining>0 else 1) if state=="approach" else Vector2.ZERO)+knockback
+	velocity=(direction*data.speed*movement_control_multiplier() if state=="approach" else Vector2.ZERO)+knockback
 	knockback=knockback.move_toward(Vector2.ZERO,delta*500)
 	velocity=game.crowd_velocity(self,velocity)
 	move_body()

@@ -41,4 +41,4 @@ func _draw() -> void:
 		var at: Vector2 = body.get_global_transform_with_canvas().origin + Vector2(-19, 12)
 		draw_rect(Rect2(at, Vector2(38, 4)), Color("11191c"))
 		draw_rect(Rect2(at, Vector2(38 * interaction.progress / session.rules.revive_seconds, 4)), Color("83c4bd"))
-		draw_string(font, at + Vector2(-16, 16), "%s  %.1fs" % [session.actors[interaction.target].display_name, maxf(0, session.rules.revive_seconds - interaction.progress)], HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color("d7c9a1"))
+		draw_string(font, at + Vector2(-16, 16), "%s  %s" % [session.actors[interaction.target].display_name, DisplayNumbers.seconds(maxf(0, session.rules.revive_seconds - interaction.progress))], HORIZONTAL_ALIGNMENT_LEFT, -1, 10, Color("d7c9a1"))

@@ -30,6 +30,10 @@ var poison_remaining:float=0
 var poison_clock:float=0
 var poison_damage:float=2
 var root_remaining:float=0
+var damage_clock:float=0
+var attacker_until:Dictionary={}
+var next_attacker_cleanup:float=0
+var poison_attacker:int=0
 
 func _ready() -> void:
  collision_layer = 1
@@ -72,14 +76,18 @@ func tick(delta: float, movement: Vector2) -> void:
  tick_visual(delta,actually_moving)
  queue_redraw()
 
-func take_damage(amount: float, source: Vector2) -> bool:
+func take_damage(amount: float, source: Vector2,attacker:int=0,scheduled_time:float=-1) -> bool:
  if dev_invulnerable or down or invulnerable > 0 or hp <= 0 or game.state != "running":
   return false
+ if game.coop.active and not game.coop.hosting:return false
+ var now:float=damage_clock if scheduled_time<0 else scheduled_time
+ if attacker>0:
+  if now+.000001<float(attacker_until.get(attacker,-1)):return false
+  attacker_until[attacker]=now+game.balance.same_attacker_interval
  hurt_remaining=.2
  damage_revision += 1
  hp = maxf(0, hp - received_damage(amount))
  time_since_damage = 0
- invulnerable = 0.85
  game.shake_time = 0.16
  game.sound.play_cue("hurt")
  var direction := (position - source).normalized()
@@ -101,11 +109,12 @@ func _draw() -> void:
 func draw_ellipse_shadow() -> void:
  draw_rect(Rect2(-8, -1, 16, 5), Color(0, 0, 0, 0.35))
 
-func apply_poison(duration:float,damage:float):
+func apply_poison(duration:float,damage:float,attacker:int=0):
  if down:return
  if poison_remaining<=0:poison_clock=0
  poison_remaining=duration
  poison_damage=damage
+ poison_attacker=attacker
 func clear_status():
  poison_remaining=0
  poison_clock=0
@@ -115,7 +124,13 @@ func clear_status():
  anticipation_remaining=0
  hurt_remaining=0
  revive_remaining=0
+ damage_clock=0;attacker_until.clear();next_attacker_cleanup=0;poison_attacker=0
 func tick_status(delta:float):
+ damage_clock+=delta
+ if damage_clock>=next_attacker_cleanup:
+  next_attacker_cleanup=damage_clock+2
+  for attacker in attacker_until.keys():
+   if float(attacker_until[attacker])<damage_clock-1:attacker_until.erase(attacker)
  if dev_invulnerable:return
  if poison_remaining<=0:return
  var active:float=minf(delta,poison_remaining)
@@ -124,12 +139,8 @@ func tick_status(delta:float):
  poison_clock+=active
  while poison_clock>=0.999999 and not down:
   poison_clock=maxf(0,poison_clock-1)
-  damage_revision+=1
-  hp=maxf(0,hp-received_damage(poison_damage))
-  time_since_damage=0
-  if hp<=0:
-   if not game.mastery.save_from_death():game.finish_run(false)
-   break
+  take_damage(poison_damage,position,poison_attacker,damage_clock-poison_clock)
+  if hp<=0:break
 
 func begin_swing(direction:Vector2):
  swing_remaining=.3

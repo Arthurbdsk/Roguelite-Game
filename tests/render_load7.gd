@@ -19,7 +19,7 @@ func run():
  for i in 240:g.drop_xp(Vector2(100+i%40,200+i/40),1)
  for i in 320:g.enemy_projectiles.fire(Vector2(1400,800+i%100),Vector2.RIGHT,g.enemy_data.skeleton_archer)
  for actor in g.coop.actors.values():
-  actor.player.invulnerable=1000;actor.weapon_system.levels={"sludge":8,"holy_water":8,"clock":8,"axe":8,"boomerang":8,"blades":8}
+  actor.player.invulnerable=1000;actor.weapon_system.levels={"sludge":8,"holy_water":8,"clock":8,"axe":8,"boomerang":8,"fire_wand":8}
   for i in 24:
    var at:Vector2=Vector2(680+i%8*45,520+i/8*55)
    actor.weapon_system.ground.add_pool("sludge" if i%2 else "holy_water",at,actor.player.position)

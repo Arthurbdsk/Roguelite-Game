@@ -20,7 +20,7 @@ func run():
 	var beast=g.spawn_enemy("beast",Vector2(500,500))
 	check(is_equal_approx(beast.max_hp,g.enemy_data.ghoul.health*5*g.balance.enemy_health_multiplier),"beast HP")
 	check(is_equal_approx(beast.data.speed,g.enemy_data.ghoul.speed*1.9*g.balance.enemy_speed_multiplier),"beast speed")
-	g.player.hp=100;g.player.armor=0;g.player.apply_poison(10,2)
+	g.player.hp=100;g.player.armor=0;g.player.invulnerable=0;g.player.apply_poison(10,2)
 	for i in 600:g.player.tick_status(1.0/60)
 	check(is_equal_approx(g.player.hp,80),"poison ten ticks = twenty damage")
 	g.player.apply_poison(10,2);g.player.tick_status(1);g.player.apply_poison(10,2)

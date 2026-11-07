@@ -12,7 +12,7 @@ func _init(save_path: String = "user://profile.json") -> void:
  data = defaults()
 
 func defaults() -> Dictionary:
- return {"version": VERSION, "skill_ranks": {}, "upgrade_ranks": {}, "upgrade_spent": {}, "upgrade_revision": 0, "challenge_active": 0, "upgrades_migrated": true, "gold": 0, "gold_remainder": 0.0, "last_settled_run": "", "best_wave": 0, "seals": 0, "buildings": {"arsenal": false, "library": false}, "best_time": 0.0, "wins": 0, "runs": 0, "settings": {"volume": 0.55, "effects": 0.7, "shake": true, "fullscreen": false}}
+ return {"version": VERSION, "skill_ranks": {}, "upgrade_ranks": {}, "upgrade_spent": {}, "upgrade_revision": 0, "challenge_active": 0, "upgrades_migrated": true, "gold": 0, "gold_remainder": 0.0, "last_settled_run": "", "best_wave": 0, "seals": 0, "buildings": {"arsenal": false, "library": false}, "best_time": 0.0, "wins": 0, "runs": 0, "settings": {"volume": 0.55,"music":.35, "effects": 0.7, "shake": true, "fullscreen": false}}
 
 func load_profile() -> bool:
  if not FileAccess.file_exists(path):
@@ -47,7 +47,7 @@ func load_profile() -> bool:
   last_error = "Preferências inválidas. Arquivo preservado."
   return false
  var check_options: Dictionary = parsed.get("settings", {})
- for key in ["volume", "effects"]:
+ for key in ["volume", "effects","music"]:
   if check_options.has(key) and not (check_options[key] is float or check_options[key] is int):
    last_error = "Preferências com campos inválidos. Arquivo preservado."
    return false
@@ -81,6 +81,7 @@ func load_profile() -> bool:
  var options = parsed.get("settings", {})
  if options is Dictionary:
   data.settings.volume = clampf(float(options.get("volume", 0.55)), 0, 1)
+  data.settings.music = clampf(float(options.get("music",.35)),0,1)
   data.settings.effects = clampf(float(options.get("effects", 0.7)), 0, 1)
   data.settings.shake = options.get("shake", true) == true
   data.settings.fullscreen = options.get("fullscreen", false) == true

@@ -3,7 +3,7 @@ func _initialize():call_deferred("run")
 func run():
  var g=load("res://scenes/main.tscn").instantiate();root.add_child(g);await process_frame
  g.sound.volume=0;g.start_run();var w=g.weapon_system
- for id in ["bolt","orbit","clock","lightning","sludge"]:assert(w.apply_upgrade(id))
+ for id in ["sword","orbit","clock","lightning","sludge"]:assert(w.apply_upgrade(id))
  assert(w.get_loadout().size()==6 and not w.apply_upgrade("holy_water"))
  assert(w.apply_upgrade("sword") and w.get_loadout().size()==6)
  for id in ["crown","boots","ward","magnet"]:assert(w.apply_upgrade(id))

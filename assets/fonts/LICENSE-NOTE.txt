@@ -1,0 +1,5 @@
+Aurusenthial Gothic, Kamil Koronkiewicz / Aurusenth.
+O usuário forneceu o TTF e confirmou nesta sessão que tem licença comercial para incorporá-lo ao jogo.
+O arquivo original e sua licença interna são preservados. Ajustes de tamanho/espaciamento acontecem somente na renderização.
+O TTF avulso não é publicado no repositório aberto. Copie seu arquivo licenciado para assets/fonts/AurusenthialGothic.ttf antes de exportar.
+O executável incorpora o arquivo conforme a autorização comercial confirmada. A fonte de apoio existente e fontes do sistema são usadas somente para caracteres ausentes.

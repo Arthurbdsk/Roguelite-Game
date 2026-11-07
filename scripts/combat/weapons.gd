@@ -9,7 +9,6 @@ const WEAPON_PATHS: Dictionary = {
 	"magic_wand":"res://data/weapons/magic_wand.tres",
 
 	"ice_wave":"res://data/weapons/ice_wave.tres",
-	"blades":"res://data/weapons/blades.tres",
 	"bombs":"res://data/weapons/bombs.tres",
 	"boomerang":"res://data/weapons/boomerang.tres",
 	"axe":"res://data/weapons/axe.tres",
@@ -42,7 +41,11 @@ var beam_texture=preload("res://assets/effects/clock_beam.png")
 var additions:=NewWeapons16.new()
 var arsenal:Arsenal
 var ground:GroundAttacks
-var levels: Dictionary = {"bolt": 1}
+var levels: Dictionary = {"bolt": 1}:
+	set(value):
+		levels={}
+		for id in value:
+			if WEAPON_PATHS.has(id):levels[id]=clampi(int(value[id]),1,8)
 var passives: Dictionary = {}
 var weapon_data: Dictionary = {}
 var passive_data: Dictionary = {}
@@ -572,7 +575,8 @@ func upgrade_values(id:String,current:int)->String:
 	var fields:Array[String]=[]
 	if id in NewWeapons16.IDS:
 		for f in ["projectile_speed","duration","pierce"]:
-			if current==0 or data.get(f)[current]!=data.get(f)[current-1]:fields.append(value_change({"projectile_speed":"Velocidade","duration":"Duração","pierce":"Perfuração"}[f],data.get(f)[maxi(0,current-1)],data.get(f)[current],current))
+			if id in ["garlic","whip"] or (f=="duration" and id!="runetracer") or (f=="pierce" and id=="runetracer"):continue
+			if current==0 or data.get(f)[current]!=data.get(f)[current-1]:fields.append(value_change({"projectile_speed":"Velocidade","duration":"Duração","pierce":"Perfuração"}[f],data.get(f)[maxi(0,current-1)],data.get(f)[current],current," s" if f=="duration" else ""))
 	for spec in [["damage","Dano"],["cooldown","Intervalo"],["reach","Raio da poça" if id in ["sludge","holy_water"] else "Alcance"],["count","Alvos" if id=="lightning" else "Quantidade"]]:
 		var after:float=offer_stat(id,spec[0],current)
 		var before:float=offer_stat(id,spec[0],maxi(0,current-1))
@@ -581,10 +585,10 @@ func upgrade_values(id:String,current:int)->String:
 		fields.append(value_change(spec[1],before,after,current,unit))
 	if id in ["sludge","holy_water"]:
 		if current==0 or data.duration[current]!=data.duration[current-1]:fields.append(value_change("Duração",offer_stat(id,"duration",maxi(0,current-1)),offer_stat(id,"duration",current),current," s"))
-		fields.append("Dano a cada %.1f s. Sem dano extra por sobreposição."%data.tick_interval)
+		fields.append("Dano a cada %s. Sem dano extra por sobreposição."%DisplayNumbers.seconds(data.tick_interval))
 	if id=="clock":
 		fields.append(value_change("Largura",data.beam_width[maxi(0,current-1)]*area_factor(),data.beam_width[current]*area_factor(),current))
-		fields.append("Paralisa %.1f s. Chefes: -%d%% de movimento por %.1f s."%[data.freeze_duration,data.boss_slow*100,data.boss_slow_duration])
+		fields.append("Paralisa %s. Chefes: -%d%% de movimento por %s."%[DisplayNumbers.seconds(data.freeze_duration),data.boss_slow*100,DisplayNumbers.seconds(data.boss_slow_duration)])
 	elif id=="sword" and (current==0 or current==3):
 		fields.append(value_change("Abertura",124,156 if current==3 else 124,current,"°"))
 	elif id=="bolt":
@@ -596,22 +600,20 @@ func upgrade_values(id:String,current:int)->String:
 		fields.append(value_change("Giro",(2+.18*maxi(1,current))*multiplier,(2+.18*(current+1))*multiplier,current," rad/s"))
 	if id=="axe":fields.append(value_change("Perfuração",data.pierce[maxi(0,current-1)],data.pierce[current],current))
 	if id=="bombs":fields.append(value_change("Raio",data.area_radius[maxi(0,current-1)]*area_factor(),data.area_radius[current]*area_factor(),current))
-	if id=="blades":fields.append(value_change("Rotação",data.rotation_speed[maxi(0,current-1)],data.rotation_speed[current],current," rad/s"))
-	if id=="ice_wave":fields.append("Movimento -30%% por %.2f s. Chefes: -15%% por até 1 s."%offer_stat(id,"duration",current))
+	if id=="ice_wave":fields.append("Movimento -30%% por %s. Chefes: -15%% por até 1 s."%DisplayNumbers.seconds(offer_stat(id,"duration",current)))
+	if id=="garlic":fields.append("Aura: lentidão de 15% e empurrão leve no primeiro contato. Respeita imunidades de chefes")
 	return ". ".join(fields.filter(func(v):return not v.is_empty()))
 func value_change(label:String,before:float,after:float,current:int,unit:String="")->String:
-	if current>0 and is_equal_approx(before,after):return ""
-	return "%s: %s%s%s"%[label,(number_text(before)+unit+" → ") if current>0 else "",number_text(after),unit]
-func number_text(value:float)->String:
-	return ("%.2f"%value).trim_suffix("0").trim_suffix("0").trim_suffix(".")
+	return DisplayNumbers.change(label,before,after,current,unit)
+func number_text(value:float)->String:return DisplayNumbers.number(value)
 func build_stats()->String:
 	var p=game.player
 	var damage:float=(_mastery().damage_multiplier-1)*100 if _mastery()!=null else 0
 	var interval:float=(1-.06*int(passives.get("cadence",0)))*(_mastery().interval_multiplier if _mastery()!=null else 1)
-	var text:String="Vida: %d/%d | Defesa: %.2f\nMovimento: %.2f px/s\nDano: +%.2f%% | Vel. ataque: %.2fx\nColeta XP: %.2f | Ouro: %.2f\nExperiência: +%d%%"%[p.hp,p.max_hp,p.armor,p.speed,damage,1/interval,p.pickup_radius,p.gold_collection_radius(),7*int(passives.get("crown",0))+roundi(100*permanent("experience"))]
+	var text:String="Vida: %d/%d | Defesa: %d\nMovimento: %d px/s\nDano: +%d%% | Vel. ataque: +%d%%\nColeta XP: %d | Ouro: %d\nExperiência: +%d%%"%[p.hp,p.max_hp,p.armor,p.speed,damage,(1/interval-1)*100,p.pickup_radius,p.gold_collection_radius(),7*int(passives.get("crown",0))+roundi(100*permanent("experience"))]
 	for id in weapon_data:
-		if int(levels.get(id,0))>0:text+="\n%s: %s dano | %ss | %spx"%[weapon_data[id].display_name,number_text(_stat(id,"damage")*(1+damage/100)),number_text(_interval(id)),number_text(_stat(id,"reach"))]
-	text+="\nÁrea permanente: +%.0f%% | Duração: +%.0f%%\nProjéteis: %.2fx | Redução: %.0f%%\nRegen: %.1f/s | Ouro: +%.0f%%"%[100*permanent("area"),100*permanent("duration"),projectile_factor(),100*p.damage_reduction,permanent("regen"),100*permanent("gold")]
+		if int(levels.get(id,0))>0:text+="\n%s: %s dano | %s | %spx"%[weapon_data[id].display_name,number_text(_stat(id,"damage")*(1+damage/100)),DisplayNumbers.seconds(_interval(id)),number_text(_stat(id,"reach"))]
+	text+="\nÁrea permanente: +%.0f%% | Duração: +%.0f%%\nVel. projéteis: +%d%% | Redução: %.0f%%\nRegen: %s | Ouro: +%.0f%%"%[100*permanent("area"),100*permanent("duration"),(projectile_factor()-1)*100,100*p.damage_reduction,DisplayNumbers.regeneration(permanent("regen")),100*permanent("gold")]
 	return text
 
 func area_factor()->float:

@@ -16,8 +16,8 @@ func tick(delta:float):
 		if state=="prepare":
 			movement=Vector2.ZERO
 			if state_time>=data.windup:
-				if data.id=="necromancer":game.specials.magic(position,charge_direction,data.damage,chain_root)
-				else:game.specials.flask(position,ambush_at,chain_root)
+				if data.id=="necromancer":game.specials.magic(position,charge_direction,data.damage,chain_root,get_instance_id())
+				else:game.specials.flask(position,ambush_at,chain_root,get_instance_id())
 				state="recovery";state_time=0;attack_time=data.attack_interval
 		elif state=="recovery":
 			movement=Vector2.ZERO
@@ -26,7 +26,7 @@ func tick(delta:float):
 			state="prepare";state_time=0;charge_direction=direction;ambush_at=game.player.position
 		if data.id=="necromancer" and summon_cooldown<=0 and state in ["approach","conjure_wait"]:
 			if game.specials.summon(self):
-				summon_cooldown=game.specials.balance.summon_interval
+				summon_cooldown=game.specials.balance.summon_interval*game.balance.enemy_attack_interval_multiplier
 				state="conjure";state_time=0
 			else:
 				summon_cooldown=.35
@@ -41,7 +41,7 @@ func tick(delta:float):
 		elif state=="prepare":
 			movement=Vector2.ZERO
 			if state_time>=data.windup:
-				game.damage_team_cone(position,charge_direction,data.attack_range,0.9,data.damage)
+				game.damage_team_cone(position,charge_direction,data.attack_range,0.9,data.damage,get_instance_id())
 				state="recovery";state_time=0;attack_time=data.attack_interval
 		elif state=="recovery":
 			movement=Vector2.ZERO
@@ -55,13 +55,13 @@ func tick(delta:float):
 				position=ambush_at;collision_layer=2;targetable=true;sprite.visible=true;state="recovery";state_time=0
 				for player in game.team_players():
 					if player.position.distance_to(ambush_at)<=game.specials.balance.shadow_radius+player.radius:
-						if player.take_damage(data.damage,ambush_at):player.root_remaining=game.specials.balance.shadow_root
+						if player.take_damage(data.damage,ambush_at,get_instance_id()):player.root_remaining=game.specials.balance.shadow_root
 				attack_time=data.attack_interval
 		elif state=="recovery":
 			movement=Vector2.ZERO
 			if state_time>=game.specials.balance.shadow_exposure:state="approach"
 	if state=="approach":movement=game.navigation.steer(self,movement)+game.separation(self)*8
-	if slow_remaining>0:movement*=slow_factor
+	movement*=movement_control_multiplier()
 	velocity=movement+knockback
 	knockback=knockback.move_toward(Vector2.ZERO,delta*500)
 	velocity=game.crowd_velocity(self,velocity)

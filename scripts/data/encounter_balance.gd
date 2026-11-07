@@ -43,6 +43,8 @@ extends Resource
 @export var slime_family_xp:int=8
 
 @export var common_speed_multiplier:float=1.15
+@export var enemy_attack_interval_multiplier:float=.85
+@export var same_attacker_interval:float=.4
 
 @export_group("Balanceamento 0.12")
 @export var death_experience_multiplier:float=.75

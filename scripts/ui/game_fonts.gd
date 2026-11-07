@@ -1,16 +1,24 @@
 class_name GameFonts
 extends RefCounted
-const KINGDOM_PATH:String="res://assets/fonts/Kingdom.ttf"
+const PRIMARY_PATH:String="res://assets/fonts/AurusenthialGothic.ttf"
 const SUPPORT_PATH:String="res://assets/font.ttf"
 static var cached:Font
-static func kingdom_available()->bool:return ResourceLoader.exists(KINGDOM_PATH)
+static func primary_available()->bool:return ResourceLoader.exists(PRIMARY_PATH)
 static func interface_font()->Font:
  if cached!=null:return cached
  var support:Font=load(SUPPORT_PATH)
- if kingdom_available():
-  var primary:FontFile=load(KINGDOM_PATH)
+ var symbols:=SystemFont.new()
+ symbols.font_names=PackedStringArray(["Segoe UI Symbol","DejaVu Sans","Arial"])
+ support.fallbacks=[symbols]
+ if primary_available():
+  var primary:FontFile=load(PRIMARY_PATH)
   primary.fallbacks=[support]
   primary.antialiasing=TextServer.FONT_ANTIALIASING_NONE
-  cached=primary
+  var readable:=FontVariation.new()
+  readable.base_font=primary
+  readable.variation_transform=Transform2D.IDENTITY.scaled(Vector2(1.3,1.7))
+  readable.spacing_glyph=2
+  readable.baseline_offset=.2
+  cached=readable
  else:cached=support
  return cached

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://drshqixtk88ih"
-path="res://.godot/imported/blades.png-f229617834ad29e78a90654837fd5203.ctex"
+uid="uid://eaip1eqdfkdn"
+path="res://.godot/imported/button_wood.png-be4a098cb0575aad200133f7c6fe6c79.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/icons/blades.png"
-dest_files=["res://.godot/imported/blades.png-f229617834ad29e78a90654837fd5203.ctex"]
+source_file="res://assets/v18/button_wood.png"
+dest_files=["res://.godot/imported/button_wood.png-be4a098cb0575aad200133f7c6fe6c79.ctex"]
 
 [params]
 

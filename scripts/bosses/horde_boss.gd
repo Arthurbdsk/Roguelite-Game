@@ -93,7 +93,7 @@ func tick(delta: float) -> void:
 			begin_attack(choose_attack())
 			movement = Vector2.ZERO
 		if offset.length() < radius + game.player.radius and contact_timer <= 0:
-			game.player.take_damage(data.damage*damage_scale(), position)
+			game.player.take_damage(data.damage*damage_scale(), position,get_instance_id())
 			contact_timer = 1.0
 	elif state == "windup":
 		if state_time < tracking_duration():
@@ -111,7 +111,7 @@ func tick(delta: float) -> void:
 			state_time = 0
 	if state=="chase":movement=game.navigation.steer(self,movement)
 	var previous_position: Vector2 = position
-	if slow_remaining>0:movement*=slow_factor
+	movement*=movement_control_multiplier()
 	velocity = movement
 	velocity=game.crowd_velocity(self,velocity)
 	move_body()
@@ -119,7 +119,7 @@ func tick(delta: float) -> void:
 		var victim = game.projectile_victim(previous_position, position, radius)
 		if not charge_hit and victim != null:
 			charge_hit = true
-			victim.take_damage((game.boss_balance.executioner_charge_damage if is_executioner else game.boss_balance.demon_charge_damage) * game.enemy_scale().damage * damage_scale(), previous_position)
+			victim.take_damage((game.boss_balance.executioner_charge_damage if is_executioner else game.boss_balance.demon_charge_damage) * game.enemy_scale().damage * damage_scale(), previous_position,get_instance_id())
 		if is_on_wall():
 			finish_attack()
 	sprite.frame = int(clock * 7) % 4
@@ -186,7 +186,7 @@ func execute_attack() -> void:
 		charge_hit = false
 		return
 	if attack_name == "execute":
-		game.damage_team_cone(position, charge_direction, game.boss_balance.executioner_swing_range, deg_to_rad(68), game.boss_balance.executioner_swing_damage * game.enemy_scale().damage)
+		game.damage_team_cone(position, charge_direction, game.boss_balance.executioner_swing_range, deg_to_rad(68), game.boss_balance.executioner_swing_damage * game.enemy_scale().damage,get_instance_id())
 		if game.state == "running":
 			game.boss_arena.swings.append({"at": position, "direction": charge_direction, "life": 0.22})
 	else:

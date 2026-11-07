@@ -6,6 +6,8 @@ var shots:Array=[]
 var strikes:Array=[]
 var bursts:Array=[]
 var aura_hits:Dictionary={}
+var garlic_contacts:Dictionary={}
+var garlic_cleanup_at:float=0
 var wall_query:=PhysicsRayQueryParameters2D.new()
 var visual:=NewWeaponVisuals17.new()
 var shot_serial:int=0
@@ -13,7 +15,7 @@ var impact_serial:int=0
 var impact_log:Array=[]
 var received_impact:int=0
 func setup(owner):weapons=owner
-func reset():shots.clear();strikes.clear();bursts.clear();aura_hits.clear();visual.reset();shot_serial=0;impact_serial=0;impact_log.clear();received_impact=0
+func reset():shots.clear();strikes.clear();bursts.clear();aura_hits.clear();garlic_contacts.clear();garlic_cleanup_at=0;visual.reset();shot_serial=0;impact_serial=0;impact_log.clear();received_impact=0
 func impact(kind:String,at:Vector2):
  if kind=="runetracer":return
  visual.impact(kind,at);impact_serial+=1
@@ -32,9 +34,7 @@ func launch(id:String)->bool:
  elif id=="magic_wand":
   for i in n:bursts.append({"delay":i*.12})
  elif id=="fire_wand":
-  var list:Array=world().query_enemies(p.position,weapons._stat(id,"reach")).filter(func(e):return weapons._valid_target(e) and p.position.distance_to(e.position)<=weapons._stat(id,"reach"))
-  if list.is_empty():return false
-  var e=list[weapons.rng.randi_range(0,list.size()-1)];var direction:Vector2=(e.position-p.position).normalized()
+  var direction:Vector2=Vector2.from_angle(weapons.rng.randf()*TAU)
   for i in n:projectile(id,direction.rotated((i-(n-1)*.5)*.14))
  elif id=="runetracer":
   for i in n:projectile(id,Vector2.from_angle(weapons.rng.randf()*TAU))
@@ -50,13 +50,26 @@ func tick(delta:float,allow:bool):
  if allow and int(weapons.levels.get("garlic",0))>0:
   var radius:float=weapons._stat("garlic","reach")
   for e in world().query_enemies(origin,radius):
-   if not weapons._valid_target(e) or e.position.distance_to(origin)>radius+e.radius or weapons.combat_time<float(aura_hits.get(e.serial,-1)):continue
+   if not weapons._valid_target(e) or e.position.distance_to(origin)>radius+e.radius:continue
+   if not e is HordeBoss:
+    if not e.garlic_sources.has(weapons.get_instance_id()):e.garlic_sources[weapons.get_instance_id()]=weakref(weapons)
+    if not garlic_contacts.has(e.serial):
+     garlic_contacts[e.serial]=weakref(e)
+     var outward:Vector2=(e.position-origin).normalized()
+     if outward==Vector2.ZERO:outward=Vector2.RIGHT
+     e.knockback+=outward*35
+   if weapons.combat_time<float(aura_hits.get(e.serial,-1)):continue
    aura_hits[e.serial]=weapons.combat_time+weapons._interval("garlic")
    if not e is HordeBoss:e.garlic_until=world().elapsed+2
    weapons._hit(e,weapons._stat("garlic","damage"),Vector2.ZERO)
  if aura_hits.size()>512:
   for id in aura_hits.keys():
    if aura_hits[id]<weapons.combat_time-2:aura_hits.erase(id)
+ if garlic_contacts.size()>512 and weapons.combat_time>=garlic_cleanup_at:
+  garlic_cleanup_at=weapons.combat_time+1
+  for id in garlic_contacts.keys():
+   var ref=garlic_contacts[id].get_ref()
+   if not is_instance_valid(ref) or not ref.alive:garlic_contacts.erase(id)
  for burst in bursts.duplicate():
   burst.delay-=delta
   if burst.delay>0:continue

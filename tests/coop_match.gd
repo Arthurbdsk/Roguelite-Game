@@ -334,7 +334,7 @@ func host_disconnect() -> void:
 func host_soak() -> void:
 	game.director.reset()
 	for actor in session.actors.values():
-		actor.weapon_system.levels = {"sludge":8,"holy_water":8,"clock":8,"axe":8,"boomerang":8,"blades":8}
+		actor.weapon_system.levels = {"sludge":8,"holy_water":8,"clock":8,"axe":8,"boomerang":8,"fire_wand":8}
 		actor.weapon_system.passives = {"crown":1,"magnet":2,"ward":2}
 		actor.player.pickup_radius = 114
 	var started_at: int = Time.get_ticks_msec()

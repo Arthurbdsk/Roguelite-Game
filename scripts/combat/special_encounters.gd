@@ -58,13 +58,13 @@ func summon(caster)->bool:
  if chained:game.late_arena.chain.waiting.erase(owner)
  return true
 
-func magic(at:Vector2,direction:Vector2,damage:float,owner_root:int=0):
- if bolts.size()<96:bolts.append({"root":owner_root,"visual_id":str(Time.get_ticks_usec()),"at":at,"velocity":direction*balance.magic_speed,"life":4.0,"damage":damage})
-func flask(source:Vector2,at:Vector2,owner_root:int=0)->bool:
+func magic(at:Vector2,direction:Vector2,damage:float,owner_root:int=0,attacker:int=0):
+ if bolts.size()<96:bolts.append({"root":owner_root,"attacker":attacker,"visual_id":str(Time.get_ticks_usec()),"at":at,"velocity":direction*balance.magic_speed,"life":4.0,"damage":damage})
+func flask(source:Vector2,at:Vector2,owner_root:int=0,attacker:int=0)->bool:
  if areas.size()>=balance.pool_limit:return false
  for area in areas:
   if area.at.distance_to(at)<balance.pool_radius*2.5:return false
- areas.append({"root":owner_root,"at":at,"source":source,"age":0.0,"inside":[]})
+ areas.append({"root":owner_root,"attacker":attacker,"at":at,"source":source,"age":0.0,"inside":[]})
  return true
 func tick(delta:float):
  if game.consumables!=null and game.consumables.freeze_left>0:return
@@ -96,14 +96,14 @@ func tick(delta:float):
   for player in game.team_players():
    if player.position.distance_to(area.at)<=balance.pool_radius+player.radius:
     inside.append(player.get_instance_id())
-    if not area.inside.has(player.get_instance_id()):player.apply_poison(balance.poison_duration,balance.poison_damage*(1+.05*game.run_challenge))
+    if not area.inside.has(player.get_instance_id()):player.apply_poison(balance.poison_duration,balance.poison_damage*(1+.05*game.run_challenge),int(area.get("attacker",0)))
   area.inside=inside
  areas=areas.filter(func(a):return a.age<balance.flask_warning+balance.pool_duration)
  for i in range(bolts.size()-1,-1,-1):
   var bolt=bolts[i];bolt.life-=delta
   var end:Vector2=bolt.at+bolt.velocity*delta
   var victim=game.projectile_victim(bolt.at,end,4)
-  if victim!=null:victim.take_damage(bolt.damage,bolt.at);bolt.life=0
+  if victim!=null:victim.take_damage(bolt.damage,bolt.at,int(bolt.get("attacker",0)));bolt.life=0
   if game.state!="running":return
   bolt.at=end
   if bolt.life<=0:bolts.remove_at(i)

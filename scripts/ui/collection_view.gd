@@ -11,7 +11,7 @@ var detail_icon:TextureRect
 var current:int=0
 func setup(owner,interface):
  game=owner;ui=interface;set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
- var panel:=Panel.new();panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);panel.add_theme_stylebox_override("panel",ui._style(GameUI.PANEL,GameUI.LINE));add_child(panel)
+ var panel:=Panel.new();panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);panel.add_theme_stylebox_override("panel",UIAssets18.panel());add_child(panel)
  var margin:=MarginContainer.new();margin.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
  for side in ["left","top","right","bottom"]:margin.add_theme_constant_override("margin_"+side,12)
  add_child(margin)
@@ -53,10 +53,10 @@ func select(index:int):
  if not is_instance_valid(detail):return
  var e:Dictionary=entries[index];var known:bool=game.profile.data.get("discoveries",{}).get(e.key,false)==true
  detail_icon.texture=load(e.icon) if known else null
- detail.text=e.name+"\n"+e.description+"\n"+e.compatibility if known else "?\nItem não descoberto. Encontre ou equipe este item durante uma partida."
+ detail.text=DisplayNumbers.clean(e.name+"\n"+e.description+"\n"+e.compatibility) if known else "?\nItem não descoberto. Encontre ou equipe este item durante uma partida."
  for i in buttons.size():buttons[i].add_theme_stylebox_override("normal",ui._style(Color("182133"),Color("fff0ac") if i==index else GameUI.LINE,2 if i==index else 1))
 func weapon_compatibility(id:String)->String:
- var area:bool=id in ["sword","sludge","holy_water","ice_wave","bombs","blades","clock","garlic","whip","fire_wand","runetracer","magic_wand"]
+ var area:bool=id in ["sword","sludge","holy_water","ice_wave","bombs","clock","garlic","whip","fire_wand","runetracer","magic_wand"]
  var duration:bool=id in ["sludge","holy_water","ice_wave","runetracer"]
  var amount:bool=id in ["bolt","axe","boomerang","bombs","holy_water","whip","fire_wand","runetracer","magic_wand"]
  return "Lupa: %s | Ampulheta: %s | Quantidade permanente: %s"%["largura" if id=="clock" else "sim" if area else "não","sim" if duration else "não","sim" if amount else "não"]

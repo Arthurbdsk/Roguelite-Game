@@ -23,12 +23,13 @@ func clear_shot(origin: Vector2, target: Vector2) -> bool:
 	var query := PhysicsRayQueryParameters2D.create(origin, target, 4)
 	return get_world_2d().direct_space_state.intersect_ray(query).is_empty()
 
-func fire(origin: Vector2, direction: Vector2, stats: EnemyData, owner: int = 0) -> bool:
+func fire(origin: Vector2, direction: Vector2, stats: EnemyData, owner: int = 0,attacker:int=0) -> bool:
 	var limit: int = mini(game.balance.max_enemy_projectiles, game.boss_balance.final_projectile_limit) if game.boss_arena.final_active() else game.balance.max_enemy_projectiles
 	if arrows.size() >= limit or direction.length_squared() < 0.1:
 		return false
 	serial += 1
-	arrows.append({"id": serial, "at": origin, "velocity": direction.normalized() * stats.arrow_speed, "damage": stats.damage, "distance": 0.0, "range": stats.arrow_range, "life": stats.arrow_lifetime, "owner": owner, "kind": "arrow", "radius": game.balance.arrow_radius})
+	if attacker==0:attacker=owner
+	arrows.append({"id": serial, "at": origin, "velocity": direction.normalized() * stats.arrow_speed, "damage": stats.damage, "distance": 0.0, "range": stats.arrow_range, "life": stats.arrow_lifetime, "owner": owner,"attacker":attacker, "kind": "arrow", "radius": game.balance.arrow_radius})
 	game.sound.play_cue("arrow")
 	queue_redraw()
 	return true
@@ -75,7 +76,7 @@ func tick(delta: float) -> void:
 		var victim = game.projectile_victim(start, end, arrow.get("radius", game.balance.arrow_radius))
 		if victim != null:
 			arrows.remove_at(i)
-			victim.take_damage(arrow.damage, start)
+			victim.take_damage(arrow.damage, start,int(arrow.get("attacker",arrow.get("owner",0))))
 			if game.state != "running":
 				queue_redraw()
 				return

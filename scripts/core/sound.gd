@@ -1,11 +1,13 @@
 class_name GameSound
 extends Node
+signal important_cue
 
 var voices: Array[AudioStreamPlayer] = []
 var cues: Dictionary = {}
 var limits: Dictionary = {}
 var clock: float = 0.0
 var volume: float = 0.55
+var stopping:bool=false
 
 func _ready() -> void:
 	for i in 8:
@@ -28,10 +30,13 @@ func _process(delta: float) -> void:
 	clock += delta
 
 func _exit_tree() -> void:
+	stop_all()
+	cues.clear()
+func stop_all():
+	stopping=true
 	for voice in voices:
 		voice.stop()
 		voice.stream = null
-	cues.clear()
 
 func synth(hz: float, length: float) -> AudioStreamWAV:
 	var sample := AudioStreamWAV.new()
@@ -50,7 +55,7 @@ func synth(hz: float, length: float) -> AudioStreamWAV:
 	return sample
 
 func play_cue(id: String) -> void:
-	if not cues.has(id) or volume <= 0:
+	if stopping or not cues.has(id) or volume <= 0:
 		return
 	var interval := 0.10 if id in ["hit", "pickup", "orbit", "gold", "arrow"] else 0.04
 	if clock - float(limits.get(id, -99.0)) < interval:
@@ -61,5 +66,6 @@ func play_cue(id: String) -> void:
 			voice.volume_db = linear_to_db(volume * 0.65)
 			voice.pitch_scale = randf_range(0.96, 1.04)
 			voice.play()
+			if id in ["hurt","boss","elite","portal","level"]:important_cue.emit()
 			limits[id] = clock
 			return

@@ -16,7 +16,7 @@ const GOLD=Color("d9b454")
 func frame(color:Color,border:Color=GOLD,width:int=2)->StyleBoxFlat:
  var s:=StyleBoxFlat.new();s.bg_color=color;s.border_color=border;s.set_border_width_all(width);s.set_content_margin_all(5);return s
 func label(parent,text:String,font_size:int=12)->Label:
- var l:=Label.new();l.text=text;l.add_theme_font_size_override("font_size",font_size);l.add_theme_color_override("font_color",Color("f7f3e5"));parent.add_child(l);return l
+ var l:=Label.new();l.text=DisplayNumbers.clean(text);l.add_theme_font_size_override("font_size",font_size);l.add_theme_color_override("font_color",Color("f7f3e5"));parent.add_child(l);return l
 func icon(parent,path:String,size_px:int=26):
  var n:=TextureRect.new();n.texture=load(path);n.custom_minimum_size=Vector2(size_px,size_px);n.expand_mode=TextureRect.EXPAND_IGNORE_SIZE;n.stretch_mode=TextureRect.STRETCH_KEEP_ASPECT_CENTERED;n.texture_filter=CanvasItem.TEXTURE_FILTER_NEAREST;parent.add_child(n);return n
 func setup(owner_game,interface):

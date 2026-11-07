@@ -56,7 +56,7 @@ func set_challenge(level:int)->bool:
  return true
 func effect(id:String,n:int)->String:
  var v:float=float(by_id[id].values[n-1]) if n>0 else 0.0
- if id=="regen":return "+%.1f vida/s"%v
+ if id=="regen":return DisplayNumbers.regeneration(v)
  if id=="amount":return "+%d projétil"%int(v)
  if id=="revive":return "%d retorno por partida"%int(v)
  if id=="luck":return "Quarta opção: %.0f%% | Consumível: %.0f%%"%[v*100,15+n*2]

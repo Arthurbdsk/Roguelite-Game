@@ -138,7 +138,7 @@ func visual_tick(delta:float):
  toast_left=maxf(0,toast_left-delta)
  if toast_left==0:toast.hide()
  if freeze_left>0 and toast_left==0:
-  toast.text="Tempo parado: %.1f s"%freeze_left;toast.show()
+  toast.text="Tempo parado: "+DisplayNumbers.seconds(freeze_left);toast.show()
  for fx in feedback:fx.life-=delta
  feedback=feedback.filter(func(f):return f.life>0)
  queue_redraw()

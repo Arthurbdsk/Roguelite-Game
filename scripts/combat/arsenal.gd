@@ -13,8 +13,9 @@ var snow_texture=preload("res://assets/v10/snowflake.png")
 var explosion_texture=preload("res://assets/v10/explosion.png")
 func setup(w):
  weapons=w
- for id in ["axe","boomerang","bombs","blades","ice_wave"]:textures[id]=load("res://assets/icons/"+id+".png")
+ for id in ["axe","boomerang","bombs","ice_wave"]:textures[id]=load("res://assets/icons/"+id+".png")
  textures.boomerang=load("res://assets/v08/boomerang.png")
+ textures.axe=load("res://assets/v18/axe.png")
 func reset():
  shots.clear();zones.clear();blade_points.clear();blade_hits.clear();angle=0;queue_redraw()
 func launch(id:String)->bool:
@@ -74,24 +75,13 @@ func tick(delta:float,allow_attacks:bool=true):
     if weapons._valid_target(e) and e.position.distance_to(zone.at)<=zone.radius:weapons._hit(e,weapons._stat("bombs","damage"),Vector2.ZERO)
  zones=zones.filter(func(z):return z.age<z.life)
  blade_points.clear()
- if allow_attacks and int(weapons.levels.get("blades",0))>0:
-  angle+=delta*weapons._stat("blades","rotation_speed")
-  for i in int(weapons._stat("blades","count")):blade_points.append(weapons.game.player.position+Vector2.from_angle(angle+i*TAU/weapons._stat("blades","count"))*weapons._stat("blades","reach"))
-  for e in candidates(weapons.game.player.position-Vector2.ONE*weapons._stat("blades","reach"),weapons.game.player.position+Vector2.ONE*weapons._stat("blades","reach")):
-   if not weapons._valid_target(e) or weapons.combat_time<float(blade_hits.get(e.serial,0)):continue
-   if e.position.distance_squared_to(weapons.game.player.position)>pow(weapons._stat("blades","reach")+e.radius+6*weapons.area_factor(),2):continue
-   for at in blade_points:
-    if e.position.distance_to(at)<=e.radius+6*weapons.area_factor():
-     blade_hits[e.serial]=weapons.combat_time+weapons._interval("blades");weapons._hit(e,weapons._stat("blades","damage"),Vector2.ZERO);break
- if blade_hits.size()>512:
-  for key in blade_hits.keys():
-   if blade_hits[key]<weapons.combat_time-1:blade_hits.erase(key)
  queue_redraw()
 func _draw():
  for shot in shots:
-  draw_set_transform(shot.at.round(),shot.age*12);draw_texture(textures[shot.kind],-textures[shot.kind].get_size()*.5);draw_set_transform(Vector2.ZERO)
- for at in blade_points:
-  draw_set_transform(at.round(),angle);draw_texture(textures.blades,Vector2(-8,-8));draw_set_transform(Vector2.ZERO)
+  draw_set_transform(shot.at.round(),shot.age*12)
+  if shot.kind=="axe":draw_texture_rect(textures.axe,Rect2(-8,-8,16,16),false)
+  else:draw_texture(textures[shot.kind],-textures[shot.kind].get_size()*.5)
+  draw_set_transform(Vector2.ZERO)
  for zone in zones:
   if zone.kind=="bombs" and zone.age<zone.delay:
    var t:float=clampf(zone.age/float(zone.get("flight_delay",zone.delay)),0,1);var at:Vector2=zone.source.lerp(zone.at,t)-Vector2(0,sin(t*PI)*40)

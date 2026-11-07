@@ -21,7 +21,7 @@ func button(parent:Node,text:String,action:Callable,host_only:bool=false)->Butto
  if host_only:host_controls.append(b);b.disabled=not lab.is_host()
  return b
 func label(parent:Node,text:String)->Label:
- var l:=Label.new();l.text=text;l.add_theme_font_size_override("font_size",10);l.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;l.size_flags_horizontal=Control.SIZE_EXPAND_FILL;parent.add_child(l);return l
+ var l:=Label.new();l.text=DisplayNumbers.clean(text);l.add_theme_font_size_override("font_size",10);l.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;l.size_flags_horizontal=Control.SIZE_EXPAND_FILL;parent.add_child(l);return l
 func row(parent:Node)->HBoxContainer:
  var r:=HBoxContainer.new();r.add_theme_constant_override("separation",5);parent.add_child(r);return r
 func pick(parent:Node,entries:Dictionary,current:String)->OptionButton:
@@ -53,7 +53,7 @@ func rebuild():
  var count:=spin(r,lab.participants,1,4);count.value_changed.connect(func(value):lab.participants=int(value);lab.status="Escala será aplicada ao iniciar/reiniciar.");host_controls.append(count)
  var options:=row(encounter);var waves:=CheckBox.new();waves.text="Geração normal";waves.add_theme_font_size_override("font_size",10);waves.button_pressed=lab.hordes;waves.toggled.connect(func(value):lab.hordes=value);options.add_child(waves);host_controls.append(waves)
  label(options,"Tempo")
- var speed:=pick(options,{"0.5":"0,5x","1":"1x","2":"2x"},"0.5" if Engine.time_scale==.5 else "2" if Engine.time_scale==2 else "1");speed.item_selected.connect(func(i):lab.set_time(float(speed.get_item_metadata(i))));host_controls.append(speed)
+ var speed:=pick(options,{"0.5":"50%","1":"100%","2":"200%"},"0.5" if Engine.time_scale==.5 else "2" if Engine.time_scale==2 else "1");speed.item_selected.connect(func(i):lab.set_time(float(speed.get_item_metadata(i))));host_controls.append(speed)
  var actions:=row(encounter);button(actions,"Iniciar encontro",func():if read_build():lab.start_encounter(),true);button(actions,"Reiniciar",func():lab.start_encounter(),true)
  button(actions,"Sala DEV",lab.open_dev_room)
  label(encounter,"Escala simulada usa os mesmos multiplicadores da partida. Não substitui conexões reais. Mapa, geração e escala passam a valer ao iniciar ou reiniciar.")
@@ -82,7 +82,7 @@ func rebuild():
   for pair in lab.game.late_arena.patterns.config.combination_pairs:
    if pair[0]==first:lab.force_combination(pair[0],pair[1]),true)
  var values:=row(boss);var frozen:=CheckBox.new();frozen.text="Congelar chefe";frozen.add_theme_font_size_override("font_size",10);frozen.button_pressed=lab.frozen;frozen.toggled.connect(lab.freeze);values.add_child(frozen);host_controls.append(frozen)
- label(values,"Vida %");var percent:=spin(values,100,1,100,.1);button(values,"Definir vida",func():lab.health_percent(percent.value),true);button(values,"Próxima fase",lab.next_phase,true)
+ label(values,"Vida %");var percent:=spin(values,100,1,100,1);button(values,"Definir vida",func():lab.health_percent(percent.value),true);button(values,"Próxima fase",lab.next_phase,true)
  label(boss,"Ataques aguardam os limites reais de efeitos e a recuperação. Congelar para o chefe, mas mantém projéteis e áreas já lançados. Vida 0: use Próxima fase ou cause dano na arena.")
  var survival:=tab("Contínuo")
  var actions13:=row(survival);button(actions13,"Iniciar contínuo",func():lab.start_survival(false),true);button(actions13,"Iniciar infinito",func():lab.start_survival(true),true)
@@ -142,9 +142,9 @@ func read_build()->bool:
  lab.build=result;return true
 func refresh():
  if not is_instance_valid(status_label):return
- if is_instance_valid(performance_label):performance_label.text=lab.performance_info()
- if is_instance_valid(survival_label):survival_label.text=lab.survival_info()
- status_label.text="Tempo: %.1fx | "%Engine.time_scale+lab.status;boss_label.text=lab.boss_info();build_label.text=lab.game.weapon_system.build_stats()
+ if is_instance_valid(performance_label):performance_label.text=DisplayNumbers.clean(lab.performance_info())
+ if is_instance_valid(survival_label):survival_label.text=DisplayNumbers.clean(lab.survival_info())
+ status_label.text="Tempo: %d%% | "%roundi(Engine.time_scale*100)+lab.status;boss_label.text=DisplayNumbers.clean(lab.boss_info());build_label.text=lab.game.weapon_system.build_stats()
  var signature:String=str(lab.attacks())
  if signature!=attack_signature:
   attack_signature=signature;attack_box.clear()

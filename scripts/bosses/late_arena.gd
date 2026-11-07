@@ -49,7 +49,7 @@ func clear_attacks(boss):
 func on_death(boss):
  clear_attacks(boss);deaths.append({"boss":boss,"age":0.0})
 func add_area(kind:String,at:Vector2,warning:float,duration:float,boss)->Dictionary:
- var area:Dictionary={"kind":kind,"at":at,"age":0.0,"warning":warning,"duration":duration,"owner":boss.serial,"damage":damage(kind,boss),"hits":{}}
+ var area:Dictionary={"kind":kind,"at":at,"age":0.0,"warning":warning,"duration":duration,"owner":boss.serial,"attacker":boss.get_instance_id(),"damage":damage(kind,boss),"hits":{}}
  areas.append(area);return area
 func cast(kind:String,boss)->bool:
  if kind in FinalPatterns.IDS:return patterns.request(kind,boss)
@@ -64,7 +64,7 @@ func cast(kind:String,boss)->bool:
    var stop:Vector2=boss.position+Vector2.from_angle(i*TAU/int(c.feather_count))*160
    stop=stop.clamp(Vector2(55,60),Vector2(1745,1140))
    if not game.arena.safe_position(stop,6):continue
-   shots.append({"kind":"feather","at":boss.position,"source":boss.position,"stop":stop,"age":0.0,"velocity":(boss.locked_target-stop).normalized()*float(c.feather_speed),"warning":float(c.feather_warning),"damage":damage("feather",boss),"owner":boss.serial,"life":5.0})
+   shots.append({"kind":"feather","at":boss.position,"source":boss.position,"stop":stop,"age":0.0,"velocity":(boss.locked_target-stop).normalized()*float(c.feather_speed),"warning":float(c.feather_warning),"damage":damage("feather",boss),"owner":boss.serial,"attacker":boss.get_instance_id(),"life":5.0})
  elif kind=="light_ring":
   var area:Dictionary=add_area("light_ring",boss.position,1.2,float(c.ring_radius)/float(c.ring_speed),boss)
   area.gap=(boss.locked_target-boss.position).angle()+.8;area.speed=float(c.ring_speed);area.width=float(c.ring_width);area.opening=deg_to_rad(float(c.ring_gap_degrees))
@@ -100,7 +100,7 @@ func tick(delta:float):
     var near:float=maxf(0,previous-area.warning)*area.speed-area.width*.5-player.radius
     var far:float=(area.age-area.warning)*area.speed+area.width*.5+player.radius
     inside=offset.length()>=near and offset.length()<=far and absf(wrapf(offset.angle()-(area.gap+(area.age-area.warning)*.4 if area.kind=="moving_ring" else area.gap),-PI,PI))>area.opening*.5
-   if inside:area.hits[player.get_instance_id()]=true;player.take_damage(area.damage,area.at)
+   if inside:area.hits[player.get_instance_id()]=true;player.take_damage(area.damage,area.at,int(area.get("attacker",0)))
  for shot in shots:
   var previous:float=shot.age;shot.age+=delta
   if shot.age<.5:shot.at=shot.source.lerp(shot.stop,shot.age/.5)
@@ -110,7 +110,7 @@ func tick(delta:float):
    var wall:Dictionary=get_world_2d().direct_space_state.intersect_ray(PhysicsRayQueryParameters2D.create(shot.at,end,4))
    if not wall.is_empty():end=wall.position;shot.life=shot.age
    var victim=game.projectile_victim(shot.at,end,4)
-   if victim!=null:victim.take_damage(shot.damage,shot.at);shot.age=shot.life
+   if victim!=null:victim.take_damage(shot.damage,shot.at,int(shot.get("attacker",0)));shot.age=shot.life
    shot.at=end
  shots=shots.filter(func(s):return s.age<s.life)
  areas=areas.filter(func(a):return a.age<a.warning+a.duration)
@@ -239,4 +239,4 @@ func tick_advanced(delta:float):
   bursts.erase(burst)
  for a in areas:
   if a.kind!="column" or a.get("hit",false) or a.age+delta<a.warning:continue
-  a.hit=true;game.damage_team_area(a.at,a.radius,a.damage)
+  a.hit=true;game.damage_team_area(a.at,a.radius,a.damage,int(a.get("attacker",0)))

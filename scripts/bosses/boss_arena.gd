@@ -155,11 +155,16 @@ func tick(delta: float) -> void:
 		area.age += delta
 		if area.kind=="ring":
 			area.at=area.ring_center+Vector2.from_angle(area.ring_angle)*maxf(0,game.boss_balance.ring_radius-maxf(0,area.age-area.warning)*game.boss_balance.ring_speed)
-			if area.age>=area.warning:game.damage_team_area(area.at,area.radius,area.damage)
+			if area.age>=area.warning:
+				if not area.has("hits"):area.hits={}
+				for player in game.team_players():
+					if not area.hits.has(player.get_instance_id()) and player.position.distance_to(area.at)<=area.radius+player.radius:
+						area.hits[player.get_instance_id()]=true
+						player.take_damage(area.damage,area.at,area.owner)
 		if area.kind == "lightning" and area.age >= area.warning and not area.hit:
 			area.hit = true
 			game.sound.play_cue("thunder")
-			game.damage_team_area(area.at, area.radius, area.damage)
+			game.damage_team_area(area.at, area.radius, area.damage,area.owner)
 			if game.state != "running": return
 	areas = areas.filter(func(area): return area.age < area.warning + area.duration)
 	for swing in swings:

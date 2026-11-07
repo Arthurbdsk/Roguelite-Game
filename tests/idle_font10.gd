@@ -13,5 +13,5 @@ func run():
  p.hurt_remaining=.2;p.tick(.016,Vector2.ZERO);assert(p.sprite.frame in [24,25])
  var font:Font=GameFonts.interface_font()
  for c in "Aprimoramentos: Armadura, Área, Duração, Regeneração, 0123456789% çãáéíóúâêôõ":assert(font.has_char(c.unicode_at(0)))
- print("FONT10 kingdom_available=",GameFonts.kingdom_available()," support characters verified; Kingdom file remains external dependency")
+ print("FONT10 Aurusenthial_available=",GameFonts.primary_available()," Portuguese, digits and symbols verified with fallback only for missing characters")
  g.queue_free();await process_frame;await create_timer(.3).timeout;print("IDLE_FONT10_PASS actual displacement, wall stop, noise, direction, attack/hurt priority");quit()

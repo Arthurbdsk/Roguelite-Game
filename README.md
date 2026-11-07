@@ -1,10 +1,10 @@
 # Hordas
 
-Versão 0.17.0: visuais animados e ícones de Alho, Chicote, Varinha de Fogo, Runa Traçante e Varinha Mágica, com referências pesquisadas no Pinterest. As cinco armas estão disponíveis nas partidas normais, melhorias, baús, coleção e DEV. [Referências, implementação e testes](docs/VISUAIS_0_17.md). As tabelas de dano e os demais valores permanecem os da versão 0.16.0.
+Versão 0.18.0: Lâminas Orbitais removidas, Varinha de Fogo aleatória, novos intervalos, Alho com controle, Machado azul, números inteiros na interface, fonte Aurusenthial Gothic, música e elementos do UI Bundle. [Valores, implementação, licenças e testes](docs/AJUSTES_0_18.md).
 
-Projeto editável em Godot 4.7.2. Inclui código, cenas, mapas, dados de balanceamento, sprites e testes. Não precisa instalar Python ou Node.js para jogar no modo solo pelo editor.
+Projeto editável em Godot 4.7.2. Inclui código, cenas, mapas, dados de balanceamento, sprites e testes. Não precisa instalar Python ou Node.js para jogar no modo solo pelo editor. Para usar/exportar a fonte licenciada a partir do código, copie seu arquivo autorizado para `assets/fonts/AurusenthialGothic.ttf`; o TTF avulso fica fora do GitHub, enquanto os executáveis incluem a fonte autorizada.
 
-Para jogar no Windows sem instalar o Godot, baixe [Hordas 0.15.0](https://github.com/Arthurbdsk/Roguelite-Game/releases/tag/v0.15.0). O arquivo `.exe` contém todos os recursos e o endereço público do relay. Todos os participantes precisam usar a mesma versão. A hospedagem gratuita no Render pode demorar cerca de um minuto para iniciar após ficar inativa; aguarde a conexão no menu Online.
+Para jogar no Windows sem instalar o Godot, baixe [Hordas 0.18.0](https://github.com/Arthurbdsk/Roguelite-Game/releases/tag/v0.18.0). O arquivo `.exe` contém todos os recursos e o endereço público do relay. Todos os participantes precisam usar a mesma versão. A hospedagem gratuita no Render pode demorar cerca de um minuto para iniciar após ficar inativa; aguarde a conexão no menu Online.
 
 ## Atualização 0.15.0
 

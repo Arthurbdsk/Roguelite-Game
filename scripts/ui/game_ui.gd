@@ -69,6 +69,7 @@ func _build_theme() -> void:
  ui_theme.set_stylebox("pressed", "Button", _style(Color("646c80"), IVORY))
  ui_theme.set_stylebox("focus", "Button", _style(Color(0, 0, 0, 0), IVORY, 2))
  ui_theme.set_stylebox("disabled", "Button", _style(Color("151e22"), Color("303c3c")))
+ for state_name in ["normal","hover","pressed","disabled"]:ui_theme.set_stylebox(state_name,"Button",UIAssets18.button(state_name))
  ui_theme.set_stylebox("background", "ProgressBar", _bar_style(Color("0c1216"), Color("45514d"), 1))
  ui_theme.set_stylebox("fill", "ProgressBar", _bar_style(ICE, ICE))
  ui_theme.set_stylebox("panel", "Panel", _style(PANEL, LINE))
@@ -113,7 +114,7 @@ func _box(parent: Node, rect: Rect2, color: Color = PANEL) -> Panel:
 
 func _label(parent: Node, text: String, rect: Rect2, font_size: int = 12, color: Color = IVORY, centered: bool = false) -> Label:
  var label := Label.new()
- label.text = text
+ label.text = DisplayNumbers.clean(text)
  label.position = rect.position
  label.add_theme_font_size_override("font_size", font_size)
  label.add_theme_color_override("font_color", color)
@@ -125,7 +126,7 @@ func _label(parent: Node, text: String, rect: Rect2, font_size: int = 12, color:
  parent.add_child(label)
  # Set the size after enabling wrapping; otherwise the initial single-line
  # minimum expands this control and it never shrinks to the card width.
- label.size = rect.size
+ label.size = Vector2(rect.size.x,maxf(rect.size.y,label.get_theme_font("font").get_height(font_size)))
  return label
 
 func _grant_focus(control) -> void:
@@ -134,7 +135,7 @@ func _grant_focus(control) -> void:
 
 func _button(parent: Node, text: String, rect: Rect2, action: Callable, primary: bool = false) -> Button:
  var b := Button.new()
- b.text = text
+ b.text = DisplayNumbers.clean(text)
  b.position = rect.position
  b.size = rect.size
  b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
@@ -360,7 +361,8 @@ func _upgrades(data: Dictionary) -> void:
   var column:=VBoxContainer.new();column.size_flags_horizontal=Control.SIZE_EXPAND_FILL;column.mouse_filter=Control.MOUSE_FILTER_IGNORE;column.add_theme_constant_override("separation",2);line.add_child(column)
   var name_label:=Label.new();name_label.text="%d. %s"%[i+1,offer.name];name_label.add_theme_font_size_override("font_size",12);column.add_child(name_label)
   var level_label:=Label.new();level_label.text=offer.get("detail","Novo");level_label.add_theme_font_size_override("font_size",9);level_label.modulate=ICE;column.add_child(level_label)
-  var desc:=Label.new();desc.text=offer.description;desc.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;desc.add_theme_font_size_override("font_size",10);column.add_child(desc)
+  var desc:=Label.new();desc.text=DisplayNumbers.clean(offer.description);desc.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;desc.add_theme_font_size_override("font_size",10);column.add_child(desc)
+  inset.minimum_size_changed.connect(func():button.custom_minimum_size.y=maxf(88,inset.get_combined_minimum_size().y))
   if i==0:call_deferred("_grant_focus",button)
  var build_scroll:=ScrollContainer.new();build_scroll.custom_minimum_size.x=220;build_scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED;row.add_child(build_scroll)
  var build:=VBoxContainer.new();build.name="BuildPanel";build.custom_minimum_size.x=204;build.add_theme_constant_override("separation",4);build_scroll.add_child(build)
@@ -397,7 +399,7 @@ func _settings() -> void:
  _backdrop()
  _label(menu, "OPÇÕES", Rect2(28, 23, 584, 40), 29)
  var settings: Dictionary = game.profile.data.get("settings", {})
- _label(menu, "Volume", Rect2(65, 98, 180, 22), 14)
+ _label(menu, "Efeitos sonoros", Rect2(65, 98, 180, 22), 14)
  var volume := HSlider.new()
  volume.position = Vector2(276, 98)
  volume.size = Vector2(278, 22)
@@ -417,6 +419,10 @@ func _settings() -> void:
  effects.value = float(settings.get("effects", 0.75))
  effects.value_changed.connect(func(value: float): game.set_option("effects", value))
  menu.add_child(effects)
+ _label(menu,"Música",Rect2(65,234,180,22),14)
+ var music_volume:=HSlider.new();music_volume.name="MusicVolume";music_volume.position=Vector2(276,234);music_volume.size=Vector2(278,22)
+ music_volume.min_value=0;music_volume.max_value=1;music_volume.step=.05;music_volume.value=float(settings.get("music",.35))
+ music_volume.value_changed.connect(func(value):game.set_option("music",value));menu.add_child(music_volume)
  var shake := CheckButton.new()
  shake.text = "Tremor de câmera"
  shake.position = Vector2(65, 190)
@@ -532,7 +538,7 @@ func update_hud(data: Dictionary) -> void:
   status_text.text="Veneno %ds"%ceili(game.player.poison_remaining) if status_icon.visible else ""
  life_bar.max_value = maxf(1.0, float(data.get("max_hp", 100.0)))
  life_bar.value = float(data.get("hp", 100.0))
- life_text.text = "VIDA   %d / %d" % [int(data.get("hp", 100)), int(life_bar.max_value)]
+ life_text.text = "VIDA   %d / %d" % [ceili(data.get("hp", 100)), ceili(life_bar.max_value)]
  experience_bar.max_value = maxf(1.0, float(data.get("xp_needed", 10.0)))
  experience_bar.value = float(data.get("xp", 0))
  level_text.text = "NÍVEL %d" % int(data.get("level", 1))

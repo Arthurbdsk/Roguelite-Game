@@ -11,6 +11,16 @@ var radius: float
 var alive: bool = true
 var suppress_split:bool=false
 var garlic_until:float=0
+var garlic_sources:Dictionary={}
+func movement_control_multiplier()->float:
+	var factor:float=slow_factor if slow_remaining>0 else 1.0
+	if self is HordeBoss:return factor
+	for owner in garlic_sources.keys():
+		var w=garlic_sources[owner].get_ref()
+		if not is_instance_valid(w) or not w.attacks_enabled or int(w.levels.get("garlic",0))<=0 or w.game.player.down or position.distance_to(w.game.player.position)>w._stat("garlic","reach")+radius:
+			garlic_sources.erase(owner)
+		else:factor=minf(factor,.85)
+	return factor
 var elite: bool = false
 var state: String = "approach"
 var clock: float = 0
@@ -110,25 +120,25 @@ func tick(delta: float) -> void:
 			movement = Vector2.ZERO
 			if state_time > 1.25:
 				state = "approach"
-				attack_time = 4.0
+				attack_time = 4.0*game.balance.enemy_attack_interval_multiplier
 	if data.behavior == "boss" and attack_time <= 0:
 		attack_time = 4.5 if hp > max_hp * 0.5 else 3.2
 		# Locked positions before impact. Never follow the player during the warning.
-		game.add_hazard(game.player.position, 42, 1.3, 24)
+		game.add_hazard(game.player.position, 42, 1.3, 24,get_instance_id())
 		for i in 6:
 			var point := position + Vector2.from_angle(i * TAU / 6 + clock * 0.15) * 95
-			game.add_hazard(point, 22, 1.6, 16)
+			game.add_hazard(point, 22, 1.6, 16,get_instance_id())
 		state_time = 0
 	if data.behavior == "boss" and state_time < 0.8:
 		movement *= 0.15
 	if state=="approach":movement=game.navigation.steer(self,movement)
-	if slow_remaining>0:movement*=slow_factor
+	movement*=movement_control_multiplier()
 	velocity = movement + game.separation(self) * 14 + knockback
 	knockback = knockback.move_toward(Vector2.ZERO, delta * 500)
 	velocity=game.crowd_velocity(self,velocity)
 	move_body()
 	if data.contact_damage and offset.length() < radius + game.player.radius:
-		game.player.take_damage(data.damage * (1.25 if elite else 1), position)
+		game.player.take_damage(data.damage * (1.25 if elite else 1), position,get_instance_id())
 	sprite.frame = int(clock * 7) % 4
 	if data.frames >= 6 and state in ["prepare", "recovery"]:
 		sprite.frame = 4 if state == "prepare" else 5
@@ -161,11 +171,11 @@ func skeleton_attack(offset: Vector2, direction: Vector2) -> Vector2:
 			state_time = 0
 			attack_time = data.attack_interval
 			if data.behavior == "archer":
-				game.enemy_projectiles.fire(position + charge_direction * 12, charge_direction, data, summoner_id)
+				game.enemy_projectiles.fire(position + charge_direction * 12, charge_direction, data, summoner_id,get_instance_id())
 			else:
 				# One damage decision per swing, at its locked direction.
 				if distance <= data.attack_range + game.player.radius and absf(charge_direction.angle_to(direction)) <= deg_to_rad(data.attack_half_angle):
-					game.player.take_damage(data.damage, position)
+					game.player.take_damage(data.damage, position,get_instance_id())
 		return Vector2.ZERO
 	if state == "recovery":
 		if state_time >= data.recovery:

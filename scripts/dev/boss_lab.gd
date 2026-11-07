@@ -70,6 +70,7 @@ func validated_build(raw:Dictionary)->Dictionary:
  for category in ["weapons","passives"]:
   var definitions:Dictionary=game.weapon_system.weapon_data if category=="weapons" else game.weapon_system.passive_data
   for id in raw[category]:
+   if category=="weapons" and id=="blades":continue
    if not definitions.has(id) or not (raw[category][id] is float or raw[category][id] is int):return {}
    result[category][id]=clampi(int(raw[category][id]),1,8)
  return result
@@ -190,7 +191,7 @@ func complete(_won:bool):
  var clock:float=game.elapsed;game.clear_run();game.elapsed=clock;game.state="dev_complete";game.ui.render("running");status="Teste concluído. Reinicie ou escolha outro encontro."
 func boss_info()->String:
  var scale:Dictionary=game.enemy_scale()
- var result:String="Escala simulada: %d | Vida ×%.2f | Dano ×%.2f | Movimento ×%.2f | Quantidade ×%.2f\nSimular escala não testa conexões reais. Desafio ativo: %d.\n"%[applied_participants if running_test else participants,scale.health,scale.damage,scale.speed,scale.count,game.run_challenge]
+ var result:String="Escala simulada: %d | Vida %d%% | Dano %d%% | Movimento %d%% | Quantidade %d%%\nSimular escala não testa conexões reais. Desafio ativo: %d.\n"%[applied_participants if running_test else participants,scale.health*100,scale.damage*100,scale.speed*100,scale.count*100,game.run_challenge]
  if not is_instance_valid(game.boss):return result+status
  var boss=game.boss;var summons:int=game.boss_arena.summons.size()+game.late_arena.chain.count(boss.serial)+game.enemies.filter(func(e):return e is HazardTarget and e.owner_boss==boss.serial).size() if is_host() else boss.dev_summons_alive
  result+="Padrões: %d | Projéteis: %d/%d | Filas por limite: %d\n"%[game.late_arena.patterns.jobs.size(),game.late_arena.patterns.shots.size(),game.late_arena.patterns.config.max_projectiles,game.late_arena.patterns.blocked]
@@ -335,7 +336,7 @@ func performance_info()->String:
  var c=game.consumables
  var consumable_info:String="Consumíveis: %d/%d | Chance %.1f%% | Próxima tentativa %.1fs\nRelógio %.1fs | Cristais pendentes %d\n"%[c.items.size(),c.config.limit,c.chance()*100,maxf(0,c.next_check-game.elapsed),c.freeze_left,c.magnet_jobs.size()]
  consumable_info+="Setores: %s\nBloqueios: %s\n"%[str(game.director.sector_counts),str(game.director.blocked_reasons)]
- return consumable_info+"FPS %.1f | Corpos %d | Pares locais %d | Maior célula %d\nNavegação: consultas %d | Adiadas %d | Campos %d\nRede: protocolo 2 / WebSocket TCP | RTT %.0f ms | Jitter %.0f ms\nEnviados %d bytes | Recebidos %d bytes | Fila %d bytes / %d ms\nCodificação %.2f ms | Decodificação %.2f ms | Snapshot há %d ms\nTempos de simulação (microssegundos): %s"%[Engine.get_frames_per_second(),game.enemies.size(),game.crowd_pairs,game.crowded_cell_peak,game.navigation.queries,game.navigation.deferred,game.navigation.field_builds,metrics.rtt_ms,metrics.jitter_ms,metrics.tx_bytes,metrics.rx_bytes,metrics.queue_bytes,metrics.queue_age_ms,metrics.serialize_us/1000.0,metrics.decode_us/1000.0,Time.get_ticks_msec()-net.last_snapshot_ms if net.last_snapshot_ms>0 else 0,str(game.perf_us)]
+ return consumable_info+"FPS %.1f | Corpos %d | Pares locais %d | Maior célula %d\nNavegação: consultas %d | Adiadas %d | Campos %d\nRede: protocolo 2 / WebSocket TCP | RTT %.0f ms | Jitter %.0f ms\nEnviados %d bytes | Recebidos %d bytes | Fila %d bytes / %d ms\nCodificação %d µs | Decodificação %d µs | Snapshot há %d ms\nTempos de simulação (microssegundos): %s"%[Engine.get_frames_per_second(),game.enemies.size(),game.crowd_pairs,game.crowded_cell_peak,game.navigation.queries,game.navigation.deferred,game.navigation.field_builds,metrics.rtt_ms,metrics.jitter_ms,metrics.tx_bytes,metrics.rx_bytes,metrics.queue_bytes,metrics.queue_age_ms,metrics.serialize_us,metrics.decode_us,Time.get_ticks_msec()-net.last_snapshot_ms if net.last_snapshot_ms>0 else 0,str(game.perf_us)]
 
 func force_consumable(kind:String):
  if not active or not is_host():return
