@@ -1,10 +1,10 @@
 # Hordas Android
 
-Entrega atual 0.25.1-android.3, compatível com PC 0.25.1, protocolo 2, conteúdo 0.25.1+f69263393c14aee1. Arquivo local: build/Hordas-Android-0.25.1-3.apk. Instale por cima da versão anterior, sem desinstalar, para preservar o progresso.
+Entrega atual 0.25.2-android.4, compatível com PC 0.25.2, protocolo 2, conteúdo 0.25.2+6ba5d9724f77d754. APK local build/Hordas-Android-0.25.2-4.apk. Instale por cima sem desinstalar para preservar o progresso.
 
-Coop com quatro jogadores: 1,7 vezes o dano e 2 vezes a geração, vida/velocidade do solo. Android solo com 40% menos geração contínua e inimigos 20% menores visualmente. PC solo preservado. [Entrega, testes e limites](docs/ANDROID_0_25_3.md).
+Dano, vida, resistência e geração iguais ao PC. Removida a redução exclusiva de spawn no solo Android. Somente Orc comum e Soldado ficam 20% menores visualmente; demais criaturas voltaram ao tamanho do PC. [Correção, auditoria nativa e limitações](docs/ANDROID_0_25_4.md).
 
-Android volta a ficar congelado. [Política de manutenção](docs/ANDROID_POLICY.md). Não houve publicação em loja ou GitHub Releases. Exportação manual somente por pedido autorizado, via python tools/android/export_android.py --android-request. Chaves fora do repositório; o APK QA separado não é a entrega pública.
+Android volta a ficar congelado após esta atualização autorizada. [Política de manutenção](docs/ANDROID_POLICY.md). Sem publicação em loja. Exportação manual autorizada via python tools/android/export_android.py --android-request. O APK QA separado não é o jogo público.
 
 ## Histórico da base de PC
 

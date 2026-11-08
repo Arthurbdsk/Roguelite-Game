@@ -3,7 +3,7 @@ config_version=5
 
 [application]
 config/name="Brasafria"
-config/version="0.25.1-android.3"
+config/version="0.25.2-android.4"
 config/quit_on_go_back=false
 config/use_custom_user_dir=true
 config/custom_user_dir_name="Hordas Android"

@@ -1,0 +1,63 @@
+{
+  "android": true,
+  "bestiary": {
+    "beast": {
+      "kills": 0,
+      "seen": 3
+    },
+    "demon": {
+      "kills": 1,
+      "seen": 1
+    },
+    "devourer": {
+      "kills": 1,
+      "seen": 3
+    },
+    "executioner": {
+      "kills": 0,
+      "seen": 3
+    },
+    "ghoul": {
+      "kills": 0,
+      "seen": 120
+    },
+    "guard": {
+      "kills": 1,
+      "seen": 3
+    },
+    "necromancer": {
+      "kills": 0,
+      "seen": 3
+    },
+    "orc_armored": {
+      "kills": 0,
+      "seen": 3
+    },
+    "plague": {
+      "kills": 1,
+      "seen": 3
+    },
+    "shadow": {
+      "kills": 0,
+      "seen": 3
+    },
+    "skeleton_archer": {
+      "kills": 0,
+      "seen": 5
+    },
+    "skeleton_sword": {
+      "kills": 0,
+      "seen": 11
+    },
+    "slime_small": {
+      "kills": 0,
+      "seen": 3
+    }
+  },
+  "failures": 0,
+  "gold": 219,
+  "host": false,
+  "identity": "0.25.1+f69263393c14aee1",
+  "passed": true,
+  "runs": 1
+}

@@ -1,6 +1,6 @@
 # Estado atual
 
-PC 0.25.1 e Android 0.25.1-android.3: coop com dano 1,7x e quantidade 2x para quatro jogadores, progressão linear para dois e três, vida/velocidade do solo. Android solo com geração contínua 40% menor e inimigos visualmente 20% menores. Solo PC e regras de colisão online preservados. Protocolo 2, conteúdo `0.25.1+f69263393c14aee1`. [Entrega e testes](BALANCEAMENTO_0_25_1.md). Android volta a ficar congelado após esta atualização autorizada. Testes em celular físico e redes distintas ficam com o usuário.
+PC 0.25.2 e Android 0.25.2-android.4, protocolo 2, conteúdo 0.25.2+6ba5d9724f77d754. Removido o spawn exclusivo do Android: ambas as plataformas usam os mesmos valores de gameplay. Apenas Orc comum e herói são 20% menores visualmente no Android; demais criaturas iguais ao PC. Coop continua em 1,7x dano e 2x quantidade com quatro jogadores, vida/velocidade do solo. [Auditoria e entrega](PARIDADE_0_25_2.md). Android volta a ficar congelado após esta atualização autorizada. Testes físicos e redes distintas ficam com o usuário.
 
 O texto abaixo preserva o histórico dos envios anteriores, até a versão 0.9.0.
 

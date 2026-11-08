@@ -22,6 +22,7 @@ func setup(owner):
  if mode=="cross25":
   var fixture=load("res://scripts/mobile/crossplay25_qa.gd").new();add_child(fixture);fixture.setup(game,request)
  elif mode=="balance251":balance_test()
+ elif mode=="parity252":parity_test()
  elif mode=="network":network(request)
  else:load_test(request)
 func load_test(request:Dictionary):
@@ -96,19 +97,19 @@ func release_revive_later():
 func balance_test():
  game.set_physics_process(false);game.start_run()
  check(OS.has_feature("android"),"native Android")
- check(is_equal_approx(game.director.rate(),54.0),"solo 54 enemies per minute")
+ check(is_equal_approx(game.director.rate(),90.0),"solo 90 enemies per minute")
  var meter=Meter.new();meter.setup(game);meter.cooldown=0
  for i in 3600:meter.tick(1.0/60)
- check(absi(meter.total_spawned-54)<=1,"real director debt produces 54 enemies in simulated minute")
+ check(absi(meter.total_spawned-90)<=1,"real director debt produces 90 enemies in simulated minute")
  var species:int=0
  for id in EnemyCatalog.ids(game):
   var e=game.spawn_enemy(id,Vector2(1100,730));check(e!=null,id)
   if e==null:continue
   species+=1
-  check(is_equal_approx(e.sprite.get_parent().scale.x,.8),"smaller "+id)
+  check(is_equal_approx(e.sprite.get_parent().scale.x,.8 if id=="ghoul" else 1.0),"smaller "+id)
   check(is_equal_approx(e.get_child(0).shape.radius,e.radius),"collision "+id)
-  if e is Devourer:e.meals=3;e.growth_visual();check(is_equal_approx(e.sprite.get_parent().scale.x,.8),"growth keeps visual multiplier")
-  if e is HordeBoss:e.form=2;e.apply_visual_form();check(is_equal_approx(e.sprite.get_parent().scale.x,.8),"boss phase keeps visual multiplier")
+  if e is Devourer:e.meals=3;e.growth_visual();check(is_equal_approx(e.sprite.get_parent().scale.x,.8 if id=="ghoul" else 1.0),"growth keeps visual multiplier")
+  if e is HordeBoss:e.form=2;e.apply_visual_form();check(is_equal_approx(e.sprite.get_parent().scale.x,.8 if id=="ghoul" else 1.0),"boss phase keeps visual multiplier")
   game.clear_run();game.state="running"
  game.coop.active=true;game.coop.hosting=true
  var scales:Array=[]
@@ -124,6 +125,27 @@ func balance_test():
   var e=game.spawn_enemy(id,game.player.position+Vector2(-120+i*80,-35));i+=1
  await RenderingServer.frame_post_draw
  get_viewport().get_texture().get_image().save_png("user://balance251.png")
- var result:Dictionary={"passed":failed==0,"failures":failed,"android_native":true,"species":species,"simulated_minute_spawns":meter.total_spawned,"solo_rate":54,"visual_multiplier":.8,"coop_scales":scales,"identity":GameCompatibility.identity()}
+ var result:Dictionary={"passed":failed==0,"failures":failed,"android_native":true,"species":species,"simulated_minute_spawns":meter.total_spawned,"solo_rate":90,"visual_multiplier":.8,"coop_scales":scales,"identity":GameCompatibility.identity()}
  var f=FileAccess.open("user://balance251-result.json",FileAccess.WRITE);f.store_string(JSON.stringify(result));f.close()
  print("ANDROID_BALANCE251_"+("PASS" if failed==0 else "FAIL")+" "+JSON.stringify(result))
+
+func parity_test():
+ var data:Dictionary=await load("res://scripts/diagnostics/combat_parity252.gd").capture(game)
+ var visuals:Dictionary={"hero":game.player.sprite.get_parent().scale.x}
+ check(is_equal_approx(float(visuals.hero),.8),"only hero visual reduced")
+ for id in EnemyCatalog.ids(game):
+  var e=game.spawn_enemy(id,Vector2(1100,730));check(e!=null,id)
+  if e==null:continue
+  visuals[id]=e.sprite.get_parent().scale.x
+  check(is_equal_approx(float(visuals[id]),.8 if id=="ghoul" else 1.0),"selective size "+id)
+  if e is Devourer:e.meals=3;e.growth_visual();check(e.sprite.get_parent().scale.x==1,"devourer size restored")
+  if e is HordeBoss:e.form=2;e.apply_visual_form();check(e.sprite.get_parent().scale.x==1,"boss size restored")
+  game.clear_run();game.state="running"
+ var i:int=0
+ for id in ["ghoul","skeleton_sword","hound","skeleton_archer","shadow"]:
+  game.spawn_enemy(id,game.player.position+Vector2(-160+i*80,-40));i+=1
+ await RenderingServer.frame_post_draw
+ get_viewport().get_texture().get_image().save_png("user://parity252.png")
+ var result:Dictionary={"passed":failed==0,"failures":failed,"android_native":true,"identity":GameCompatibility.identity(),"combat":data,"visuals":visuals}
+ var f=FileAccess.open("user://parity252-result.json",FileAccess.WRITE);f.store_string(JSON.stringify(result));f.close()
+ print("ANDROID_PARITY252_"+("PASS" if failed==0 else "FAIL"))

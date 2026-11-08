@@ -1,8 +1,8 @@
 {
-  "mobile_version": "0.25.1-android.3",
-  "android_version_code": 3,
-  "base_pc_version": "0.25.1",
-  "base_pc_commit": "3b73d3f",
+  "mobile_version": "0.25.2-android.4",
+  "android_version_code": 4,
+  "base_pc_version": "0.25.2",
+  "base_pc_commit": "6b319f308b19ecbd17c9917ac44741bb3622f614",
   "incorporated_pc_commits": [
     "9f4982d7d6c9a5861c3d1048fb2fe899bc945c62",
     "091d93f1b2d8e121bb1b111d07c2f839f7d0ef41",
@@ -11,12 +11,13 @@
     "c4624b7777f6df7644cceb50335bbb602d7bf741",
     "6d7774cd9b64337865e2829183d3e6b00789eb3d",
     "4276c18125e5a61f57022437569729a0afe577e0",
-    "3b73d3f"
+    "3b73d3f",
+    "6b319f308b19ecbd17c9917ac44741bb3622f614"
   ],
-  "previous_mobile_commit": "d21c73d542584b83c798e54d8bcc810e999a2f87",
+  "previous_mobile_commit": "c9f5bcf7d3baa4282692ab52c2478c82e0b6fd75",
   "protocol": 2,
-  "compatible_game_version": "0.25.1",
-  "compatibility_id": "0.25.1+f69263393c14aee1",
+  "compatible_game_version": "0.25.2",
+  "compatibility_id": "0.25.2+6ba5d9724f77d754",
   "application_id": "com.socialy.hordas.android",
   "authorized_update": "2026-11-08",
   "maintenance": "Frozen after this delivery; new explicit Android request required."
