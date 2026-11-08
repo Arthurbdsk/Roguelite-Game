@@ -24,6 +24,7 @@ class Updater {
    var platforms=(Dictionary<string,object>)m["platforms"];var p=(Dictionary<string,object>)platforms["pc"];
    string download=Path.Combine(work,"download.part");
    if((string)p["platform"]!="pc" || new FileInfo(download).Length!=Convert.ToInt64(p["size"]))throw new Exception("Plataforma/tamanho invalidos");
+   using(var reader=new BinaryReader(File.OpenRead(download))){if(reader.ReadUInt16()!=0x5a4d)throw new Exception("Formato invalido");reader.BaseStream.Position=0x3c;int offset=reader.ReadInt32();if(offset<64||offset>reader.BaseStream.Length-6)throw new Exception("Formato invalido");reader.BaseStream.Position=offset;if(reader.ReadUInt32()!=0x4550||reader.ReadUInt16()!=0x8664)throw new Exception("Executavel nao e Windows x64");}
    using(var sha=SHA256.Create())using(var file=File.OpenRead(download)){if(BitConverter.ToString(sha.ComputeHash(file)).Replace("-","").ToLowerInvariant()!=(string)p["sha256"])throw new Exception("Arquivo corrompido");}
    try {var old=Process.GetProcessById(Convert.ToInt32(r["pid"]));if(!old.WaitForExit(60000))throw new Exception("Jogo ainda aberto");}catch(ArgumentException){}
    Directory.CreateDirectory(root);

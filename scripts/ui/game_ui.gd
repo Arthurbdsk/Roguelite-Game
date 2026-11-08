@@ -190,6 +190,7 @@ func render(which: String, data: Dictionary = {}) -> void:
   "maps": _map_selection()
   "hub": _hub(data)
   "updates":
+   _backdrop(.98)
    var view:=UpdateView.new();menu.add_child(view);view.setup(game,self)
   "bestiary":
    var view:=BestiaryView.new();menu.add_child(view);view.setup(game,self)

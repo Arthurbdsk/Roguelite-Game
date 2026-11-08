@@ -22,6 +22,7 @@ func installed()->String:return str(ProjectSettings.get_setting("application/con
 func version_code(s:String)->int:
  var a:=s.split("-")[0].split(".");return int(a[0])*1000000+(int(a[1])*1000 if a.size()>1 else 0)+(int(a[2]) if a.size()>2 else 0)
 func available()->bool:return not release.is_empty() and version_code(str(release.version))>version_code(installed())
+func online_blocked()->bool:return bool(release.get("online_required",false)) and release.get("compatibility",GameCompatibility.identity())!=GameCompatibility.identity()
 func check():
  if busy:return
  phase="manifest";busy=true;status="Verificando atualização...";changed.emit();request.body_size_limit=262144;request.download_file=""
@@ -55,7 +56,8 @@ func validate_download()->bool:
  if data.is_empty() or data.get("platforms",{}).get(platform(),{})!=release:return false
  if not FileAccess.file_exists(path):return false
  var f:=FileAccess.open(path,FileAccess.READ)
- return f!=null and f.get_length()==int(release.size) and FileAccess.get_sha256(path)==str(release.sha256)
+ if f==null or f.get_length()!=int(release.size) or FileAccess.get_sha256(path)!=str(release.sha256):return false
+ return f.get_16()==0x5a4d if platform()=="pc" else f.get_32()==0x04034b50
 func download():
  if busy or not available():return
  var dir:=DirAccess.open("user://updates")
@@ -85,7 +87,8 @@ func install_android():
  for i in current.signatures.size():
   if not current.signatures[i].equals(incoming.signatures[i]):fail("Assinatura do APK incompatível.");return
  var Intent=JavaClassWrapper.wrap("android.content.Intent");var Uri=JavaClassWrapper.wrap("android.net.Uri")
- if not pm.canRequestPackageInstalls():
+ var sdk=JavaClassWrapper.wrap("android.os.Build$VERSION")
+ if int(sdk.SDK_INT)>=26 and not pm.canRequestPackageInstalls():
   activity.startActivity(Intent.Intent("android.settings.MANAGE_UNKNOWN_APP_SOURCES",Uri.parse("package:"+activity.getPackageName())))
   status="Autorize instalar desta origem e toque em Instalar atualização novamente.";changed.emit();return
  var File=JavaClassWrapper.wrap("java.io.File");var provider=JavaClassWrapper.wrap("androidx.core.content.FileProvider")
