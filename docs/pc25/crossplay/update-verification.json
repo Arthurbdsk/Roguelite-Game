@@ -1,0 +1,12 @@
+{
+  "certificate_preserved": true,
+  "certificate_sha256": "a2d917b419ab3da9572b72f1e0c825b56b800ef6ef011ed4108591b396449c05",
+  "old_version_code": 2,
+  "old_profile_existed": true,
+  "profile_bytes_unchanged_after_install": true,
+  "profile_before_sha256": "8597c881f17a07dde15721615b3144603e0ddbb6734cd47a0d9e38c77d7773e1",
+  "application_id": "com.socialy.hordas.android",
+  "version_code": 2,
+  "compatibility_id": "0.25.0+24d20eff97f22428",
+  "public_qa_dev_excluded": true
+}
