@@ -6,10 +6,12 @@ using System.Text;
 using System.Threading;
 using System.Web.Script.Serialization;
 using System.Collections.Generic;
+using System.Net;
 class Updater {
  const string PublicKey="PUBLIC_KEY_XML";
  static string target,backup,root;static bool applied;static Process child;
  static int Main(string[] args) {
+  if(args.Length>=4&&args[0]=="--fetch")return Fetch(args);
   root=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"Hordas","Game");
   target=Path.Combine(root,"Hordas.exe");backup=Path.Combine(root,"Hordas.previous.exe");
   string work=Path.GetDirectoryName(Path.GetFullPath(args[0]));
@@ -40,5 +42,23 @@ class Updater {
    try{if(applied&&File.Exists(backup)){if(child!=null&&!child.HasExited){child.Kill();child.WaitForExit();}File.Copy(backup,target,true);Process.Start(target);}File.WriteAllText(Path.Combine(work,"result.txt"),"ERRO: "+e.Message);}catch{}
    return 1;
   }
+ }
+ static int Fetch(string[] args) {
+  string destination=args[2];
+  try {
+   var uri=new Uri(args[1]);if(uri.Scheme!="https")throw new Exception("HTTPS obrigatorio");
+   ServicePointManager.SecurityProtocol=SecurityProtocolType.Tls12;
+   long limit=long.Parse(args[3]);
+   if(args.Length==5){string pin=args[4];ServicePointManager.ServerCertificateValidationCallback=(sender,cert,chain,errors)=>{using(var sha=SHA256.Create()){string actual=BitConverter.ToString(sha.ComputeHash(cert.GetRawCertData())).Replace("-","").ToLowerInvariant();File.WriteAllText(destination+".tls",actual+" expected "+pin);return actual==pin;}};}
+   var request=(HttpWebRequest)WebRequest.Create(uri);if(uri.IsLoopback)request.Proxy=null;request.KeepAlive=false;request.ProtocolVersion=HttpVersion.Version10;request.Timeout=30000;request.ReadWriteTimeout=30000;request.UserAgent="Hordas-Updater";
+   using(var response=(HttpWebResponse)request.GetResponse()) {
+    if(response.ResponseUri.Scheme!="https"||response.ContentLength>limit)throw new Exception("Resposta invalida");
+    using(var input=response.GetResponseStream())using(var output=File.Create(destination)){
+     byte[] buffer=new byte[65536];int read;long total=0;
+     while((read=input.Read(buffer,0,buffer.Length))>0){total+=read;if(total>limit)throw new Exception("Arquivo grande demais");output.Write(buffer,0,read);File.WriteAllText(destination+".progress",total.ToString());}
+    }
+   }
+   File.WriteAllText(destination+".result","200");return 0;
+  }catch(Exception e){File.WriteAllText(destination+".result","ERROR "+e.ToString());return 1;}
  }
 }

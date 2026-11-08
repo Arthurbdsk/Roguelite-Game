@@ -11,6 +11,9 @@ var install_ready:bool=false
 var progress:float=0
 var request:HTTPRequest
 var phase:String=""
+var fetch_pid:int=-1
+var fetch_path:String=""
+var test_tls_pin:String=""
 var envelope:String=""
 var path:String="user://updates/download.part"
 func platform()->String:return "android" if OS.has_feature("android") else "pc"
@@ -20,13 +23,13 @@ func setup(g):
  if FileAccess.file_exists(path):DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
 func installed()->String:return str(ProjectSettings.get_setting("application/config/version"))
 func version_code(s:String)->int:
- var a:=s.split("-")[0].split(".");return int(a[0])*1000000+(int(a[1])*1000 if a.size()>1 else 0)+(int(a[2]) if a.size()>2 else 0)
-func available()->bool:return not release.is_empty() and version_code(str(release.version))>version_code(installed())
+ var a:=s.split("-")[0].split(".");return (int(a[0])*1000000+(int(a[1])*1000 if a.size()>1 else 0)+(int(a[2]) if a.size()>2 else 0))*1000+(int(s.get_slice("android.",1)) if s.contains("android.") else 0)
+func available()->bool:return not release.is_empty() and version_code(str(release.get("version",installed())))>version_code(installed())
 func online_blocked()->bool:return bool(release.get("online_required",false)) and release.get("compatibility",GameCompatibility.identity())!=GameCompatibility.identity()
 func check():
  if busy:return
  phase="manifest";busy=true;status="Verificando atualização...";changed.emit();request.body_size_limit=262144;request.download_file=""
- if request.request(endpoint)!=OK:fail("Sem conexão. Você pode jogar normalmente.")
+ if start_request(endpoint,262144,true)!=OK:fail("Sem conexão. Você pode jogar normalmente.")
 func fail(message:String):busy=false;install_ready=false;status=message;changed.emit()
 func verify_manifest(text:String)->Dictionary:
  var e=JSON.parse_string(text)
@@ -44,7 +47,7 @@ func completed(result:int,code:int,_headers:PackedStringArray,body:PackedByteArr
   var text:=body.get_string_from_utf8();var data:=verify_manifest(text)
   if data.is_empty():fail("Manifesto inválido, vencido ou sem assinatura confiável.");return
   var record=data.get("platforms",{}).get(platform(),{})
-  if not record is Dictionary or record.get("platform")!=platform() or not str(record.get("url","")).begins_with("https://") or int(record.get("size",0))<=0 or str(record.get("sha256","")).length()!=64:fail("Nenhuma versão válida publicada para esta plataforma.");return
+  if not record is Dictionary or not record.get("version") is String or record.get("platform")!=platform() or not str(record.get("url","")).begins_with("https://") or int(record.get("size",0))<=0 or str(record.get("sha256","")).length()!=64:fail("Nenhuma versão válida publicada para esta plataforma.");return
   envelope=text;release=record
   if game.ui.screen=="title":game.ui.call_deferred("render","title")
   status="Atualização disponível." if available() else "Você está na versão mais recente";changed.emit()
@@ -63,15 +66,35 @@ func download():
  var dir:=DirAccess.open("user://updates")
  if dir==null or dir.get_space_left()<int(release.size)*3:fail("Espaço insuficiente para baixar e manter uma cópia recuperável.");return
  install_ready=false;progress=0;busy=true;phase="download";status="Baixando atualização...";request.body_size_limit=int(release.size);request.download_file=path;changed.emit()
- if request.request(release.url)!=OK:fail("Não foi possível iniciar o download.")
+ if start_request(release.url,int(release.size),false)!=OK:fail("Não foi possível iniciar o download.")
 func cancel():
+ if fetch_pid>0:OS.kill(fetch_pid);fetch_pid=-1
  request.cancel_request();busy=false;install_ready=false;status="Download cancelado. Você pode tentar novamente."
  if FileAccess.file_exists(path):DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
  changed.emit()
 func _process(_delta):
- if busy and phase=="download":progress=100.0*request.get_downloaded_bytes()/maxi(1,int(release.get("size",1)));changed.emit()
+ if fetch_pid>0:
+  if FileAccess.file_exists(fetch_path+".progress") and phase=="download":progress=100.0*int(FileAccess.get_file_as_string(fetch_path+".progress"))/maxi(1,int(release.get("size",1)));changed.emit()
+  if not OS.is_process_running(fetch_pid):
+   fetch_pid=-1
+   var ok:bool=FileAccess.file_exists(fetch_path+".result") and FileAccess.get_file_as_string(fetch_path+".result")=="200"
+   completed(HTTPRequest.RESULT_SUCCESS if ok else HTTPRequest.RESULT_CANT_CONNECT,200 if ok else 0,PackedStringArray(),FileAccess.get_file_as_bytes(fetch_path) if phase=="manifest" and ok else PackedByteArray())
+ elif busy and phase=="download":progress=100.0*request.get_downloaded_bytes()/maxi(1,int(release.get("size",1)));changed.emit()
+func start_request(url:String,limit:int,manifest:bool)->int:
+ if OS.get_name()!="Windows":return request.request(url)
+ fetch_path="user://updates/manifest.part" if manifest else path
+ for suffix in [".result",".progress"]:
+  if FileAccess.file_exists(fetch_path+suffix):DirAccess.remove_absolute(ProjectSettings.globalize_path(fetch_path+suffix))
+ var helper_path:=ProjectSettings.globalize_path("user://updates/Fetch.exe")
+ var helper:=FileAccess.open(helper_path,FileAccess.WRITE)
+ if helper==null:return ERR_CANT_CREATE
+ helper.store_buffer(FileAccess.get_file_as_bytes("res://data/updates/Updater.exe"));helper.close()
+ var args:=PackedStringArray(["--fetch",url,ProjectSettings.globalize_path(fetch_path),str(limit)])
+ if game.test_mode and not test_tls_pin.is_empty():args.append(test_tls_pin)
+ fetch_pid=OS.create_process(helper_path,args)
+ return OK if fetch_pid>0 else ERR_CANT_FORK
 func install():
- if game.state=="running" or game.coop.active:status="Encerre a partida antes de instalar.";changed.emit();return
+ if game.state not in ["title","hub","online"] or game.coop.active:status="Encerre a partida antes de instalar.";changed.emit();return
  if not install_ready or not validate_download():fail("Validação falhou. Baixe novamente.");return
  if platform()=="android":install_android();return
  var folder:=ProjectSettings.globalize_path("user://updates/")
@@ -98,3 +121,5 @@ func install_android():
 
 func digest(bytes:PackedByteArray)->PackedByteArray:
  var h:=HashingContext.new();h.start(HashingContext.HASH_SHA256);h.update(bytes);return h.finish()
+func _exit_tree():
+ if fetch_pid>0 and OS.is_process_running(fetch_pid):OS.kill(fetch_pid)

@@ -18,13 +18,13 @@ func run():
    var hazard:bool=e is HazardTarget
    var base:float=g.enemy_base_health(id)
    var event_factor:float=g.survival_config.events.siege_health if id=="siege_archer" else g.survival_config.events.blue_health if id=="event_blue" else g.survival_config.events.small_health if id=="event_small" else 1
-   var expected:float=(base+30)*g.balance.enemy_health_multiplier*g.enemy_scale().health*event_factor
+   var expected:float=(base+(0 if EarlyBalance.applies(id) else 30))*g.balance.enemy_health_multiplier*g.enemy_scale().health*event_factor
    if not hazard:check(is_equal_approx(e.max_hp,expected),"+30 before difficulty once "+id)
    rows.append({"enemy":id,"challenge":challenge,"base_before_bonus":base,"initial_hp":e.max_hp,"time_bonus":0})
    var initial:float=e.max_hp;g.elapsed=240;g.horde_progress.tick();var grown:float=e.max_hp
    for i in 3:g.horde_progress.apply(e)
    check(is_equal_approx(e.max_hp,grown),"time bonus idempotent "+id)
-   if not hazard:check(is_equal_approx(grown-initial,70*event_factor),"existing timed health preserved "+id)
+   if not hazard:check(is_equal_approx(grown-initial,(3 if EarlyBalance.applies(id) else 70)*event_factor),"existing timed health preserved "+id)
    if id in ["demon","horror"]:
     e.take_damage(1e9)
     var factor:float=g.boss_balance.second_health_multiplier if id=="demon" else g.campaign.config.true_health_ratio

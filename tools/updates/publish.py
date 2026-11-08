@@ -21,6 +21,8 @@ if not identity:identity=json.loads((root/'data/gameplay_manifest.json').read_te
 tag='update-'+a.platform+'-'+version
 url='https://github.com/Arthurbdsk/Roguelite-Game/releases/download/'+tag+'/'+artifact.name
 data['platforms'][a.platform]={'version':version,'platform':a.platform,'size':artifact.stat().st_size,'sha256':hashlib.sha256(artifact.read_bytes()).hexdigest(),'url':url,'notes':Path(a.notes).read_text(encoding='utf-8'),'compatibility':identity,'protocol':2,'online_required':a.online_required}
+for platform,record in data['platforms'].items():
+ record['compatible_versions']=' / '.join(('PC' if name=='pc' else 'Android')+' '+other['version'] for name,other in data['platforms'].items() if other['compatibility']==record['compatibility'])
 payload=json.dumps(data,ensure_ascii=False,separators=(',',':')).encode();e={'payload':base64.b64encode(payload).decode(),'signature':base64.b64encode(key.sign(payload,padding.PKCS1v15(),hashes.SHA256())).decode()}
 out=root/'build/updates';out.mkdir(exist_ok=True);(out/'stable.json').write_text(json.dumps(e))
 if a.publish:

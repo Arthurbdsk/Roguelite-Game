@@ -1,8 +1,8 @@
 {
-  "version": "0.26.0",
+  "version": "0.26.1",
   "protocol": 2,
   "content_sha256": "340a633a04e971b2307f2aa1e775ed2a6701aa6bca4ae1843884b15b3e214124",
-  "compatibility_id": "0.26.0+340a633a04e971b2",
+  "compatibility_id": "0.26.1+340a633a04e971b2",
   "files": {
     "data/balance16_audit.json": "8c3f5b84f1a117dd28219d2ba282cfa1b1c5a93c94cfde153e3785d8412f59d3",
     "data/balance18_audit.json": "4859989e20e3337ac83aa6f166a4fd559b369c543835cf6e70f6ddcc4dfc8697",

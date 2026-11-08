@@ -7,5 +7,5 @@ func run():
  assert(not u.verify_manifest(good).is_empty());assert(u.verify_manifest(good.replace("payload","bad")).is_empty())
  var e:Dictionary=JSON.parse_string(good);e.signature="AAAA";assert(u.verify_manifest(JSON.stringify(e)).is_empty())
  u.cancel();assert(not u.busy and not u.install_ready)
- g.ui.render("updates");await process_frame;assert(g.ui.menu.get_child(0) is UpdateView)
+ g.ui.render("updates");await process_frame;assert(g.ui.menu.get_child(g.ui.menu.get_child_count()-1) is UpdateView)
  g.ui.render("title");g.queue_free();await process_frame;await create_timer(.2).timeout;print("UPDATES253_PASS signed manifest, invalid signature/schema, cancel, UI");quit()
