@@ -23,7 +23,7 @@ func fresh(kind: String):
 	game.coop.actors.b.player.position = Vector2(450,350)
 	game.coop.actors.c.player.position = Vector2(1300,350)
 	game.coop.actors.d.player.position = Vector2(1300,900)
-	for actor in game.coop.actors.values(): actor.weapon_system.levels = {"sword":0,"bolt":0,"orbit":0}
+	for actor in game.coop.actors.values():actor.weapon_system.attacks_enabled=false
 	return game.spawn_enemy(kind, Vector2(900,630))
 
 func run() -> void:
@@ -40,7 +40,7 @@ func run() -> void:
 		var boss = fresh(kind)
 		await physics_frame
 		game.simulate(1.0/60)
-		check(is_equal_approx(boss.velocity.length(), (102.4 if kind == "executioner" else 112.0)*game.balance.enemy_speed_multiplier), "actual four-player chase speed: " + kind)
+		check(is_equal_approx(boss.velocity.length(), (64.0 if kind == "executioner" else 70.0)*game.balance.enemy_speed_multiplier), "solo chase speed in four-player match: " + kind)
 		for attack in (["execute", "charge"] if kind == "executioner" else ["charge"]):
 			boss = fresh(kind)
 			if attack == "execute": game.player.position = Vector2(840,630)
@@ -59,7 +59,7 @@ func run() -> void:
 	boss.hp = boss.max_hp * 0.4
 	await physics_frame
 	game.simulate(1.0/60)
-	check(is_equal_approx(boss.velocity.length(), 108.544*game.balance.enemy_speed_multiplier), "four-player enraged executioner retains requested speed multiplier")
+	check(is_equal_approx(boss.velocity.length(), 67.84*game.balance.enemy_speed_multiplier), "four-player enraged executioner retains its own phase speed")
 	var fast=fresh("hound")
 	game.player.position=Vector2(700,700);fast.position=Vector2(675,700)
 	game.coop.local_input_override={"movement":Vector2.RIGHT,"revive":false}

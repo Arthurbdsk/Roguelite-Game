@@ -8,6 +8,7 @@ var cosmetic_discards:int=0
 func setup(owner):game=owner;z_index=-1
 func reset():effects.clear();seen.clear();cosmetic_discards=0;queue_redraw()
 func died(enemy):
+ if enemy is HordeBoss:return # BossArena owns the complete boss death presentation.
  if enemy.tiny_kind.is_empty():return
  var event:Dictionary={"type":"tiny_death","id":enemy.serial,"kind":enemy.tiny_kind,"at":enemy.position,"flip":enemy.sprite.flip_h,"scale":enemy.sprite.scale.x,"clock":game.elapsed}
  receive(event)

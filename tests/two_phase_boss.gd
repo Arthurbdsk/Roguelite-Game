@@ -13,6 +13,6 @@ func run():
 	g.coop.connection.peer_id="a";g.coop.hosting=true
 	g.coop.begin({"run":"scale_fixture","players":[{"id":"a","name":"A","skills":{}},{"id":"b","name":"B","skills":{}},{"id":"c","name":"C","skills":{}},{"id":"d","name":"D","skills":{}}]})
 	boss=g.spawn_enemy("demon",Vector2(900,900));first=boss.max_hp;boss.take_damage(100000)
-	assert(is_equal_approx(first,(g.boss_balance.demon_health()+30)*2.5*g.balance.enemy_health_multiplier) and is_equal_approx(boss.max_hp,(first-boss.spawn_health_bonus)*5+boss.spawn_health_bonus))
+	assert(is_equal_approx(first,(g.boss_balance.demon_health()+30)*g.balance.enemy_health_multiplier) and is_equal_approx(boss.max_hp,(first-boss.spawn_health_bonus)*5+boss.spawn_health_bonus))
 	g.queue_free();await process_frame;await create_timer(.2).timeout
 	print("TWO_PHASE_BOSS_PASS transition, final reward and multiplayer scaling");quit()

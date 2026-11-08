@@ -111,6 +111,7 @@ func begin(packet: Dictionary) -> void:
  game.run_id = room_run
  initial_size = packet.players.size()
  active = true
+ game.bestiary.begin(room_run)
  ended = false
  menu_open = false
  actors.clear()
@@ -238,6 +239,7 @@ func host_tick(delta: float, local: Dictionary) -> void:
   var actor: CoopActor = actors[id]
   if not actor.down:
    actor.weapon_system.update_combat(delta, not actions[id].revive)
+ game.bestiary.tick(delta)
  game.perf_mark("weapons_damage",perf_start)
  perf_start=Time.get_ticks_usec() if game.perf_enabled else 0
  game.update_pickups(delta)
@@ -275,6 +277,7 @@ func host_tick(delta: float, local: Dictionary) -> void:
    last_health[id] = health
    publish({"type": "health", "id": id, "hp": health[0], "down": health[1], "invulnerable": actors[id].player.invulnerable})
   var personal: Dictionary = actors[id].personal()
+  personal.bestiary=game.bestiary.personal(id)
   var serialized: String = JSON.stringify(personal)
   if last_personal.get(id) != serialized:
    last_personal[id] = serialized
@@ -392,6 +395,7 @@ func finish(won: bool) -> void:
   return
  if ended: return
  var result := {"gold_fractions":{},"gold_bonuses":{},"won": won, "elapsed": game.elapsed, "kills": game.kills, "gold": game.gold, "earned": game.earned, "wave": game.director.wave_number()}
+ result.bestiary=game.bestiary.totals.duplicate(true)
  for id in actors:
   result.gold_bonuses[id]=actors[id].mastery.gold_bonus;result.gold_fractions[id]=actors[id].mastery.gold_fraction
  if hosting: publish({"type": "end", "data": result})
@@ -402,6 +406,7 @@ func settle(result: Dictionary) -> void:
  game.consumables.reset()
  if ended: return
  result=result.duplicate(true);result.won=bool(result.get("won",false)) or game.campaign.cleared
+ game.bestiary.receive(room_run,result.get("bestiary",{}).get(connection.peer_id,{}))
  game.chests.reset();game.special_events.stop()
  ended = true
  if is_instance_valid(team_hud): team_hud.hide()
@@ -548,6 +553,9 @@ func apply_event(data: Dictionary) -> void:
    game.sound.play_cue("gold")
    if game.gold_loot.feedback.size() < 12: game.gold_loot.feedback.append({"at": CoopWire.vector(data.at) - Vector2(0,26), "life": 0.55, "amount": int(data.amount)})
   "personal":
+   var journal:Dictionary=data.data.get("bestiary",{})
+   if not journal.is_empty() and journal.get("run","")!=room_run:return
+   game.bestiary.receive(str(journal.get("run","")),journal.get("totals",{}))
    received_personal = data.data
    var actor: CoopActor = actors[connection.peer_id]
    actor.level = int(data.data.level)
@@ -662,6 +670,7 @@ func apply_delta(raw: Dictionary,native:bool=false) -> void:
      enemy.attack_name = state.attack_name
      enemy.phase = int(state.phase)
      enemy.form = int(state.form)
+     if enemy.is_executioner:enemy.sprite.modulate=Color(1.12,.84,.80,state.alpha) if enemy.phase==2 else Color(1,1,1,state.alpha)
      enemy.apply_visual_form()
     enemy.queue_redraw()
    "coin":
@@ -742,6 +751,7 @@ func apply_delta(raw: Dictionary,native:bool=false) -> void:
  game.ui.update_hud(hud)
 
 func client_tick(delta: float, action: Dictionary) -> void:
+ game.bestiary.tick(delta)
  if game.state=="running":game.consumables.visual_tick(delta)
  if game.state=="running":game.chests.visual_tick(delta)
  peer_probe_clock+=delta

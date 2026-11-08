@@ -1,5 +1,15 @@
 # Atualizações
 
+## PC 0.25.0
+
+- Shadow e Carrasco com arte original, animações ligadas aos estados reais e apresentação das fases, sem mudar seus atributos de combate.
+- Bestiário com 23 espécies, variantes, fases de chefes, prévia animada, filtros e layout adaptável, acessível pelo menu e pela base.
+- Atributos consultam o mesmo cálculo usado no spawn. Descobertas por aparição visível e eliminações individuais pelo dono do golpe final, confirmadas pelo host.
+- Contadores opcionais no perfil existente, sem inventar histórico, com gravação em pontos seguros e deduplicação por partida.
+- Cooperativo usa a vida e velocidade do solo. Geração total reduzida em 20%; dano, regras próprias das fases e dificuldade temporal preservados.
+- Handshake com protocolo 2 e identificação do conteúdo compartilhado, preparado para a atualização Android explicitamente autorizada nesta entrega.
+- PC validado em 40 suítes e quatro processos pelo relay público. Testes em aparelho físico e redes distintas ficam com o usuário.
+
 ## PC 0.24.0
 
 - Flechas sem velocidade válida são encerradas; prazo de voo passa a valer também no host. Ricochete renova o prazo visual.

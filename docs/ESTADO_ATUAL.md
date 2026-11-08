@@ -1,6 +1,6 @@
 # Estado atual
 
-PC 0.24.0: correções de ciclo de projéteis, limpeza cooperativa, vida dos chefes e novos visuais para avaliação no jogo. Consulte [o relatório](CORRECOES_PC_0_24.md). Executável: `build/Hordas-0.24.0/Hordas-0.24.0.exe`. Android continua congelado.
+PC 0.25.0: novos Shadow/Carrasco, bestiário, estatísticas individuais e cooperativo com vida/velocidade do solo e geração reduzida em 20%. Consulte [o relatório](DESIGNS_BESTIARIO_CROSSPLAY_0_25.md). Executável: `build/Hordas-0.25.0/Hordas-0.25.0.exe`. Android está sendo atualizado por autorização expressa e voltará a ficar congelado após a entrega.
 
 O texto abaixo preserva o histórico dos envios anteriores, até a versão 0.9.0.
 

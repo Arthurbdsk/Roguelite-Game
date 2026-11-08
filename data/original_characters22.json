@@ -702,5 +702,113 @@
    }
   },
   "visible_height": 20
+ },
+ "original_shadow": {
+  "texture": "res://assets/v25/shadow.png",
+  "frames": 32,
+  "cell": [
+   48,
+   48
+  ],
+  "offset": [
+   0,
+   -20.0
+  ],
+  "origin": "Original project artwork, built-in image generation, 2026-11-07",
+  "clips": {
+   "idle": {
+    "start": 0,
+    "count": 4
+   },
+   "walk": {
+    "start": 4,
+    "count": 4
+   },
+   "prepare": {
+    "start": 8,
+    "count": 4
+   },
+   "attack": {
+    "start": 12,
+    "count": 4
+   },
+   "vanish": {
+    "start": 16,
+    "count": 4
+   },
+   "appear": {
+    "start": 20,
+    "count": 4
+   },
+   "hurt": {
+    "start": 24,
+    "count": 4
+   },
+   "death": {
+    "start": 28,
+    "count": 4
+   },
+   "cast": {
+    "start": 20,
+    "count": 4
+   }
+  },
+  "visible_height": 21
+ },
+ "original_executioner": {
+  "texture": "res://assets/v25/executioner.png",
+  "frames": 36,
+  "cell": [
+   64,
+   64
+  ],
+  "offset": [
+   0,
+   -28.0
+  ],
+  "origin": "Original project artwork, built-in image generation, 2026-11-07",
+  "clips": {
+   "idle": {
+    "start": 0,
+    "count": 4
+   },
+   "walk": {
+    "start": 4,
+    "count": 4
+   },
+   "execute_prepare": {
+    "start": 8,
+    "count": 4
+   },
+   "attack": {
+    "start": 12,
+    "count": 4
+   },
+   "charge_prepare": {
+    "start": 16,
+    "count": 4
+   },
+   "charge": {
+    "start": 20,
+    "count": 4
+   },
+   "hurt": {
+    "start": 24,
+    "count": 4
+   },
+   "phase": {
+    "start": 28,
+    "count": 4
+   },
+   "death": {
+    "start": 32,
+    "count": 4
+   },
+   "cast": {
+    "start": 28,
+    "count": 4
+   }
+  },
+  "visible_height": 28
  }
 }

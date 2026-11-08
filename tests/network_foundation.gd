@@ -17,12 +17,12 @@ func actors() -> Dictionary:
 
 func run() -> void:
 	var rules := CoopRules.new()
-	var expected: Array = [[1,1,1,1],[1.5,1.5,1.2,1.8],[2,2,1.4,2.6],[2.5,2.5,1.6,3.4]]
+	var expected: Array = [[1,1,1,1],[1,1.5,1,1.44],[1,2,1,2.08],[1,2.5,1,2.72]]
 	for n in range(1, 5):
 		var scale: Dictionary = rules.scaling(n)
 		for i in 4:
 			verify(is_equal_approx(float(scale[["health", "damage", "speed", "count"][i]]), float(expected[n-1][i])), "additive scaling %d players" % n)
-		verify(rules.wave_count(10, n) == [10,18,26,34][n-1], "consistent wave rounding")
+		verify(rules.wave_count(10, n) == [10,14,21,27][n-1], "consistent wave rounding")
 		verify(rules.wave_count(1, n, true) == 1, "boss quantity is not multiplied")
 		var composition: Dictionary = rules.composition({"ghoul": 10, "hound": 4, "guard": 3}, n)
 		verify(composition.ghoul + composition.hound + composition.guard == rules.wave_count(17, n), "composition rounding preserves whole wave total")

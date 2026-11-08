@@ -1,0 +1,6 @@
+Shadow and Executioner: original project artwork generated with the built-in image tool.
+Generated on 2026-11-08 from the game's required silhouettes and animation events.
+Not official Tiny RPG paid-pack assets. No marketplace preview artwork was incorporated.
+Technical atlas packing uses common registration, limited palette and nearest resampling.
+Existing Soldier and Orc remain separately licensed Tiny RPG assets.
+Research and production instructions: docs/DESIGNS_BESTIARIO_CROSSPLAY_0_25.md.

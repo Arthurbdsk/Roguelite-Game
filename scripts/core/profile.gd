@@ -6,13 +6,14 @@ var path: String = "user://profile.json"
 var data: Dictionary
 var last_error: String = ""
 var load_failed:bool=false
+var bestiary_dirty:bool=false
 
 func _init(save_path: String = "user://profile.json") -> void:
  path = save_path
  data = defaults()
 
 func defaults() -> Dictionary:
- return {"version": VERSION, "skill_ranks": {}, "upgrade_ranks": {}, "upgrade_spent": {}, "upgrade_revision": 0, "challenge_active": 0, "upgrades_migrated": true, "gold": 0, "gold_remainder": 0.0, "last_settled_run": "", "best_wave": 0, "seals": 0, "buildings": {"arsenal": false, "library": false}, "best_time": 0.0, "wins": 0, "runs": 0, "settings": {"volume": 0.55,"music":.35, "effects": 0.7, "shake": true, "fullscreen": false}}
+ return {"version": VERSION, "bestiary_stats": {}, "skill_ranks": {}, "upgrade_ranks": {}, "upgrade_spent": {}, "upgrade_revision": 0, "challenge_active": 0, "upgrades_migrated": true, "gold": 0, "gold_remainder": 0.0, "last_settled_run": "", "best_wave": 0, "seals": 0, "buildings": {"arsenal": false, "library": false}, "best_time": 0.0, "wins": 0, "runs": 0, "settings": {"volume": 0.55,"music":.35, "effects": 0.7, "shake": true, "fullscreen": false}}
 
 func load_profile() -> bool:
  if not FileAccess.file_exists(path):
@@ -20,38 +21,39 @@ func load_profile() -> bool:
  load_failed=true
  var file := FileAccess.open(path, FileAccess.READ)
  if file == null:
-  last_error = "Não foi possível ler o progresso."
+  last_error = "NÃ£o foi possÃ­vel ler o progresso."
   return false
  var parser := JSON.new()
  var content:String=file.get_as_text()
  file.close()
  if parser.parse(content) != OK:
-  last_error = "Progresso inválido. Arquivo preservado."
+  last_error = "Progresso invÃ¡lido. Arquivo preservado."
   return false
  var parsed = parser.data
  if not parsed is Dictionary:
-  last_error = "Progresso inválido. Arquivo preservado."
+  last_error = "Progresso invÃ¡lido. Arquivo preservado."
   return false
  var saved_version = parsed.get("version", 0)
  if not (saved_version is float or saved_version is int) or (saved_version != 1 and saved_version != 2 and saved_version != 3 and saved_version != VERSION):
-  last_error = "Progresso inválido ou versão incompatível. Arquivo preservado."
+  last_error = "Progresso invÃ¡lido ou versÃ£o incompatÃ­vel. Arquivo preservado."
   return false
  for key in ["seals", "best_time", "runs", "wins", "gold", "best_wave"]:
   if parsed.has(key) and not (parsed[key] is float or parsed[key] is int):
-   last_error = "Progresso com campos inválidos. Arquivo preservado."
+   last_error = "Progresso com campos invÃ¡lidos. Arquivo preservado."
    return false
  if parsed.has("buildings") and not parsed.buildings is Dictionary:
-  last_error = "Progresso com construções inválidas. Arquivo preservado."
+  last_error = "Progresso com construÃ§Ãµes invÃ¡lidas. Arquivo preservado."
   return false
  if parsed.has("settings") and not parsed.settings is Dictionary:
-  last_error = "Preferências inválidas. Arquivo preservado."
+  last_error = "PreferÃªncias invÃ¡lidas. Arquivo preservado."
   return false
  var check_options: Dictionary = parsed.get("settings", {})
  for key in ["volume", "effects","music"]:
   if check_options.has(key) and not (check_options[key] is float or check_options[key] is int):
-   last_error = "Preferências com campos inválidos. Arquivo preservado."
+   last_error = "PreferÃªncias com campos invÃ¡lidos. Arquivo preservado."
    return false
  data = defaults()
+ data.bestiary_stats=sanitize_bestiary(parsed.get("bestiary_stats",{}))
  for key in parsed:
   if not data.has(key):data[key]=parsed[key]
  data.discoveries={}
@@ -60,7 +62,7 @@ func load_profile() -> bool:
    if id is String and id.length()<=80 and parsed.discoveries[id]==true:data.discoveries[id]=true
  for key in ["upgrade_ranks","upgrade_spent"]:
   if parsed.has(key) and not parsed[key] is Dictionary:
-   last_error="Aprimoramentos inválidos. Arquivo preservado.";return false
+   last_error="Aprimoramentos invÃ¡lidos. Arquivo preservado.";return false
  data.seals = clampi(int(parsed.get("seals", 0)), 0, 999999)
  data.gold = clampi(int(parsed.get("gold", 0)), 0, 9999999999)
  data.gold_remainder=clampf(float(parsed.get("gold_remainder",0)),0,.999999) if parsed.get("gold_remainder",0) is float or parsed.get("gold_remainder",0) is int else 0.0
@@ -89,7 +91,7 @@ func load_profile() -> bool:
  if int(saved_version)<4:
   var backup:String=path+".pre_upgrades_v4.bak"
   if not FileAccess.file_exists(backup) and DirAccess.copy_absolute(path,backup)!=OK:
-   load_failed=true;last_error="Falha no backup. Migração cancelada.";return false
+   load_failed=true;last_error="Falha no backup. MigraÃ§Ã£o cancelada.";return false
   migrate_upgrades(parsed)
   if not save():load_failed=true;return false
  else:
@@ -104,11 +106,11 @@ func load_profile() -> bool:
 
 func save() -> bool:
  if load_failed:
-  last_error="O save não foi carregado. Arquivo original preservado.";return false
+  last_error="O save nÃ£o foi carregado. Arquivo original preservado.";return false
  # Write new data first. Keep a readable previous version on replacement.
  var file := FileAccess.open(path + ".tmp", FileAccess.WRITE)
  if file == null:
-  last_error = "Não foi possível salvar o progresso."
+  last_error = "NÃ£o foi possÃ­vel salvar o progresso."
   return false
  file.store_string(JSON.stringify(data, "\t"))
  file.close()
@@ -117,7 +119,30 @@ func save() -> bool:
  var result := DirAccess.rename_absolute(path + ".tmp", path)
  if result != OK:
   last_error = "Falha ao concluir o salvamento."
+ if result==OK:bestiary_dirty=false
  return result == OK
+
+func sanitize_bestiary(raw)->Dictionary:
+ var result:Dictionary={}
+ if not raw is Dictionary:return result
+ for id in raw:
+  if result.size()>=128:break
+  if not id is String or id.length()>80 or not raw[id] is Dictionary:continue
+  var counts:Dictionary={"seen":0,"kills":0}
+  for key in counts:
+   var value=raw[id].get(key,0)
+   if (value is int or value is float) and is_finite(float(value)):counts[key]=clampi(int(value),0,1000000000)
+  result[id]=counts
+ return result
+
+func bestiary_counts(id:String)->Dictionary:
+ return data.get("bestiary_stats",{}).get(id,{"seen":0,"kills":0}).duplicate()
+
+func add_bestiary(id:String,seen:int,kills:int):
+ if seen<=0 and kills<=0:return
+ var value:Dictionary=bestiary_counts(id)
+ value.seen=mini(1000000000,int(value.seen)+maxi(0,seen));value.kills=mini(1000000000,int(value.kills)+maxi(0,kills))
+ data.bestiary_stats[id]=value;bestiary_dirty=true
 
 func purchase(id: String) -> bool:
  if not data.buildings.has(id) or data.buildings[id] or data.seals < 8:

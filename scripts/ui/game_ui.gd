@@ -39,6 +39,7 @@ var passive_text: Label
 var ui_theme: Theme
 var previous_data: Dictionary = {}
 var selected_skill: String = "edge"
+var bestiary_return:String="title"
 
 func setup(game_ref) -> void:
  game = game_ref
@@ -175,6 +176,7 @@ func _backdrop(alpha: float = 1.0) -> void:
 func render(which: String, data: Dictionary = {}) -> void:
  if root == null:
   return
+ if which!="running":game.bestiary.flush()
  screen = which
  previous_data = data.duplicate(true)
  for child in menu.get_children():
@@ -187,6 +189,8 @@ func render(which: String, data: Dictionary = {}) -> void:
   "title": _title()
   "maps": _map_selection()
   "hub": _hub(data)
+  "bestiary":
+   var view:=BestiaryView.new();menu.add_child(view);view.setup(game,self)
   "collection":
    var view:=CollectionView.new();menu.add_child(view);view.setup(game,self)
   "upgrading": _upgrades(data)
@@ -242,7 +246,9 @@ func _title() -> void:
  var play := _button(actions,"Jogar",Rect2(),func(): game.open_map_select(),true)
  _button(actions,"Cooperativo online",Rect2(),func(): game.open_online())
  _button(actions,"Base e aprimoramentos",Rect2(),func(): game.enter_hub())
- _button(actions,"Coleção",Rect2(),func(): render("collection"))
+ var libraries:=HBoxContainer.new();libraries.add_theme_constant_override("separation",8);actions.add_child(libraries)
+ _button(libraries,"Coleção",Rect2(),func(): render("collection"))
+ _button(libraries,"Bestiário",Rect2(),func():bestiary_return="title";render("bestiary"))
  var settings := HBoxContainer.new()
  settings.add_theme_constant_override("separation",8)
  actions.add_child(settings)
@@ -311,8 +317,9 @@ func _hub(data: Dictionary) -> void:
  var library := _button(menu, _choice("library", "Biblioteca"), Rect2(425, 235, 188, 30), func(): _select_support("library"))
  library.disabled = not bool(buildings.get("library", false))
  _label(menu, "Armas, níveis e passivas da partida são temporários.", Rect2(25, 274, 380, 24), 11, MUTED)
- _button(menu, "Voltar", Rect2(25, 292, 105, 24), func(): game.show_title())
- _button(menu, "Aprimoramentos", Rect2(142, 292, 230, 24), game.open_skill_tree)
+ _button(menu, "Voltar", Rect2(25, 292, 90, 24), func(): game.show_title())
+ _button(menu, "Aprimoramentos", Rect2(127, 292, 140, 24), game.open_skill_tree)
+ _button(menu, "Bestiário", Rect2(279, 292, 120, 24),func():bestiary_return="hub";render("bestiary"))
  _button(menu, "Partir", Rect2(425, 278, 188, 35), func(): game.open_map_select(), true)
  _footer()
  call_deferred("_grant_focus", none)

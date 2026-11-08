@@ -7,8 +7,6 @@ var queued_combination:String=""
 func setup(owner_game,stats:EnemyData,_elite:bool=false):
  super.setup(owner_game,stats,false)
  hp=max_hp;state="chase";attack_time=1.5
- data.speed=game.boss_balance.demon_speed*(.8 if stats.id=="guardian" else float(game.campaign.config.horror_speed_ratio_to_demon))*game.balance.enemy_speed_multiplier*game.enemy_scale().speed
- if stats.id=="horror":data.damage=game.enemy_data.demon.damage*game.boss_balance.second_damage_multiplier*float(game.campaign.config.horror_damage_ratio_to_demon_phase2)*game.enemy_scale().damage
 func apply_visual_form():
  var shown:int=1 if form==1 or (state=="transform" and state_time<.8) else 2
  if visual_form==shown:return
@@ -83,9 +81,10 @@ func execute_attack():
 func finish_attack():
  state="recovery";state_time=0
  attack_time=float(game.campaign.config.guardian_interval if data.id=="guardian" else (game.campaign.config.true_interval if form==2 else game.campaign.config.horror_interval))
-func take_damage(amount:float,_force:Vector2=Vector2.ZERO):
+func take_damage(amount:float,_force:Vector2=Vector2.ZERO,owner:String=""):
  if not alive or not combat_enabled or not targetable:return
  amount=received_damage(amount);hp=maxf(0,hp-amount);hit_flash=.08;game.add_damage_number(position-Vector2(0,45),amount)
+ if amount>0:last_hit_owner=owner
  if hp>0:return
  if data.id=="horror" and form==1:
   dev_repeat="";dev_next_attack=""

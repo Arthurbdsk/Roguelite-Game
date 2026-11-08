@@ -18,16 +18,18 @@ func run():
    var e=g.spawn_enemy(id,g.free_enemy_position(Vector2(960+(i%5)*55,560+(i/5)*60),d.radius));i+=1
    if not is_instance_valid(e):continue
    check(e.tiny_kind==d.visual_family,"original atlas installed "+id)
-   check(e.sprite.hframes==24 and e.sprite.texture_filter==CanvasItem.TEXTURE_FILTER_NEAREST,"24 nearest frames "+id)
+   check(e.sprite.hframes==int(TinyCharacters.data(e.tiny_kind).frames) and e.sprite.texture_filter==CanvasItem.TEXTURE_FILTER_NEAREST,"registered nearest frames "+id)
    check(e.sprite.texture==TinyCharacters.texture(e.tiny_kind),"shared texture "+id)
    for clip in ["idle","walk","attack","cast","hurt","death"]:
     for f in 4:check(TinyCharacters.frame(e.tiny_kind,clip,f/4.0)>=0,"clip "+id+" "+clip)
-   e.tick(.016);check(e.sprite.frame<24,"valid animated frame "+id)
+   e.tick(.016);check(e.sprite.frame<e.sprite.hframes,"valid animated frame "+id)
    var at:Vector2=e.position;var kills:int=g.kills
    e.take_damage(100000,Vector2.ZERO)
    check(g.kills==kills+1,"one reward "+id)
-   check(not g.character_remains.effects.is_empty(),"real death animation "+id)
-   check(g.character_remains.effects.back().at==at,"death pivot "+id)
+   if e is HordeBoss:check(g.boss_arena.deaths.any(func(d):return d.boss==e),"complete boss death renderer "+id)
+   else:
+    check(not g.character_remains.effects.is_empty(),"real death animation "+id)
+    check(g.character_remains.effects.back().at==at,"death pivot "+id)
    g.spawn_enemy(id,g.free_enemy_position(at,d.radius))
   g.ui.update_hud(g.snapshot());await process_frame;await process_frame;await RenderingServer.frame_post_draw
   g.numbers.clear();g.gold_loot.reset();g.pickups.clear()

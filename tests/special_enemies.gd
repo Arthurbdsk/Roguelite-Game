@@ -51,8 +51,9 @@ func run():
 	check(g.player.hp==88 and g.specials.bolts.is_empty(),"magic travels fixed direction and is removed on hit")
 	g.player.invulnerable=0;g.player.hp=100
 	var attacker=g.spawn_enemy("shadow",g.player.position+Vector2(100,0));attacker.attack_time=0;attacker.tick(0)
-	check(not attacker.targetable and not attacker.sprite.visible,"ambush hides and disables contact")
-	attacker.tick(1.51);check(g.player.hp==83 and g.player.root_remaining==.75,"ambush hit damages and roots")
+	check(not attacker.targetable and attacker.collision_layer==0 and attacker.sprite.visible,"ambush begins with visual anticipation and disables contact")
+	attacker.tick(.31);check(not attacker.sprite.visible,"middle ambush hides after disappearance frames")
+	attacker.tick(1.2);check(g.player.hp==83 and g.player.root_remaining==.75,"ambush hit damages and roots")
 	g.player.apply_poison(10,2);g.finish_run(false)
 	check(g.player.poison_remaining==0 and g.player.root_remaining==0,"end clears player effects")
 	g.start_run();g.director.phase="complete";g.player.hp=1;g.player.invulnerable=0

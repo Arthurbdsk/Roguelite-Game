@@ -51,6 +51,7 @@ var event_claimed: bool = false
 var event_progress: float = 0
 var region: Vector2 = Vector2(1260, 810)
 var profile := GameProfile.new()
+var bestiary:=BestiaryJournal.new()
 var player: Sentinel
 var arena: RuinedArena
 var weapon_system: WeaponSystem
@@ -105,6 +106,7 @@ func _ready() -> void:
  survival_config=JSON.parse_string(FileAccess.get_file_as_string("res://data/survival.json"))
  balance.continuous_per_minute=survival_config.generation.per_minute;balance.difficulty_seconds=survival_config.generation.stage_seconds;balance.continuous_stage_rate=survival_config.generation.stage_rate
  skills.setup(self)
+ bestiary.setup(self)
  mastery.setup(self)
  for id in ["ice_crystal","channel_totem","ghoul", "hound", "guard", "demon", "executioner", "skeleton_sword", "skeleton_archer", "necromancer", "beast", "plague", "shadow", "devourer", "slime_large", "slime_small", "guardian", "horror"]:
   enemy_data[id] = load("res://data/enemies/" + id + ".tres")
@@ -275,6 +277,7 @@ func simulate(delta: float, movement: Vector2 = Vector2.ZERO) -> void:
     return
  rebuild_grid()
  weapon_system.update_combat(delta)
+ bestiary.tick(delta)
  update_pickups(delta)
  if state != "running":
   queue_redraw()
@@ -320,6 +323,7 @@ func start_run(selected_support: String = "none") -> void:
  arena.apply_map(selected_map)
  run_challenge=clampi(int(profile.data.challenge_active),0,skills.rank("challenge"))
  run_id = "%d_%d_%d" % [Time.get_unix_time_from_system(), Time.get_ticks_usec(), randi()]
+ bestiary.begin(run_id)
  run_settled = false
  player.poison_remaining = 0
  player.poison_clock = 0
@@ -555,6 +559,7 @@ func finish_run(won: bool) -> void:
 func request_quit() -> void:
  if closing:return
  closing=true
+ bestiary.flush()
  if coop != null and coop.active:
   coop.finish(false)
   if coop.connection.socket != null: coop.connection.socket.poll()
@@ -591,6 +596,8 @@ func toggle_pause() -> void:
   ui.update_hud(snapshot())
 
 func _unhandled_input(event: InputEvent) -> void:
+ if ui.screen=="bestiary" and event.is_action_pressed("ui_cancel"):
+  ui.render(ui.bestiary_return,profile.data);get_viewport().set_input_as_handled();return
  if event.is_action_pressed("revive") and state=="running" and not coop.active:
   if chests.try_open(player):get_viewport().set_input_as_handled();return
  if coop != null and coop.active:
@@ -687,6 +694,28 @@ func enemy_base_health(id:String)->float:
   return boss_balance.demon_health()*boss_balance.second_health_multiplier*ratio
  return enemy_data[id].health
 
+func enemy_health_factor(id:String)->float:
+ return float(survival_config.events.siege_health) if id=="siege_archer" else float(survival_config.events.blue_health) if id=="event_blue" else float(survival_config.events.small_health) if id=="event_small" else 1.0
+
+func enemy_spawn_stats(id:String,scale:Dictionary)->EnemyData:
+ var stats:EnemyData=enemy_data[id].duplicate()
+ stats.health=enemy_base_health(id)
+ if id in ["slime_small","event_small"]:
+  stats.speed=enemy_data.ghoul.speed*balance.slime_small_speed_ratio
+  stats.damage=enemy_data.ghoul.damage*balance.slime_small_damage_ratio
+ if id in ["ice_crystal","channel_totem"]:
+  stats.health=float(late_arena.patterns.config.crystal_health if id=="ice_crystal" else late_arena.patterns.config.totem_health)
+ else:stats.health=(stats.health+30)*balance.enemy_health_multiplier*scale.health*enemy_health_factor(id)
+ stats.damage*=scale.damage
+ if id not in ["demon","executioner","guardian","horror"]:stats.attack_interval*=balance.enemy_attack_interval_multiplier
+ if id in ["ghoul","skeleton_sword","skeleton_archer"] or variant_data.has(id):stats.speed*=balance.common_speed_multiplier
+ if id in ["demon","executioner"]:stats.speed=boss_balance.executioner_speed if id=="executioner" else boss_balance.demon_speed
+ if id in ["guardian","horror"]:stats.speed=boss_balance.demon_speed*(.8 if id=="guardian" else float(campaign.config.horror_speed_ratio_to_demon))
+ if id=="horror":stats.damage=enemy_data.demon.damage*boss_balance.second_damage_multiplier*float(campaign.config.horror_damage_ratio_to_demon_phase2)*scale.damage
+ stats.speed*=balance.enemy_speed_multiplier*scale.speed
+ if id=="event_small":stats.speed*=survival_config.events.small_speed
+ return stats
+
 func spawn_enemy(id: String, point: Vector2, elite: bool = false, chain_meta:Dictionary={}):
  id = "demon" if id == "boss" else id
  if id=="slime_large" and not (coop.active and not coop.hosting) and not slime_families.can_add():return null
@@ -695,24 +724,9 @@ func spawn_enemy(id: String, point: Vector2, elite: bool = false, chain_meta:Dic
  enemy.chain_root=int(chain_meta.get("root",0));enemy.chain_generation=int(chain_meta.get("generation",-1))
  enemy.serial = serial
  serial += 1
- var stats: EnemyData = enemy_data[id].duplicate()
- stats.health=enemy_base_health(id)
- if id in ["slime_small","event_small"]:
-  stats.speed=enemy_data.ghoul.speed*balance.slime_small_speed_ratio
-  stats.damage=enemy_data.ghoul.damage*balance.slime_small_damage_ratio
  var scale: Dictionary = enemy_scale()
- if enemy is HazardTarget:stats.health=float(late_arena.patterns.config.crystal_health if id=="ice_crystal" else late_arena.patterns.config.totem_health)
- if not enemy is HazardTarget:stats.health+=30
- stats.health *= 1.0 if enemy is HazardTarget else balance.enemy_health_multiplier
- stats.health *= 1.0 if enemy is HazardTarget else scale.health
- stats.damage *= scale.damage
- if not enemy is HordeBoss:stats.attack_interval*=balance.enemy_attack_interval_multiplier
- if id in ["ghoul","skeleton_sword","skeleton_archer"] or variant_data.has(id):stats.speed*=balance.common_speed_multiplier
- stats.speed *= balance.enemy_speed_multiplier
- stats.speed *= scale.speed
- var health_factor:float=float(survival_config.events.siege_health) if id=="siege_archer" else float(survival_config.events.blue_health) if id=="event_blue" else float(survival_config.events.small_health) if id=="event_small" else 1
- stats.health*=health_factor
- if id=="event_small":stats.speed*=survival_config.events.small_speed
+ var stats:EnemyData=enemy_spawn_stats(id,scale)
+ var health_factor:float=enemy_health_factor(id)
  enemy.setup(self, stats, elite)
  enemy.spawn_health_bonus=0 if enemy is HazardTarget else 30*balance.enemy_health_multiplier*scale.health*health_factor*(4.0 if elite and not enemy is HordeBoss else 1.0)
  enemy.difficulty_health_factor=health_factor
@@ -744,6 +758,7 @@ func enemy_killed(enemy) -> void:
  if reported_deaths.has(enemy.get_instance_id()):
   return
  reported_deaths[enemy.get_instance_id()] = true
+ bestiary.killed(enemy)
  character_remains.died(enemy)
  late_arena.chain.remove(enemy)
  if enemy.data.id=="slime_large":

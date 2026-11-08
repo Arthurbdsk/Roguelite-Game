@@ -5,6 +5,9 @@ var game
 var data: EnemyData
 var horde_health_bonus:float=0
 var spawn_health_bonus:float=0
+var last_hit_owner:String=""
+var bestiary_seen:Dictionary={}
+var bestiary_kill_registered:bool=false
 var difficulty_health_factor:float=1
 var hp: float
 var max_hp: float
@@ -226,10 +229,11 @@ func skeleton_attack(offset: Vector2, direction: Vector2) -> Vector2:
 		return Vector2.ZERO
 	return movement
 
-func take_damage(amount: float, force: Vector2 = Vector2.ZERO) -> void:
+func take_damage(amount: float, force: Vector2 = Vector2.ZERO,owner:String="") -> void:
 	if not alive:
 		return
 	amount=received_damage(amount)
+	if amount>0:last_hit_owner=owner
 	hp -= amount
 	hit_flash = 0.09
 	knockback += force * (0.2 if data.behavior == "boss" else (1.3 if game.elapsed<garlic_until else 1.0))
