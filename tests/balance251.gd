@@ -32,4 +32,3 @@ func run():
  g.coop.active=false;g.queue_free();await process_frame;await create_timer(.2).timeout
  print("BALANCE251_PASS mobile=",mobile," measured solo spawns=",meter.total_spawned," all species visuals, growth, boss forms, unchanged collision, coop damage/count")
  quit()
-

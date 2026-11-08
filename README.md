@@ -1,12 +1,16 @@
 # Hordas
 
+Versão atual PC 0.25.1: cooperativo com até 1,7 vezes o dano e 2 vezes a geração de inimigos com quatro jogadores. Vida e velocidade do solo preservadas. Executável `build/Hordas-0.25.1/Hordas-0.25.1.exe`. Android 0.25.1-android.3 compatível, protocolo 2, conteúdo `0.25.1+f69263393c14aee1`. [Ajustes e validação](docs/BALANCEAMENTO_0_25_1.md).
+
+Os registros abaixo descrevem entregas anteriores.
+
 Android é mantido **somente sob pedido explícito de celular, Android ou versão mobile**, separado em `codex/android-mobile`. Pedidos genéricos continuam exclusivos do PC. [Política de congelamento e base identificada](docs/ANDROID_POLICY.md).
 
 Versão PC 0.23.0: correções de descarte e identificação de flechas remotas, Machado com três acertos e descarte fora da câmera lógica, Varinha Mágica com +1 s, fogo aliado com dano dobrado, personagens 10% maiores e inimigos com +30 de vida-base. [Testes e pendências](docs/CORRECOES_PC_0_23.md).
 
 Versão PC 0.22.0: arte original animada para Morcego, Necromante, esqueletos, variantes com armadura, Orc de elite, Orc montado e família de slimes. Água Benta com frasco, impacto e poça novos. Mecânicas e IDs preservados. [Comparações, arquivos editáveis, testes e limitações](docs/ARTE_PC_0_22.md).
 
-Executável atual: `build/Hordas-0.23.0/Hordas-0.23.0.exe`. DEV: `build/Hordas-DEV-0.23.0/Hordas-DEV-0.23.0.exe`, F8. Todos os participantes precisam usar PC 0.23.0. Android permanece congelado em 0.20.0, sem sincronização ou testes nesta entrega.
+Executável da entrega 0.23.0: `build/Hordas-0.23.0/Hordas-0.23.0.exe`. DEV: `build/Hordas-DEV-0.23.0/Hordas-DEV-0.23.0.exe`, F8. Todos os participantes precisam usar PC 0.23.0. Android permanece congelado em 0.20.0, sem sincronização ou testes nesta entrega.
 
 Versão 0.20.0: Soldado e Orc animados da coleção Tiny RPG, com os atributos e IDs anteriores preservados. Escopo limitado aos dois personagens gratuitos, conforme escolhido. [Comparação, animações, licença e testes](docs/TINY_RPG_0_20.md).
 

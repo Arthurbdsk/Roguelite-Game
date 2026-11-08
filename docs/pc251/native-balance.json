@@ -1,0 +1,30 @@
+{
+  "android_native": true,
+  "coop_scales": [
+    {
+      "count": 1.33333333333333,
+      "damage": 1.23333333333333,
+      "health": 1.0,
+      "speed": 1.0
+    },
+    {
+      "count": 1.66666666666667,
+      "damage": 1.46666666666667,
+      "health": 1.0,
+      "speed": 1.0
+    },
+    {
+      "count": 2.0,
+      "damage": 1.7,
+      "health": 1.0,
+      "speed": 1.0
+    }
+  ],
+  "failures": 0,
+  "identity": "0.25.1+f69263393c14aee1",
+  "passed": true,
+  "simulated_minute_spawns": 54,
+  "solo_rate": 54,
+  "species": 23,
+  "visual_multiplier": 0.8
+}
