@@ -1,0 +1,17 @@
+{
+  "passed": true,
+  "from_version_code": 11,
+  "to_version_code": 12,
+  "downloaded_by_public_game": true,
+  "public_permanent_urls": true,
+  "official_installer_confirmed": true,
+  "save_semantics_preserved": true,
+  "save_bytes_preserved": true,
+  "runs_preserved": 2,
+  "installed_apk_sha256": "4ede55b01f5931fd458898481218fc1ea0dfd425e6eda503e818330d39d6130d",
+  "emulator": "Android 15 API35",
+  "physical_device": false,
+  "release_url": "https://github.com/Arthurbdsk/Roguelite-Game/releases/download/update-android-0.26.2-android.12/Hordas-Android-0.26.2-12.apk",
+  "reopened": true,
+  "progress_preserved_after_reopen": true
+}

@@ -24,4 +24,14 @@ O teste anterior à correção reproduziu uma escolha indevida depois de um gest
 Ambiente Android: emulador Android 15/API 35. Nenhum teste em telefone físico foi realizado. Os scripts e fixtures de QA ficam fora do APK público. Evidências em `android012/`.
 
 Package `com.socialy.hordas.android` e assinatura original preservados. Atualização opcional para online, compatível com PC 0.26.2. Android volta a ficar congelado após a entrega. Nenhuma publicação em loja.
-`nRegressão de rede: quatro participantes conectados pelo relay WSS público, com host PC e depois host Android. Ambos passaram, incluindo escolhas, chefes, abates e recompensas. São processos deste computador e emulador; não comprovam duas redes independentes.
+
+Regressão de rede: quatro participantes conectados pelo relay WSS público, com host PC e depois host Android. Ambos passaram, incluindo escolhas, chefes, abates e recompensas. São processos deste computador e emulador; não comprovam duas redes independentes.
+
+
+## Pacote público
+
+Fonte de execução: `68813852b7ad85920c9b9170a3d515ad083f81c1`. APK com 83851459 bytes e SHA-256 `4ede55b01f5931fd458898481218fc1ea0dfd425e6eda503e818330d39d6130d`.
+
+[APK Android 12](https://github.com/Arthurbdsk/Roguelite-Game/releases/download/update-android-0.26.2-android.12/Hordas-Android-0.26.2-12.apk). [Publicação concluída](https://github.com/Arthurbdsk/Roguelite-Game/actions/runs/42523457984). O manifesto assinado mantém o mesmo arquivo PC.
+
+Atualização pública validada da revisão 11 para 12 pelo próprio jogo, baixando o APK do GitHub Release e confirmando no instalador oficial. Pacote instalado com hash idêntico ao publicado, mesmo identificador e assinatura. O save permaneceu idêntico durante a instalação e semanticamente igual após reabrir; duas partidas registradas preservadas. Evidência: `android012/public-update.json`. Não houve instalação do APK público por ADB.
