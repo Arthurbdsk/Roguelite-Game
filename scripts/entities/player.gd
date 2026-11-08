@@ -55,7 +55,11 @@ func _ready() -> void:
   sprite.texture = load("res://assets/v08/hero.png")
   sprite.hframes = 32
   sprite.position.y = -28
- add_child(sprite)
+ var visual_root:=Node2D.new()
+ visual_root.name="PlayerVisual"
+ visual_root.scale=Vector2.ONE*PlatformTuning.hero_visual_multiplier()
+ add_child(visual_root)
+ visual_root.add_child(sprite)
  sprite.scale=Vector2.ONE*1.1
  sprite.position*=1.1
  set_process(false)
@@ -120,7 +124,7 @@ func _draw() -> void:
  if not display_name.is_empty():
   var font: Font = GameFonts.interface_font()
   var width: float = font.get_string_size(display_name, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x
-  draw_string(font, Vector2(-width * 0.5, (-32 if tiny_soldier else (-58 if sprite.hframes>=32 else -34))*1.1), display_name, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, marker_color)
+  draw_string(font, Vector2(-width * 0.5, (-32 if tiny_soldier else (-58 if sprite.hframes>=32 else -34))*1.1*PlatformTuning.hero_visual_multiplier()), display_name, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, marker_color)
 
 func apply_poison(duration:float,damage:float,attacker:int=0):
  if down:return

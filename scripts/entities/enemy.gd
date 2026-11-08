@@ -100,7 +100,7 @@ func _ready() -> void:
 		sprite.scale = Vector2(1.2, 1.2)
 	var visual_root:=Node2D.new()
 	visual_root.name="EnemyVisual"
-	visual_root.scale=Vector2.ONE*PlatformTuning.enemy_visual_multiplier()
+	visual_root.scale=Vector2.ONE*PlatformTuning.enemy_visual_multiplier(tiny_kind)
 	add_child(visual_root)
 	visual_root.add_child(sprite)
 	sprite.scale*=1.1
@@ -268,7 +268,7 @@ func _draw() -> void:
 	if hp < max_hp and data.behavior != "boss":
 		var bar_y:float=-sprite.texture.get_height()+1 if tiny_kind.is_empty() else -22
 		if tiny_kind.begins_with("original_"):bar_y=-float(TinyCharacters.data(tiny_kind).get("visible_height",18))*sprite.scale.y-6
-		bar_y*=PlatformTuning.enemy_visual_multiplier()
+		bar_y*=PlatformTuning.enemy_visual_multiplier(tiny_kind)
 		draw_rect(Rect2(-11,bar_y,22,2), Color("12191d"))
 		draw_rect(Rect2(-11,bar_y,22 * hp / max_hp,2), Color("b65f42"))
 

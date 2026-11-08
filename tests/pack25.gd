@@ -1,8 +1,8 @@
 extends SceneTree
 func _initialize():call_deferred("run")
 func run():
- assert(ProjectSettings.get_setting("application/config/version")=="0.25.1")
- assert(GameCompatibility.identity().begins_with("0.25.1+") and GameCompatibility.PROTOCOL==2)
+ assert(ProjectSettings.get_setting("application/config/version")=="0.25.2")
+ assert(GameCompatibility.identity().begins_with("0.25.2+") and GameCompatibility.PROTOCOL==2)
  var g=load("res://scenes/main.tscn").instantiate();root.add_child(g);await process_frame;g.set_physics_process(false);g.persistence_enabled=false;g.start_run()
  assert(g.dev_tools==null and EnemyCatalog.ids(g).size()==23 and g.profile.data.bestiary_stats.is_empty())
  for id in ["shadow","executioner"]:
