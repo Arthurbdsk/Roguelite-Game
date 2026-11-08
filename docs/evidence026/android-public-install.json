@@ -1,0 +1,21 @@
+{
+  "passed": true,
+  "old_version_code": 9,
+  "new_version_code": 10,
+  "transport": "Public permanent GitHub HTTPS URLs",
+  "downloaded_by_game": true,
+  "bytes": 83838728,
+  "manifest_and_hash_verified": true,
+  "native_package_version_certificate_checked": true,
+  "official_installer_confirmed": true,
+  "unknown_source_permission_confirmed": true,
+  "save_bytes_preserved": true,
+  "save_semantics_preserved": true,
+  "profile_sha256": "8597c881f17a07dde15721615b3144603e0ddbb6734cd47a0d9e38c77d7773e1",
+  "runs_preserved": 2,
+  "device": "Android 15 API35 emulator",
+  "physical_device": false,
+  "independent_networks": false,
+  "reopened": true,
+  "installed_apk_hash_matches_release": true
+}

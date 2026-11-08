@@ -5,7 +5,7 @@ O jogo consulta `https://raw.githubusercontent.com/Arthurbdsk/Roguelite-Game/cod
 ## Preparação
 
 1. Implementar e validar a plataforma autorizada. Android exige pedido explícito, branch `codex/android-mobile` e worktree separado.
-2. Atualizar versão e manifesto de gameplay antes da exportação. Compilar `python tools/updates/build_helper.py` ao alterar o helper Windows. Executar a exportação PC pelo procedimento de `tools/export_windows.py`; usar o exportador Android somente quando autorizado.
+2. Atualizar versão e manifesto de gameplay, validar e commitar o código antes da exportação. O sidecar registra o HEAD exportado. O exportador PC deriva versão e nome padrão do arquivo de `project.godot`, sem repetir o número em seu código. Compilar `python tools/updates/build_helper.py` ao alterar o helper Windows. Executar a exportação PC pelo procedimento de `tools/export_windows.py`; usar o exportador Android somente quando autorizado.
 3. Guardar a chave RSA de publicação em `%USERPROFILE%/.hordas-updates/private.pem`, fora do Git. A chave Android existente também permanece fora do repositório. Fazer backup privado: perder essas chaves impede autenticar futuras atualizações com a confiança atual. O jogo contém apenas a chave pública.
 4. Enviar os commits de origem ao GitHub. Não reutilizar uma versão com bytes diferentes.
 

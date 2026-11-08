@@ -1,6 +1,6 @@
 {
-  "mobile_version": "0.26.2-android.8",
-  "android_version_code": 8,
+  "mobile_version": "0.26.2-android.10",
+  "android_version_code": 10,
   "base_pc_version": "0.26.2",
   "base_pc_commit": "01f01f009d398cd4c06208ba75533a14e52f2ca7",
   "incorporated_pc_commits": [
@@ -27,10 +27,10 @@
   "application_id": "com.socialy.hordas.android",
   "authorized_update": "2026-11-08",
   "maintenance": "Frozen after this delivery; new explicit Android request required.",
-  "file": "Hordas-Android-0.26.2-8.apk",
-  "source_commit": "3b01c9bddc392e944981a268e1e749b5cf82509c",
-  "size_bytes": 83838547,
-  "sha256": "b3dba51f53ca96ce07cf19f80116b611bdb415dc0a7804c8e0255fbf5ee94350",
+  "file": "Hordas-Android-0.26.2-10.apk",
+  "source_commit": "7362678f3859ef34c9de93130a6416dce3b2f389",
+  "size_bytes": 83838728,
+  "sha256": "5502b9c9fa0fe7095cc02877f4b07f171e871b0da349878ff2014ccd85538b78",
   "qa": false,
   "signature_verified": true
 }

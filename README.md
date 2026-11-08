@@ -1,6 +1,6 @@
 # Hordas
 
-Versão atual PC 0.26.2 e Android 0.26.2-android.8, protocolo 2 e conteúdo `0.26.2+6c3b0b65ed77fe5a`. Atualizações pelo menu, vida inicial calibrada e mesmas proporções, atributos e geração nas duas plataformas. [Entrega, testes e limites](docs/ENTREGA_0_26_2.md). [Publicar futuras versões](docs/PUBLICAR_ATUALIZACOES.md).
+Versão atual PC 0.26.2 e Android 0.26.2-android.10, protocolo 2 e conteúdo `0.26.2+6c3b0b65ed77fe5a`. Atualizações pelo menu, vida inicial calibrada e mesmas proporções, atributos e geração nas duas plataformas. [Entrega, testes e limites](docs/ENTREGA_0_26_2.md). [Publicar futuras versões](docs/PUBLICAR_ATUALIZACOES.md).
 
 Os registros abaixo descrevem entregas anteriores.
 

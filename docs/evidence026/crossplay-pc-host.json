@@ -42,12 +42,12 @@
       "seen": 3
     },
     "skeleton_archer": {
-      "kills": 0,
-      "seen": 4
+      "kills": 1,
+      "seen": 6
     },
     "skeleton_sword": {
-      "kills": 0,
-      "seen": 6
+      "kills": 8,
+      "seen": 17
     },
     "slime_small": {
       "kills": 0,
