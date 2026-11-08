@@ -1,0 +1,5 @@
+Original character and Holy Water artwork created for Hordas, 2026-11-07.
+Created using the integrated image generation tool from user-provided visual references.
+These are original project assets, not the official Tiny RPG paid character pack.
+Soldier and common Orc remain the separately licensed Tiny RPG assets; see assets/tiny_rpg/NOTICE.txt.
+Source images, production prompts and frame catalog: docs/art22 and assets/v22/sources.

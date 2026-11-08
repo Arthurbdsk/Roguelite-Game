@@ -56,6 +56,8 @@ func _ready() -> void:
   sprite.hframes = 32
   sprite.position.y = -28
  add_child(sprite)
+ sprite.scale=Vector2.ONE*1.1
+ sprite.position*=1.1
  set_process(false)
 
 func _process(delta:float):
@@ -113,16 +115,12 @@ func take_damage(amount: float, source: Vector2,attacker:int=0,scheduled_time:fl
  return true
 
 func _draw() -> void:
- draw_ellipse_shadow()
- # Cold pixels under the sentinel keep them visible in a dense crowd.
- draw_arc(Vector2(0, 1), 10, 0, TAU, 16, Color("b65f42") if down else marker_color, 1, false)
+ # The fallen marker remains useful for revives; living players use names.
+ if down:draw_arc(Vector2(0,1),10,0,TAU,16,Color("b65f42"),1,false)
  if not display_name.is_empty():
   var font: Font = GameFonts.interface_font()
   var width: float = font.get_string_size(display_name, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x
-  draw_string(font, Vector2(-width * 0.5, -58 if sprite.hframes>=32 else -34), display_name, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, marker_color)
-
-func draw_ellipse_shadow() -> void:
- draw_rect(Rect2(-8, -1, 16, 5), Color(0, 0, 0, 0.35))
+  draw_string(font, Vector2(-width * 0.5, (-32 if tiny_soldier else (-58 if sprite.hframes>=32 else -34))*1.1), display_name, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, marker_color)
 
 func apply_poison(duration:float,damage:float,attacker:int=0):
  if down:return

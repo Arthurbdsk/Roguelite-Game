@@ -6,6 +6,7 @@ func tick(delta:float):
 	if not alive:return
 	if tick_control(delta):return
 	clock+=delta;state_time+=delta;attack_time-=delta;summon_cooldown-=delta
+	visual_cast_release=maxf(0,visual_cast_release-delta)
 	hit_flash=maxf(0,hit_flash-delta)
 	var offset:Vector2=game.player.position-position
 	var direction:Vector2=offset.normalized()
@@ -52,7 +53,7 @@ func tick(delta:float):
 		if state=="ambush":
 			movement=Vector2.ZERO
 			if state_time>=game.specials.balance.shadow_warning and game.enemy_space_free(ambush_at,radius,self):
-				position=ambush_at;collision_layer=2;targetable=true;sprite.visible=true;state="recovery";state_time=0
+				position=ambush_at;motion_start=position;collision_layer=2;targetable=true;sprite.visible=true;state="recovery";state_time=0
 				for player in game.team_players():
 					if player.position.distance_to(ambush_at)<=game.specials.balance.shadow_radius+player.radius:
 						if player.take_damage(data.damage,ambush_at,get_instance_id()):player.root_remaining=game.specials.balance.shadow_root
@@ -66,6 +67,9 @@ func tick(delta:float):
 	knockback=knockback.move_toward(Vector2.ZERO,delta*500)
 	velocity=game.crowd_velocity(self,velocity)
 	move_body()
+	if tiny_kind.begins_with("original_"):
+		if data.id=="shadow":animate_shadow(direction,movement.length()>2);refresh_visual();return
+		original_visual(direction,movement.length()>2);refresh_visual();return
 	if data.frames>=16:
 		if state=="conjure_wait":sprite.frame=8+int(clock*4)%2
 		elif state=="prepare":sprite.frame=8+mini(3,int(state_time/maxf(.01,data.windup)*4))
@@ -79,8 +83,26 @@ func tick(delta:float):
 	sprite.modulate=Color(1.5,1.5,1.5) if hit_flash>0 else Color.WHITE
 	sprite.flip_h=direction.x<0
 	refresh_visual()
-func take_damage(amount:float,force:Vector2=Vector2.ZERO):
-	if targetable:super.take_damage(amount,force)
+func animate_shadow(direction:Vector2,moving:bool):
+	var offset:=Vector2(TinyCharacters.data(tiny_kind).offset[0],TinyCharacters.data(tiny_kind).offset[1])*sprite.scale
+	sprite.position=offset;sprite.flip_h=direction.x<0;sprite.modulate=Color.WHITE
+	if state=="ambush":
+		var warning:float=game.specials.balance.shadow_warning
+		if state_time<.1:
+			sprite.visible=true;sprite.frame=TinyCharacters.frame(tiny_kind,"prepare",state_time/.1)
+		elif state_time<.3:
+			sprite.visible=true;sprite.frame=TinyCharacters.frame(tiny_kind,"vanish",(state_time-.1)/.2)
+		elif state_time>=warning-.2:
+			sprite.visible=true;sprite.position+=ambush_at-position;sprite.frame=TinyCharacters.frame(tiny_kind,"appear",(state_time-warning+.2)/.2)
+		else:sprite.visible=false
+		return
+	sprite.visible=true
+	if hit_flash>0:sprite.frame=TinyCharacters.frame(tiny_kind,"hurt",1-hit_flash/.09)
+	elif state=="recovery" and state_time<.35:sprite.frame=TinyCharacters.frame(tiny_kind,"attack",state_time/.35)
+	else:sprite.frame=TinyCharacters.frame(tiny_kind,"walk" if moving else "idle",clock*1.5,true)
+
+func take_damage(amount:float,force:Vector2=Vector2.ZERO,owner:String=""):
+	if targetable:super.take_damage(amount,force,owner)
 func _draw():
 	super._draw()
 	if data.id=="beast" and state=="prepare":

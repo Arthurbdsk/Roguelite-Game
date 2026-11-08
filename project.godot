@@ -3,7 +3,7 @@ config_version=5
 
 [application]
 config/name="Brasafria"
-config/version="0.20.0-android.1"
+config/version="0.25.0-android.2"
 config/quit_on_go_back=false
 config/use_custom_user_dir=true
 config/custom_user_dir_name="Hordas Android"
@@ -41,7 +41,7 @@ common/physics_ticks_per_second=60
 gdscript/warnings/inference_on_variant=0
 
 [network]
-compatible_game_version="0.20.0"
+compatible_game_version="0.25.0"
 relay_endpoint="wss://hordas-relay.onrender.com"
 
 [input_devices]

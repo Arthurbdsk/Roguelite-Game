@@ -3,12 +3,13 @@
 [resource]
 script = ExtResource("1")
 id = "executioner"
+visual_family = "original_executioner"
 title = "Carrasco"
 speed = 64.0
 damage = 14.0
 experience = 30
 radius = 18.0
-texture = "res://assets/executioner.png"
+texture = "res://assets/v25/executioner.png"
 behavior = "executioner"
-frames = 8
+frames = 36
 contact_damage = false

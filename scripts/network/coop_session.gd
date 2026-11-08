@@ -69,7 +69,7 @@ func receive(packet: Dictionary) -> void:
    game.ui.render("lobby")
   "error":
    message = packet.get("reason", "Falha na sala.")
-   if game.mobile!=null and game.mobile.active and message.contains("Versões diferentes"):message="Versão incompatível. Este Android só conecta ao PC 0.20.0 ou ao Android com a mesma base. Versões futuras de PC exigem uma atualização mobile solicitada."
+   if message.contains("Versões diferentes"):message="Conteúdo incompatível. Atualize PC e Android para builds compatíveis desta entrega."
    game.ui.render("lobby" if not connection.code.is_empty() else "online")
   "prepare":
    game.selected_map=packet.get("map","courtyard");game.arena.apply_map(game.selected_map)
@@ -112,6 +112,7 @@ func begin(packet: Dictionary) -> void:
  game.run_id = room_run
  initial_size = packet.players.size()
  active = true
+ game.bestiary.begin(room_run)
  ended = false
  menu_open = false
  actors.clear()
@@ -229,6 +230,7 @@ func host_tick(delta: float, local: Dictionary) -> void:
   var target = nearest_player(enemy.position)
   if target != null:
    game.player = target
+   enemy.motion_start=enemy.position
    enemy.tick(delta)
  game.player = local_actor.player
  game.perf_mark("enemy_ai_physics",perf_start)
@@ -238,6 +240,7 @@ func host_tick(delta: float, local: Dictionary) -> void:
   var actor: CoopActor = actors[id]
   if not actor.down:
    actor.weapon_system.update_combat(delta, not actions[id].revive)
+ game.bestiary.tick(delta)
  game.perf_mark("weapons_damage",perf_start)
  perf_start=Time.get_ticks_usec() if game.perf_enabled else 0
  game.update_pickups(delta)
@@ -275,6 +278,7 @@ func host_tick(delta: float, local: Dictionary) -> void:
    last_health[id] = health
    publish({"type": "health", "id": id, "hp": health[0], "down": health[1], "invulnerable": actors[id].player.invulnerable})
   var personal: Dictionary = actors[id].personal()
+  personal.bestiary=game.bestiary.personal(id)
   var serialized: String = JSON.stringify(personal)
   if last_personal.get(id) != serialized:
    last_personal[id] = serialized
@@ -392,6 +396,7 @@ func finish(won: bool) -> void:
   return
  if ended: return
  var result := {"gold_fractions":{},"gold_bonuses":{},"won": won, "elapsed": game.elapsed, "kills": game.kills, "gold": game.gold, "earned": game.earned, "wave": game.director.wave_number()}
+ result.bestiary=game.bestiary.totals.duplicate(true)
  for id in actors:
   result.gold_bonuses[id]=actors[id].mastery.gold_bonus;result.gold_fractions[id]=actors[id].mastery.gold_fraction
  if hosting: publish({"type": "end", "data": result})
@@ -402,6 +407,7 @@ func settle(result: Dictionary) -> void:
  game.consumables.reset()
  if ended: return
  result=result.duplicate(true);result.won=bool(result.get("won",false)) or game.campaign.cleared
+ game.bestiary.receive(room_run,result.get("bestiary",{}).get(connection.peer_id,{}))
  game.chests.reset();game.special_events.stop()
  ended = true
  if is_instance_valid(team_hud): team_hud.hide()
@@ -512,8 +518,8 @@ func broadcast_state(force: bool = false) -> void:
  for id in actors:
   var weapons: WeaponSystem = actors[id].weapon_system
   var shots: Array = []
-  for shot in weapons.projectiles: shots.append({"position": shot.position, "velocity": shot.velocity})
-  weapon_fx[id] = {"projectiles": shots, "slashes": weapons.slashes, "orbit_positions": weapons.orbit_positions,"lightning_fx":weapons.lightning_fx,"beams":weapons.beams,"pools":weapons.ground.pools,"arsenal_shots":weapons.arsenal.shots,"arsenal_zones":weapons.arsenal.zones,"blade_points":weapons.arsenal.blade_points}
+  for shot in weapons.projectiles: shots.append({"id":shot.get("id",0),"age":shot.get("age",0),"life":shot.get("life",2),"position": shot.position, "velocity": shot.velocity,"distance":shot.distance,"reach":shot.reach})
+  weapon_fx[id] = {"levels":weapons.levels,"passives":weapons.passives,"projectiles": shots, "slashes": weapons.slashes, "orbit_positions": weapons.orbit_positions,"lightning_fx":weapons.lightning_fx,"beams":weapons.beams,"pools":weapons.ground.pools,"arsenal_shots":weapons.arsenal.shots,"arsenal_zones":weapons.arsenal.zones,"blade_points":weapons.arsenal.blade_points}
  var data := {"reward_chest":game.chests.chest,"event_status":{"active":game.special_events.active,"age":game.special_events.age,"pending":game.special_events.pending.size()},"campaign_cleared":game.campaign.cleared,"endless":game.campaign.endless,"final_jobs":game.late_arena.patterns.jobs,"final_shots":game.late_arena.patterns.shots,"final_marks":game.late_arena.patterns.marks,"hordes_completed":game.horde_progress.completed,"chain_seeds":game.late_arena.seed_pending,"chain_stats":game.late_arena.chain.snapshot(),"late_areas":game.late_arena.areas,"late_shots":game.late_arena.shots,"full":true,"changes": changes, "removals": removals, "elapsed": game.elapsed, "gold": game.gold, "kills": game.kills, "earned": game.earned, "wave": game.director.wave_number(), "pressure": "TESTE DEV" if game.dev_tools!=null and game.dev_tools.active else game.director.pressure(), "banner": game.banner, "arrows": game.enemy_projectiles.arrows, "hazards": game.hazards, "areas": game.boss_arena.areas, "summons": game.boss_arena.pending_summons, "swings": game.boss_arena.swings, "portal_age": game.boss_arena.portal_age, "stage": game.boss_arena.stage, "weapons": weapon_fx, "revives": revives.interactions, "event_claimed": game.event_claimed, "event_progress": game.event_progress, "numbers": game.numbers,"split_pending":game.slime_families.pending,"special_marks":game.specials.marks,"special_areas":game.specials.areas,"special_bolts":game.specials.bolts}
  data.snapshot_serial=snapshot_count+1;data.room_run=room_run
  data.consumables={"items":game.consumables.items,"freeze":game.consumables.freeze_left,"magnet":game.consumables.magnet_jobs.slice(0,48)}
@@ -548,6 +554,9 @@ func apply_event(data: Dictionary) -> void:
    game.sound.play_cue("gold")
    if game.gold_loot.feedback.size() < 12: game.gold_loot.feedback.append({"at": CoopWire.vector(data.at) - Vector2(0,26), "life": 0.55, "amount": int(data.amount)})
   "personal":
+   var journal:Dictionary=data.data.get("bestiary",{})
+   if not journal.is_empty() and journal.get("run","")!=room_run:return
+   game.bestiary.receive(str(journal.get("run","")),journal.get("totals",{}))
    received_personal = data.data
    var actor: CoopActor = actors[connection.peer_id]
    actor.level = int(data.data.level)
@@ -662,6 +671,7 @@ func apply_delta(raw: Dictionary,native:bool=false) -> void:
      enemy.attack_name = state.attack_name
      enemy.phase = int(state.phase)
      enemy.form = int(state.form)
+     if enemy.is_executioner:enemy.sprite.modulate=Color(1.12,.84,.80,state.alpha) if enemy.phase==2 else Color(1,1,1,state.alpha)
      enemy.apply_visual_form()
     enemy.queue_redraw()
    "coin":
@@ -718,6 +728,9 @@ func apply_delta(raw: Dictionary,native:bool=false) -> void:
  for id in data.weapons:
   if not actors.has(id): continue
   var weapons: WeaponSystem = actors[id].weapon_system
+  if id!=connection.peer_id:
+   weapons.levels=data.weapons[id].get("levels",weapons.levels)
+   weapons.passives=data.weapons[id].get("passives",weapons.passives).duplicate()
   weapons.arsenal.shots.assign(data.weapons[id].arsenal_shots)
   weapons.arsenal.zones.assign(data.weapons[id].arsenal_zones)
   weapons.arsenal.blade_points.assign(data.weapons[id].blade_points)
@@ -739,6 +752,7 @@ func apply_delta(raw: Dictionary,native:bool=false) -> void:
  game.ui.update_hud(hud)
 
 func client_tick(delta: float, action: Dictionary) -> void:
+ game.bestiary.tick(delta)
  if game.state=="running":game.consumables.visual_tick(delta)
  if game.state=="running":game.chests.visual_tick(delta)
  peer_probe_clock+=delta
@@ -768,7 +782,11 @@ func client_tick(delta: float, action: Dictionary) -> void:
  for actor in actors.values():
   actor.player.sprite.modulate.a = 0.55 if actor.player.invulnerable > 0 and int(world_clock * 10) % 2 == 0 else 1.0
  for arrow in game.enemy_projectiles.arrows:
-  if not game.consumables.paused_projectile(arrow):arrow.at += arrow.velocity * delta
+  if game.consumables.paused_projectile(arrow):continue
+  arrow.life-=delta
+  var movement:Vector2=(Vector2(arrow.velocity)*delta).limit_length(maxf(0,float(arrow.range)-float(arrow.distance)))
+  arrow.at+=movement;arrow.distance+=movement.length()
+ game.enemy_projectiles.arrows=game.enemy_projectiles.arrows.filter(func(a):return a.life>0 and a.distance<a.range and Rect2(20,20,1760,1160).has_point(a.at))
  game.late_arena.visual_tick(delta)
  for area in game.boss_arena.areas:
   area.age += delta
@@ -777,7 +795,9 @@ func client_tick(delta: float, action: Dictionary) -> void:
  game.slime_families.queue_redraw()
  for mark in game.specials.marks:mark.age+=delta
  for area in game.specials.areas:area.age+=delta
- for bolt in game.specials.bolts:bolt.at+=bolt.velocity*delta
+ for bolt in game.specials.bolts:
+  if game.consumables.freeze_left<=0:bolt.at+=bolt.velocity*delta;bolt.life-=delta
+ game.specials.bolts=game.specials.bolts.filter(func(b):return b.life>0)
  game.specials.queue_redraw()
  for hazard in game.hazards: hazard.age += delta
  for mark in game.boss_arena.pending_summons: mark.age += delta
@@ -788,11 +808,7 @@ func client_tick(delta: float, action: Dictionary) -> void:
   effect.at.y -= delta * 13
  game.gold_loot.feedback = game.gold_loot.feedback.filter(func(effect): return effect.life > 0)
  for actor in actors.values():
-  for shot in actor.weapon_system.arsenal.shots:
-   shot.age+=delta
-   var speed:float=float(shot.get("speed_factor",1));var travel:float=shot.age*speed
-   if shot.kind=="axe":shot.at=shot.origin+shot.direction*170*travel+Vector2(0,180*travel*(travel-shot.flight))
-   else:shot.at+=shot.direction*250*delta*speed if shot.leg==0 else (actor.player.position-shot.at).normalized()*300*delta*speed
+  actor.weapon_system.arsenal.advance_shots(delta,false)
   for zone in actor.weapon_system.arsenal.zones:zone.age+=delta
   actor.weapon_system.arsenal.queue_redraw()
   for beam in actor.weapon_system.beams:beam.life-=delta
@@ -802,8 +818,12 @@ func client_tick(delta: float, action: Dictionary) -> void:
   for pool in actor.weapon_system.ground.pools:pool.age+=delta
   actor.weapon_system.ground.pools=actor.weapon_system.ground.pools.filter(func(p):return p.age<p.flight+p.duration)
   actor.weapon_system.ground.queue_redraw()
-  for shot in actor.weapon_system.projectiles: shot.position += shot.velocity * delta
+  for shot in actor.weapon_system.projectiles:
+   var movement:Vector2=(Vector2(shot.velocity)*delta).limit_length(maxf(0,float(shot.reach)-float(shot.distance)))
+   shot.position+=movement;shot.distance+=movement.length();shot.age=float(shot.get("age",0))+delta
+  actor.weapon_system.projectiles=actor.weapon_system.projectiles.filter(func(s):return float(s.get("age",0))<float(s.get("life",2)) and s.distance<s.reach)
   for slash in actor.weapon_system.slashes: slash.remaining = maxf(0, slash.remaining - delta)
+  actor.weapon_system.additions.advance_shots(delta,false)
   actor.weapon_system.additions.visual.tick(delta)
   for strike in actor.weapon_system.additions.strikes:strike.age+=delta
   actor.weapon_system.additions.strikes=actor.weapon_system.additions.strikes.filter(func(s):return s.age<s.delay+.22)

@@ -3,11 +3,13 @@
 [resource]
 script = ExtResource("1")
 id = "hound"
-title = "Cão"
+title = "Morcego"
+visual_family = "original_bat"
 health = 15.0
 speed = 48.0
 damage = 6.0
 experience = 2
 radius = 7.0
-texture = "res://assets/hound.png"
+texture = "res://assets/v22/bat.png"
 behavior = "flank"
+frames = 24

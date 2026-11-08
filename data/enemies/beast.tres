@@ -3,15 +3,16 @@
 [resource]
 script = ExtResource("1")
 id = "beast"
-title = "Besta"
+title = "Orc montado"
+visual_family = "original_orc_mounted"
 health = 120.0
 speed = 47.5
 damage = 22.0
 radius = 15.0
 experience = 6
-texture = "res://assets/v08/beast.png"
+texture = "res://assets/v22/orc_mounted.png"
 behavior = "special"
-frames = 16
+frames = 24
 contact_damage = false
 attack_range = 40.0
 attack_interval = 2.8

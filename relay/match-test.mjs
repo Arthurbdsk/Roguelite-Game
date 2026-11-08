@@ -10,7 +10,9 @@ const codeFile=resolve(root,`test_output/coop-match-${stamp}-${scenario}.txt`);
 const packedArgument=process.argv.find(v=>v.startsWith('--packed='));
 let packedPath=packedArgument?resolve(packedArgument.slice('--packed='.length)):null;
 if(packedPath){await mkdir(resolve(root,'test_output/packs'),{recursive:true});const source=packedPath;packedPath=resolve(root,`test_output/packs/${stamp}.exe`);await copyFile(source,packedPath);}
-const runtime=packedArgument?['--main-pack',packedPath]:['--path',root];
+const isolated=resolve(process.env.LOCALAPPDATA||root,'HordasPackedTests');
+if(packedArgument)await mkdir(isolated,{recursive:true});
+const runtime=packedArgument?['--path',isolated,'--main-pack',packedPath]:['--path',root];
 const harnessName=process.argv.includes('--normal13')?'coop_match13':process.argv.includes('--survival')?'survival_network13':process.argv.includes('--balance')?'balance_network12':process.argv.includes('--dev')?'dev_network11':process.argv.includes('--campaign')?'campaign_network10':process.argv.includes('--permanent')?'permanent_network9':'coop_match';
 const harnessOverride=process.argv.find(a=>a.startsWith('--harness='));
 const harness=harnessOverride?resolve(harnessOverride.slice(10)):packedArgument?resolve(root,`tests/${harnessName}.gd`):`res://tests/${harnessName}.gd`;

@@ -34,5 +34,5 @@ func run():
  check(a.shots.size()>0 and a.shots.back().velocity.x<0,"magic reevaluates living closest target between shots")
  for id in audit.global_20_percent:
   if not w.weapon_data.has(id):continue
-  for i in 8:check(is_equal_approx(w.weapon_data[id].damage[i],float(audit.global_20_percent[id].before[i])*1.2*(1.1 if id=="garlic" else 1.0)),"exact global damage once "+id)
+  for i in 8:check(is_equal_approx(w.weapon_data[id].damage[i],float(audit.global_20_percent[id].before[i])*1.2*(1.1 if id=="garlic" else 2.0 if id=="fire_wand" else 1.0)),"exact global damage once "+id)
  g.queue_free();await process_frame;await create_timer(.3).timeout;print("WEAPONS16_%s"%("PASS" if errors==0 else "FAIL"));quit(int(errors>0))

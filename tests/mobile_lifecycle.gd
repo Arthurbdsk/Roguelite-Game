@@ -25,6 +25,6 @@ func run():
  var p:=GameProfile.new("user://mobile_lifecycle_fixture.json");p.data.gold=123;p.data.upgrade_ranks={"damage":2};check(p.save(),"private progress written")
  var q:=GameProfile.new(p.path);check(q.load_profile() and q.data.gold==123 and q.data.upgrade_ranks.damage==2,"progress survives process-style reload")
  check(OS.get_user_data_dir().contains("Hordas Android"),"desktop mobile preview also isolated from PC save")
- check(ProjectSettings.get_setting("network/compatible_game_version")=="0.20.0","explicit frozen PC compatibility")
+ check(ProjectSettings.get_setting("network/compatible_game_version")=="0.25.0","explicit PC content compatibility for authorized Android update")
  g.queue_free();await process_frame;await create_timer(.3).timeout
  print("MOBILE_LIFECYCLE_"+("PASS" if errors==0 else "FAIL"));quit(int(errors>0))

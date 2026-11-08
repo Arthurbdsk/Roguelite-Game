@@ -3,11 +3,13 @@
 [resource]
 script = ExtResource("1")
 id = "guard"
+visual_family = "original_guard"
 title = "Soldado"
 health = 78.0
 speed = 18.0
 damage = 14.0
 experience = 6
 radius = 11.0
-texture = "res://assets/guard.png"
+texture = "res://assets/v24/guard.png"
 behavior = "charge"
+frames = 24

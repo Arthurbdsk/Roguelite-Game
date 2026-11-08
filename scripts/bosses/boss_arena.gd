@@ -119,7 +119,7 @@ func tick(delta: float) -> void:
 		death.age += delta
 		if is_instance_valid(death.boss):
 			var boss = death.boss
-			boss.sprite.frame = boss.data.frames - 2 + int(death.age > game.boss_balance.death_duration * 0.5)
+			boss.sprite.frame = TinyCharacters.frame(boss.tiny_kind,"death",death.age/game.boss_balance.death_duration) if boss.tiny_kind=="original_executioner" else boss.data.frames - 2 + int(death.age > game.boss_balance.death_duration * 0.5)
 			boss.sprite.modulate = Color(1.0, 0.65, 0.50, clampf(2 - death.age / game.boss_balance.death_duration * 2, 0, 1))
 		if death.age >= game.boss_balance.death_duration:
 			deaths.remove_at(i)

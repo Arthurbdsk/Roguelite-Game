@@ -1,0 +1,254 @@
+[
+  {
+    "test": "frequency24",
+    "passed": true,
+    "evidence": [
+      "FREQUENCY24_PASS checks=2656 failures=0 combinations=64"
+    ]
+  },
+  {
+    "test": "projectiles24",
+    "passed": true,
+    "evidence": [
+      "PROJECTILES24_PASS checks=14 failures=0"
+    ]
+  },
+  {
+    "test": "arrow_render24",
+    "passed": true,
+    "evidence": [
+      "ARROW_RENDER24_PASS checks=181 sixty render/impact cycles and stationary cleanup"
+    ]
+  },
+  {
+    "test": "wand24",
+    "passed": true,
+    "evidence": [
+      "WAND24_PASS checks=108 failures=0"
+    ]
+  },
+  {
+    "test": "axe24",
+    "passed": true,
+    "evidence": [
+      "AXE24_PASS checks=17 failures=0"
+    ]
+  },
+  {
+    "test": "scale24",
+    "passed": true,
+    "evidence": [
+      "SCALE24_PASS checks=98 failures=0"
+    ]
+  },
+  {
+    "test": "health_fire24",
+    "passed": true,
+    "evidence": [
+      "HEALTH_FIRE24_PASS checks=221 failures=0"
+    ]
+  },
+  {
+    "test": "art24",
+    "passed": true,
+    "evidence": [
+      "ART24_PASS checks=103 three characters and actual attacks/feeding, three maps, cleanup"
+    ]
+  },
+  {
+    "test": "refinement21",
+    "passed": true,
+    "evidence": [
+      "BOW21_PASS checks=12"
+    ]
+  },
+  {
+    "test": "rune21",
+    "passed": true,
+    "evidence": [
+      "RUNE21_PASS random targets, moving owner bounds, no teleport or flip loop, walls and fallback"
+    ]
+  },
+  {
+    "test": "garlic21",
+    "passed": true,
+    "evidence": [
+      "GARLIC21_PASS radius +15% once in eight levels, damage and slow preserved; max radius=99.0019097038032"
+    ]
+  },
+  {
+    "test": "variants21",
+    "passed": true,
+    "evidence": [
+      "VARIANTS21_PASS reductions 5/10/15%, gates 4/6/8 minutes, preserved budget; 50000 draws { \"ghoul\": 22024, \"orc_armored\": 2652, \"orc_elite\": 1319 }"
+    ]
+  },
+  {
+    "test": "presentation21",
+    "passed": true,
+    "evidence": [
+      "PRESENTATION21_PASS all weapon levels without ms/decimals; Midas retains +56% experience"
+    ]
+  },
+  {
+    "test": "adjustments18",
+    "passed": true,
+    "evidence": [
+      "ADJUSTMENTS18_PASS"
+    ]
+  },
+  {
+    "test": "weapons16",
+    "passed": true,
+    "evidence": [
+      "WEAPONS16_PASS"
+    ]
+  },
+  {
+    "test": "limits7",
+    "passed": true,
+    "evidence": [
+      "LIMITS7_PASS"
+    ]
+  },
+  {
+    "test": "permanent_data9",
+    "passed": true,
+    "evidence": [
+      "PERMANENT_DATA9_PASS 16 definitions, backup, one-time migration, exact ledger refund, stale click rejected"
+    ]
+  },
+  {
+    "test": "permanent_effects9",
+    "passed": true,
+    "evidence": [
+      "PERMANENT_EFFECTS9_PASS base stats, regen, damage floor, area sqrt, projectiles, fractions, additive XP, luck, solo revive once, restart"
+    ]
+  },
+  {
+    "test": "permanent_coop9",
+    "passed": true,
+    "evidence": [
+      "PERMANENT_COOP9_PASS challenge once, rank clamp, per-owner gold, all-down offer, host revive once, ally revive preserves benefit"
+    ]
+  },
+  {
+    "test": "network_foundation",
+    "passed": true,
+    "evidence": [
+      "NETWORK_FOUNDATION_PASS checks=66 failures=0"
+    ]
+  },
+  {
+    "test": "network_backpressure",
+    "passed": true,
+    "evidence": [
+      "NETWORK_BACKPRESSURE_PASS checks=10 failures=0"
+    ]
+  },
+  {
+    "test": "spatial14",
+    "passed": true,
+    "evidence": [
+      "SPATIAL14_PASS mixed radii, cell edges, 120 moving physical bodies, obstacle oracle and dynamic ice invalidation"
+    ]
+  },
+  {
+    "test": "devourer",
+    "passed": true,
+    "evidence": [
+      "DEVOURER_PASS growth, decimals, attraction lock, exact protected refunds and cleanup"
+    ]
+  },
+  {
+    "test": "slimes",
+    "passed": true,
+    "evidence": [
+      "SLIME_PASS exactly fifteen, valid positions, grace, no recursion, family reward budget"
+    ]
+  },
+  {
+    "test": "holy_water",
+    "passed": true,
+    "evidence": [
+      "WATER_PASS random visible valid positions, fixed flight, damage timing, no stacking and expiry"
+    ]
+  },
+  {
+    "test": "water12",
+    "passed": true,
+    "evidence": [
+      "WATER12_PASS diameter 55%, levels 1/8, max area/duration, damage boundary, simultaneous pool cleanup"
+    ]
+  },
+  {
+    "test": "soldier20",
+    "passed": true,
+    "evidence": [
+      "SOLDIER20_PASS checks=91"
+    ]
+  },
+  {
+    "test": "orc20",
+    "passed": true,
+    "evidence": [
+      "ORC20_PASS checks=54"
+    ]
+  },
+  {
+    "test": "death22",
+    "passed": true,
+    "evidence": [
+      "DEATH22_PASS 128 pixel-identical comparisons and 40 consecutive deaths"
+    ]
+  },
+  {
+    "test": "art22",
+    "passed": true,
+    "evidence": [
+      "ART22_PASS checks=1597"
+    ]
+  },
+  {
+    "test": "special_enemies",
+    "passed": true,
+    "evidence": [
+      "SPECIAL_ENEMIES_PASS checks=24"
+    ]
+  },
+  {
+    "test": "body_collision13",
+    "passed": true,
+    "evidence": [
+      "BODY_COLLISION13_PASS physical masks, free spawn, mixed sizes, terrain and dense moving bodies"
+    ]
+  },
+  {
+    "test": "events13",
+    "passed": true,
+    "evidence": [
+      "EVENTS13_PASS 20 fixed archers, x4 current health, configured cadence, 45s no-reward expiry; king ->15 blue ->225 small, exact ratios and configured family budget"
+    ]
+  },
+  {
+    "test": "campaign13",
+    "passed": true,
+    "evidence": [
+      "CAMPAIGN13_PASS exact 5/10/15/20 deadlines, actual boss phases, flat bonus once, no early victory, post-True choice, continuous infinite and victory on later defeat"
+    ]
+  },
+  {
+    "test": "two_phase_boss",
+    "passed": true,
+    "evidence": [
+      "TWO_PHASE_BOSS_PASS transition, final reward and multiplayer scaling"
+    ]
+  },
+  {
+    "test": "coop_bosses",
+    "passed": true,
+    "evidence": [
+      "COOP_BOSSES_PASS checks=73 failures=0"
+    ]
+  }
+]

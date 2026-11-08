@@ -3,6 +3,7 @@
 [resource]
 script = ExtResource("1")
 id = "slime_large"
+visual_family = "original_slime_large"
 title = "Slime grande"
 health = 90
 speed = 18
@@ -10,4 +11,5 @@ damage = 9
 radius = 17
 experience = 2
 gold_value = 1
-texture = "res://assets/slime_large.png"
+texture = "res://assets/v22/slime_large.png"
+frames = 24

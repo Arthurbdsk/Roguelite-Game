@@ -12,10 +12,11 @@ func run():
  if path.is_empty():path="res://test_output"
  for safe in [Rect2(0,0,640,360),Rect2(20,8,600,344)]:
   g.mobile.safe=safe;g.mobile.layout()
-  for which in ["title","maps","hub","tree","collection","online","lobby","paused","mobile_build","settings","upgrading","result","revive_offer","endless_choice"]:
+  for which in ["title","maps","hub","tree","collection","bestiary","online","lobby","paused","mobile_build","settings","upgrading","result","revive_offer","endless_choice"]:
    g.ui.render(which,{"offers":g.weapon_system.get_offers(),"won":true,"gold":72,"total_gold":20072,"level":8});await process_frame;await process_frame
    check(g.ui.menu.get_child_count()>0,"screen has touch layout "+which)
    var panel=g.ui.menu.get_child(0)
+   if panel is BestiaryView:panel=panel.get_child(0)
    check(panel.size.x<=safe.size.x+.1 and panel.size.y<=safe.size.y+.1,"layout within safe area "+which+" "+str(panel.size))
    for b in g.ui.menu.find_children("*","BaseButton",true,false):check(b.size.y>=43.9,"comfortable button "+which+" "+b.text)
    if which=="online":

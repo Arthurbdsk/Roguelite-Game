@@ -1,0 +1,14 @@
+[
+  {
+    "test": "slimes",
+    "passed": true
+  },
+  {
+    "test": "holy_water",
+    "passed": true
+  },
+  {
+    "test": "water12",
+    "passed": true
+  }
+]

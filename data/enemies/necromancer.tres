@@ -3,15 +3,16 @@
 [resource]
 script = ExtResource("1")
 id = "necromancer"
+visual_family = "original_necromancer"
 title = "Necromante"
 health = 70.0
 speed = 23
 damage = 12.0
 radius = 9.0
 experience = 6
-texture = "res://assets/v08/necromancer.png"
+texture = "res://assets/v22/necromancer.png"
 behavior = "special"
-frames = 16
+frames = 24
 contact_damage = false
 attack_range = 300.0
 attack_interval = 2.8

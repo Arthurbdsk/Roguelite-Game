@@ -41,6 +41,8 @@ func render(interface,which:String,data:Dictionary)->bool:
   "hub":hub()
   "tree":permanent()
   "collection":collection()
+  "bestiary":
+   var view:=BestiaryView.new();ui.menu.add_child(view);view.setup(game,ui)
   "online","lobby":online(which)
   "paused","online_pause":pause_page()
   "mobile_build":build_page()
@@ -54,12 +56,14 @@ func render(interface,which:String,data:Dictionary)->bool:
  restore();return true
 func title():
  var v:=page("Hordas Android")
- text(v,"Android %s | PC 0.20.0 | Rede 2 | Ouro: %d"%[ProjectSettings.get_setting("application/config/version"),game.profile.data.gold],13)
+ text(v,"Android %s | Base PC 0.25.0 | Rede 2 | Ouro: %d"%[ProjectSettings.get_setting("application/config/version"),game.profile.data.gold],13)
  var grid:=GridContainer.new();grid.columns=2;grid.add_theme_constant_override("h_separation",10);grid.add_theme_constant_override("v_separation",8);grid.size_flags_vertical=Control.SIZE_EXPAND_FILL;v.add_child(grid)
  button(grid,"Jogar",game.open_map_select)
  button(grid,"Cooperativo online",game.open_online)
  button(grid,"Aprimoramentos",game.open_skill_tree)
- button(grid,"Coleção",func():ui.render("collection"))
+ var books:=row(grid)
+ button(books,"Coleção",func():ui.render("collection"))
+ button(books,"Bestiário",func():ui.bestiary_return="title";ui.render("bestiary"))
  button(grid,"Opções",func():ui._open_settings("title"))
  button(grid,"Base",game.enter_hub)
  var links:=row(v)
@@ -75,6 +79,7 @@ func hub():
  var v:=page("Base",game.show_title);var list:=scroll(v)
  text(list,"%d medalhas | %d ouro"%[game.profile.data.seals,game.profile.data.gold])
  button(list,"Aprimoramentos permanentes",game.open_skill_tree)
+ button(list,"Bestiário",func():ui.bestiary_return="hub";ui.render("bestiary"))
  for spec in [["arsenal","Arsenal"],["library","Biblioteca"]]:
   var id:String=spec[0];var owned:bool=game.profile.data.buildings.get(id,false)
   var b:=button(list,spec[1]+(" disponível" if owned else ": 8 medalhas"),func():game.buy_building(id);ui.render("hub"))

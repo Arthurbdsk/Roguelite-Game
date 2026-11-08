@@ -60,9 +60,9 @@
   "weapon:holy_water": {
     "name": "Água Benta",
     "category": "weapon",
-    "asset": "res://assets/icons/holy_water.png",
-    "origin": "Asset atual preservado",
-    "reason": "Referência específica ou correspondência superior ao pacote."
+    "asset": "res://assets/v22/water_vial.png",
+    "origin": "Arte original Hordas 0.22",
+    "reason": "Frasco criado a partir da referência fornecida pelo usuário, igual ao projétil."
   },
   "weapon:ice_wave": {
     "name": "Onda de gelo",
@@ -153,7 +153,7 @@
     "pixel_sha256": "142ab94e6c87cfd6bec9e4a3fb18f4a13753ac3875dd4f242c81f0189e2d919d"
   },
   "passive:crown": {
-    "name": "Coroa",
+    "name": "Toque do Midas",
     "category": "passive",
     "asset": "res://assets/raven/fa1568.tres",
     "origin": "Clockwork Raven",

@@ -57,7 +57,7 @@ func run():
   game.ui.render("running");game.ui.update_hud(game.snapshot());inspect(game.ui.root)
   check(game.ui.hud.find_child("GoldIcon",true,false).size==Vector2(16,16),"gold icon actual scale")
   check(game.ui.hud.find_child("ExperienceIcon",true,false).size==Vector2(16,16),"experience icon actual scale")
-  check(game.ui.status_labels.poison.panel.visible and game.ui.status_labels.root.label.text=="Preso: 350 ms","status icon and precise integer unit")
+  check(game.ui.status_labels.poison.panel.visible and game.ui.status_labels.root.label.text=="Preso: Menos de 1 s","status icon and integer seconds")
   check(game.ui.time_text.text=="02:05","gothic actual match timer")
   await capture("arena-"+map_id)
  game.chests.show_receipt({"chest":1900,"item":"Regeneração","before":7,"after":8,"gold":123,"icon":game.weapon_system.passive_data.regeneration.icon});await capture("receipt");check(game.chests.result_icon.texture!=null,"chest displays catalog icon")

@@ -1,0 +1,45 @@
+{
+  "stamp": 1794074170781,
+  "args": [
+    "--packed=build/Hordas-0.21.0/Hordas-0.21.0.exe",
+    "--harness=tests/refinement_network21.gd",
+    "--render-one",
+    "--relay-url=wss://hordas-relay.onrender.com"
+  ],
+  "peers": [
+    {
+      "peer": 0,
+      "evidence": [
+        "COOP_MATCH_PEER_PASS refinement21 index=0 failures=0"
+      ]
+    },
+    {
+      "peer": 1,
+      "evidence": [
+        "REFINEMENT21_CLIENT_STATE index=1 map=courtyard failures=0",
+        "REFINEMENT21_CLIENT_STATE index=1 map=library failures=0",
+        "REFINEMENT21_CLIENT_STATE index=1 map=fields failures=0",
+        "COOP_MATCH_PEER_PASS refinement21 index=1 failures=0"
+      ]
+    },
+    {
+      "peer": 2,
+      "evidence": [
+        "REFINEMENT21_CLIENT_STATE index=2 map=courtyard failures=0",
+        "REFINEMENT21_CLIENT_STATE index=2 map=library failures=0",
+        "REFINEMENT21_CLIENT_STATE index=2 map=fields failures=0",
+        "COOP_MATCH_PEER_PASS refinement21 index=2 failures=0"
+      ]
+    },
+    {
+      "peer": 3,
+      "evidence": [
+        "REFINEMENT21_CLIENT_STATE index=3 map=courtyard failures=0",
+        "REFINEMENT21_CLIENT_STATE index=3 map=library failures=0",
+        "REFINEMENT21_CLIENT_STATE index=3 map=fields failures=0",
+        "COOP_MATCH_PEER_PASS refinement21 index=3 failures=0"
+      ]
+    }
+  ],
+  "method": "Four local Godot processes, shipped public PCK in an empty resource directory, one rendered client, public WSS relay. Not four physical networks."
+}

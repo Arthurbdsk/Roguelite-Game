@@ -26,7 +26,7 @@ func regeneration_rate()->float:
  var n:int=clampi(int(game.weapon_system.passives.get("regeneration",0)),0,8)
  var data=game.weapon_system.passive_data.get("regeneration")
  return value("regen")+(float(data.regeneration[n-1]) if n>0 and data!=null else 0.0)
-func hit(enemy,amount:float,force:Vector2):enemy.take_damage(amount*damage_multiplier,force)
+func hit(enemy,amount:float,force:Vector2):enemy.take_damage(amount*damage_multiplier,force,game.id if game is CoopActor else "solo")
 func can_revive()->bool:return rank("revive")>0 and not last_stand_spent
 func use_revive()->bool:
  if not can_revive() or not (game.player.down or game.player.hp<=0):return false

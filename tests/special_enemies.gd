@@ -18,7 +18,7 @@ func run():
 	necro.take_damage(9999)
 	check(g.enemies.size()==7,"caster death preserves children")
 	var beast=g.spawn_enemy("beast",Vector2(500,500))
-	check(is_equal_approx(beast.max_hp,g.enemy_data.ghoul.health*5*g.balance.enemy_health_multiplier),"beast HP")
+	check(is_equal_approx(beast.max_hp,(g.enemy_data.ghoul.health*5+30)*g.balance.enemy_health_multiplier),"beast HP")
 	check(is_equal_approx(beast.data.speed,g.enemy_data.ghoul.speed*1.9*g.balance.enemy_speed_multiplier),"beast speed")
 	g.player.hp=100;g.player.armor=0;g.player.invulnerable=0;g.player.apply_poison(10,2)
 	for i in 600:g.player.tick_status(1.0/60)
@@ -51,8 +51,9 @@ func run():
 	check(g.player.hp==88 and g.specials.bolts.is_empty(),"magic travels fixed direction and is removed on hit")
 	g.player.invulnerable=0;g.player.hp=100
 	var attacker=g.spawn_enemy("shadow",g.player.position+Vector2(100,0));attacker.attack_time=0;attacker.tick(0)
-	check(not attacker.targetable and not attacker.sprite.visible,"ambush hides and disables contact")
-	attacker.tick(1.51);check(g.player.hp==83 and g.player.root_remaining==.75,"ambush hit damages and roots")
+	check(not attacker.targetable and attacker.collision_layer==0 and attacker.sprite.visible,"ambush begins with visual anticipation and disables contact")
+	attacker.tick(.31);check(not attacker.sprite.visible,"middle ambush hides after disappearance frames")
+	attacker.tick(1.2);check(g.player.hp==83 and g.player.root_remaining==.75,"ambush hit damages and roots")
 	g.player.apply_poison(10,2);g.finish_run(false)
 	check(g.player.poison_remaining==0 and g.player.root_remaining==0,"end clears player effects")
 	g.start_run();g.director.phase="complete";g.player.hp=1;g.player.invulnerable=0

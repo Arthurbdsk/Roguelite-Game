@@ -3,15 +3,16 @@
 [resource]
 script = ExtResource("1")
 id = "plague"
+visual_family = "original_plague"
 title = "Médico da peste"
 health = 65.0
 speed = 24
 damage = 10.0
 radius = 9.0
 experience = 6
-texture = "res://assets/v08/plague.png"
+texture = "res://assets/v24/plague.png"
 behavior = "special"
-frames = 16
+frames = 24
 contact_damage = false
 attack_range = 300.0
 attack_interval = 2.8

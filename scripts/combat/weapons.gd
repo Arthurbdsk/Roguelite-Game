@@ -66,6 +66,7 @@ var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 var stat_cache:Dictionary={}
 var cache_combat_stats:bool=false
 var bow_visual_target:WeakRef
+var projectile_serial:int=0
 
 
 func setup(game_ref) -> void:
@@ -84,20 +85,11 @@ func setup(game_ref) -> void:
 
 # Call after the player has reset its base statistics for a fresh expedition.
 func reset(support_id: String = "none") -> void:
-	bow_visual_target=null
-	additions.setup(self);additions.reset()
-	if arsenal!=null:arsenal.reset()
-	if ground!=null:ground.reset()
+	clear_attacks()
 	support = support_id
 	levels = {"bolt": 1}
 	passives.clear()
-	beams.clear()
 	clock_index=0
-	lightning_fx.clear()
-	projectiles.clear()
-	slashes.clear()
-	orbit_positions.clear()
-	orbit_hits.clear()
 	timers = {"sword": 0.1, "bolt": 0.2}
 	orbit_phase = 0.0
 	combat_time = 0.0
@@ -106,6 +98,20 @@ func reset(support_id: String = "none") -> void:
 		levels["bolt"] = 1
 	elif support == "library":
 		levels["orbit"] = 1
+	queue_redraw()
+
+
+func clear_attacks() -> void:
+	bow_visual_target=null
+	additions.setup(self);additions.reset()
+	if arsenal!=null:arsenal.reset()
+	if ground!=null:ground.reset()
+	beams.clear()
+	lightning_fx.clear()
+	projectiles.clear()
+	slashes.clear()
+	orbit_positions.clear()
+	orbit_hits.clear()
 	queue_redraw()
 
 
@@ -215,15 +221,24 @@ func _fire_bolts() -> bool:
 		return false
 	var direction: Vector2 = (target.position - game.player.position).normalized()
 	var count: int = int(_stat("bolt", "count"))
+	var targets:Array=[target]
+	for candidate in arsenal.candidates(game.player.position-Vector2.ONE*reach,game.player.position+Vector2.ONE*reach):
+		if _valid_target(candidate) and candidate!=target and candidate.position.distance_to(game.player.position)<=reach:targets.append(candidate)
+	targets.sort_custom(func(a,b):return game.player.position.distance_squared_to(a.position)<game.player.position.distance_squared_to(b.position))
 	bow_visual_target=weakref(target)
 	var previous_shots:int=projectiles.size()
 	for index: int in count:
 		if projectiles.size() >= MAX_PROJECTILES:
 			break
-		var angle_offset: float = (float(index) - float(count - 1) * 0.5) * 0.18
-		var velocity: Vector2 = direction.rotated(angle_offset) * 275.0 * projectile_factor()
-		projectiles.append({"position": game.player.position, "velocity": velocity,
-			"distance": 0.0, "reach": reach, "damage": _stat("bolt", "damage"),
+		var selected=targets[index%targets.size()]
+		if not _valid_target(selected):continue
+		var origin:Vector2=game.player.position+Vector2(0,-10)+direction*8+direction.orthogonal()*(index-(count-1)*.5)*2
+		var aim:Vector2=selected.position-origin
+		if aim.length_squared()<.000001:aim=direction if direction.length_squared()>.000001 else Vector2.RIGHT
+		var velocity: Vector2 = aim.normalized() * 275.0 * projectile_factor()
+		projectile_serial+=1
+		projectiles.append({"id":projectile_serial,"age":0.0,"life":(reach+weapon_data.bolt.flight_padding)/maxf(1,velocity.length()),"position": origin, "velocity": velocity,
+			"distance": 0.0, "reach": reach+weapon_data.bolt.flight_padding, "selection_range":reach, "damage": _stat("bolt", "damage"),
 			"pierce": (2 if int(levels.get("bolt",0)) >= 2 else 1) + (_mastery().rank("bolt_pierce") if _mastery() != null else 0),
 			"bounce": 1 if int(levels.get("bolt",0)) >= 5 else 0, "hits": []})
 	if projectiles.size()>previous_shots and game.player.has_method("begin_bow"):game.player.begin_bow(direction)
@@ -234,19 +249,30 @@ func _fire_bolts() -> bool:
 func _update_projectiles(delta: float) -> void:
 	for index: int in range(projectiles.size() - 1, -1, -1):
 		var shot: Dictionary = projectiles[index]
+		var previous_age:float=float(shot.get("age",0))
+		var life:float=float(shot.get("life",float(shot.reach)/maxf(1,Vector2(shot.velocity).length())))
+		shot.age=previous_age+delta
+		if not Vector2(shot.velocity).is_finite() or Vector2(shot.velocity).length_squared()<.000001 or previous_age>=life:
+			projectiles.remove_at(index)
+			continue
 		var start: Vector2 = shot["position"]
-		var end: Vector2 = start + Vector2(shot["velocity"]) * delta
+		var travel:Vector2=Vector2(shot.velocity)*minf(delta,maxf(0,life-previous_age))
+		travel=travel.limit_length(maxf(0,float(shot.reach)-float(shot.distance)))
+		var end: Vector2 = start + travel
+		var world=game.world if game is CoopActor else game
+		var wall:Dictionary=CombatSweep.wall(world.arena,start,end,3)
+		var wall_fraction:float=wall.get("fraction",INF)
 		shot["position"] = end
 		shot["distance"] = float(shot["distance"]) + start.distance_to(end)
 		var consumed: bool = false
 		var collisions: Array[Dictionary] = []
-		for enemy in arsenal.candidates(start,end):
+		for enemy in arsenal.candidates(start-Vector2.ONE*3,end+Vector2.ONE*3):
 			if not _valid_target(enemy) or shot["hits"].has(enemy.get_instance_id()):
 				continue
-			var closest: Vector2 = Geometry2D.get_closest_point_to_segment(enemy.position, start, end)
-			if closest.distance_squared_to(enemy.position) > pow(enemy.radius + 3.0, 2.0):
-				continue
-			collisions.append({"enemy": enemy, "distance": start.distance_squared_to(closest)})
+			var old:Vector2=enemy.motion_start if enemy.motion_start!=Vector2.INF else enemy.position
+			var fraction:float=CombatSweep.circle(start,end,old,enemy.position,enemy.radius+3)
+			if fraction>=wall_fraction or fraction==INF:continue
+			collisions.append({"enemy": enemy, "distance": fraction})
 		# Resolve along travel order, independent of the director's spawn ordering.
 		collisions.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 			if is_equal_approx(float(a["distance"]), float(b["distance"])):
@@ -269,11 +295,16 @@ func _update_projectiles(delta: float) -> void:
 					shot["bounce"] = 0
 					shot["pierce"] = 1
 					shot["distance"] = 0.0
+					# A ricochet starts a fresh flight; clients use this same visual clock.
+					shot["age"] = 0.0
+					shot["life"] = float(shot.reach)/maxf(1,Vector2(shot.velocity).length())
+					wall={}
 					break
 			consumed = true
 			break
-		if consumed or float(shot["distance"]) > float(shot["reach"]):
+		if consumed or not wall.is_empty() or float(shot["distance"]) >= float(shot["reach"]) or float(shot.age)>=float(shot.get("life",life)):
 			projectiles.remove_at(index)
+	queue_redraw()
 
 
 func _bounce_target(origin: Vector2, excluded: Array):
@@ -586,7 +617,7 @@ func upgrade_values(id:String,current:int)->String:
 		for f in ["projectile_speed","duration","pierce"]:
 			if id in ["garlic","whip"] or (f=="duration" and id!="runetracer") or (f=="pierce" and id=="runetracer"):continue
 			if current==0 or data.get(f)[current]!=data.get(f)[current-1]:fields.append(value_change({"projectile_speed":"Velocidade","duration":"Duração","pierce":"Perfuração"}[f],data.get(f)[maxi(0,current-1)],data.get(f)[current],current," s" if f=="duration" else ""))
-	for spec in [["damage","Dano"],["cooldown","Intervalo"],["reach","Raio da poça" if id in ["sludge","holy_water"] else "Alcance"],["count","Alvos" if id=="lightning" else "Quantidade"]]:
+	for spec in [["damage","Dano"],["cooldown","Intervalo"],["reach","Raio da poça" if id in ["sludge","holy_water"] else "Alcance de seleção" if id=="bolt" else "Alcance"],["count","Alvos" if id=="lightning" else "Quantidade"]]:
 		var after:float=offer_stat(id,spec[0],current)
 		var before:float=offer_stat(id,spec[0],maxi(0,current-1))
 		if current>0 and is_equal_approx(before,after):continue
@@ -594,13 +625,14 @@ func upgrade_values(id:String,current:int)->String:
 		fields.append(value_change(spec[1],before,after,current,unit))
 	if id in ["sludge","holy_water"]:
 		if current==0 or data.duration[current]!=data.duration[current-1]:fields.append(value_change("Duração",offer_stat(id,"duration",maxi(0,current-1)),offer_stat(id,"duration",current),current," s"))
-		fields.append("Dano a cada %s. Sem dano extra por sobreposição."%DisplayNumbers.seconds(data.tick_interval))
+		fields.append("Dano: %s. Sem dano extra por sobreposição."%DisplayNumbers.attack_interval(data.tick_interval).replace("ataques","acertos"))
 	if id=="clock":
 		fields.append(value_change("Largura",data.beam_width[maxi(0,current-1)]*area_factor(),data.beam_width[current]*area_factor(),current))
 		fields.append("Paralisa %s. Chefes: -%d%% de movimento por %s."%[DisplayNumbers.seconds(data.freeze_duration),data.boss_slow*100,DisplayNumbers.seconds(data.boss_slow_duration)])
 	elif id=="sword" and (current==0 or current==3):
 		fields.append(value_change("Abertura",124,156 if current==3 else 124,current,"°"))
 	elif id=="bolt":
+		fields.append("Flechas miram a partir da origem real. Voo máximo: %s px."%number_text(offer_stat(id,"reach",current)+data.flight_padding))
 		var extra:int=_mastery().rank("bolt_pierce") if _mastery()!=null else 0
 		if current in [0,1]:fields.append(value_change("Atravessa",1+extra,1+extra if current==0 else 2+extra,current," inimigos"))
 		if current==4:fields.append("Ricochetes: 0 → 1")
@@ -621,7 +653,7 @@ func build_stats()->String:
 	var interval:float=(1-.06*int(passives.get("cadence",0)))*(_mastery().interval_multiplier if _mastery()!=null else 1)
 	var text:String="Vida: %d/%d | Defesa: %d\nMovimento: %d px/s\nDano: +%d%% | Vel. ataque: +%d%%\nColeta XP: %d | Ouro: %d\nExperiência: +%d%%"%[p.hp,p.max_hp,p.armor,p.speed,damage,(1/interval-1)*100,p.pickup_radius,p.gold_collection_radius(),7*int(passives.get("crown",0))+roundi(100*permanent("experience"))]
 	for id in weapon_data:
-		if int(levels.get(id,0))>0:text+="\n%s: %s dano | %s | %spx"%[weapon_data[id].display_name,number_text(_stat(id,"damage")*(1+damage/100)),DisplayNumbers.seconds(_interval(id)),number_text(_stat(id,"reach"))]
+		if int(levels.get(id,0))>0:text+="\n%s: %s dano | %s | %spx"%[weapon_data[id].display_name,number_text(_stat(id,"damage")*(1+damage/100)),DisplayNumbers.attack_interval(_interval(id)),number_text(_stat(id,"reach"))]
 	text+="\nÁrea permanente: +%.0f%% | Duração: +%.0f%%\nVel. projéteis: +%d%% | Redução: %.0f%%\nRegeneração: %s | Ouro: +%.0f%%"%[100*permanent("area"),100*permanent("duration"),(projectile_factor()-1)*100,100*p.damage_reduction,DisplayNumbers.regeneration(_mastery().regeneration_rate() if _mastery()!=null else 0),100*permanent("gold")]
 	return text
 

@@ -3,7 +3,7 @@
 [resource]
 script = ExtResource("1")
 id = "crown"
-display_name = "Coroa"
+display_name = "Toque do Midas"
 description = "Experiência recebida +7%. Apenas para o dono."
 icon = "res://assets/icons/crown.png"
 max_level = 8

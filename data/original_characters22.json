@@ -1,0 +1,814 @@
+{
+ "original_bat": {
+  "texture": "res://assets/v22/bat.png",
+  "frames": 24,
+  "cell": [
+   40,
+   40
+  ],
+  "offset": [
+   0,
+   -10
+  ],
+  "origin": "Original art created for Hordas from user references, 2026-11-07",
+  "clips": {
+   "idle": {
+    "start": 0,
+    "count": 4
+   },
+   "walk": {
+    "start": 4,
+    "count": 4
+   },
+   "attack": {
+    "start": 8,
+    "count": 4
+   },
+   "attack2": {
+    "start": 8,
+    "count": 4
+   },
+   "cast": {
+    "start": 12,
+    "count": 4
+   },
+   "hurt": {
+    "start": 16,
+    "count": 4
+   },
+   "death": {
+    "start": 20,
+    "count": 4
+   }
+  },
+  "visible_height": 15
+ },
+ "original_necromancer": {
+  "texture": "res://assets/v22/necromancer.png",
+  "frames": 24,
+  "cell": [
+   48,
+   48
+  ],
+  "offset": [
+   0,
+   -20
+  ],
+  "origin": "Original art created for Hordas from user references, 2026-11-07",
+  "clips": {
+   "idle": {
+    "start": 0,
+    "count": 4
+   },
+   "walk": {
+    "start": 4,
+    "count": 4
+   },
+   "attack": {
+    "start": 8,
+    "count": 4
+   },
+   "attack2": {
+    "start": 8,
+    "count": 4
+   },
+   "cast": {
+    "start": 12,
+    "count": 4
+   },
+   "hurt": {
+    "start": 16,
+    "count": 4
+   },
+   "death": {
+    "start": 20,
+    "count": 4
+   }
+  },
+  "visible_height": 24
+ },
+ "original_skeleton_sword": {
+  "texture": "res://assets/v22/skeleton_sword.png",
+  "frames": 24,
+  "cell": [
+   40,
+   40
+  ],
+  "offset": [
+   0,
+   -16
+  ],
+  "origin": "Original art created for Hordas from user references, 2026-11-07",
+  "clips": {
+   "idle": {
+    "start": 0,
+    "count": 4
+   },
+   "walk": {
+    "start": 4,
+    "count": 4
+   },
+   "attack": {
+    "start": 8,
+    "count": 4
+   },
+   "attack2": {
+    "start": 8,
+    "count": 4
+   },
+   "cast": {
+    "start": 12,
+    "count": 4
+   },
+   "hurt": {
+    "start": 16,
+    "count": 4
+   },
+   "death": {
+    "start": 20,
+    "count": 4
+   }
+  },
+  "visible_height": 18
+ },
+ "original_skeleton_archer": {
+  "texture": "res://assets/v22/skeleton_archer.png",
+  "frames": 24,
+  "cell": [
+   40,
+   40
+  ],
+  "offset": [
+   0,
+   -16
+  ],
+  "origin": "Original art created for Hordas from user references, 2026-11-07",
+  "clips": {
+   "idle": {
+    "start": 0,
+    "count": 4
+   },
+   "walk": {
+    "start": 4,
+    "count": 4
+   },
+   "attack": {
+    "start": 8,
+    "count": 4
+   },
+   "attack2": {
+    "start": 8,
+    "count": 4
+   },
+   "cast": {
+    "start": 12,
+    "count": 4
+   },
+   "hurt": {
+    "start": 16,
+    "count": 4
+   },
+   "death": {
+    "start": 20,
+    "count": 4
+   }
+  },
+  "visible_height": 18
+ },
+ "original_skeleton_armored": {
+  "texture": "res://assets/v22/skeleton_armored.png",
+  "frames": 24,
+  "cell": [
+   40,
+   40
+  ],
+  "offset": [
+   0,
+   -16
+  ],
+  "origin": "Original art created for Hordas from user references, 2026-11-07",
+  "clips": {
+   "idle": {
+    "start": 0,
+    "count": 4
+   },
+   "walk": {
+    "start": 4,
+    "count": 4
+   },
+   "attack": {
+    "start": 8,
+    "count": 4
+   },
+   "attack2": {
+    "start": 8,
+    "count": 4
+   },
+   "cast": {
+    "start": 12,
+    "count": 4
+   },
+   "hurt": {
+    "start": 16,
+    "count": 4
+   },
+   "death": {
+    "start": 20,
+    "count": 4
+   }
+  },
+  "visible_height": 19
+ },
+ "original_orc_armored": {
+  "texture": "res://assets/v22/orc_armored.png",
+  "frames": 24,
+  "cell": [
+   40,
+   40
+  ],
+  "offset": [
+   0,
+   -16
+  ],
+  "origin": "Original art created for Hordas from user references, 2026-11-07",
+  "clips": {
+   "idle": {
+    "start": 0,
+    "count": 4
+   },
+   "walk": {
+    "start": 4,
+    "count": 4
+   },
+   "attack": {
+    "start": 8,
+    "count": 4
+   },
+   "attack2": {
+    "start": 8,
+    "count": 4
+   },
+   "cast": {
+    "start": 12,
+    "count": 4
+   },
+   "hurt": {
+    "start": 16,
+    "count": 4
+   },
+   "death": {
+    "start": 20,
+    "count": 4
+   }
+  },
+  "visible_height": 18
+ },
+ "original_orc_elite": {
+  "texture": "res://assets/v22/orc_elite.png",
+  "frames": 24,
+  "cell": [
+   40,
+   40
+  ],
+  "offset": [
+   0,
+   -16
+  ],
+  "origin": "Original art created for Hordas from user references, 2026-11-07",
+  "clips": {
+   "idle": {
+    "start": 0,
+    "count": 4
+   },
+   "walk": {
+    "start": 4,
+    "count": 4
+   },
+   "attack": {
+    "start": 8,
+    "count": 4
+   },
+   "attack2": {
+    "start": 8,
+    "count": 4
+   },
+   "cast": {
+    "start": 12,
+    "count": 4
+   },
+   "hurt": {
+    "start": 16,
+    "count": 4
+   },
+   "death": {
+    "start": 20,
+    "count": 4
+   }
+  },
+  "visible_height": 18
+ },
+ "original_orc_mounted": {
+  "texture": "res://assets/v22/orc_mounted.png",
+  "frames": 24,
+  "cell": [
+   48,
+   48
+  ],
+  "offset": [
+   0,
+   -20
+  ],
+  "origin": "Original art created for Hordas from user references, 2026-11-07",
+  "clips": {
+   "idle": {
+    "start": 0,
+    "count": 4
+   },
+   "walk": {
+    "start": 4,
+    "count": 4
+   },
+   "attack": {
+    "start": 8,
+    "count": 4
+   },
+   "attack2": {
+    "start": 8,
+    "count": 4
+   },
+   "cast": {
+    "start": 12,
+    "count": 4
+   },
+   "hurt": {
+    "start": 16,
+    "count": 4
+   },
+   "death": {
+    "start": 20,
+    "count": 4
+   }
+  },
+  "visible_height": 27
+ },
+ "original_slime_large": {
+  "texture": "res://assets/v22/slime_large.png",
+  "frames": 24,
+  "cell": [
+   48,
+   48
+  ],
+  "offset": [
+   0,
+   -20
+  ],
+  "origin": "Original art created for Hordas from user references, 2026-11-07",
+  "clips": {
+   "idle": {
+    "start": 0,
+    "count": 4
+   },
+   "walk": {
+    "start": 4,
+    "count": 4
+   },
+   "attack": {
+    "start": 8,
+    "count": 4
+   },
+   "attack2": {
+    "start": 8,
+    "count": 4
+   },
+   "cast": {
+    "start": 12,
+    "count": 4
+   },
+   "hurt": {
+    "start": 16,
+    "count": 4
+   },
+   "death": {
+    "start": 20,
+    "count": 4
+   }
+  },
+  "visible_height": 16
+ },
+ "original_slime_small": {
+  "texture": "res://assets/v22/slime_small.png",
+  "frames": 24,
+  "cell": [
+   20,
+   20
+  ],
+  "offset": [
+   0,
+   -6
+  ],
+  "origin": "Original art created for Hordas from user references, 2026-11-07",
+  "clips": {
+   "idle": {
+    "start": 0,
+    "count": 4
+   },
+   "walk": {
+    "start": 4,
+    "count": 4
+   },
+   "attack": {
+    "start": 8,
+    "count": 4
+   },
+   "attack2": {
+    "start": 8,
+    "count": 4
+   },
+   "cast": {
+    "start": 12,
+    "count": 4
+   },
+   "hurt": {
+    "start": 16,
+    "count": 4
+   },
+   "death": {
+    "start": 20,
+    "count": 4
+   }
+  },
+  "visible_height": 5
+ },
+ "original_slime_blue": {
+  "texture": "res://assets/v22/slime_blue.png",
+  "frames": 24,
+  "cell": [
+   48,
+   48
+  ],
+  "offset": [
+   0,
+   -20
+  ],
+  "origin": "Original art created for Hordas from user references, 2026-11-07",
+  "clips": {
+   "idle": {
+    "start": 0,
+    "count": 4
+   },
+   "walk": {
+    "start": 4,
+    "count": 4
+   },
+   "attack": {
+    "start": 8,
+    "count": 4
+   },
+   "attack2": {
+    "start": 8,
+    "count": 4
+   },
+   "cast": {
+    "start": 12,
+    "count": 4
+   },
+   "hurt": {
+    "start": 16,
+    "count": 4
+   },
+   "death": {
+    "start": 20,
+    "count": 4
+   }
+  },
+  "visible_height": 16
+ },
+ "original_slime_blue_small": {
+  "texture": "res://assets/v22/slime_blue_small.png",
+  "frames": 24,
+  "cell": [
+   20,
+   20
+  ],
+  "offset": [
+   0,
+   -6
+  ],
+  "origin": "Original art created for Hordas from user references, 2026-11-07",
+  "clips": {
+   "idle": {
+    "start": 0,
+    "count": 4
+   },
+   "walk": {
+    "start": 4,
+    "count": 4
+   },
+   "attack": {
+    "start": 8,
+    "count": 4
+   },
+   "attack2": {
+    "start": 8,
+    "count": 4
+   },
+   "cast": {
+    "start": 12,
+    "count": 4
+   },
+   "hurt": {
+    "start": 16,
+    "count": 4
+   },
+   "death": {
+    "start": 20,
+    "count": 4
+   }
+  },
+  "visible_height": 5
+ },
+ "original_slime_king": {
+  "texture": "res://assets/v22/slime_king.png",
+  "frames": 24,
+  "cell": [
+   80,
+   80
+  ],
+  "offset": [
+   0,
+   -36
+  ],
+  "origin": "Original art created for Hordas from user references, 2026-11-07",
+  "clips": {
+   "idle": {
+    "start": 0,
+    "count": 4
+   },
+   "walk": {
+    "start": 4,
+    "count": 4
+   },
+   "attack": {
+    "start": 8,
+    "count": 4
+   },
+   "attack2": {
+    "start": 8,
+    "count": 4
+   },
+   "cast": {
+    "start": 12,
+    "count": 4
+   },
+   "hurt": {
+    "start": 16,
+    "count": 4
+   },
+   "death": {
+    "start": 20,
+    "count": 4
+   }
+  },
+  "visible_height": 48
+ },
+ "original_plague": {
+  "texture": "res://assets/v24/plague.png",
+  "frames": 24,
+  "cell": [
+   48,
+   48
+  ],
+  "offset": [
+   0,
+   -20
+  ],
+  "origin": "Original art created for Hordas from user references, 2026-11-07",
+  "clips": {
+   "idle": {
+    "start": 0,
+    "count": 4
+   },
+   "walk": {
+    "start": 4,
+    "count": 4
+   },
+   "attack": {
+    "start": 8,
+    "count": 4
+   },
+   "attack2": {
+    "start": 8,
+    "count": 4
+   },
+   "cast": {
+    "start": 12,
+    "count": 4
+   },
+   "hurt": {
+    "start": 16,
+    "count": 4
+   },
+   "death": {
+    "start": 20,
+    "count": 4
+   }
+  },
+  "visible_height": 22
+ },
+ "original_devourer": {
+  "texture": "res://assets/v24/devourer.png",
+  "frames": 24,
+  "cell": [
+   48,
+   48
+  ],
+  "offset": [
+   0,
+   -20
+  ],
+  "origin": "Original art created for Hordas from user references, 2026-11-07",
+  "clips": {
+   "idle": {
+    "start": 0,
+    "count": 4
+   },
+   "walk": {
+    "start": 4,
+    "count": 4
+   },
+   "attack": {
+    "start": 8,
+    "count": 4
+   },
+   "attack2": {
+    "start": 8,
+    "count": 4
+   },
+   "cast": {
+    "start": 12,
+    "count": 4
+   },
+   "hurt": {
+    "start": 16,
+    "count": 4
+   },
+   "death": {
+    "start": 20,
+    "count": 4
+   }
+  },
+  "visible_height": 22
+ },
+ "original_guard": {
+  "texture": "res://assets/v24/guard.png",
+  "frames": 24,
+  "cell": [
+   48,
+   48
+  ],
+  "offset": [
+   0,
+   -20
+  ],
+  "origin": "Original art created for Hordas from user references, 2026-11-07",
+  "clips": {
+   "idle": {
+    "start": 0,
+    "count": 4
+   },
+   "walk": {
+    "start": 4,
+    "count": 4
+   },
+   "attack": {
+    "start": 8,
+    "count": 4
+   },
+   "attack2": {
+    "start": 8,
+    "count": 4
+   },
+   "cast": {
+    "start": 12,
+    "count": 4
+   },
+   "hurt": {
+    "start": 16,
+    "count": 4
+   },
+   "death": {
+    "start": 20,
+    "count": 4
+   }
+  },
+  "visible_height": 20
+ },
+ "original_shadow": {
+  "texture": "res://assets/v25/shadow.png",
+  "frames": 32,
+  "cell": [
+   48,
+   48
+  ],
+  "offset": [
+   0,
+   -20.0
+  ],
+  "origin": "Original project artwork, built-in image generation, 2026-11-07",
+  "clips": {
+   "idle": {
+    "start": 0,
+    "count": 4
+   },
+   "walk": {
+    "start": 4,
+    "count": 4
+   },
+   "prepare": {
+    "start": 8,
+    "count": 4
+   },
+   "attack": {
+    "start": 12,
+    "count": 4
+   },
+   "vanish": {
+    "start": 16,
+    "count": 4
+   },
+   "appear": {
+    "start": 20,
+    "count": 4
+   },
+   "hurt": {
+    "start": 24,
+    "count": 4
+   },
+   "death": {
+    "start": 28,
+    "count": 4
+   },
+   "cast": {
+    "start": 20,
+    "count": 4
+   }
+  },
+  "visible_height": 21
+ },
+ "original_executioner": {
+  "texture": "res://assets/v25/executioner.png",
+  "frames": 36,
+  "cell": [
+   64,
+   64
+  ],
+  "offset": [
+   0,
+   -28.0
+  ],
+  "origin": "Original project artwork, built-in image generation, 2026-11-07",
+  "clips": {
+   "idle": {
+    "start": 0,
+    "count": 4
+   },
+   "walk": {
+    "start": 4,
+    "count": 4
+   },
+   "execute_prepare": {
+    "start": 8,
+    "count": 4
+   },
+   "attack": {
+    "start": 12,
+    "count": 4
+   },
+   "charge_prepare": {
+    "start": 16,
+    "count": 4
+   },
+   "charge": {
+    "start": 20,
+    "count": 4
+   },
+   "hurt": {
+    "start": 24,
+    "count": 4
+   },
+   "phase": {
+    "start": 28,
+    "count": 4
+   },
+   "death": {
+    "start": 32,
+    "count": 4
+   },
+   "cast": {
+    "start": 28,
+    "count": 4
+   }
+  },
+  "visible_height": 28
+ }
+}

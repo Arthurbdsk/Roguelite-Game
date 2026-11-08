@@ -31,12 +31,11 @@ var previous_poll: int = 0
 var max_poll_gap_ms: int = 0
 
 func _ready() -> void:
- endpoint=str(ProjectSettings.get_setting("network/relay_endpoint",""))
+ endpoint=str(ProjectSettings.get_setting("network/relay_endpoint","wss://hordas-relay.onrender.com"))
  var config := ConfigFile.new()
  var candidates: Array[String] = ["res://network.cfg"]
  if not OS.has_feature("editor"): candidates.push_front(OS.get_executable_path().get_base_dir().path_join("network.cfg"))
  for path in candidates:
-  if not endpoint.is_empty():break
   if config.load(path) == OK:
    endpoint = str(config.get_value("relay", "url", ""))
    break
@@ -49,9 +48,10 @@ func connect_room(create: bool, display_name: String, room_code: String = "", sk
   connection_failed.emit("O serviço de salas está indisponível no momento.")
   return
  close()
- pending = {"type": "create" if create else "join", "name": display_name.strip_edges().left(8), "code": room_code.strip_edges().to_upper(), "skills": skills,"challenge":challenge,"gold_remainder":gold_remainder}
- pending.protocol=2
- pending.game_version=ProjectSettings.get_setting("network/compatible_game_version",ProjectSettings.get_setting("application/config/version","0.5.0"))
+ pending = {"type": "create" if create else "join", "name": display_name.strip_edges(), "code": room_code.strip_edges().to_upper(), "skills": skills,"challenge":challenge,"gold_remainder":gold_remainder}
+ pending.protocol=GameCompatibility.PROTOCOL
+ pending.game_version=GameCompatibility.identity()
+ if pending.game_version.is_empty():connection_failed.emit("Conteúdo de gameplay sem identificação válida. Reinstale uma versão compatível.");return
  if development and (OS.has_feature("editor") or OS.has_feature("dev_tools")):pending.game_version+="-dev"
  if endpoint.begins_with("wss://") and endpoint.get_slice("/",2).ends_with(".onrender.com"):
   warmup=HTTPRequest.new()
@@ -175,6 +175,8 @@ func _process(delta: float) -> void:
     if not socket.was_string_packet():parsed.native=true
    if not parsed is Dictionary:
     continue
+   if parsed.get("type","")=="error" and str(parsed.get("reason","")).contains("Versões diferentes"):
+    parsed.reason="Conteúdo de gameplay incompatível. Use PC e Android compatíveis da mesma entrega."
    if parsed.get("type") == "joined":
     peer_id = parsed.id
     host_id = parsed.host

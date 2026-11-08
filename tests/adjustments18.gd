@@ -41,7 +41,7 @@ func run():
  check(e.knockback==Vector2.ZERO,"reentry cannot repeat initial push")
  e.garlic_sources[999]=weakref(w);check(is_equal_approx(e.movement_control_multiplier(),.85),"multiple garlic sources do not stack")
  e.slow_remaining=1;e.slow_factor=.7;check(is_equal_approx(e.movement_control_multiplier(),.7),"stronger existing slow preserved")
- check(DisplayNumbers.seconds(.4)=="400 ms" and DisplayNumbers.seconds(1.2)=="1200 ms","integer time units")
+ check(DisplayNumbers.seconds(.4)=="Menos de 1 s" and DisplayNumbers.seconds(1.2)=="Cerca de 1 s","integer time units without milliseconds")
  check(DisplayNumbers.regeneration(.1)=="1 de vida a cada 10 s","fractional regeneration preserved in description")
  check(DisplayNumbers.change("Dano",10.1,10.2,1).contains("1%"),"same rounded values show actual change")
  var decimal:=RegEx.new();decimal.compile("[0-9]+[.,][0-9]+")

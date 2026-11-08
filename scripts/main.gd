@@ -51,6 +51,7 @@ var event_claimed: bool = false
 var event_progress: float = 0
 var region: Vector2 = Vector2(1260, 810)
 var profile := GameProfile.new()
+var bestiary:=BestiaryJournal.new()
 var player: Sentinel
 var arena: RuinedArena
 var weapon_system: WeaponSystem
@@ -64,6 +65,7 @@ var entities: Node2D
 var camera: Camera2D
 var character_remains:CharacterRemains
 var enemy_data: Dictionary = {}
+var variant_data:Dictionary={}
 var balance: EncounterBalance = preload("res://data/encounters/default.tres")
 var gold_loot: GoldLoot
 var enemy_projectiles: EnemyProjectiles
@@ -108,14 +110,25 @@ func _ready() -> void:
  survival_config=JSON.parse_string(FileAccess.get_file_as_string("res://data/survival.json"))
  balance.continuous_per_minute=survival_config.generation.per_minute;balance.difficulty_seconds=survival_config.generation.stage_seconds;balance.continuous_stage_rate=survival_config.generation.stage_rate
  skills.setup(self)
+ bestiary.setup(self)
  mastery.setup(self)
  for id in ["ice_crystal","channel_totem","ghoul", "hound", "guard", "demon", "executioner", "skeleton_sword", "skeleton_archer", "necromancer", "beast", "plague", "shadow", "devourer", "slime_large", "slime_small", "guardian", "horror"]:
   enemy_data[id] = load("res://data/enemies/" + id + ".tres")
  for pair in [["siege_archer","skeleton_archer"],["slime_king","slime_large"],["event_blue","slime_large"],["event_small","slime_small"]]:
   enemy_data[pair[0]]=enemy_data[pair[1]].duplicate();enemy_data[pair[0]].id=pair[0]
  enemy_data.siege_archer.title="Arqueiro do cerco";enemy_data.siege_archer.speed=0;enemy_data.siege_archer.attack_interval+=survival_config.events.siege_extra_interval;enemy_data.siege_archer.attack_range=survival_config.events.siege_range;enemy_data.siege_archer.arrow_range=survival_config.events.siege_arrow_range;enemy_data.siege_archer.arrow_lifetime=survival_config.events.siege_arrow_lifetime
- enemy_data.slime_king.title="Slime Rei";enemy_data.slime_king.health*=survival_config.events.king_health;enemy_data.slime_king.speed*=survival_config.events.king_speed;enemy_data.slime_king.radius=survival_config.events.king_radius;enemy_data.slime_king.texture="res://assets/v13/slime_king.png";enemy_data.slime_king.frames=8
+ enemy_data.event_blue.visual_family="original_slime_blue";enemy_data.event_small.visual_family="original_slime_blue_small"
+ enemy_data.slime_king.title="Slime Rei";enemy_data.slime_king.health*=survival_config.events.king_health;enemy_data.slime_king.speed*=survival_config.events.king_speed;enemy_data.slime_king.radius=survival_config.events.king_radius
+ enemy_data.slime_king.visual_family="original_slime_king"
  enemy_data["boss"] = enemy_data.demon
+ variant_data=JSON.parse_string(FileAccess.get_file_as_string("res://data/variants21.json"))
+ for id in variant_data:
+  var v:Dictionary=variant_data[id];enemy_data[id]=enemy_data[v.base].duplicate();enemy_data[id].id=id;enemy_data[id].title=v.name;enemy_data[id].damage_resistance=v.resistance
+  enemy_data[id].visual_family=v.get("visual_family","orc" if v.base=="ghoul" else "")
+ for id in enemy_data:
+  var family:String=enemy_data[id].visual_family
+  if not family.is_empty() and TinyCharacters.available(family):
+   enemy_data[id].texture=TinyCharacters.data(family).texture;enemy_data[id].frames=int(TinyCharacters.data(family).frames)
  arena = RuinedArena.new()
  arena.z_index = -20
  add_child(arena)
@@ -279,11 +292,13 @@ func simulate(delta: float, movement: Vector2 = Vector2.ZERO) -> void:
  prepare_crowd()
  for enemy in enemies.duplicate():
   if is_instance_valid(enemy) and enemy.alive:
+   enemy.motion_start=enemy.position
    enemy.tick(delta)
    if state != "running":
     return
  rebuild_grid()
  weapon_system.update_combat(delta)
+ bestiary.tick(delta)
  update_pickups(delta)
  if state != "running":
   queue_redraw()
@@ -329,6 +344,7 @@ func start_run(selected_support: String = "none") -> void:
  arena.apply_map(selected_map)
  run_challenge=clampi(int(profile.data.challenge_active),0,skills.rank("challenge"))
  run_id = "%d_%d_%d" % [Time.get_unix_time_from_system(), Time.get_ticks_usec(), randi()]
+ bestiary.begin(run_id)
  run_settled = false
  player.poison_remaining = 0
  player.poison_clock = 0
@@ -362,7 +378,10 @@ func clear_run() -> void:
  if late_arena!=null:late_arena.reset()
  food_index.reset()
  navigation.reset()
- if is_instance_valid(weapon_system) and weapon_system.ground!=null:weapon_system.ground.reset();weapon_system.arsenal.reset()
+ if is_instance_valid(weapon_system):weapon_system.clear_attacks()
+ if coop!=null and coop.active:
+  for actor in coop.actors.values():
+   if is_instance_valid(actor.weapon_system) and actor.weapon_system!=weapon_system:actor.weapon_system.clear_attacks()
  if slime_families!=null:slime_families.reset()
  if is_instance_valid(player): player.clear_status()
  if specials != null: specials.reset()
@@ -561,6 +580,7 @@ func finish_run(won: bool) -> void:
 func request_quit() -> void:
  if closing:return
  closing=true
+ bestiary.flush()
  if coop != null and coop.active:
   coop.finish(false)
   if coop.connection.socket != null: coop.connection.socket.poll()
@@ -613,6 +633,7 @@ func mobile_back():
   "running","paused","online_pause":toggle_pause()
   "mobile_build":ui.mobile_screens.close_run_panel()
   "settings":ui.render(ui.return_screen,profile.data)
+  "bestiary":ui.render(ui.bestiary_return,profile.data)
   "upgrading":
    if coop.active:coop.close_menu()
   "tree":close_skill_tree()
@@ -645,6 +666,8 @@ func toggle_pause() -> void:
   ui.update_hud(snapshot())
 
 func _unhandled_input(event: InputEvent) -> void:
+ if ui.screen=="bestiary" and event.is_action_pressed("ui_cancel"):
+  ui.render(ui.bestiary_return,profile.data);get_viewport().set_input_as_handled();return
  if event.is_action_pressed("revive") and state=="running" and not coop.active:
   if chests.try_open(player):get_viewport().set_input_as_handled();return
  if coop != null and coop.active:
@@ -732,6 +755,37 @@ func apply_settings() -> void:
  if not test_mode and not (mobile!=null and mobile.active):
   DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN if profile.data.settings.fullscreen else DisplayServer.WINDOW_MODE_WINDOWED)
 
+func enemy_base_health(id:String)->float:
+ if id in ["slime_small","event_small"]:return enemy_data.ghoul.health*balance.slime_small_health_ratio
+ if id=="executioner":return boss_balance.executioner_health()
+ if id=="demon":return boss_balance.demon_health()
+ if id in ["guardian","horror"]:
+  var ratio:float=campaign.config.guardian_health_ratio_to_demon_phase2 if id=="guardian" else campaign.config.horror_health_ratio_to_demon_phase2
+  return boss_balance.demon_health()*boss_balance.second_health_multiplier*ratio
+ return enemy_data[id].health
+
+func enemy_health_factor(id:String)->float:
+ return float(survival_config.events.siege_health) if id=="siege_archer" else float(survival_config.events.blue_health) if id=="event_blue" else float(survival_config.events.small_health) if id=="event_small" else 1.0
+
+func enemy_spawn_stats(id:String,scale:Dictionary)->EnemyData:
+ var stats:EnemyData=enemy_data[id].duplicate()
+ stats.health=enemy_base_health(id)
+ if id in ["slime_small","event_small"]:
+  stats.speed=enemy_data.ghoul.speed*balance.slime_small_speed_ratio
+  stats.damage=enemy_data.ghoul.damage*balance.slime_small_damage_ratio
+ if id in ["ice_crystal","channel_totem"]:
+  stats.health=float(late_arena.patterns.config.crystal_health if id=="ice_crystal" else late_arena.patterns.config.totem_health)
+ else:stats.health=(stats.health+30)*balance.enemy_health_multiplier*scale.health*enemy_health_factor(id)
+ stats.damage*=scale.damage
+ if id not in ["demon","executioner","guardian","horror"]:stats.attack_interval*=balance.enemy_attack_interval_multiplier
+ if id in ["ghoul","skeleton_sword","skeleton_archer"] or variant_data.has(id):stats.speed*=balance.common_speed_multiplier
+ if id in ["demon","executioner"]:stats.speed=boss_balance.executioner_speed if id=="executioner" else boss_balance.demon_speed
+ if id in ["guardian","horror"]:stats.speed=boss_balance.demon_speed*(.8 if id=="guardian" else float(campaign.config.horror_speed_ratio_to_demon))
+ if id=="horror":stats.damage=enemy_data.demon.damage*boss_balance.second_damage_multiplier*float(campaign.config.horror_damage_ratio_to_demon_phase2)*scale.damage
+ stats.speed*=balance.enemy_speed_multiplier*scale.speed
+ if id=="event_small":stats.speed*=survival_config.events.small_speed
+ return stats
+
 func spawn_enemy(id: String, point: Vector2, elite: bool = false, chain_meta:Dictionary={}):
  id = "demon" if id == "boss" else id
  if id=="slime_large" and not (coop.active and not coop.hosting) and not slime_families.can_add():return null
@@ -740,30 +794,14 @@ func spawn_enemy(id: String, point: Vector2, elite: bool = false, chain_meta:Dic
  enemy.chain_root=int(chain_meta.get("root",0));enemy.chain_generation=int(chain_meta.get("generation",-1))
  enemy.serial = serial
  serial += 1
- var stats: EnemyData = enemy_data[id].duplicate()
- if id in ["slime_small","event_small"]:
-  stats.health=enemy_data.ghoul.health*balance.slime_small_health_ratio
-  stats.speed=enemy_data.ghoul.speed*balance.slime_small_speed_ratio
-  stats.damage=enemy_data.ghoul.damage*balance.slime_small_damage_ratio
  var scale: Dictionary = enemy_scale()
- if enemy is HazardTarget:stats.health=float(late_arena.patterns.config.crystal_health if id=="ice_crystal" else late_arena.patterns.config.totem_health)
- stats.health *= 1.0 if enemy is HazardTarget else balance.enemy_health_multiplier
- stats.health *= 1.0 if enemy is HazardTarget else scale.health
- stats.damage *= scale.damage
- if not enemy is HordeBoss:stats.attack_interval*=balance.enemy_attack_interval_multiplier
- if id in ["ghoul","skeleton_sword","skeleton_archer"]:stats.speed*=balance.common_speed_multiplier
- stats.speed *= balance.enemy_speed_multiplier
- stats.speed *= scale.speed
- var health_factor:float=float(survival_config.events.siege_health) if id=="siege_archer" else float(survival_config.events.blue_health) if id=="event_blue" else float(survival_config.events.small_health) if id=="event_small" else 1
- stats.health*=health_factor
- if id=="event_small":stats.speed*=survival_config.events.small_speed
+ var stats:EnemyData=enemy_spawn_stats(id,scale)
+ var health_factor:float=enemy_health_factor(id)
  enemy.setup(self, stats, elite)
+ enemy.spawn_health_bonus=0 if enemy is HazardTarget else 30*balance.enemy_health_multiplier*scale.health*health_factor*(4.0 if elite and not enemy is HordeBoss else 1.0)
  enemy.difficulty_health_factor=health_factor
  if id=="siege_archer":enemy.event_kind="siege"
  if enemy is HazardTarget:enemy.owner_boss=int(chain_meta.get("pattern_owner",0))
- if enemy is HordeBoss:
-  enemy.max_hp *= scale.health
-  enemy.hp = enemy.max_hp
  horde_progress.apply(enemy)
  if not (coop.active and not coop.hosting):
   var free:Vector2=free_enemy_position(point,enemy.radius)
@@ -772,7 +810,7 @@ func spawn_enemy(id: String, point: Vector2, elite: bool = false, chain_meta:Dic
  entities.add_child(enemy)
  if coop.active and not coop.hosting:enemy.collision_mask=0
  enemies.append(enemy)
- enemy_collision_margin=maxf(enemy_collision_margin,enemy.radius+5)
+ enemy_collision_margin=maxf(enemy_collision_margin,enemy.radius+5+(enemy.position.distance_to(enemy.motion_start) if enemy.motion_start!=Vector2.INF else 0))
  var cell:=Vector2i(floori(enemy.position.x/40),floori(enemy.position.y/40))
  if not grid.has(cell):grid[cell]=[]
  grid[cell].append(enemy)
@@ -790,6 +828,7 @@ func enemy_killed(enemy) -> void:
  if reported_deaths.has(enemy.get_instance_id()):
   return
  reported_deaths[enemy.get_instance_id()] = true
+ bestiary.killed(enemy)
  character_remains.died(enemy)
  late_arena.chain.remove(enemy)
  if enemy.data.id=="slime_large":
@@ -858,7 +897,7 @@ func rebuild_grid() -> void:
  for enemy in enemies:
   if not is_instance_valid(enemy) or not enemy.alive:
    continue
-  enemy_collision_margin=maxf(enemy_collision_margin,enemy.radius+5)
+  enemy_collision_margin=maxf(enemy_collision_margin,enemy.radius+5+(enemy.position.distance_to(enemy.motion_start) if enemy.motion_start!=Vector2.INF else 0))
   var cell := Vector2i(floori(enemy.position.x / 40), floori(enemy.position.y / 40))
   if not grid.has(cell):
    grid[cell] = []

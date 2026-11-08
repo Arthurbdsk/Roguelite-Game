@@ -8,6 +8,8 @@ extends Resource
 @export var damage: float = 8
 @export var experience: int = 2
 @export var radius: float = 8
+@export var damage_resistance:float=0.0
+@export var visual_family:String=""
 @export var texture: String = "res://assets/ghoul.png"
 @export var behavior: String = "chase"
 @export var frames: int = 4

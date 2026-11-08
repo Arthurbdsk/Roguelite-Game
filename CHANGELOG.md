@@ -1,5 +1,28 @@
 # Atualizações
 
+## PC 0.25.0
+
+- Shadow e Carrasco com arte original, animações ligadas aos estados reais e apresentação das fases, sem mudar seus atributos de combate.
+- Bestiário com 23 espécies, variantes, fases de chefes, prévia animada, filtros e layout adaptável, acessível pelo menu e pela base.
+- Atributos consultam o mesmo cálculo usado no spawn. Descobertas por aparição visível e eliminações individuais pelo dono do golpe final, confirmadas pelo host.
+- Contadores opcionais no perfil existente, sem inventar histórico, com gravação em pontos seguros e deduplicação por partida.
+- Cooperativo usa a vida e velocidade do solo. Geração total reduzida em 20%; dano, regras próprias das fases e dificuldade temporal preservados.
+- Handshake com protocolo 2 e identificação do conteúdo compartilhado, preparado para a atualização Android explicitamente autorizada nesta entrega.
+- PC validado em 40 suítes e quatro processos pelo relay público. Testes em aparelho físico e redes distintas ficam com o usuário.
+
+## PC 0.24.0
+
+- Flechas sem velocidade válida são encerradas; prazo de voo passa a valer também no host. Ricochete renova o prazo visual.
+- Limpeza completa de ataques ao encerrar ou reiniciar, incluindo todos os donos no cooperativo. IDs de ataques adicionais e impactos não se repetem nas reconstruções.
+- Réplicas de flechas aliadas, inimigas e magia inimiga encerram pelo voo ou prazo, mesmo sem novo snapshot. Mensagens antigas continuam rejeitadas.
+- Machado resolve a perfuração pela ordem dos contatos varridos e usa a mesma trajetória e descarte lógico nos clientes. Preservados três acertos iniciais, arco e tamanho +15% da 0.23.
+- Vida-base +30 corrigida também nos quatro chefes. Transformações preservam o bônus uma única vez, separado do aumento temporal.
+- Pivôs horizontais, nomes e barras ajustados à escala visual de 1,1. Função antiga da sombra do herói removida.
+- Médico da Peste, Devorador e Soldado de dash com 24 quadros, incluídos para avaliação do usuário dentro do jogo. Animação de alimentação e poça de veneno integradas do trabalho local existente.
+- Mantidos os aumentos previamente autorizados: 90 inimigos/minuto e 20% de chance de ouro.
+- Mantidos Varinha Mágica +1 segundo nos oito níveis, fogo aliado com dano dobrado, escalas, salvamentos e otimizações. Nenhuma aceleração geral indevida foi reproduzida nas 64 medições.
+- Somente PC. Android continua congelado.
+
 ## 0.3.0
 
 - Árvore permanente de 16 nós, pré-requisitos, níveis limitados e custos em ouro.

@@ -16,6 +16,8 @@ var charge_hit: bool = false
 var contact_timer: float = 0.8
 var is_executioner: bool = false
 var visual_form:int=0
+var visual_phase_seen:int=1
+var visual_phase_left:float=0
 
 func _ready() -> void:
 	super._ready()
@@ -28,7 +30,7 @@ func apply_visual_form() -> void:
 	visual_form=shown
 	sprite.texture=load("res://assets/v08/demon_"+str(shown)+".png")
 	sprite.hframes=32
-	sprite.position.y=-float(sprite.texture.get_height())*.5+4
+	sprite.position.y=(-float(sprite.texture.get_height())*.5+4)*1.1
 
 func animate_demon(moving:bool) -> void:
 	apply_visual_form()
@@ -44,8 +46,8 @@ func animate_demon(moving:bool) -> void:
 func setup(owner_game, stats: EnemyData, _is_elite: bool = false) -> void:
 	super.setup(owner_game, stats, false)
 	is_executioner = stats.behavior == "executioner"
-	max_hp = game.boss_balance.executioner_health() if is_executioner else game.boss_balance.demon_health()
-	max_hp *= game.balance.enemy_health_multiplier
+	# The spawner resolves the boss base, +30 and difficulty once for every species.
+	max_hp = stats.health
 	hp = max_hp
 	state = "chase"
 	attack_time = 1.2
@@ -59,7 +61,7 @@ func enable_combat() -> void:
 	contact_timer = game.boss_balance.activation_grace
 	sprite.visible = true
 	sprite.modulate = Color.WHITE
-	sprite.position.y = -float(sprite.texture.get_height()) * 0.5 + 4
+	sprite.position.y = (-float(sprite.texture.get_height()) * 0.5 + 4)*1.1
 
 func tick(delta: float) -> void:
 	if dev_frozen or not alive or not combat_enabled:
@@ -129,9 +131,21 @@ func tick(delta: float) -> void:
 	elif state == "charge":
 		sprite.frame = 5
 	if not is_executioner:animate_demon(movement.length_squared()>1)
+	elif tiny_kind=="original_executioner":animate_executioner(delta,movement.length_squared()>1)
 	sprite.flip_h = charge_direction.x < 0 if state in ["windup", "charge"] else direction.x < 0
 	sprite.modulate = Color(1.6, 1.6, 1.6) if hit_flash > 0 else Color.WHITE
+	if is_executioner and phase==2 and hit_flash<=0:sprite.modulate=Color(1.12,.84,.80)
 	queue_redraw()
+
+func animate_executioner(delta:float,moving:bool):
+	if phase!=visual_phase_seen:visual_phase_seen=phase;visual_phase_left=.4
+	visual_phase_left=maxf(0,visual_phase_left-delta)
+	if hit_flash>0:sprite.frame=TinyCharacters.frame(tiny_kind,"hurt",1-hit_flash/.09)
+	elif state=="windup":sprite.frame=TinyCharacters.frame(tiny_kind,"execute_prepare" if attack_name=="execute" else "charge_prepare",state_time/maxf(.01,warning_duration()))
+	elif state=="charge":sprite.frame=TinyCharacters.frame(tiny_kind,"charge",state_time/maxf(.01,game.boss_balance.charge_duration))
+	elif state=="recovery":sprite.frame=TinyCharacters.frame(tiny_kind,"attack" if attack_name=="execute" else "charge",state_time/maxf(.01,game.boss_balance.spell_recovery if attack_name=="execute" else game.boss_balance.charge_recovery))
+	elif visual_phase_left>0:sprite.frame=TinyCharacters.frame(tiny_kind,"phase",1-visual_phase_left/.4)
+	else:sprite.frame=TinyCharacters.frame(tiny_kind,"walk" if moving else "idle",clock*1.5,true)
 
 func dev_attack_ready()->bool:
 	var requested:String=dev_next_attack if not dev_next_attack.is_empty() else dev_repeat
@@ -205,10 +219,11 @@ func finish_attack() -> void:
 func damage_scale()->float:
 	return game.boss_balance.second_damage_multiplier if not is_executioner and form==2 else 1.0
 
-func take_damage(amount: float, _force: Vector2 = Vector2.ZERO) -> void:
+func take_damage(amount: float, _force: Vector2 = Vector2.ZERO,owner:String="") -> void:
 	if not alive or not combat_enabled or not targetable:
 		return
 	amount=received_damage(amount)
+	if amount>0:last_hit_owner=owner
 	hp = maxf(0, hp - amount)
 	hit_flash = 0.08
 	game.add_damage_number(position - Vector2(0, 35), amount)
@@ -217,7 +232,7 @@ func take_damage(amount: float, _force: Vector2 = Vector2.ZERO) -> void:
 		first_phase_hp=max_hp
 		form=2
 		dev_repeat="";dev_next_attack=""
-		max_hp=(first_phase_hp-horde_health_bonus)*game.boss_balance.second_health_multiplier+horde_health_bonus
+		max_hp=(first_phase_hp-horde_health_bonus-spawn_health_bonus)*game.boss_balance.second_health_multiplier+horde_health_bonus+spawn_health_bonus
 		hp=max_hp
 		state="transform";state_time=0;targetable=false;velocity=Vector2.ZERO
 		game.boss_arena.clear_for_transform()

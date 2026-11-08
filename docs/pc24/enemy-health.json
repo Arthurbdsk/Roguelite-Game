@@ -1,0 +1,352 @@
+[
+  {
+    "base_before_bonus": 65.0,
+    "challenge": 0,
+    "enemy": "ice_crystal",
+    "initial_hp": 65.0,
+    "time_bonus": 0
+  },
+  {
+    "base_before_bonus": 65.0,
+    "challenge": 0,
+    "enemy": "channel_totem",
+    "initial_hp": 95.0,
+    "time_bonus": 0
+  },
+  {
+    "base_before_bonus": 24.0,
+    "challenge": 0,
+    "enemy": "ghoul",
+    "initial_hp": 86.4,
+    "time_bonus": 0
+  },
+  {
+    "base_before_bonus": 15.0,
+    "challenge": 0,
+    "enemy": "hound",
+    "initial_hp": 72.0,
+    "time_bonus": 0
+  },
+  {
+    "base_before_bonus": 78.0,
+    "challenge": 0,
+    "enemy": "guard",
+    "initial_hp": 172.8,
+    "time_bonus": 0
+  },
+  {
+    "base_before_bonus": 1872.0,
+    "challenge": 0,
+    "enemy": "demon",
+    "initial_hp": 3043.2,
+    "time_bonus": 0
+  },
+  {
+    "base_before_bonus": 936.0,
+    "challenge": 0,
+    "enemy": "executioner",
+    "initial_hp": 1545.6,
+    "time_bonus": 0
+  },
+  {
+    "base_before_bonus": 48.0,
+    "challenge": 0,
+    "enemy": "skeleton_sword",
+    "initial_hp": 124.8,
+    "time_bonus": 0
+  },
+  {
+    "base_before_bonus": 38.0,
+    "challenge": 0,
+    "enemy": "skeleton_archer",
+    "initial_hp": 108.8,
+    "time_bonus": 0
+  },
+  {
+    "base_before_bonus": 70.0,
+    "challenge": 0,
+    "enemy": "necromancer",
+    "initial_hp": 160.0,
+    "time_bonus": 0
+  },
+  {
+    "base_before_bonus": 120.0,
+    "challenge": 0,
+    "enemy": "beast",
+    "initial_hp": 240.0,
+    "time_bonus": 0
+  },
+  {
+    "base_before_bonus": 65.0,
+    "challenge": 0,
+    "enemy": "plague",
+    "initial_hp": 152.0,
+    "time_bonus": 0
+  },
+  {
+    "base_before_bonus": 60.0,
+    "challenge": 0,
+    "enemy": "shadow",
+    "initial_hp": 144.0,
+    "time_bonus": 0
+  },
+  {
+    "base_before_bonus": 38.0,
+    "challenge": 0,
+    "enemy": "devourer",
+    "initial_hp": 108.8,
+    "time_bonus": 0
+  },
+  {
+    "base_before_bonus": 90.0,
+    "challenge": 0,
+    "enemy": "slime_large",
+    "initial_hp": 192.0,
+    "time_bonus": 0
+  },
+  {
+    "base_before_bonus": 3.6,
+    "challenge": 0,
+    "enemy": "slime_small",
+    "initial_hp": 53.76,
+    "time_bonus": 0
+  },
+  {
+    "base_before_bonus": 7488.0,
+    "challenge": 0,
+    "enemy": "guardian",
+    "initial_hp": 12028.8,
+    "time_bonus": 0
+  },
+  {
+    "base_before_bonus": 20592.0,
+    "challenge": 0,
+    "enemy": "horror",
+    "initial_hp": 32995.2,
+    "time_bonus": 0
+  },
+  {
+    "base_before_bonus": 38.0,
+    "challenge": 0,
+    "enemy": "siege_archer",
+    "initial_hp": 435.2,
+    "time_bonus": 0
+  },
+  {
+    "base_before_bonus": 720.0,
+    "challenge": 0,
+    "enemy": "slime_king",
+    "initial_hp": 1200.0,
+    "time_bonus": 0
+  },
+  {
+    "base_before_bonus": 90.0,
+    "challenge": 0,
+    "enemy": "event_blue",
+    "initial_hp": 96.0,
+    "time_bonus": 0
+  },
+  {
+    "base_before_bonus": 3.6,
+    "challenge": 0,
+    "enemy": "event_small",
+    "initial_hp": 107.52,
+    "time_bonus": 0
+  },
+  {
+    "base_before_bonus": 24.0,
+    "challenge": 0,
+    "enemy": "orc_armored",
+    "initial_hp": 86.4,
+    "time_bonus": 0
+  },
+  {
+    "base_before_bonus": 24.0,
+    "challenge": 0,
+    "enemy": "orc_elite",
+    "initial_hp": 86.4,
+    "time_bonus": 0
+  },
+  {
+    "base_before_bonus": 48.0,
+    "challenge": 0,
+    "enemy": "skeleton_armored",
+    "initial_hp": 124.8,
+    "time_bonus": 0
+  },
+  {
+    "base_before_bonus": 65.0,
+    "challenge": 5,
+    "enemy": "ice_crystal",
+    "initial_hp": 65.0,
+    "time_bonus": 0
+  },
+  {
+    "base_before_bonus": 65.0,
+    "challenge": 5,
+    "enemy": "channel_totem",
+    "initial_hp": 95.0,
+    "time_bonus": 0
+  },
+  {
+    "base_before_bonus": 24.0,
+    "challenge": 5,
+    "enemy": "ghoul",
+    "initial_hp": 108.0,
+    "time_bonus": 0
+  },
+  {
+    "base_before_bonus": 15.0,
+    "challenge": 5,
+    "enemy": "hound",
+    "initial_hp": 90.0,
+    "time_bonus": 0
+  },
+  {
+    "base_before_bonus": 78.0,
+    "challenge": 5,
+    "enemy": "guard",
+    "initial_hp": 216.0,
+    "time_bonus": 0
+  },
+  {
+    "base_before_bonus": 1872.0,
+    "challenge": 5,
+    "enemy": "demon",
+    "initial_hp": 3804.0,
+    "time_bonus": 0
+  },
+  {
+    "base_before_bonus": 936.0,
+    "challenge": 5,
+    "enemy": "executioner",
+    "initial_hp": 1932.0,
+    "time_bonus": 0
+  },
+  {
+    "base_before_bonus": 48.0,
+    "challenge": 5,
+    "enemy": "skeleton_sword",
+    "initial_hp": 156.0,
+    "time_bonus": 0
+  },
+  {
+    "base_before_bonus": 38.0,
+    "challenge": 5,
+    "enemy": "skeleton_archer",
+    "initial_hp": 136.0,
+    "time_bonus": 0
+  },
+  {
+    "base_before_bonus": 70.0,
+    "challenge": 5,
+    "enemy": "necromancer",
+    "initial_hp": 200.0,
+    "time_bonus": 0
+  },
+  {
+    "base_before_bonus": 120.0,
+    "challenge": 5,
+    "enemy": "beast",
+    "initial_hp": 300.0,
+    "time_bonus": 0
+  },
+  {
+    "base_before_bonus": 65.0,
+    "challenge": 5,
+    "enemy": "plague",
+    "initial_hp": 190.0,
+    "time_bonus": 0
+  },
+  {
+    "base_before_bonus": 60.0,
+    "challenge": 5,
+    "enemy": "shadow",
+    "initial_hp": 180.0,
+    "time_bonus": 0
+  },
+  {
+    "base_before_bonus": 38.0,
+    "challenge": 5,
+    "enemy": "devourer",
+    "initial_hp": 136.0,
+    "time_bonus": 0
+  },
+  {
+    "base_before_bonus": 90.0,
+    "challenge": 5,
+    "enemy": "slime_large",
+    "initial_hp": 240.0,
+    "time_bonus": 0
+  },
+  {
+    "base_before_bonus": 3.6,
+    "challenge": 5,
+    "enemy": "slime_small",
+    "initial_hp": 67.2,
+    "time_bonus": 0
+  },
+  {
+    "base_before_bonus": 7488.0,
+    "challenge": 5,
+    "enemy": "guardian",
+    "initial_hp": 15036.0,
+    "time_bonus": 0
+  },
+  {
+    "base_before_bonus": 20592.0,
+    "challenge": 5,
+    "enemy": "horror",
+    "initial_hp": 41244.0,
+    "time_bonus": 0
+  },
+  {
+    "base_before_bonus": 38.0,
+    "challenge": 5,
+    "enemy": "siege_archer",
+    "initial_hp": 544.0,
+    "time_bonus": 0
+  },
+  {
+    "base_before_bonus": 720.0,
+    "challenge": 5,
+    "enemy": "slime_king",
+    "initial_hp": 1500.0,
+    "time_bonus": 0
+  },
+  {
+    "base_before_bonus": 90.0,
+    "challenge": 5,
+    "enemy": "event_blue",
+    "initial_hp": 120.0,
+    "time_bonus": 0
+  },
+  {
+    "base_before_bonus": 3.6,
+    "challenge": 5,
+    "enemy": "event_small",
+    "initial_hp": 134.4,
+    "time_bonus": 0
+  },
+  {
+    "base_before_bonus": 24.0,
+    "challenge": 5,
+    "enemy": "orc_armored",
+    "initial_hp": 108.0,
+    "time_bonus": 0
+  },
+  {
+    "base_before_bonus": 24.0,
+    "challenge": 5,
+    "enemy": "orc_elite",
+    "initial_hp": 108.0,
+    "time_bonus": 0
+  },
+  {
+    "base_before_bonus": 48.0,
+    "challenge": 5,
+    "enemy": "skeleton_armored",
+    "initial_hp": 156.0,
+    "time_bonus": 0
+  }
+]

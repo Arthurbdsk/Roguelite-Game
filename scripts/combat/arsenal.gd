@@ -7,6 +7,7 @@ var zones:Array[Dictionary]=[]
 var blade_points:Array[Vector2]=[]
 var blade_hits:Dictionary={}
 var angle:float=0
+var shot_serial:int=0
 var textures:Dictionary={}
 var bomb_texture=preload("res://assets/v08/bombs.png")
 var snow_texture=preload("res://assets/v10/snowflake.png")
@@ -44,9 +45,20 @@ func launch(id:String)->bool:
    var world=weapons.game.world if weapons.game is CoopActor else weapons.game
    if not world.arena.safe_position(at,8):at=origin
    zones.append({"kind":id,"at":at,"source":origin,"age":0.0,"flight_delay":(.7+i*.12)/weapons.projectile_factor(),"delay":.7+i*.12,"radius":weapons._stat(id,"area_radius"),"life":1.1+i*.12,"hit":false})
-  else:shots.append({"speed_factor":weapons.projectile_factor(),"kind":id,"at":origin,"origin":origin,"direction":dir,"age":0.0,"leg":0,"flight":maxf(.25,origin.distance_to(target.position)/170) if target!=null else .9,"hits":{},"pierce":int(weapons._stat(id,"pierce"))})
+  else:
+   shot_serial+=1
+   shots.append({"id":shot_serial,"speed_factor":weapons.projectile_factor(),"kind":id,"at":origin,"origin":origin,"direction":dir,"age":0.0,"leg":0,"flight":maxf(.25,origin.distance_to(target.position)/170) if target!=null else .9,"hits":{},"pierce":int(weapons._stat(id,"pierce"))})
  return true
 func tick(delta:float,allow_attacks:bool=true):
+ advance_shots(delta)
+ tick_zones(delta)
+ blade_points.clear()
+ queue_redraw()
+func outside_owner_view(at:Vector2)->bool:
+ var center:Vector2=weapons.game.player.position.clamp(Vector2(320,180),Vector2(1480,1020))
+ # Covers the 18.4 px rotating sprite's diagonal, independent of window size.
+ return not Rect2(center-Vector2(320,180),Vector2(640,360)).grow(14).has_point(at)
+func advance_shots(delta:float,authoritative:bool=true):
  for shot in shots.duplicate():
   shot.age+=delta
   var start:Vector2=shot.at
@@ -55,13 +67,22 @@ func tick(delta:float,allow_attacks:bool=true):
   else:
    if shot.leg==0 and travel>=weapons._stat("boomerang","reach")/250:shot.leg=1;shot.hits.clear()
    shot.at+=shot.direction*250*delta*speed if shot.leg==0 else (weapons.game.player.position-shot.at).normalized()*300*delta*speed
-  for e in candidates(start,shot.at):
+  var collisions:Array=[]
+  for e in candidates(start-Vector2.ONE*6,shot.at+Vector2.ONE*6) if authoritative else []:
    if not weapons._valid_target(e) or shot.hits.has(e.serial):continue
-   if Geometry2D.get_closest_point_to_segment(e.position,start,shot.at).distance_to(e.position)<=e.radius+5:
-    shot.hits[e.serial]=true;weapons._hit(e,weapons._stat(shot.kind,"damage"),Vector2.ZERO)
-    if shot.kind=="axe":shot.pierce-=1
-    if shot.kind=="axe" and shot.pierce<=0:break
-  if travel>3 or (shot.kind=="axe" and (shot.pierce<=0 or travel>shot.flight+.2)) or (shot.kind=="boomerang" and shot.leg==1 and shot.at.distance_to(weapons.game.player.position)<12):shots.erase(shot)
+   var old:Vector2=e.motion_start if e.motion_start!=Vector2.INF else e.position
+   var fraction:float=CombatSweep.circle(start,shot.at,old,e.position,e.radius+(5.75 if shot.kind=="axe" else 5))
+   if fraction!=INF:collisions.append({"enemy":e,"fraction":fraction})
+  collisions.sort_custom(func(a,b):return a.enemy.serial<b.enemy.serial if is_equal_approx(a.fraction,b.fraction) else a.fraction<b.fraction)
+  for collision in collisions:
+   var e=collision.enemy
+   if not weapons._valid_target(e):continue
+   shot.hits[e.serial]=true;weapons._hit(e,weapons._stat(shot.kind,"damage"),Vector2.ZERO)
+   if shot.kind=="axe":shot.pierce-=1
+   if shot.kind=="axe" and shot.pierce<=0:break
+  if (shot.kind=="axe" and (shot.pierce<=0 or outside_owner_view(shot.at))) or (shot.kind=="boomerang" and (travel>3 or (shot.leg==1 and shot.at.distance_to(weapons.game.player.position)<12))):shots.erase(shot)
+ queue_redraw()
+func tick_zones(delta:float):
  for zone in zones:
   zone.age+=delta
   if zone.kind=="ice_wave":
@@ -79,7 +100,7 @@ func tick(delta:float,allow_attacks:bool=true):
 func _draw():
  for shot in shots:
   draw_set_transform(shot.at.round(),shot.age*12)
-  if shot.kind=="axe":draw_texture_rect(textures.axe,Rect2(-8,-8,16,16),false)
+  if shot.kind=="axe":draw_texture_rect(textures.axe,Rect2(-9.2,-9.2,18.4,18.4),false)
   else:draw_texture(textures[shot.kind],-textures[shot.kind].get_size()*.5)
   draw_set_transform(Vector2.ZERO)
  for zone in zones:

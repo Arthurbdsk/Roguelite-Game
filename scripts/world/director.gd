@@ -33,6 +33,13 @@ func composition()->Dictionary:
  var extra:float=minf(2,game.horde_progress.stage()*.06)
  for id in weights:
   if id not in ["ghoul","hound","skeleton_sword","skeleton_archer"]:weights[id]*=1+extra
+ var bases:Dictionary={}
+ for id in game.variant_data:
+  var v:Dictionary=game.variant_data[id]
+  if t>=float(v.starts_at) and weights.has(v.base):
+   if not bases.has(v.base):bases[v.base]=weights[v.base]
+   var portion:float=float(bases[v.base])*float(v.share)
+   weights[v.base]-=portion;weights[id]=portion
  return weights
 func rate()->float:
  return game.balance.continuous_per_minute*(1+game.balance.continuous_stage_rate*game.horde_progress.stage())*game.enemy_scale().count

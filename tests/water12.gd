@@ -14,9 +14,10 @@ func run():
    assert(is_equal_approx(w._stat("holy_water","reach"),expected))
    var center:=Vector2(900,630);w.ground.add_pool("holy_water",center,center)
    assert(is_equal_approx(w.ground.pools[0].radius,expected))
-   var inside=g.spawn_enemy("guard",center+Vector2(expected-.02,0));var outside=g.spawn_enemy("guard",center+Vector2(expected+.02,0));inside.hp=1000;outside.hp=1000
-   w.ground.tick(.1,false);assert(inside.hp<1000 and outside.hp==1000)
-   g.despawn_enemy(inside);g.despawn_enemy(outside)
+   var inside=g.spawn_enemy("guard",center+Vector2(expected-.02,0));inside.position=center+Vector2(expected-.02,0);inside.hp=1000
+   w.ground.tick(.1,false);assert(inside.hp<1000);g.despawn_enemy(inside)
+   var outside=g.spawn_enemy("guard",center+Vector2(expected+.02,0));outside.position=center+Vector2(expected+.02,0);outside.hp=1000
+   w.ground.tick(.1,false);assert(outside.hp==1000);g.despawn_enemy(outside)
    assert(is_equal_approx(w.ground.pools[0].duration,(4 if rank==1 else 6.5)*(1.89 if maximum else 1)))
  w.ground.reset();w.levels={"holy_water":8}
  for i in 24:assert(w.ground.add_pool("holy_water",Vector2(800+i%6*40,540+int(i/6)*35),g.player.position))

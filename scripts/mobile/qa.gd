@@ -15,7 +15,9 @@ func setup(owner):
  if FileAccess.file_exists("user://qa_request.json"):request=JSON.parse_string(FileAccess.get_file_as_string("user://qa_request.json"))
  mode=request.get("mode","load")
  print("ANDROID_QA_READY "+JSON.stringify({"mode":mode,"user_dir":OS.get_user_data_dir(),"compatibility":ProjectSettings.get_setting("network/compatible_game_version")}))
- if mode=="network":network(request)
+ if mode=="cross25":
+  var fixture=load("res://scripts/mobile/crossplay25_qa.gd").new();add_child(fixture);fixture.setup(game,request)
+ elif mode=="network":network(request)
  else:load_test(request)
 func load_test(request:Dictionary):
  game.start_run();game.coop.connection.queue_free();game.coop.connection=Accepted.new();game.coop.add_child(game.coop.connection);game.coop.connection.peer_id="a";game.coop.connection.host_id="a";game.coop.hosting=true
@@ -37,10 +39,10 @@ func load_test(request:Dictionary):
     var e=game.spawn_enemy("ghoul",at)
     if e!=null:e.hp=1000000;e.max_hp=e.hp
   check(game.enemies.size()==200,"exact benchmark enemy count "+map_id)
-  var warm_until:int=Time.get_ticks_msec()+5000
+  var warm_until:int=Time.get_ticks_msec()+int(float(request.get("warmup_seconds",5))*1000)
   while Time.get_ticks_msec()<warm_until:await get_tree().process_frame
   game.mobile_performance.reset()
-  var until:int=Time.get_ticks_msec()+int(25000 if map_id!="fields" else float(request.get("soak_seconds",180))*1000)
+  var until:int=Time.get_ticks_msec()+int(float(request.get("sample_seconds",25) if map_id!="fields" else request.get("soak_seconds",180))*1000)
   while Time.get_ticks_msec()<until:await get_tree().process_frame
   var report:Dictionary=game.mobile_performance.report();report.map=map_id;results.append(report);print("ANDROID_QA_MAP "+JSON.stringify(report))
  var data:Dictionary={"passed":failed==0,"failures":failed,"engine":Engine.get_version_info().string,"scenario":"Seed18018, 200 enemies, four simulated actors, six weapons8, four passives8, default mobile visuals. Emulator only.","results":results}

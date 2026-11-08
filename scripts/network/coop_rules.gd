@@ -1,10 +1,11 @@
 class_name CoopRules
 extends Resource
 
-@export var health_bonus: float = 0.5
+@export var health_bonus: float = 0.0
 @export var damage_bonus: float = 0.5
-@export var speed_bonus: float = 0.2
+@export var speed_bonus: float = 0.0
 @export var count_bonus: float = 0.8
+@export var multiplayer_spawn_multiplier:float=0.8
 @export var revive_seconds: float = 5
 @export var revive_range: float = 34
 @export var revive_health: float = 0.4
@@ -16,7 +17,7 @@ extends Resource
 
 func scaling(participants: int) -> Dictionary:
 	var extra: int = clampi(participants, 1, 4) - 1
-	return {"health": 1 + health_bonus * extra, "damage": 1 + damage_bonus * extra, "speed": 1 + speed_bonus * extra, "count": 1 + count_bonus * extra}
+	return {"health": 1 + health_bonus * extra, "damage": 1 + damage_bonus * extra, "speed": 1 + speed_bonus * extra, "count": (1 + count_bonus * extra)*(multiplayer_spawn_multiplier if extra>0 else 1.0)}
 
 func wave_count(original: int, participants: int, boss: bool = false) -> int:
 	if boss:

@@ -3,15 +3,16 @@
 [resource]
 script = ExtResource("1")
 id = "skeleton_sword"
+visual_family = "original_skeleton_sword"
 title = "Esqueleto com espada"
 health = 48.0
 speed = 31.0
 damage = 12.0
 experience = 4
 radius = 8.0
-texture = "res://assets/skeleton_sword.png"
+texture = "res://assets/v22/skeleton_sword.png"
 behavior = "sword"
-frames = 6
+frames = 24
 contact_damage = false
 attack_range = 34.0
 attack_interval = 1.7

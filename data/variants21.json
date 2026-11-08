@@ -1,0 +1,26 @@
+{
+ "orc_armored": {
+  "base": "ghoul",
+  "name": "Orc com armadura",
+  "starts_at": 240,
+  "share": 0.1,
+  "resistance": 0.05,
+  "visual_family": "original_orc_armored"
+ },
+ "orc_elite": {
+  "base": "ghoul",
+  "name": "Orc de elite",
+  "starts_at": 480,
+  "share": 0.05,
+  "resistance": 0.15,
+  "visual_family": "original_orc_elite"
+ },
+ "skeleton_armored": {
+  "base": "skeleton_sword",
+  "name": "Esqueleto com armadura",
+  "starts_at": 360,
+  "share": 0.1,
+  "resistance": 0.1,
+  "visual_family": "original_skeleton_armored"
+ }
+}

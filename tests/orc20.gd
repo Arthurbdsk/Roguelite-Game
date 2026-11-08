@@ -22,11 +22,11 @@ func run():
   check(e.data.title=="Orc" and e.data.id=="ghoul","display rename preserves ID")
   var base:EnemyData=load("res://data/enemies/ghoul.tres")
   check(base.health==24 and base.speed==25 and base.damage==8 and base.experience==2 and base.radius==8,"base attributes unchanged")
-  check(is_equal_approx(e.data.health,24*g.balance.enemy_health_multiplier*g.enemy_scale().health) and is_equal_approx(e.data.speed,25*g.balance.enemy_speed_multiplier*g.balance.common_speed_multiplier*g.enemy_scale().speed),"existing modifiers applied once")
+  check(is_equal_approx(e.data.health,(24+30)*g.balance.enemy_health_multiplier*g.enemy_scale().health) and is_equal_approx(e.data.speed,25*g.balance.enemy_speed_multiplier*g.balance.common_speed_multiplier*g.enemy_scale().speed),"PC health bonus and existing modifiers applied once")
   check(e.sprite.texture==TinyCharacters.texture("orc") and e.sprite.texture_filter==CanvasItem.TEXTURE_FILTER_NEAREST,"shared nearest atlas")
   e.velocity=Vector2.ZERO;e.clock=.2;e.tick(.016)
   check(TinyCharacters.contains("orc","walk",e.sprite.frame),"walking uses actual displacement")
-  check(e.sprite.position==Vector2(4,-18),"left facing physical pivot")
+  check(e.sprite.position.is_equal_approx(Vector2(2.2,-9.9)),"left facing physical pivot at PC 1.1 visual scale")
   await capture(map_id+"-walk")
   g.player.dev_invulnerable=false;g.player.invulnerable=0;g.player.armor=0;g.player.damage_reduction=0;g.player.clear_status();g.player.hp=100
   e.position=g.player.position+Vector2(14,0);g.rebuild_grid();e.tick(.01)

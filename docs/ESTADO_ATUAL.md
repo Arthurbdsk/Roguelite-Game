@@ -1,4 +1,10 @@
-# Estado do envio ao GitHub
+# Estado atual
+
+PC 0.25.0: novos Shadow/Carrasco, bestiário, estatísticas individuais e cooperativo com vida/velocidade do solo e geração reduzida em 20%. Consulte [o relatório](DESIGNS_BESTIARIO_CROSSPLAY_0_25.md). Executável: `build/Hordas-0.25.0/Hordas-0.25.0.exe`. Android está sendo atualizado por autorização expressa e voltará a ficar congelado após a entrega.
+
+O texto abaixo preserva o histórico dos envios anteriores, até a versão 0.9.0.
+
+## Histórico do envio ao GitHub
 
 O projeto enviado contém a implementação atual, com cenas, Resources e sprites editáveis. O arquivo de entrada é `project.godot`, para Godot 4.7.2 padrão.
 

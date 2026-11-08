@@ -7,7 +7,7 @@ func tick(delta:float):
  sprite.frame=mini(2,int(clock*.65))
  sprite.modulate=Color(1.5,1.5,1.5) if hit_flash>0 else Color.WHITE
  queue_redraw()
-func take_damage(amount:float,_force:Vector2=Vector2.ZERO):
+func take_damage(amount:float,_force:Vector2=Vector2.ZERO,_owner:String=""):
  if not alive or not targetable:return
  hp=maxf(0,hp-maxf(0,amount));hit_flash=.1
  if hp>0:return
