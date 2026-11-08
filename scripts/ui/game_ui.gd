@@ -189,6 +189,8 @@ func render(which: String, data: Dictionary = {}) -> void:
   "title": _title()
   "maps": _map_selection()
   "hub": _hub(data)
+  "updates":
+   var view:=UpdateView.new();menu.add_child(view);view.setup(game,self)
   "bestiary":
    var view:=BestiaryView.new();menu.add_child(view);view.setup(game,self)
   "collection":
@@ -249,6 +251,7 @@ func _title() -> void:
  var libraries:=HBoxContainer.new();libraries.add_theme_constant_override("separation",8);actions.add_child(libraries)
  _button(libraries,"Coleção",Rect2(),func(): render("collection"))
  _button(libraries,"Bestiário",Rect2(),func():bestiary_return="title";render("bestiary"))
+ _button(libraries,"Atualizações disponíveis" if game.updates!=null and game.updates.available() else "Atualizações",Rect2(),func():render("updates"))
  var settings := HBoxContainer.new()
  settings.add_theme_constant_override("separation",8)
  actions.add_child(settings)

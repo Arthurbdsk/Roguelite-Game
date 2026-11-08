@@ -1,8 +1,8 @@
 {
-  "version": "0.25.2",
+  "version": "0.26.0",
   "protocol": 2,
-  "content_sha256": "6ba5d9724f77d754781de6fd8c714f0386993ee3cbdbd370aeeef756c4ef5787",
-  "compatibility_id": "0.25.2+6ba5d9724f77d754",
+  "content_sha256": "340a633a04e971b2307f2aa1e775ed2a6701aa6bca4ae1843884b15b3e214124",
+  "compatibility_id": "0.26.0+340a633a04e971b2",
   "files": {
     "data/balance16_audit.json": "8c3f5b84f1a117dd28219d2ba282cfa1b1c5a93c94cfde153e3785d8412f59d3",
     "data/balance18_audit.json": "4859989e20e3337ac83aa6f166a4fd559b369c543835cf6e70f6ddcc4dfc8697",
@@ -84,10 +84,11 @@
     "scripts/combat/special_encounters.gd": "77c16729ebe3d263041b87c23a278d5c79d9134c9781d0d02d4954e649a8a66b",
     "scripts/combat/weapons.gd": "3148c5df1391ab5517951dea693967ee3b58c0ecaf7d49a65568b2982ae594ff",
     "scripts/data/boss_balance.gd": "c090bfaf178f187f13669cbf31d504740b7d6deef258357112099d0b750247fc",
+    "scripts/data/early_balance.gd": "db948abb702c54de9949384b68db697cf671b176b14d1bb97ccbffb81ade1026",
     "scripts/data/encounter_balance.gd": "f21c441bad06cb14a21b29b3cb3b020dcaf5c99e4eee50a826826069afd4f226",
     "scripts/data/enemy_catalog.gd": "4810dc375abd9a927e596cc3825991784bdfcf511fcca40c8128e1cb964f4bfb",
     "scripts/data/map_definition.gd": "b03ec83fbfc045ffa10d3b14de7a0823dc5110d6293f9d6295c197abc4e9f90f",
-    "scripts/data/platform_tuning.gd": "4e6b2d897720dbcd69e2a698d442cb85fa873658d170837b83f4c4f9f9cdaf27",
+    "scripts/data/platform_tuning.gd": "e07ff458e90fc0c89c848e4527174e39f8b0bab7340fe39a5c7f9f694d800a41",
     "scripts/data/skill_catalog.gd": "0f8f61e2f35c6e10a4529154b793958d4a3bfad489c5d8b313d585b177c7dcaf",
     "scripts/data/skill_definition.gd": "9eee71ba04c36ae83a8315262d27bc43041c8156ca54ba7e518b9eb8e899d3ea",
     "scripts/data/special_balance.gd": "aaa8823a9591b6db0a510a73ee801637207c94757b25807d12c5ab830acdb1ad",
@@ -114,12 +115,12 @@
     "scripts/world/director.gd": "d8915063c88054e4ce551f7190c44f4c22a00edfbc01a89759636fe10742cbd1",
     "scripts/world/food_index.gd": "d688850c8c663cd034a13a2172ffab94e0b4bc64b500a0ccf2614885468a20b0",
     "scripts/world/gold_loot.gd": "0a7857e8c9fac5ef53c9e51b1b5e82090774c9758a50359bc502d6419ec83e1f",
-    "scripts/world/horde_progress.gd": "500fcc8a7e4839081e6cf04537f6dc6c633d73bfab179b07deb96e755c69ef7d",
+    "scripts/world/horde_progress.gd": "bcf139c18d25f2f306be22bc4993af228bab69a83efb0957bce02af88f430b0f",
     "scripts/world/outdoor_prop.gd": "a0d3ba35f389c4154021ee2e05e3c86bec0b6832de649958b9352e2130bdffd5",
     "scripts/world/reward_chests.gd": "78c587d21be0aa9c89fddb2caf6a18236babcabdbff42e3f9fceddcb7504f962",
     "scripts/world/slime_families.gd": "d9d68ea4c663b8bf0bf9ca1cc4d5fae33e87b740dccd629d00a7b21065e58e6d",
     "scripts/world/special_events.gd": "5af53c9916954fbc4cb3c33be08d6a049e4ef0cc977da4ca0b64fac5fb690aa3",
-    "scripts/main.gd#shared": "053201043049a49a45811c8b30493b4069f7cb757a5be8c4aac8fde901e42326",
+    "scripts/main.gd#shared": "4b54003a8314b456ab234a4b16c22d9ee9e6ef55b47ce45f78ed673d9af422e9",
     "scripts/network/coop_session.gd#shared": "fb90cf0ddef03664326b0dc5df15dca399393ad1fd7229dc430485039b628a01"
   }
 }

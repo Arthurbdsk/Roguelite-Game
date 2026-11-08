@@ -66,6 +66,7 @@ var camera: Camera2D
 var character_remains:CharacterRemains
 var enemy_data: Dictionary = {}
 var variant_data:Dictionary={}
+var updates:UpdateService
 var balance: EncounterBalance = preload("res://data/encounters/default.tres")
 var gold_loot: GoldLoot
 var enemy_projectiles: EnemyProjectiles
@@ -177,6 +178,10 @@ func _ready() -> void:
  ui = GameUI.new()
  add_child(ui)
  ui.setup(self)
+ updates=UpdateService.new();add_child(updates);updates.setup(self)
+ if not test_mode:updates.call_deferred("check")
+ for arg in OS.get_cmdline_user_args():
+  if arg.begins_with("--update-health="):call_deferred("confirm_update_health",arg.trim_prefix("--update-health="))
  apply_settings()
  show_title()
  if "--smoke-shutdown" in OS.get_cmdline_user_args():call_deferred("smoke_shutdown")
@@ -686,6 +691,7 @@ func apply_settings() -> void:
   DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN if profile.data.settings.fullscreen else DisplayServer.WINDOW_MODE_WINDOWED)
 
 func enemy_base_health(id:String)->float:
+ if EarlyBalance.applies(id):return float(EarlyBalance.HEALTH[id])/balance.enemy_health_multiplier
  if id in ["slime_small","event_small"]:return enemy_data.ghoul.health*balance.slime_small_health_ratio
  if id=="executioner":return boss_balance.executioner_health()
  if id=="demon":return boss_balance.demon_health()
@@ -705,7 +711,7 @@ func enemy_spawn_stats(id:String,scale:Dictionary)->EnemyData:
   stats.damage=enemy_data.ghoul.damage*balance.slime_small_damage_ratio
  if id in ["ice_crystal","channel_totem"]:
   stats.health=float(late_arena.patterns.config.crystal_health if id=="ice_crystal" else late_arena.patterns.config.totem_health)
- else:stats.health=(stats.health+30)*balance.enemy_health_multiplier*scale.health*enemy_health_factor(id)
+ else:stats.health=(stats.health+(0 if EarlyBalance.applies(id) else 30))*balance.enemy_health_multiplier*scale.health*enemy_health_factor(id)
  stats.damage*=scale.damage
  if id not in ["demon","executioner","guardian","horror"]:stats.attack_interval*=balance.enemy_attack_interval_multiplier
  if id in ["ghoul","skeleton_sword","skeleton_archer"] or variant_data.has(id):stats.speed*=balance.common_speed_multiplier
@@ -728,7 +734,7 @@ func spawn_enemy(id: String, point: Vector2, elite: bool = false, chain_meta:Dic
  var stats:EnemyData=enemy_spawn_stats(id,scale)
  var health_factor:float=enemy_health_factor(id)
  enemy.setup(self, stats, elite)
- enemy.spawn_health_bonus=0 if enemy is HazardTarget else 30*balance.enemy_health_multiplier*scale.health*health_factor*(4.0 if elite and not enemy is HordeBoss else 1.0)
+ enemy.spawn_health_bonus=0 if enemy is HazardTarget or EarlyBalance.applies(id) else 30*balance.enemy_health_multiplier*scale.health*health_factor*(4.0 if elite and not enemy is HordeBoss else 1.0)
  enemy.difficulty_health_factor=health_factor
  if id=="siege_archer":enemy.event_kind="siege"
  if enemy is HazardTarget:enemy.owner_boss=int(chain_meta.get("pattern_owner",0))
@@ -1043,3 +1049,10 @@ func start_late_test(kind:String):
   late_arena.tick(1.3);boss.take_damage(boss.max_hp/maxf(.01,1-horde_progress.resistance())+.01);boss.tick(1.7)
  announce("TESTE: "+kind.to_upper()+" | SEM SALVAMENTO",3)
  ui.update_hud(snapshot())
+
+func confirm_update_health(path:String):
+ await get_tree().create_timer(2).timeout
+ var expected:=ProjectSettings.globalize_path("user://updates/")
+ if path.get_base_dir().simplify_path()!=expected.trim_suffix("/").simplify_path() or not path.get_file().begins_with("health-"):return
+ var f:=FileAccess.open(path,FileAccess.WRITE)
+ if f!=null:f.store_string(str(ProjectSettings.get_setting("application/config/version")));f.close()
