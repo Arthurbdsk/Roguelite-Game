@@ -2,19 +2,20 @@
   "mobile_version": "0.25.0-android.2",
   "android_version_code": 2,
   "base_pc_version": "0.25.0",
-  "base_pc_commit": "6d7774cd9b64337865e2829183d3e6b00789eb3d",
+  "base_pc_commit": "4276c18125e5a61f57022437569729a0afe577e0",
   "incorporated_pc_commits": [
     "9f4982d7d6c9a5861c3d1048fb2fe899bc945c62",
     "091d93f1b2d8e121bb1b111d07c2f839f7d0ef41",
     "35635d23acca12c3870be2550880f28aba9e0ece",
     "7d8f79e07b3a6588b42d3da320a2501ecf7ed38e",
     "c4624b7777f6df7644cceb50335bbb602d7bf741",
-    "6d7774cd9b64337865e2829183d3e6b00789eb3d"
+    "6d7774cd9b64337865e2829183d3e6b00789eb3d",
+    "4276c18125e5a61f57022437569729a0afe577e0"
   ],
   "previous_mobile_commit": "d21c73d542584b83c798e54d8bcc810e999a2f87",
   "protocol": 2,
   "compatible_game_version": "0.25.0",
-  "compatibility_id": "0.25.0+5ef0dae7debf3bb7",
+  "compatibility_id": "0.25.0+24d20eff97f22428",
   "application_id": "com.socialy.hordas.android",
   "authorized_update": "2026-11-08",
   "maintenance": "Frozen after this delivery; new explicit Android request required."

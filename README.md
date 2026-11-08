@@ -1,14 +1,12 @@
 # Hordas Android
 
-Entrega Android 0.20.0-android.1, baseada no PC 0.20.0 (`4b6e2e5dd1a86c2feb8ed169c8da305c0fd5d0a8`). Esta branch é exclusiva do Android e fica congelada depois da entrega. Atualizações genéricas do jogo continuam sendo somente para PC.
+Entrega 0.25.0-android.2, baseada no PC 0.25.0, commit `4276c18125e5a61f57022437569729a0afe577e0`. APK local: `build/Hordas-Android-0.25.0-2.apk`. Instale por cima da versão anterior, sem desinstalar, para manter o progresso.
 
-[Baixar o APK de teste](https://github.com/Arthurbdsk/Roguelite-Game/releases/download/android-v0.20.0-1/Hordas-Android-0.20.0-1.apk). Arquivo local: `build/Hordas-Android-0.20.0-1.apk`. Envie esse arquivo ao celular, abra e permita instalar por esse aplicativo quando o Android solicitar. Android 7 ou mais recente, OpenGL ES 3. Não desinstale para atualizar: instale o próximo APK autorizado por cima, com o mesmo pacote e assinatura.
+Compatível com o PC desta entrega, protocolo 2 e conteúdo `0.25.0+24d20eff97f22428`. Inclui Shadow e Carrasco novos, bestiário e multiplayer com vida/velocidade do solo e 20% menos geração total. Use joystick e os botões de interação à direita. Nome e código podem ser preenchidos pelo teclado de toque.
 
-Use o joystick à esquerda. Os ataques são automáticos. Os botões à direita abrem pausa, build e opções; Interagir aparece perto de baús e Segure: ajudar aparece perto de aliados caídos. Nas salas, o botão Teclado permite preencher nome e código por toque. Todos marcam Estou pronto; o anfitrião inicia. Cooperação verificada com PC **0.20.0 público**, protocolo 2. Outras versões são recusadas.
+[Entrega, testes e limitações](docs/ANDROID_0_25_2.md). O emulador apresentou desempenho insuficiente sob carga de 200 inimigos e quatro jogadores com build máxima. Aparelho real e redes distintas serão testados pelo usuário. Não há publicação nova em lojas ou GitHub Releases.
 
-[Entrega, testes, desempenho e limitações](docs/ANDROID_0_20_1.md). [Política de manutenção somente sob demanda](docs/ANDROID_POLICY.md). O APK não contém painel DEV. Não há publicação em loja nem rotina automática de Android.
-
-Exportação manual autorizada: `python tools/android/export_android.py --android-request`. Exige a chave original fora do repositório e os assets licenciados locais. O script recusa execução fora de `codex/android-mobile`. `--qa` cria outro pacote, isolado, exclusivo de validação. Não distribuir esse pacote como jogo público.
+Android volta a ficar congelado. [Política de atualização sob demanda](docs/ANDROID_POLICY.md). Exportação manual exclusivamente autorizada: `python tools/android/export_android.py --android-request`. A chave original fica fora do repositório; APK QA é separado e não deve ser distribuído como jogo público.
 
 ## Histórico da base de PC
 
@@ -18,7 +16,7 @@ Versão PC 0.23.0: correções de descarte e identificação de flechas remotas,
 
 Versão PC 0.22.0: arte original animada para Morcego, Necromante, esqueletos, variantes com armadura, Orc de elite, Orc montado e família de slimes. Água Benta com frasco, impacto e poça novos. Mecânicas e IDs preservados. [Comparações, arquivos editáveis, testes e limitações](docs/ARTE_PC_0_22.md).
 
-Executável atual: `build/Hordas-0.23.0/Hordas-0.23.0.exe`. DEV: `build/Hordas-DEV-0.23.0/Hordas-DEV-0.23.0.exe`, F8. Todos os participantes precisam usar PC 0.23.0. Android permanece congelado em 0.20.0, sem sincronização ou testes nesta entrega.
+Executável histórico da base: `build/Hordas-0.23.0/Hordas-0.23.0.exe`. DEV: `build/Hordas-DEV-0.23.0/Hordas-DEV-0.23.0.exe`, F8. Todos os participantes precisam usar PC 0.23.0. Essa restrição descreve a entrega histórica 0.23.0; a atualização autorizada atual consta no início deste arquivo.
 
 Versão 0.20.0: Soldado e Orc animados da coleção Tiny RPG, com os atributos e IDs anteriores preservados. Escopo limitado aos dois personagens gratuitos, conforme escolhido. [Comparação, animações, licença e testes](docs/TINY_RPG_0_20.md).
 

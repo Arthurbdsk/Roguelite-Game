@@ -23,7 +23,7 @@ const TEXT:Dictionary={
  "skeleton_armored":"Esqueleto com armadura e escudo. Prepara ataques de espada e reduz o dano recebido.",
  "executioner":"Chega aos cinco minutos. Alterna golpe de execução e investida; fica mais agressivo ao perder vida.",
  "demon":"Alterna investidas, magias e invocações. Ao cair, transforma-se antes da morte definitiva.",
- "guardian":"Cria ataques de área e barreiras. Observe os avisos e preserve uma rota de saída.",
+ "guardian":"Marca cruzes, dispara penas e fecha anéis com uma abertura. Procure a passagem.",
  "horror":"Combina projéteis, invocações e avanços. Sua derrota inicial libera a forma verdadeira."
 }
 static func ids(game)->Array:
@@ -42,6 +42,20 @@ static func phases(id:String)->Array:
  if id=="horror":return ["Horror","Forma verdadeira"]
  return ["Inicial"]
 static func number(value:float)->String:return str(roundi(value))
+static func powers(id:String,phase:int)->Array:
+ var order:Array=[]
+ if id=="executioner":order=HordeBoss.attack_cycle(1,phase+1,true)
+ elif id=="demon":order=HordeBoss.attack_cycle(2 if phase==3 else 1,phase+1)
+ elif id in ["guardian","horror"]:order=LateBoss.late_attack_cycle(id,phase+1)
+ var unique:Array=[]
+ for power in order:
+  if power not in unique:unique.append(power)
+ return unique
+static func power_names(ids:Array)->String:
+ var names:Dictionary={"execute":"execução","charge":"investida","fire":"fogo","summon":"invocação","lightning":"raios","ice":"gelo","ring":"anel","cross":"cruzes","feathers":"penas","light_ring":"anel de luz","columns":"colunas","dash":"avanço","ice_sectors":"setores de gelo","light_bands":"faixas de luz","spiral":"espiral","rings":"anéis","spears":"lanças","orbs":"orbes","moving_ring":"anel móvel","crystals":"cristais","beams":"feixes","seals":"selos","totems":"totens"}
+ var labels:PackedStringArray=[]
+ for id in ids:labels.append(names.get(id,id))
+ return ", ".join(labels)
 static func entry(game,id:String,phase:int=0)->Dictionary:
  var data:EnemyData=game.enemy_spawn_stats(id,game.coop.rules.scaling(1))
  var b=game.boss_balance;var c=game.campaign.config
@@ -58,18 +72,23 @@ static func entry(game,id:String,phase:int=0)->Dictionary:
    result.hp=(result.hp-30*game.balance.enemy_health_multiplier)*b.second_health_multiplier+30*game.balance.enemy_health_multiplier
    damage_scale=b.second_damage_multiplier
   result.attacks=["Investida: "+number(b.demon_charge_damage*damage_scale),"Bola de fogo: "+number(b.fire_damage*damage_scale)]
-  if phase>0:result.attacks.append("Raio: "+number(b.lightning_damage*damage_scale));result.attacks.append("Anel: "+number(b.lightning_damage*damage_scale))
-  result.abilities=["Invoca aliados e dispara fogo.","Nas fases seguintes, adiciona raios, gelo e anéis de projéteis.","A transformação não conta como outra eliminação."]
+  if "lightning" in powers(id,phase):result.attacks.append("Raio: "+number(b.lightning_damage*damage_scale))
+  if "ring" in powers(id,phase):result.attacks.append("Anel: "+number(b.lightning_damage*damage_scale))
+  if "ice" in powers(id,phase):result.attacks.append("Gelo: controle de movimento")
+  result.abilities=["Invoca até %d aliados por ativação."%[b.second_summon_batch if phase==3 else b.first_summon_batch],"A transformação não conta como outra eliminação."]
  elif id in ["guardian","horror"]:
   if id=="horror" and phase==1:result.hp=(result.hp-30*game.balance.enemy_health_multiplier)*float(c.true_health_ratio)+30*game.balance.enemy_health_multiplier
-  if id=="guardian":result.attacks=["Ataques de área: "+number(c.guardian_damage)]
-  else:result.attacks=["Avanço: "+number(b.demon_charge_damage*b.second_damage_multiplier*c.horror_damage_ratio_to_demon_phase2),"Fogo: "+number(b.fire_damage*b.second_damage_multiplier*c.horror_damage_ratio_to_demon_phase2),"Raio: "+number(b.lightning_damage*b.second_damage_multiplier*c.horror_damage_ratio_to_demon_phase2)]
-  result.abilities=["Ataques de área e barreiras.","Forma verdadeira combina padrões e mantém os avisos de combate." if id=="horror" and phase==1 else "Observe as marcações antes de avançar."]
+  if id=="guardian":result.attacks=["Cruz, penas e anel: "+number(LateArena.base_damage(game,id,"cross"))]
+  else:
+   result.attacks=["Avanço: "+number(LateArena.base_damage(game,id,"dash")),"Fogo: "+number(LateArena.base_damage(game,id,"fire")),"Áreas de luz: "+number(LateArena.base_damage(game,id,"column")),"Padrões avançados: "+number(LateArena.base_damage(game,id,"column")*(float(game.late_arena.patterns.config.phase2_damage) if phase==1 else 1))]
+  result.abilities=["Forma verdadeira combina padrões e mantém os avisos de combate." if id=="horror" and phase==1 else "Observe as marcações antes de avançar."]
  elif id=="plague":result.attacks=["Veneno por segundo: "+number(game.specials.balance.poison_damage)];result.abilities=["Frasco cria uma poça venenosa no destino marcado."]
  else:
   result.attacks=[("Flecha: " if id in ["skeleton_archer","siege_archer"] else "Magia: " if id=="necromancer" else "Emboscada: " if id=="shadow" else "Ataque: ")+number(data.damage)]
  if id=="devourer":result.abilities.append("Valores iniciais. Cada alimento aumenta vida, dano e tamanho; os valores crescidos variam.")
  if id in ["slime_large","slime_king","event_blue"]:result.abilities.append("Divide-se em descendentes de outra espécie. Consulte a ficha de cada tamanho.")
+ result.powers=powers(id,phase)
+ if not result.powers.is_empty():result.abilities.append("Poderes desta fase: "+power_names(result.powers)+".")
  return result
 static func preview(game,id:String,phase:int=0)->Dictionary:
  var data:EnemyData=game.enemy_data[id];var kind:String="orc" if id=="ghoul" else data.visual_family

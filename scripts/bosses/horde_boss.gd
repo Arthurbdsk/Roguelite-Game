@@ -152,6 +152,13 @@ func dev_attack_ready()->bool:
 	if requested.is_empty() or requested in ["execute","charge","dash"]:return true
 	return game.late_arena.can_cast(requested) if self is LateBoss else game.boss_arena.can_cast(requested)
 
+static func attack_cycle(form_value:int,phase_value:int,executioner:bool=false)->Array:
+	if executioner:return ["execute","charge"]
+	if form_value==2:return ["fire","lightning","ring","charge","summon","ice","fire"]
+	if phase_value==2:return ["lightning","fire","ice","charge","summon"]
+	if phase_value==3:return ["fire","lightning","charge","summon","ice","fire"]
+	return ["fire","summon","charge","fire"]
+
 func choose_attack() -> String:
 	if not dev_next_attack.is_empty():
 		var selected:String=dev_next_attack;dev_next_attack="";return selected
@@ -160,17 +167,7 @@ func choose_attack() -> String:
 		var chosen: String = "execute" if attack_index % 2 == 0 else "charge"
 		attack_index += 1
 		return chosen
-	if form==2:
-		var choices:Array=["fire","lightning","ring","charge","summon","ice","fire"]
-		for attempt in choices.size():
-			var chosen:String=choices[attack_index%choices.size()];attack_index+=1
-			if game.boss_arena.can_cast(chosen):return chosen
-		return "charge"
-	var order: Array = ["fire", "summon", "charge", "fire"]
-	if phase == 2:
-		order = ["lightning", "fire", "ice", "charge", "summon"]
-	elif phase == 3:
-		order = ["fire", "lightning", "charge", "summon", "ice", "fire"]
+	var order:Array=attack_cycle(form,phase)
 	for attempt in order.size():
 		var candidate: String = order[attack_index % order.size()]
 		attack_index += 1

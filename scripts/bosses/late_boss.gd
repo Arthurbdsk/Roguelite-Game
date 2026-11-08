@@ -57,14 +57,17 @@ func begin_attack(id:String):
  var target=players[randi()%players.size()] if not players.is_empty() else game.player
  locked_target=target.position;charge_direction=(locked_target-position).normalized()
 func warning_duration()->float:return float(game.campaign.config.warning)
+static func late_attack_cycle(species:String,form_value:int)->Array:
+ var order:Array=["cross","feathers","light_ring"] if species=="guardian" else ["fire","summon","ice","columns","dash","ice_sectors","light_bands"]
+ if species=="horror":order+=["spiral","rings","spears","orbs"]
+ if form_value==2:order=["fire","moving_ring","light_bands","dash","columns","ice_sectors"]
+ if form_value==2:order+=FinalPatterns.IDS
+ return order
 func choose_attack()->String:
  if not dev_next_attack.is_empty():
   var selected:String=dev_next_attack;dev_next_attack="";return selected
  if not dev_repeat.is_empty():return dev_repeat
- var order:Array=["cross","feathers","light_ring"] if data.id=="guardian" else ["fire","summon","ice","columns","dash","ice_sectors","light_bands"]
- if data.id=="horror":order+=["spiral","rings","spears","orbs"]
- if form==2:order=["fire","moving_ring","light_bands","dash","columns","ice_sectors"]
- if form==2:order+=FinalPatterns.IDS
+ var order:Array=late_attack_cycle(data.id,form)
  var chosen:String=order[attack_index%order.size()]
  if chosen!="dash" and not game.late_arena.can_cast(chosen):return ""
  attack_index+=1;return chosen

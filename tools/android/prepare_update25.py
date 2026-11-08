@@ -13,7 +13,7 @@ p=root/'export_presets.cfg';s=p.read_text().replace('0.20.0-android.1','0.25.0-a
 for line in lines:
  if line=='[preset.1]':qa=True
  if line.startswith('include_filter='):line=include
- if line.startswith('exclude_filter='):line=exclude if qa else exclude[:-1]+',scripts/mobile/qa.gd"'
+ if line.startswith('exclude_filter='):line=exclude if qa else exclude[:-1]+',scripts/mobile/qa.gd,scripts/mobile/crossplay25_qa.gd"'
  result.append(line)
 p.write_text('\n'.join(result)+'\n')
 p=root/'scripts/core/profile.gd';s=p.read_text().replace('"effects": 0.7, "shake": true','"effects": 0.35, "shake": false');p.write_text(s)
