@@ -2,7 +2,7 @@
 from pathlib import Path
 import argparse, hashlib, json, re
 ROOT = Path(__file__).resolve().parents[1]
-VERSION = '0.25.2'
+VERSION = '0.26.2'
 MAIN_FUNCTIONS = ['enemy_base_health', 'enemy_health_factor', 'enemy_spawn_stats', 'spawn_enemy', 'enemy_scale', 'enemy_killed', 'clear_run', 'weapon_hit']
 NETWORK_FUNCTIONS = ['host_tick', 'actor_states', 'apply_delta', 'apply_event', 'settle', 'finish']
 def functions(text, names):

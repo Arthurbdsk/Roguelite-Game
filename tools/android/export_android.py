@@ -19,7 +19,7 @@ if not Path(signing['keystore']).is_file():raise SystemExit('Original keystore i
 env={**os.environ,'GODOT_ANDROID_KEYSTORE_RELEASE_PATH':signing['keystore'],'GODOT_ANDROID_KEYSTORE_RELEASE_USER':signing['alias'],'GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD':signing['password']}
 base=Path.home()/'AppData/Local/HordasAndroidToolchain'
 java=next((base/'java').iterdir());env['JAVA_HOME']=str(java)
-target=ROOT/'build'/('Hordas-Android-0.25.2-4'+('-QA' if args.qa else '')+'.apk')
+target=ROOT/'build'/('Hordas-Android-0.26.2-7'+('-QA' if args.qa else '')+'.apk')
 target.parent.mkdir(exist_ok=True)
 godot=Path.home()/'Downloads/Godot_v4.7.2-stable_win64_console.exe'
 for p in ['assets/tiny_rpg/soldier.png','assets/tiny_rpg/orc.png','assets/fonts/AurusenthialGothic.ttf']:

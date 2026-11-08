@@ -56,7 +56,7 @@ func render(interface,which:String,data:Dictionary)->bool:
  restore();return true
 func title():
  var v:=page("Hordas Android")
- text(v,"Android %s | Base PC 0.25.0 | Rede 2 | Ouro: %d"%[ProjectSettings.get_setting("application/config/version"),game.profile.data.gold],13)
+ text(v,"Android %s | Base PC 0.26.1 | Rede 2 | Ouro: %d"%[ProjectSettings.get_setting("application/config/version"),game.profile.data.gold],13)
  var grid:=GridContainer.new();grid.columns=2;grid.add_theme_constant_override("h_separation",10);grid.add_theme_constant_override("v_separation",8);grid.size_flags_vertical=Control.SIZE_EXPAND_FILL;v.add_child(grid)
  button(grid,"Jogar",game.open_map_select)
  button(grid,"Cooperativo online",game.open_online)
@@ -66,6 +66,7 @@ func title():
  button(books,"Bestiário",func():ui.bestiary_return="title";ui.render("bestiary"))
  button(grid,"Opções",func():ui._open_settings("title"))
  button(grid,"Base",game.enter_hub)
+ button(grid,"Atualizações (nova)" if game.updates!=null and game.updates.available() else "Atualizações",func():ui.render("updates"))
  var links:=row(v)
  button(links,"Privacidade",func():ui.render("mobile_privacy"))
  button(links,"Termos",func():ui.render("mobile_terms"))
@@ -184,6 +185,7 @@ func collection():
  else:text(detail,"Não descoberto",18);text(detail,"Encontre este item durante uma partida.",14)
 func online(which:String):
  var session=game.coop;var v:=page("Sala "+session.connection.code if which=="lobby" else "Cooperativo online",session.leave)
+ button(v.get_child(0),"Atualizações",func():ui.render("updates",{"return":which}))
  if which=="lobby":
   var list:=scroll(v)
   var all_ready:bool=not session.connection.players.is_empty();var mine:bool=false

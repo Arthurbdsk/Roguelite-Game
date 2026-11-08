@@ -41,6 +41,7 @@ func update_safe_area():
  safe=Rect2(Vector2.ZERO,logical)
  if OS.has_feature("android"):
   var window:=Vector2(DisplayServer.window_get_size());var area:=Rect2(DisplayServer.get_display_safe_area());var factor:float=minf(window.x/logical.x,window.y/logical.y)
+  if ProjectSettings.get_setting("display/window/stretch/scale_mode","fractional")=="integer" and factor>=1:factor=floorf(factor)
   var offset:Vector2=(window-logical*factor)*.5
   area=area.intersection(Rect2(offset,logical*factor))
   if area.has_area():safe=Rect2((area.position-offset)/factor,area.size/factor)

@@ -23,6 +23,8 @@ func setup(owner):
   var fixture=load("res://scripts/mobile/crossplay25_qa.gd").new();add_child(fixture);fixture.setup(game,request)
  elif mode=="balance251":balance_test()
  elif mode=="parity252":parity_test()
+ elif mode=="updates026":updates_test(request)
+ elif mode=="early026":early_test()
  elif mode=="network":network(request)
  else:load_test(request)
 func load_test(request:Dictionary):
@@ -149,3 +151,32 @@ func parity_test():
  var result:Dictionary={"passed":failed==0,"failures":failed,"android_native":true,"identity":GameCompatibility.identity(),"combat":data,"visuals":visuals}
  var f=FileAccess.open("user://parity252-result.json",FileAccess.WRITE);f.store_string(JSON.stringify(result));f.close()
  print("ANDROID_PARITY252_"+("PASS" if failed==0 else "FAIL"))
+
+func updates_test(request:Dictionary):
+ var u=game.updates
+ u.cancel()
+ var cert:=X509Certificate.new();check(cert.load("user://test-ca.pem")==OK,"test certificate")
+ u.endpoint="https://127.0.0.1:8443/stable.json";u.request.set_tls_options(TLSOptions.client(cert));u.check()
+ while u.busy:await get_tree().process_frame
+ check(u.available(),"detect newer APK")
+ if not u.available():printerr("UPDATE_QA_ERROR "+u.status);return
+ u.download()
+ while u.busy:await get_tree().process_frame
+ check(u.install_ready,"authenticated APK downloaded")
+ if not u.install_ready:printerr("UPDATE_QA_ERROR "+u.status);return
+ game.ui.render("updates");u.install();print("UPDATE_QA_INSTALL "+u.status)
+
+func early_test():
+ game.set_physics_process(false);game.start_run();game.mastery.begin(false);game.run_challenge=0
+ var rows:Array=[]
+ for t in [0,60,120,180,240,299]:
+  for id in EarlyBalance.HEALTH:
+   game.elapsed=t;game.state="running";game.weapon_system.reset();var e=game.spawn_enemy(id,Vector2(1100,730));var hp:float=e.hp;var hits:int=0
+   while e.alive and hits<20:game.weapon_system._hit(e,game.weapon_system._stat("bolt","damage"),Vector2.ZERO);hits+=1
+   check(hits==(3 if id in ["guard","orc_armored","skeleton_armored","slime_large"] else 2),id+" at "+str(t))
+   rows.append({"id":id,"seconds":t,"hp":hp,"hits":hits});game.clear_run()
+ var visuals:Dictionary={"hero":game.player.sprite.get_parent().scale.x}
+ for id in EnemyCatalog.ids(game):
+  game.elapsed=0;game.state="running";var e=game.spawn_enemy(id,Vector2(1100,730));visuals[id]=e.sprite.get_parent().scale.x;check(e.sprite.get_parent().scale==Vector2.ONE,"PC proportions "+id);game.clear_run()
+ var f=FileAccess.open("user://early026.json",FileAccess.WRITE);f.store_string(JSON.stringify({"passed":failed==0,"rows":rows,"visuals":visuals,"identity":GameCompatibility.identity()}));f.close();print("EARLY_ANDROID026_"+("PASS" if failed==0 else "FAIL"))
+ game.show_title()

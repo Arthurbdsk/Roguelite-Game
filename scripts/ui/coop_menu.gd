@@ -12,6 +12,7 @@ static func build(ui, screen: String) -> void:
 		ui._button(ui.menu, "Continuar", Rect2(180, 178, 280, 34), session.close_menu, true)
 		ui._button(ui.menu, "Sair da partida", Rect2(180, 229, 280, 34), session.leave)
 		return
+	ui._button(ui.menu,"Atualizações",Rect2(470,20,142,28),func():ui.render("updates"))
 	ui._label(ui.menu, "COOPERATIVO ONLINE", Rect2(24, 19, 592, 42), 27)
 	if screen == "lobby":
 		ui._label(ui.menu, "SALA  " + session.connection.code, Rect2(26, 65, 420, 30), 21, ui.ICE)
