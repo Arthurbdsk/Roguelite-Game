@@ -404,7 +404,7 @@ func show_title() -> void:
  ui.render("title", profile.data)
 
 func open_online() -> void:
- if updates!=null and updates.online_blocked():ui.render("updates");return
+ if updates!=null and updates.online_blocked():updates.status="Atualização necessária para as salas atuais. O modo solo continua disponível.";ui.render("updates");return
  state = "online"
  ui.render("online")
 

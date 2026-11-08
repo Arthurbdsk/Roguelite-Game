@@ -30,16 +30,19 @@ class Updater {
    using(var sha=SHA256.Create())using(var file=File.OpenRead(download)){if(BitConverter.ToString(sha.ComputeHash(file)).Replace("-","").ToLowerInvariant()!=(string)p["sha256"])throw new Exception("Arquivo corrompido");}
    try {var old=Process.GetProcessById(Convert.ToInt32(r["pid"]));if(!old.WaitForExit(60000))throw new Exception("Jogo ainda aberto");}catch(ArgumentException){}
    Directory.CreateDirectory(root);
+   foreach(var other in Process.GetProcessesByName("Hordas")){try{if(!other.HasExited&&String.Equals(other.MainModule.FileName,target,StringComparison.OrdinalIgnoreCase))throw new IOException("Feche as outras instancias do jogo antes de atualizar");}catch(System.ComponentModel.Win32Exception){}}
    if(File.Exists(target))File.Copy(target,backup,true);else File.Copy((string)r["old"],backup,true);
    string next=Path.Combine(root,"Hordas.next.exe");File.Copy(download,next,true);
    if(File.Exists(target))File.Replace(next,target,null);else File.Move(next,target);
    applied=true;
    string health=Path.Combine(work,"health-"+Guid.NewGuid().ToString("N")+".txt");
    child=Process.Start(new ProcessStartInfo(target,"-- --update-health=\""+health+"\""){WorkingDirectory=root,UseShellExecute=false});
+   File.WriteAllText(Path.Combine(work,"installed-pid.txt"),child.Id.ToString());
    for(int i=0;i<60;i++){Thread.Sleep(500);if(child.HasExited)throw new Exception("Nova versao encerrou");if(File.Exists(health)&&File.ReadAllText(health)==(string)p["version"]){File.WriteAllText(Path.Combine(work,"result.txt"),"OK");return 0;}}
    throw new Exception("Inicializacao nao confirmada");
   } catch(Exception e) {
-   try{if(applied&&File.Exists(backup)){if(child!=null&&!child.HasExited){child.Kill();child.WaitForExit();}File.Copy(backup,target,true);Process.Start(target);}File.WriteAllText(Path.Combine(work,"result.txt"),"ERRO: "+e.Message);}catch{}
+   try{File.WriteAllText(Path.Combine(work,"result.txt"),"ERRO: "+e.Message);}catch{}
+   try{if(applied&&File.Exists(backup)){if(child!=null&&!child.HasExited){child.Kill();child.WaitForExit();}File.Copy(backup,target,true);var restored=Process.Start(target);File.WriteAllText(Path.Combine(work,"restored-pid.txt"),restored.Id.ToString());}}catch{}
    return 1;
   }
  }

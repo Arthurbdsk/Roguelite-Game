@@ -1,8 +1,8 @@
 {
-  "version": "0.26.1",
+  "version": "0.26.2",
   "protocol": 2,
-  "content_sha256": "340a633a04e971b2307f2aa1e775ed2a6701aa6bca4ae1843884b15b3e214124",
-  "compatibility_id": "0.26.1+340a633a04e971b2",
+  "content_sha256": "293f125a6d98cf8424314964396364cb7648023c37988594e96a0af388ef0091",
+  "compatibility_id": "0.26.2+293f125a6d98cf84",
   "files": {
     "data/balance16_audit.json": "8c3f5b84f1a117dd28219d2ba282cfa1b1c5a93c94cfde153e3785d8412f59d3",
     "data/balance18_audit.json": "4859989e20e3337ac83aa6f166a4fd559b369c543835cf6e70f6ddcc4dfc8697",
@@ -84,7 +84,7 @@
     "scripts/combat/special_encounters.gd": "77c16729ebe3d263041b87c23a278d5c79d9134c9781d0d02d4954e649a8a66b",
     "scripts/combat/weapons.gd": "3148c5df1391ab5517951dea693967ee3b58c0ecaf7d49a65568b2982ae594ff",
     "scripts/data/boss_balance.gd": "c090bfaf178f187f13669cbf31d504740b7d6deef258357112099d0b750247fc",
-    "scripts/data/early_balance.gd": "db948abb702c54de9949384b68db697cf671b176b14d1bb97ccbffb81ade1026",
+    "scripts/data/early_balance.gd": "cb7de02378481c7d573936c4035875195e85ef0c1c8ffef09184eab83837ce45",
     "scripts/data/encounter_balance.gd": "f21c441bad06cb14a21b29b3cb3b020dcaf5c99e4eee50a826826069afd4f226",
     "scripts/data/enemy_catalog.gd": "4810dc375abd9a927e596cc3825991784bdfcf511fcca40c8128e1cb964f4bfb",
     "scripts/data/map_definition.gd": "b03ec83fbfc045ffa10d3b14de7a0823dc5110d6293f9d6295c197abc4e9f90f",

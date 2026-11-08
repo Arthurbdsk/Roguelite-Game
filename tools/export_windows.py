@@ -137,7 +137,7 @@ def ensure_license():
 
 def main():
     from gameplay_manifest import check
-    check()
+    content_identity = check()
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--godot", type=Path, default=Path.home() / "Downloads" / "Godot_v4.7.2-stable_win64_console.exe")
     parser.add_argument("--template-only", action="store_true")
@@ -181,6 +181,8 @@ def main():
     manifest = {
         "file": target.name,
         "game_version": "0.26.2",
+        "compatibility_id": content_identity["compatibility_id"],
+        "protocol": content_identity["protocol"],
         "godot_version": VERSION,
         "size_bytes": len(payload),
         "sha256": hashlib.sha256(payload).hexdigest(),
