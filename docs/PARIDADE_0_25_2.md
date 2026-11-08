@@ -6,7 +6,7 @@ Agora só o Orc comum e o Soldado são desenhados 20% menores no Android. Esquel
 
 Gameplay igual ao PC: sem multiplicador de spawn por plataforma, 90 inimigos/minuto no estágio inicial e mesmos modificadores de estágio/Desafio, armas, dano, vida e resistência. Coop preservado: 2/3/4 jogadores com dano 1,2333/1,4667/1,7 e quantidade 1,3333/1,6667/2. Progressos locais e escolhas de Desafio continuam individuais; não houve reset ou sincronização de saves.
 
-Auditoria nativa contra o PCK público PC: 3.948 valores comparados, 256 casos de armas nos oito níveis com e sem passivas, 184 casos de inimigos com diferentes quantidades de jogadores e estágios, oito cenários de geração. Comparados dano configurado e aplicado, cooldown, quantidade, alcance, vida, resistência, velocidade e colisão. Seis números diferiram apenas na serialização decimal, diferença máxima 1,03e-12, sem diferença de gameplay observada. Resultado em docs/pc252/comparison.json.
+Auditoria nativa contra o PCK público PC: 3.948 valores comparados, 256 casos de armas nos oito níveis com e sem passivas, 184 casos de inimigos com diferentes quantidades de jogadores e estágios, oito cenários de geração. Comparados dano configurado e aplicado, cooldown, quantidade, alcance, vida, resistência, velocidade e colisão. Seis números diferiram apenas na serialização decimal, diferença máxima 1,03e-12, sem diferença de gameplay observada. Resultado em docs/validation252/comparison.json.
 
 As 23 espécies e o jogador foram inspecionados em execução no Android. Apenas hero/ghoul têm multiplicador visual 0,8; os demais 1. Captura nativa em build/update252/native.png. Testes do PC passaram para escala, morte, geração e cooperativo; oito suítes Android de prévia também passaram.
 
