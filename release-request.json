@@ -1,11 +1,7 @@
 {
-  "source": "https://computed-contracts-increased-stolen.trycloudflare.com",
+  "source": "https://charms-pond-exploring-mostly.trycloudflare.com",
   "platforms": [
     "android"
   ],
-  "request": "authorized-2026-11-08-0262-final-retire-experiments",
-  "retire_android_revisions": [
-    7,
-    8
-  ]
+  "request": "authorized-android11-touch-scrolling-pc-proportions"
 }
