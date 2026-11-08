@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "expires": 1801945615,
+  "platforms": {
+    "pc": {
+      "version": "0.26.2",
+      "platform": "pc",
+      "size": 114869304,
+      "sha256": "820ab40246435ec1a30e85237a7cbd4c78ade1423ed78f0085b659d1b8ce8ac3",
+      "url": "https://github.com/Arthurbdsk/Roguelite-Game/releases/download/update-pc-0.26.2/Hordas-0.26.2.exe",
+      "notes": "Atualizações pelo menu do jogo, com download autenticado, instalação e recuperação no Windows e instalador oficial no Android.\nVida inicial calibrada para dois ou três acertos de Arco nível 1, sem crítico, no solo.\nAndroid usa as mesmas proporções do mundo, atributos e spawn do PC.\nCrossplay exige PC 0.26.2 ou Android 0.26.2-android.10, protocolo 2 e o mesmo conteúdo de gameplay.\n",
+      "compatibility": "0.26.2+6c3b0b65ed77fe5a",
+      "protocol": 2,
+      "source_commit": "01f01f009d398cd4c06208ba75533a14e52f2ca7",
+      "online_required": true,
+      "compatible_versions": "PC 0.26.2 / Android 0.26.2-android.11"
+    },
+    "android": {
+      "version": "0.26.2-android.11",
+      "platform": "android",
+      "size": 83847182,
+      "sha256": "4c0590ffc95182c1acc09599e5d1db743758409aba4b03d803ed7c5cfdc6c05e",
+      "url": "https://github.com/Arthurbdsk/Roguelite-Game/releases/download/update-android-0.26.2-android.11/Hordas-Android-0.26.2-11.apk",
+      "notes": "Rolagem por toque corrigida nas telas do celular, inclusive nos cartões de escolha de item.\nArraste contínuo sem selecionar opções por acidente; toque simples preservado.\nSoldado e Orc corrigidos para as mesmas proporções do PC; os demais sprites e as regras de combate permanecem iguais.\nCompatível com PC 0.26.2, protocolo 2.\n",
+      "compatibility": "0.26.2+6c3b0b65ed77fe5a",
+      "protocol": 2,
+      "source_commit": "d00e9f5c6dd1d5bb9aa0427911ad6f1ca25442f9",
+      "online_required": false,
+      "compatible_versions": "PC 0.26.2 / Android 0.26.2-android.11"
+    }
+  }
+}

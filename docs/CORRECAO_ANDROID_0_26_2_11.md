@@ -32,3 +32,13 @@ Protocolo 2, gameplay `0.26.2+6c3b0b65ed77fe5a`, compatível com PC 0.26.2. Nenh
 Ambiente nativo: emulador Android 15/API 35. Os gestos foram enviados pelo sistema Android via ADB, sem chamar diretamente o código de arraste do jogo. Não houve teste em telefone físico nesta entrega. O teste do relay público usa clientes na mesma conexão de internet e não comprova redes independentes ou desempenho de aparelho real.
 
 Package `com.socialy.hordas.android`, versionCode 11. Assinatura original preservada, sem desinstalação e sem migração nova do perfil. Publicação somente como APK direto, sem loja. A atualização é opcional para o online, pois mantém protocolo e conteúdo de gameplay.
+
+## Entrega
+
+APK público: [Hordas-Android-0.26.2-11.apk](https://github.com/Arthurbdsk/Roguelite-Game/releases/download/update-android-0.26.2-android.11/Hordas-Android-0.26.2-11.apk). Disponível também pela aba Atualizações. Publicação Android isolada aprovada pelo [Actions](https://github.com/Arthurbdsk/Roguelite-Game/actions/runs/42520267417).
+
+Origem runtime Android `d00e9f5c6dd1d5bb9aa0427911ad6f1ca25442f9`, base PC 0.26.2/01f01f0. 83847182 bytes, SHA-256 `4c0590ffc95182c1acc09599e5d1db743758409aba4b03d803ed7c5cfdc6c05e`. O APK público foi inspecionado e não contém os fixtures de rolagem, comparação visual ou código DEV. Os publicadores foram incorporados de forma controlada da versão PC para gerar metadados e preservar o outro canal; nenhuma mudança de gameplay PC foi incorporada nesta entrega.
+
+Crossplay repetido: quatro participantes, host PC e host Android, três mapas, escolhas, chefes, reanimação por toque e recompensas individuais aprovados. Evidências em `android011/crossplay-pc-host.json` e `android011/crossplay-android-host.json`.
+
+Atualização pública validada no emulador: aplicativo público 10 detectou, baixou e instalou a versão 11 nos links permanentes do GitHub. PackageInstaller confirmou a instalação; hash do APK instalado conferido. O perfil permaneceu byte a byte igual durante a instalação e com os mesmos dados após reabrir o jogo. Evidência: `android011/public-update.json`. O canal público assinado preserva o hash do PC anterior; a infraestrutura temporária de transferência foi encerrada.

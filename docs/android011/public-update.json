@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "from_version_code": 10,
+  "to_version_code": 11,
+  "downloaded_by_public_game": true,
+  "public_permanent_urls": true,
+  "official_installer_confirmed": true,
+  "save_semantics_preserved": true,
+  "save_bytes_preserved": true,
+  "runs_preserved": 2,
+  "installed_apk_sha256": "4c0590ffc95182c1acc09599e5d1db743758409aba4b03d803ed7c5cfdc6c05e",
+  "emulator": "Android 15 API35",
+  "physical_device": false,
+  "reopened": true,
+  "progress_preserved_after_reopen": true
+}
