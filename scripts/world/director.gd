@@ -106,5 +106,5 @@ func spawn(id: String, elite: bool = false) -> bool:
  return false
 
 func pressure()->String:
- return "ENCONTRO EM ANDAMENTO" if phase=="boss" else "ESTÁGIO %d | VIDA +%.0f"%[game.horde_progress.stage(),game.horde_progress.stage()*game.balance.horde_health_step]
+ return "ENCONTRO EM ANDAMENTO" if phase=="boss" else "ESTÁGIO %d"%game.horde_progress.stage()
 func wave_number()->int:return game.horde_progress.stage()

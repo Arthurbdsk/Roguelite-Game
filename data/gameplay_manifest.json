@@ -1,8 +1,8 @@
 {
   "version": "0.26.2",
   "protocol": 2,
-  "content_sha256": "293f125a6d98cf8424314964396364cb7648023c37988594e96a0af388ef0091",
-  "compatibility_id": "0.26.2+293f125a6d98cf84",
+  "content_sha256": "6c3b0b65ed77fe5ae65f8597224ae4c9f5f199d56c14eb16a41f9c2c5505e8aa",
+  "compatibility_id": "0.26.2+6c3b0b65ed77fe5a",
   "files": {
     "data/balance16_audit.json": "8c3f5b84f1a117dd28219d2ba282cfa1b1c5a93c94cfde153e3785d8412f59d3",
     "data/balance18_audit.json": "4859989e20e3337ac83aa6f166a4fd559b369c543835cf6e70f6ddcc4dfc8697",
@@ -112,7 +112,7 @@
     "scripts/world/arena.gd": "d02f88387142d68deb26615830a5d4dfcc3c8aaacdbeeec52b81119c7ee1a66a",
     "scripts/world/consumables.gd": "ded397ad71e9c26c10ae2745be3af9651a282afef790664fb3b883f45380c9f8",
     "scripts/world/crowd_navigation.gd": "91b75a856d11b1e4ddc411026f3a188a842e8ef0225050a25b50b26dcc26d0ff",
-    "scripts/world/director.gd": "d8915063c88054e4ce551f7190c44f4c22a00edfbc01a89759636fe10742cbd1",
+    "scripts/world/director.gd": "5621d4fb266e72f3f2103be33d509d987396693ee739154d2c5b1cd7d0dc439c",
     "scripts/world/food_index.gd": "d688850c8c663cd034a13a2172ffab94e0b4bc64b500a0ccf2614885468a20b0",
     "scripts/world/gold_loot.gd": "0a7857e8c9fac5ef53c9e51b1b5e82090774c9758a50359bc502d6419ec83e1f",
     "scripts/world/horde_progress.gd": "bcf139c18d25f2f306be22bc4993af228bab69a83efb0957bce02af88f430b0f",
