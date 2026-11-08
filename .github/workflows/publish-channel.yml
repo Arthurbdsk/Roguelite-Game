@@ -1,0 +1,20 @@
+name: Publish signed game updates
+on:
+  push:
+    branches: [codex/release-channel]
+    paths: [release-request.json]
+permissions:
+  contents: write
+concurrency:
+  group: signed-game-channel
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Verify and publish selected artifacts
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: Arthurbdsk/Roguelite-Game
+        run: python3 .github/scripts/publish_updates.py
