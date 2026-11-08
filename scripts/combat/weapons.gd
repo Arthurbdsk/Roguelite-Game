@@ -85,20 +85,11 @@ func setup(game_ref) -> void:
 
 # Call after the player has reset its base statistics for a fresh expedition.
 func reset(support_id: String = "none") -> void:
-	bow_visual_target=null
-	additions.setup(self);additions.reset()
-	if arsenal!=null:arsenal.reset()
-	if ground!=null:ground.reset()
+	clear_attacks()
 	support = support_id
 	levels = {"bolt": 1}
 	passives.clear()
-	beams.clear()
 	clock_index=0
-	lightning_fx.clear()
-	projectiles.clear()
-	slashes.clear()
-	orbit_positions.clear()
-	orbit_hits.clear()
 	timers = {"sword": 0.1, "bolt": 0.2}
 	orbit_phase = 0.0
 	combat_time = 0.0
@@ -107,6 +98,20 @@ func reset(support_id: String = "none") -> void:
 		levels["bolt"] = 1
 	elif support == "library":
 		levels["orbit"] = 1
+	queue_redraw()
+
+
+func clear_attacks() -> void:
+	bow_visual_target=null
+	additions.setup(self);additions.reset()
+	if arsenal!=null:arsenal.reset()
+	if ground!=null:ground.reset()
+	beams.clear()
+	lightning_fx.clear()
+	projectiles.clear()
+	slashes.clear()
+	orbit_positions.clear()
+	orbit_hits.clear()
 	queue_redraw()
 
 
@@ -228,7 +233,9 @@ func _fire_bolts() -> bool:
 		var selected=targets[index%targets.size()]
 		if not _valid_target(selected):continue
 		var origin:Vector2=game.player.position+Vector2(0,-10)+direction*8+direction.orthogonal()*(index-(count-1)*.5)*2
-		var velocity: Vector2 = (selected.position-origin).normalized() * 275.0 * projectile_factor()
+		var aim:Vector2=selected.position-origin
+		if aim.length_squared()<.000001:aim=direction if direction.length_squared()>.000001 else Vector2.RIGHT
+		var velocity: Vector2 = aim.normalized() * 275.0 * projectile_factor()
 		projectile_serial+=1
 		projectiles.append({"id":projectile_serial,"age":0.0,"life":(reach+weapon_data.bolt.flight_padding)/maxf(1,velocity.length()),"position": origin, "velocity": velocity,
 			"distance": 0.0, "reach": reach+weapon_data.bolt.flight_padding, "selection_range":reach, "damage": _stat("bolt", "damage"),
@@ -242,9 +249,14 @@ func _fire_bolts() -> bool:
 func _update_projectiles(delta: float) -> void:
 	for index: int in range(projectiles.size() - 1, -1, -1):
 		var shot: Dictionary = projectiles[index]
-		shot.age=float(shot.get("age",0))+delta
+		var previous_age:float=float(shot.get("age",0))
+		var life:float=float(shot.get("life",float(shot.reach)/maxf(1,Vector2(shot.velocity).length())))
+		shot.age=previous_age+delta
+		if not Vector2(shot.velocity).is_finite() or Vector2(shot.velocity).length_squared()<.000001 or previous_age>=life:
+			projectiles.remove_at(index)
+			continue
 		var start: Vector2 = shot["position"]
-		var travel:Vector2=Vector2(shot.velocity)*delta
+		var travel:Vector2=Vector2(shot.velocity)*minf(delta,maxf(0,life-previous_age))
 		travel=travel.limit_length(maxf(0,float(shot.reach)-float(shot.distance)))
 		var end: Vector2 = start + travel
 		var world=game.world if game is CoopActor else game
@@ -283,12 +295,16 @@ func _update_projectiles(delta: float) -> void:
 					shot["bounce"] = 0
 					shot["pierce"] = 1
 					shot["distance"] = 0.0
+					# A ricochet starts a fresh flight; clients use this same visual clock.
+					shot["age"] = 0.0
+					shot["life"] = float(shot.reach)/maxf(1,Vector2(shot.velocity).length())
 					wall={}
 					break
 			consumed = true
 			break
-		if consumed or not wall.is_empty() or float(shot["distance"]) >= float(shot["reach"]):
+		if consumed or not wall.is_empty() or float(shot["distance"]) >= float(shot["reach"]) or float(shot.age)>=float(shot.get("life",life)):
 			projectiles.remove_at(index)
+	queue_redraw()
 
 
 func _bounce_target(origin: Vector2, excluded: Array):

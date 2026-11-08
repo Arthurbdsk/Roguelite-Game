@@ -6,7 +6,7 @@ var impact_fx:Array[Dictionary]=[]
 var fire_texture=preload("res://assets/effects/fire.png")
 var impact_texture=preload("res://assets/effects/impact.png")
 var flask_texture=preload("res://assets/effects/flask.png")
-var pool_texture=preload("res://assets/effects/pool.png")
+var pool_texture=preload("res://assets/v24/poison_pool.png")
 var splash_texture=preload("res://assets/effects/splash.png")
 var balance:SpecialBalance=preload("res://data/encounters/special.tres")
 var marks:Array[Dictionary]=[]
@@ -123,10 +123,13 @@ func _draw():
   if active:
    var fade:float=clampf((balance.flask_warning+balance.pool_duration-area.age)/.7,0,1)
    draw_set_transform(area.at.round(),0,Vector2.ONE)
-   draw_texture_rect_region(pool_texture,Rect2(-balance.pool_radius,-balance.pool_radius,balance.pool_radius*2,balance.pool_radius*2),Rect2(int(area.age*7)%6*64,0,64,64),Color(1,1,1,fade))
+   var remaining:float=balance.flask_warning+balance.pool_duration-area.age
+   var frame:int=4+int((area.age-balance.flask_warning)*8)%8
+   if remaining<.7:frame=12+mini(3,int((.7-remaining)/.7*4))
+   draw_texture_rect_region(pool_texture,Rect2(-balance.pool_radius,-balance.pool_radius,balance.pool_radius*2,balance.pool_radius*2),Rect2(frame*64,0,64,64),Color(1,1,1,fade))
    draw_set_transform(Vector2.ZERO)
    var impact_age:float=area.age-balance.flask_warning
-   if impact_age<.42:draw_frame(splash_texture,area.at,mini(6,int(impact_age*17)),Vector2(32,32))
+   if impact_age<.42:draw_frame(pool_texture,area.at,mini(3,int(impact_age/.42*4)),Vector2(64,64),balance.pool_radius/32)
   else:
    var t:float=clampf(area.age/balance.flask_warning,0,1)
    var ground:Vector2=area.source.lerp(area.at,t)

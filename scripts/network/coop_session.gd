@@ -512,7 +512,7 @@ func broadcast_state(force: bool = false) -> void:
  for id in actors:
   var weapons: WeaponSystem = actors[id].weapon_system
   var shots: Array = []
-  for shot in weapons.projectiles: shots.append({"id":shot.get("id",0),"age":shot.get("age",0),"life":shot.get("life",2),"position": shot.position, "velocity": shot.velocity})
+  for shot in weapons.projectiles: shots.append({"id":shot.get("id",0),"age":shot.get("age",0),"life":shot.get("life",2),"position": shot.position, "velocity": shot.velocity,"distance":shot.distance,"reach":shot.reach})
   weapon_fx[id] = {"levels":weapons.levels,"passives":weapons.passives,"projectiles": shots, "slashes": weapons.slashes, "orbit_positions": weapons.orbit_positions,"lightning_fx":weapons.lightning_fx,"beams":weapons.beams,"pools":weapons.ground.pools,"arsenal_shots":weapons.arsenal.shots,"arsenal_zones":weapons.arsenal.zones,"blade_points":weapons.arsenal.blade_points}
  var data := {"reward_chest":game.chests.chest,"event_status":{"active":game.special_events.active,"age":game.special_events.age,"pending":game.special_events.pending.size()},"campaign_cleared":game.campaign.cleared,"endless":game.campaign.endless,"final_jobs":game.late_arena.patterns.jobs,"final_shots":game.late_arena.patterns.shots,"final_marks":game.late_arena.patterns.marks,"hordes_completed":game.horde_progress.completed,"chain_seeds":game.late_arena.seed_pending,"chain_stats":game.late_arena.chain.snapshot(),"late_areas":game.late_arena.areas,"late_shots":game.late_arena.shots,"full":true,"changes": changes, "removals": removals, "elapsed": game.elapsed, "gold": game.gold, "kills": game.kills, "earned": game.earned, "wave": game.director.wave_number(), "pressure": "TESTE DEV" if game.dev_tools!=null and game.dev_tools.active else game.director.pressure(), "banner": game.banner, "arrows": game.enemy_projectiles.arrows, "hazards": game.hazards, "areas": game.boss_arena.areas, "summons": game.boss_arena.pending_summons, "swings": game.boss_arena.swings, "portal_age": game.boss_arena.portal_age, "stage": game.boss_arena.stage, "weapons": weapon_fx, "revives": revives.interactions, "event_claimed": game.event_claimed, "event_progress": game.event_progress, "numbers": game.numbers,"split_pending":game.slime_families.pending,"special_marks":game.specials.marks,"special_areas":game.specials.areas,"special_bolts":game.specials.bolts}
  data.snapshot_serial=snapshot_count+1;data.room_run=room_run
@@ -771,7 +771,11 @@ func client_tick(delta: float, action: Dictionary) -> void:
  for actor in actors.values():
   actor.player.sprite.modulate.a = 0.55 if actor.player.invulnerable > 0 and int(world_clock * 10) % 2 == 0 else 1.0
  for arrow in game.enemy_projectiles.arrows:
-  if not game.consumables.paused_projectile(arrow):arrow.at += arrow.velocity * delta
+  if game.consumables.paused_projectile(arrow):continue
+  arrow.life-=delta
+  var movement:Vector2=(Vector2(arrow.velocity)*delta).limit_length(maxf(0,float(arrow.range)-float(arrow.distance)))
+  arrow.at+=movement;arrow.distance+=movement.length()
+ game.enemy_projectiles.arrows=game.enemy_projectiles.arrows.filter(func(a):return a.life>0 and a.distance<a.range and Rect2(20,20,1760,1160).has_point(a.at))
  game.late_arena.visual_tick(delta)
  for area in game.boss_arena.areas:
   area.age += delta
@@ -780,7 +784,9 @@ func client_tick(delta: float, action: Dictionary) -> void:
  game.slime_families.queue_redraw()
  for mark in game.specials.marks:mark.age+=delta
  for area in game.specials.areas:area.age+=delta
- for bolt in game.specials.bolts:bolt.at+=bolt.velocity*delta
+ for bolt in game.specials.bolts:
+  if game.consumables.freeze_left<=0:bolt.at+=bolt.velocity*delta;bolt.life-=delta
+ game.specials.bolts=game.specials.bolts.filter(func(b):return b.life>0)
  game.specials.queue_redraw()
  for hazard in game.hazards: hazard.age += delta
  for mark in game.boss_arena.pending_summons: mark.age += delta
@@ -791,11 +797,7 @@ func client_tick(delta: float, action: Dictionary) -> void:
   effect.at.y -= delta * 13
  game.gold_loot.feedback = game.gold_loot.feedback.filter(func(effect): return effect.life > 0)
  for actor in actors.values():
-  for shot in actor.weapon_system.arsenal.shots:
-   shot.age+=delta
-   var speed:float=float(shot.get("speed_factor",1));var travel:float=shot.age*speed
-   if shot.kind=="axe":shot.at=shot.origin+shot.direction*170*travel+Vector2(0,180*travel*(travel-shot.flight))
-   else:shot.at+=shot.direction*250*delta*speed if shot.leg==0 else (actor.player.position-shot.at).normalized()*300*delta*speed
+  actor.weapon_system.arsenal.advance_shots(delta,false)
   for zone in actor.weapon_system.arsenal.zones:zone.age+=delta
   actor.weapon_system.arsenal.queue_redraw()
   for beam in actor.weapon_system.beams:beam.life-=delta
@@ -806,8 +808,9 @@ func client_tick(delta: float, action: Dictionary) -> void:
   actor.weapon_system.ground.pools=actor.weapon_system.ground.pools.filter(func(p):return p.age<p.flight+p.duration)
   actor.weapon_system.ground.queue_redraw()
   for shot in actor.weapon_system.projectiles:
-   shot.position += shot.velocity * delta;shot.age=float(shot.get("age",0))+delta
-  actor.weapon_system.projectiles=actor.weapon_system.projectiles.filter(func(s):return float(s.get("age",0))<float(s.get("life",2)))
+   var movement:Vector2=(Vector2(shot.velocity)*delta).limit_length(maxf(0,float(shot.reach)-float(shot.distance)))
+   shot.position+=movement;shot.distance+=movement.length();shot.age=float(shot.get("age",0))+delta
+  actor.weapon_system.projectiles=actor.weapon_system.projectiles.filter(func(s):return float(s.get("age",0))<float(s.get("life",2)) and s.distance<s.reach)
   for slash in actor.weapon_system.slashes: slash.remaining = maxf(0, slash.remaining - delta)
   actor.weapon_system.additions.advance_shots(delta,false)
   actor.weapon_system.additions.visual.tick(delta)

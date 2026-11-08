@@ -5,17 +5,19 @@ var swallowed_gold:int=0
 var swallowed_xp:float=0
 var search_clock:float=0
 var food:Dictionary={}
+var eating_left:float=0
 func growth_visual():
 	var size:float=minf(game.balance.devour_max_scale,1+meals*game.balance.devour_growth_step)
 	if not game.enemy_space_free(position,data.radius*size,self):return
 	sprite.scale=Vector2.ONE*size*1.1
-	sprite.position.y=-12*size*1.1
+	sprite.position.y=(-20 if tiny_kind=="original_devourer" else -12)*size*1.1
 	radius=data.radius*size
 	var shape=get_child(0) as CollisionShape2D
 	if shape!=null:shape.shape.radius=radius
 func tick(delta:float):
 	if not alive or tick_control(delta):return
 	clock+=delta;attack_time-=delta;state_time+=delta;search_clock-=delta
+	hit_flash=maxf(0,hit_flash-delta);eating_left=maxf(0,eating_left-delta)
 	if search_clock<=0:
 		if meals>0:growth_visual()
 		food=game.food_index.nearest(position);search_clock=game.balance.food_search_interval
@@ -24,6 +26,7 @@ func tick(delta:float):
 	var direction:Vector2=(destination-position).normalized()
 	if not food.is_empty() and destination.distance_to(position)<=radius+3:
 		if game.food_index.consume(food):
+			eating_left=.4
 			if food.kind=="gold":swallowed_gold+=int(food.item.value)
 			else:swallowed_xp+=float(food.item.xp)
 			meals+=1;max_hp+=game.balance.devour_health_gain;hp+=game.balance.devour_health_gain
@@ -44,6 +47,9 @@ func tick(delta:float):
 	knockback=knockback.move_toward(Vector2.ZERO,delta*500)
 	velocity=game.crowd_velocity(self,velocity)
 	move_body()
-	sprite.frame=4 if state=="prepare" else int(clock*7)%4
+	if tiny_kind=="original_devourer":
+		original_visual(direction,velocity.length()>2)
+		if eating_left>0 and hit_flash<=0:sprite.frame=TinyCharacters.frame(tiny_kind,"cast",1-eating_left/.4)
+	else:sprite.frame=4 if state=="prepare" else int(clock*7)%4
 	sprite.flip_h=direction.x<0
 	refresh_visual()

@@ -18,7 +18,7 @@ func run():
  var p=g.player;var w=g.weapon_system
  check(p.tiny_soldier and p.sprite.hframes==43,"official Soldier, 43 aligned frames")
  check(p.radius==7 and p.speed==96 and p.max_hp==100,"body and baseline attributes unchanged")
- check(p.sprite.position==Vector2(0,-12),"fixed feet pivot")
+ check(p.sprite.position.is_equal_approx(Vector2(0,-13.2)),"fixed feet pivot at PC 1.1 visual scale")
  check(p.sprite.texture==TinyCharacters.texture("soldier"),"shared texture")
  for map_id in ["courtyard","library","fields"]:
   g.clear_run();g.arena.apply_map(map_id);g.state="running";g.player.position=Vector2(900,630);g.camera.position=Vector2.ZERO;p.display_name="Jogador 1";w.reset();g.ui.render("running")

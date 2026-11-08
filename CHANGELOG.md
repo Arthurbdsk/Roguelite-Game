@@ -1,5 +1,18 @@
 # Atualizações
 
+## PC 0.24.0
+
+- Flechas sem velocidade válida são encerradas; prazo de voo passa a valer também no host. Ricochete renova o prazo visual.
+- Limpeza completa de ataques ao encerrar ou reiniciar, incluindo todos os donos no cooperativo. IDs de ataques adicionais e impactos não se repetem nas reconstruções.
+- Réplicas de flechas aliadas, inimigas e magia inimiga encerram pelo voo ou prazo, mesmo sem novo snapshot. Mensagens antigas continuam rejeitadas.
+- Machado resolve a perfuração pela ordem dos contatos varridos e usa a mesma trajetória e descarte lógico nos clientes. Preservados três acertos iniciais, arco e tamanho +15% da 0.23.
+- Vida-base +30 corrigida também nos quatro chefes. Transformações preservam o bônus uma única vez, separado do aumento temporal.
+- Pivôs horizontais, nomes e barras ajustados à escala visual de 1,1. Função antiga da sombra do herói removida.
+- Médico da Peste, Devorador e Soldado de dash com 24 quadros, incluídos para avaliação do usuário dentro do jogo. Animação de alimentação e poça de veneno integradas do trabalho local existente.
+- Mantidos os aumentos previamente autorizados: 90 inimigos/minuto e 20% de chance de ouro.
+- Mantidos Varinha Mágica +1 segundo nos oito níveis, fogo aliado com dano dobrado, escalas, salvamentos e otimizações. Nenhuma aceleração geral indevida foi reproduzida nas 64 medições.
+- Somente PC. Android continua congelado.
+
 ## 0.3.0
 
 - Árvore permanente de 16 nós, pré-requisitos, níveis limitados e custos em ouro.

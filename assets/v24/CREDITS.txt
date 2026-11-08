@@ -1,0 +1,5 @@
+Character and poison artwork recovered from the local work in progress on 2026-11-07.
+These are original project atlases, not official Tiny RPG paid-pack assets.
+The user requested inclusion for in-game review; visual approval is pending.
+Soldier and common Orc remain the separately licensed Tiny RPG assets.
+Sources are retained locally in assets/v24/sources and excluded from PC exports.

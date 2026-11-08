@@ -15,7 +15,7 @@ var impact_serial:int=0
 var impact_log:Array=[]
 var received_impact:int=0
 func setup(owner):weapons=owner
-func reset():shots.clear();strikes.clear();bursts.clear();aura_hits.clear();garlic_contacts.clear();garlic_cleanup_at=0;visual.reset();shot_serial=0;impact_serial=0;impact_log.clear();received_impact=0
+func reset():shots.clear();strikes.clear();bursts.clear();aura_hits.clear();garlic_contacts.clear();garlic_cleanup_at=0;visual.reset();impact_log.clear();received_impact=0
 func impact(kind:String,at:Vector2):
  if kind=="runetracer":return
  visual.impact(kind,at);impact_serial+=1

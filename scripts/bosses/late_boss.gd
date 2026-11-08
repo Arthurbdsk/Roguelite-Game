@@ -6,8 +6,6 @@ var isolated_attack:bool=false
 var queued_combination:String=""
 func setup(owner_game,stats:EnemyData,_elite:bool=false):
  super.setup(owner_game,stats,false)
- var ratio:float=game.campaign.config.guardian_health_ratio_to_demon_phase2 if stats.id=="guardian" else game.campaign.config.horror_health_ratio_to_demon_phase2
- max_hp=game.boss_balance.demon_health()*game.boss_balance.second_health_multiplier*game.balance.enemy_health_multiplier*ratio
  hp=max_hp;state="chase";attack_time=1.5
  data.speed=game.boss_balance.demon_speed*(.8 if stats.id=="guardian" else float(game.campaign.config.horror_speed_ratio_to_demon))*game.balance.enemy_speed_multiplier*game.enemy_scale().speed
  if stats.id=="horror":data.damage=game.enemy_data.demon.damage*game.boss_balance.second_damage_multiplier*float(game.campaign.config.horror_damage_ratio_to_demon_phase2)*game.enemy_scale().damage
@@ -91,7 +89,7 @@ func take_damage(amount:float,_force:Vector2=Vector2.ZERO):
  if hp>0:return
  if data.id=="horror" and form==1:
   dev_repeat="";dev_next_attack=""
-  form=2;max_hp=(max_hp-horde_health_bonus)*float(game.campaign.config.true_health_ratio)+horde_health_bonus;hp=max_hp;state="transform";state_time=0;targetable=false;velocity=Vector2.ZERO
+  form=2;max_hp=(max_hp-horde_health_bonus-spawn_health_bonus)*float(game.campaign.config.true_health_ratio)+horde_health_bonus+spawn_health_bonus;hp=max_hp;state="transform";state_time=0;targetable=false;velocity=Vector2.ZERO
   game.late_arena.clear_attacks(self);game.announce("TRUE FORM",3);return
  if death_paid:return
  death_paid=true;alive=false;targetable=false;state="death";velocity=Vector2.ZERO;game.enemy_killed(self)

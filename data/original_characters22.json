@@ -570,5 +570,137 @@
    }
   },
   "visible_height": 48
+ },
+ "original_plague": {
+  "texture": "res://assets/v24/plague.png",
+  "frames": 24,
+  "cell": [
+   48,
+   48
+  ],
+  "offset": [
+   0,
+   -20
+  ],
+  "origin": "Original art created for Hordas from user references, 2026-11-07",
+  "clips": {
+   "idle": {
+    "start": 0,
+    "count": 4
+   },
+   "walk": {
+    "start": 4,
+    "count": 4
+   },
+   "attack": {
+    "start": 8,
+    "count": 4
+   },
+   "attack2": {
+    "start": 8,
+    "count": 4
+   },
+   "cast": {
+    "start": 12,
+    "count": 4
+   },
+   "hurt": {
+    "start": 16,
+    "count": 4
+   },
+   "death": {
+    "start": 20,
+    "count": 4
+   }
+  },
+  "visible_height": 22
+ },
+ "original_devourer": {
+  "texture": "res://assets/v24/devourer.png",
+  "frames": 24,
+  "cell": [
+   48,
+   48
+  ],
+  "offset": [
+   0,
+   -20
+  ],
+  "origin": "Original art created for Hordas from user references, 2026-11-07",
+  "clips": {
+   "idle": {
+    "start": 0,
+    "count": 4
+   },
+   "walk": {
+    "start": 4,
+    "count": 4
+   },
+   "attack": {
+    "start": 8,
+    "count": 4
+   },
+   "attack2": {
+    "start": 8,
+    "count": 4
+   },
+   "cast": {
+    "start": 12,
+    "count": 4
+   },
+   "hurt": {
+    "start": 16,
+    "count": 4
+   },
+   "death": {
+    "start": 20,
+    "count": 4
+   }
+  },
+  "visible_height": 22
+ },
+ "original_guard": {
+  "texture": "res://assets/v24/guard.png",
+  "frames": 24,
+  "cell": [
+   48,
+   48
+  ],
+  "offset": [
+   0,
+   -20
+  ],
+  "origin": "Original art created for Hordas from user references, 2026-11-07",
+  "clips": {
+   "idle": {
+    "start": 0,
+    "count": 4
+   },
+   "walk": {
+    "start": 4,
+    "count": 4
+   },
+   "attack": {
+    "start": 8,
+    "count": 4
+   },
+   "attack2": {
+    "start": 8,
+    "count": 4
+   },
+   "cast": {
+    "start": 12,
+    "count": 4
+   },
+   "hurt": {
+    "start": 16,
+    "count": 4
+   },
+   "death": {
+    "start": 20,
+    "count": 4
+   }
+  },
+  "visible_height": 20
  }
 }

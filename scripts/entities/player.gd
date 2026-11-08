@@ -120,10 +120,7 @@ func _draw() -> void:
  if not display_name.is_empty():
   var font: Font = GameFonts.interface_font()
   var width: float = font.get_string_size(display_name, HORIZONTAL_ALIGNMENT_LEFT, -1, 10).x
-  draw_string(font, Vector2(-width * 0.5, -32 if tiny_soldier else (-58 if sprite.hframes>=32 else -34)), display_name, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, marker_color)
-
-func draw_ellipse_shadow() -> void:
- draw_rect(Rect2(-8, -1, 16, 5), Color(0, 0, 0, 0.35))
+  draw_string(font, Vector2(-width * 0.5, (-32 if tiny_soldier else (-58 if sprite.hframes>=32 else -34))*1.1), display_name, HORIZONTAL_ALIGNMENT_LEFT, -1, 10, marker_color)
 
 func apply_poison(duration:float,damage:float,attacker:int=0):
  if down:return

@@ -353,7 +353,10 @@ func clear_run() -> void:
  if late_arena!=null:late_arena.reset()
  food_index.reset()
  navigation.reset()
- if is_instance_valid(weapon_system) and weapon_system.ground!=null:weapon_system.ground.reset();weapon_system.arsenal.reset()
+ if is_instance_valid(weapon_system):weapon_system.clear_attacks()
+ if coop!=null and coop.active:
+  for actor in coop.actors.values():
+   if is_instance_valid(actor.weapon_system) and actor.weapon_system!=weapon_system:actor.weapon_system.clear_attacks()
  if slime_families!=null:slime_families.reset()
  if is_instance_valid(player): player.clear_status()
  if specials != null: specials.reset()
@@ -675,6 +678,15 @@ func apply_settings() -> void:
  if not test_mode:
   DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN if profile.data.settings.fullscreen else DisplayServer.WINDOW_MODE_WINDOWED)
 
+func enemy_base_health(id:String)->float:
+ if id in ["slime_small","event_small"]:return enemy_data.ghoul.health*balance.slime_small_health_ratio
+ if id=="executioner":return boss_balance.executioner_health()
+ if id=="demon":return boss_balance.demon_health()
+ if id in ["guardian","horror"]:
+  var ratio:float=campaign.config.guardian_health_ratio_to_demon_phase2 if id=="guardian" else campaign.config.horror_health_ratio_to_demon_phase2
+  return boss_balance.demon_health()*boss_balance.second_health_multiplier*ratio
+ return enemy_data[id].health
+
 func spawn_enemy(id: String, point: Vector2, elite: bool = false, chain_meta:Dictionary={}):
  id = "demon" if id == "boss" else id
  if id=="slime_large" and not (coop.active and not coop.hosting) and not slime_families.can_add():return null
@@ -684,8 +696,8 @@ func spawn_enemy(id: String, point: Vector2, elite: bool = false, chain_meta:Dic
  enemy.serial = serial
  serial += 1
  var stats: EnemyData = enemy_data[id].duplicate()
+ stats.health=enemy_base_health(id)
  if id in ["slime_small","event_small"]:
-  stats.health=enemy_data.ghoul.health*balance.slime_small_health_ratio
   stats.speed=enemy_data.ghoul.speed*balance.slime_small_speed_ratio
   stats.damage=enemy_data.ghoul.damage*balance.slime_small_damage_ratio
  var scale: Dictionary = enemy_scale()
@@ -702,12 +714,10 @@ func spawn_enemy(id: String, point: Vector2, elite: bool = false, chain_meta:Dic
  stats.health*=health_factor
  if id=="event_small":stats.speed*=survival_config.events.small_speed
  enemy.setup(self, stats, elite)
+ enemy.spawn_health_bonus=0 if enemy is HazardTarget else 30*balance.enemy_health_multiplier*scale.health*health_factor*(4.0 if elite and not enemy is HordeBoss else 1.0)
  enemy.difficulty_health_factor=health_factor
  if id=="siege_archer":enemy.event_kind="siege"
  if enemy is HazardTarget:enemy.owner_boss=int(chain_meta.get("pattern_owner",0))
- if enemy is HordeBoss:
-  enemy.max_hp *= scale.health
-  enemy.hp = enemy.max_hp
  horde_progress.apply(enemy)
  if not (coop.active and not coop.hosting):
   var free:Vector2=free_enemy_position(point,enemy.radius)

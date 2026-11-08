@@ -44,8 +44,8 @@ func animate_demon(moving:bool) -> void:
 func setup(owner_game, stats: EnemyData, _is_elite: bool = false) -> void:
 	super.setup(owner_game, stats, false)
 	is_executioner = stats.behavior == "executioner"
-	max_hp = game.boss_balance.executioner_health() if is_executioner else game.boss_balance.demon_health()
-	max_hp *= game.balance.enemy_health_multiplier
+	# The spawner resolves the boss base, +30 and difficulty once for every species.
+	max_hp = stats.health
 	hp = max_hp
 	state = "chase"
 	attack_time = 1.2
@@ -217,7 +217,7 @@ func take_damage(amount: float, _force: Vector2 = Vector2.ZERO) -> void:
 		first_phase_hp=max_hp
 		form=2
 		dev_repeat="";dev_next_attack=""
-		max_hp=(first_phase_hp-horde_health_bonus)*game.boss_balance.second_health_multiplier+horde_health_bonus
+		max_hp=(first_phase_hp-horde_health_bonus-spawn_health_bonus)*game.boss_balance.second_health_multiplier+horde_health_bonus+spawn_health_bonus
 		hp=max_hp
 		state="transform";state_time=0;targetable=false;velocity=Vector2.ZERO
 		game.boss_arena.clear_for_transform()

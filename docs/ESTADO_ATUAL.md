@@ -1,4 +1,10 @@
-# Estado do envio ao GitHub
+# Estado atual
+
+PC 0.24.0: correções de ciclo de projéteis, limpeza cooperativa, vida dos chefes e novos visuais para avaliação no jogo. Consulte [o relatório](CORRECOES_PC_0_24.md). Executável: `build/Hordas-0.24.0/Hordas-0.24.0.exe`. Android continua congelado.
+
+O texto abaixo preserva o histórico dos envios anteriores, até a versão 0.9.0.
+
+## Histórico do envio ao GitHub
 
 O projeto enviado contém a implementação atual, com cenas, Resources e sprites editáveis. O arquivo de entrada é `project.godot`, para Godot 4.7.2 padrão.
 

@@ -11,7 +11,7 @@ extends Resource
 @export var spawn_distance_min: float = 390.0
 @export var spawn_distance_max: float = 460.0
 @export_group("Ouro")
-@export var gold_drop_chance:float=0.10
+@export var gold_drop_chance:float=0.20
 @export var gold_drop_value:int=1
 @export var coin_lifetime: float = 60.0
 @export var coin_value: int = 1

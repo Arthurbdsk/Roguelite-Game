@@ -3,12 +3,13 @@
 [resource]
 script = ExtResource("1")
 id = "devourer"
+visual_family = "original_devourer"
 title = "Devorador"
 health = 38.0
 speed = 27.0
 damage = 7.0
 experience = 4
 radius = 9.0
-texture = "res://assets/devourer.png"
-frames = 6
+texture = "res://assets/v24/devourer.png"
+frames = 24
 contact_damage = false
