@@ -27,7 +27,7 @@ for platform in request['platforms']:
   existing=work/('existing-'+platform);existing.mkdir()
   subprocess.run(['gh','release','download',tag,'--pattern',name,'--dir',str(existing)],check=True)
   assert hashlib.sha256((existing/name).read_bytes()).hexdigest()==record['sha256'],'Version is immutable; choose a new version'
- else:subprocess.run(['gh','release','create',tag,str(artifact),'--title',record['version'],'--notes-file',str(notes)],check=True)
+ else:subprocess.run(['gh','release','create',tag,str(artifact),'--target',record['source_commit'],'--title',record['version'],'--notes-file',str(notes)],check=True)
 result=subprocess.run(['gh','api','repos/'+repo+'/contents/stable.json?ref='+branch],capture_output=True,text=True)
 body={'branch':branch,'message':'Promote authenticated game update channel','content':base64.b64encode((work/'stable.json').read_bytes()).decode()}
 if result.returncode==0:body['sha']=json.loads(result.stdout)['sha']
