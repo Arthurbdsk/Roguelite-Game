@@ -38,13 +38,21 @@ class Updater {
    string health=Path.Combine(work,"health-"+Guid.NewGuid().ToString("N")+".txt");
    child=Process.Start(new ProcessStartInfo(target,"-- --update-health=\""+health+"\""){WorkingDirectory=root,UseShellExecute=false});
    File.WriteAllText(Path.Combine(work,"installed-pid.txt"),child.Id.ToString());
-   for(int i=0;i<60;i++){Thread.Sleep(500);if(child.HasExited)throw new Exception("Nova versao encerrou");if(File.Exists(health)&&File.ReadAllText(health)==(string)p["version"]){File.WriteAllText(Path.Combine(work,"result.txt"),"OK");return 0;}}
+   for(int i=0;i<60;i++){Thread.Sleep(500);if(child.HasExited)throw new Exception("Nova versao encerrou");if(File.Exists(health)&&File.ReadAllText(health)==(string)p["version"]){CreateShortcut();File.WriteAllText(Path.Combine(work,"result.txt"),"OK");return 0;}}
    throw new Exception("Inicializacao nao confirmada");
   } catch(Exception e) {
    try{File.WriteAllText(Path.Combine(work,"result.txt"),"ERRO: "+e.Message);}catch{}
-   try{if(applied&&File.Exists(backup)){if(child!=null&&!child.HasExited){child.Kill();child.WaitForExit();}File.Copy(backup,target,true);var restored=Process.Start(target);File.WriteAllText(Path.Combine(work,"restored-pid.txt"),restored.Id.ToString());}}catch{}
+   try{if(applied&&File.Exists(backup)){if(child!=null&&!child.HasExited){child.Kill();child.WaitForExit();}File.Copy(backup,target,true);var restored=Process.Start(new ProcessStartInfo(target){WorkingDirectory=root,UseShellExecute=false});File.WriteAllText(Path.Combine(work,"restored-pid.txt"),restored.Id.ToString());}}catch{}
    return 1;
   }
+ }
+ static void CreateShortcut(){
+  try{
+   string folder=Environment.GetFolderPath(Environment.SpecialFolder.Programs);Directory.CreateDirectory(folder);
+   string link=Path.Combine(folder,"Hordas.lnk");if(File.Exists(link))return;
+   dynamic shell=Activator.CreateInstance(Type.GetTypeFromProgID("WScript.Shell"));dynamic shortcut=shell.CreateShortcut(link);
+   shortcut.TargetPath=target;shortcut.WorkingDirectory=root;shortcut.IconLocation=target+",0";shortcut.Save();
+  }catch{}
  }
  static int Fetch(string[] args) {
   string destination=args[2];

@@ -252,7 +252,7 @@ func _title() -> void:
  var libraries:=HBoxContainer.new();libraries.add_theme_constant_override("separation",8);actions.add_child(libraries)
  _button(libraries,"Coleção",Rect2(),func(): render("collection"))
  _button(libraries,"Bestiário",Rect2(),func():bestiary_return="title";render("bestiary"))
- _button(libraries,"Atualizações disponíveis" if game.updates!=null and game.updates.available() else "Atualizações",Rect2(),func():render("updates"))
+ _button(libraries,"Atualizações (nova)" if game.updates!=null and game.updates.available() else "Atualizações",Rect2(),func():render("updates"))
  var settings := HBoxContainer.new()
  settings.add_theme_constant_override("separation",8)
  actions.add_child(settings)
