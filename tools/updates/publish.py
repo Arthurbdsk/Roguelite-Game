@@ -35,7 +35,7 @@ else:
  signature=subprocess.check_output([str(toolchain/'sdk/build-tools/35.0.1/apksigner.bat'),'verify','--print-certs',str(artifact)],env=env,text=True)
  assert 'a2d917b419ab3da9572b72f1e0c825b56b800ef6ef011ed4108591b396449c05' in signature,'Original Android signature required'
 data={'schema':1,'expires':int(time.time())+90*86400,'platforms':{}}
-if a.publish and not a.previous:
+if not a.previous:
  try:
   previous=urllib.request.urlopen('https://raw.githubusercontent.com/Arthurbdsk/Roguelite-Game/codex/release-channel/stable.json',timeout=20).read()
   cached=root/'build/previous-update.json';cached.write_bytes(previous);a.previous=str(cached)
@@ -47,13 +47,13 @@ version=meta.get('mobile_version',meta.get('game_version'));identity=meta.get('c
 if not identity:raise SystemExit('Re-export with embedded-content identity metadata before publishing')
 tag='update-'+a.platform+'-'+version
 url='https://github.com/Arthurbdsk/Roguelite-Game/releases/download/'+tag+'/'+artifact.name
-data['platforms'][a.platform]={'version':version,'platform':a.platform,'size':artifact.stat().st_size,'sha256':hashlib.sha256(artifact.read_bytes()).hexdigest(),'url':url,'notes':Path(a.notes).read_text(encoding='utf-8'),'compatibility':identity,'protocol':2,'online_required':a.online_required}
+data['platforms'][a.platform]={'version':version,'platform':a.platform,'size':artifact.stat().st_size,'sha256':hashlib.sha256(artifact.read_bytes()).hexdigest(),'url':url,'notes':Path(a.notes).read_text(encoding='utf-8'),'compatibility':identity,'protocol':meta.get('protocol',2),'source_commit':meta.get('source_commit',meta.get('base_pc_commit','')),'online_required':a.online_required}
 for platform,record in data['platforms'].items():
  record['compatible_versions']=' / '.join(('PC' if name=='pc' else 'Android')+' '+other['version'] for name,other in data['platforms'].items() if other['compatibility']==record['compatibility'])
 payload=json.dumps(data,ensure_ascii=False,separators=(',',':')).encode();e={'payload':base64.b64encode(payload).decode(),'signature':base64.b64encode(key.sign(payload,padding.PKCS1v15(),hashes.SHA256())).decode()}
 out=root/'build/updates';out.mkdir(exist_ok=True);(out/'stable.json').write_text(json.dumps(e))
 if a.publish:
  subprocess.run(['gh','auth','status'],check=True)
- subprocess.run(['gh','release','create',tag,str(artifact),'--repo','Arthurbdsk/Roguelite-Game','--title',version,'--notes-file',a.notes],check=True)
+ subprocess.run(['gh','release','create',tag,str(artifact),'--repo','Arthurbdsk/Roguelite-Game','--target',data['platforms'][a.platform]['source_commit'],'--title',version,'--notes-file',a.notes],check=True)
  subprocess.run(['python',str(root/'tools/updates/promote.py'),str(out/'stable.json')],check=True)
 print(out/'stable.json')

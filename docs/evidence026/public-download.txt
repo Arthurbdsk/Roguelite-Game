@@ -1,0 +1,4 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+
+PUBLIC_MANIFEST_PASS A instalação anterior falhou e foi preservada. Você está na versão mais recente
+PUBLIC_WINDOWS_DOWNLOAD_PASS 0.26.2 bytes=114869304

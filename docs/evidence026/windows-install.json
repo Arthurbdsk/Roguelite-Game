@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "old": "0.26.1 QA",
+  "new": "0.26.2 QA",
+  "manifest_detected": true,
+  "download": "public HTTPS temporary test CDN",
+  "downloaded_by_game": true,
+  "authentication_and_hash": true,
+  "restart_health_ack": true,
+  "save_preserved": true,
+  "fixture_gold": 321,
+  "isolated_user_data": true
+}

@@ -5,7 +5,7 @@ func run():
  assert(OS.get_user_data_dir().contains("HordasUpdateQA"))
  assert(ProjectSettings.get_setting("application/config/version")=="0.26.1")
  g.profile.data.gold=321;g.profile.data.runs=7;g.profile.data.settings.volume=0;g.profile.data.settings.music=0;assert(g.profile.save())
- var u=g.updates;u.endpoint="https://paths-doctors-either-amended.trycloudflare.com/qa/stable.json";u.check()
+ var u=g.updates;u.endpoint="https://comm-sectors-vcr-representing.trycloudflare.com/qa/stable.json";u.check()
  while u.busy:await process_frame
  assert(u.available(),u.status);print("E2E_DETECTED ",u.release.version)
  u.download()

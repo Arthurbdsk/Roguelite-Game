@@ -1,0 +1,27 @@
+{
+  "device": "Android 15 API35 emulator",
+  "physical_device": false,
+  "results": [
+    {
+      "screen": "1080x2340",
+      "passed": true,
+      "hit_cases": 54,
+      "visuals": 24,
+      "identity": "0.26.2+6c3b0b65ed77fe5a"
+    },
+    {
+      "screen": "1080x1920",
+      "passed": true,
+      "hit_cases": 54,
+      "visuals": 24,
+      "identity": "0.26.2+6c3b0b65ed77fe5a"
+    },
+    {
+      "screen": "800x1280",
+      "passed": true,
+      "hit_cases": 54,
+      "visuals": 24,
+      "identity": "0.26.2+6c3b0b65ed77fe5a"
+    }
+  ]
+}

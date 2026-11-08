@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "old_version_code": 5,
+  "new_version_code": 6,
+  "downloaded_by_game": true,
+  "transport": "local HTTPS over adb reverse",
+  "official_installer_confirmed": true,
+  "unknown_source_permission_confirmed": true,
+  "signature_checked_by_app": true,
+  "save_bytes_preserved": true,
+  "fixture_gold": 321,
+  "device": "Android 15 API35 emulator",
+  "public_internet_update": false
+}

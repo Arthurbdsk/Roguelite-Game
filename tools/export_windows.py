@@ -181,6 +181,7 @@ def main():
     manifest = {
         "file": target.name,
         "game_version": "0.26.2",
+        "source_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
         "compatibility_id": content_identity["compatibility_id"],
         "protocol": content_identity["protocol"],
         "godot_version": VERSION,

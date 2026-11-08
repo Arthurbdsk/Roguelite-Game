@@ -1,0 +1,51 @@
+[
+  {
+    "test": "early253",
+    "passed": true,
+    "evidence": [
+      "EARLY253_PASS 54 actual noncritical arrow-hit cases over first five minutes"
+    ]
+  },
+  {
+    "test": "proportions026",
+    "passed": true,
+    "evidence": [
+      "PROPORTIONS026_PASS four aspects, logical framing, 23 species, player, uniform world scale"
+    ]
+  },
+  {
+    "test": "integrity026",
+    "passed": true,
+    "evidence": [
+      "INTEGRITY026_PASS authentic binary, corrupted/truncated rejected, cancel cleanup, required online routes updates, solo works, live game cannot install"
+    ]
+  },
+  {
+    "test": "updates253",
+    "passed": true,
+    "evidence": [
+      "UPDATES253_PASS signed manifest, invalid signature/schema, cancel, UI"
+    ]
+  },
+  {
+    "test": "health_fire24",
+    "passed": true,
+    "evidence": [
+      "HEALTH_FIRE24_PASS checks=221 failures=0"
+    ]
+  },
+  {
+    "test": "permanent_coop9",
+    "passed": true,
+    "evidence": [
+      "PERMANENT_COOP9_PASS challenge once, rank clamp, per-owner gold, all-down offer, host revive once, ally revive preserves benefit"
+    ]
+  },
+  {
+    "test": "network_foundation",
+    "passed": true,
+    "evidence": [
+      "NETWORK_FOUNDATION_PASS checks=66 failures=0"
+    ]
+  }
+]

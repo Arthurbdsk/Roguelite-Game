@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "expires": 1801932663,
+  "platforms": {
+    "pc": {
+      "version": "0.26.2",
+      "platform": "pc",
+      "size": 114869304,
+      "sha256": "820ab40246435ec1a30e85237a7cbd4c78ade1423ed78f0085b659d1b8ce8ac3",
+      "url": "https://github.com/Arthurbdsk/Roguelite-Game/releases/download/update-pc-0.26.2/Hordas-0.26.2.exe",
+      "notes": "Atualizações pelo menu do jogo, com download autenticado, instalação e recuperação no Windows e instalador oficial no Android.\nVida inicial calibrada para dois ou três acertos de Arco nível 1, sem crítico, no solo.\nAndroid usa as mesmas proporções do mundo, atributos e spawn do PC.\nCrossplay exige PC 0.26.2 ou Android 0.26.2-android.8, protocolo 2 e o mesmo conteúdo de gameplay.\n",
+      "compatibility": "0.26.2+6c3b0b65ed77fe5a",
+      "protocol": 2,
+      "source_commit": "01f01f009d398cd4c06208ba75533a14e52f2ca7",
+      "online_required": true,
+      "compatible_versions": "PC 0.26.2 / Android 0.26.2-android.8"
+    },
+    "android": {
+      "version": "0.26.2-android.8",
+      "platform": "android",
+      "size": 83838547,
+      "sha256": "b3dba51f53ca96ce07cf19f80116b611bdb415dc0a7804c8e0255fbf5ee94350",
+      "url": "https://github.com/Arthurbdsk/Roguelite-Game/releases/download/update-android-0.26.2-android.8/Hordas-Android-0.26.2-8.apk",
+      "notes": "Atualizações pelo menu do jogo, com download autenticado, instalação e recuperação no Windows e instalador oficial no Android.\nVida inicial calibrada para dois ou três acertos de Arco nível 1, sem crítico, no solo.\nAndroid usa as mesmas proporções do mundo, atributos e spawn do PC.\nCrossplay exige PC 0.26.2 ou Android 0.26.2-android.8, protocolo 2 e o mesmo conteúdo de gameplay.\n",
+      "compatibility": "0.26.2+6c3b0b65ed77fe5a",
+      "protocol": 2,
+      "source_commit": "3b01c9bddc392e944981a268e1e749b5cf82509c",
+      "online_required": true,
+      "compatible_versions": "PC 0.26.2 / Android 0.26.2-android.8"
+    }
+  }
+}

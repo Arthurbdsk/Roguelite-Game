@@ -1,0 +1,13 @@
+{
+  "file": "Hordas-0.26.2.exe",
+  "game_version": "0.26.2",
+  "compatibility_id": "0.26.2+6c3b0b65ed77fe5a",
+  "protocol": 2,
+  "godot_version": "4.7.2-stable",
+  "size_bytes": 114869304,
+  "sha256": "820ab40246435ec1a30e85237a7cbd4c78ade1423ed78f0085b659d1b8ce8ac3",
+  "embedded_pck": true,
+  "development_tools": false,
+  "smoke_test": "headless_120_frames_exit_0",
+  "source_commit": "01f01f009d398cd4c06208ba75533a14e52f2ca7"
+}

@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "failure": "new executable did not acknowledge expected version",
+  "rollback_restored_old_hash": true,
+  "old_reopened": true,
+  "save_preserved": true,
+  "exit": 1
+}
