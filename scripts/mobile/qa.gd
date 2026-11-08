@@ -189,9 +189,9 @@ func inspect_apk():
   var Objects=JavaClassWrapper.wrap("java.util.Objects")
   values.signatures_equal=Objects.deepEquals(values.incoming.certificates,values.current.certificates)
   check(values.signatures_equal,"original APK certificate matches installed signer")
-  JavaClassWrapper.wrap("java.lang.reflect.Array").call("set",values.current.certificates,0,JavaClassWrapper.wrap("android.content.pm.Signature").Signature("00"))
-  values.rejects_modified_signature=not Objects.deepEquals(values.incoming.certificates,values.current.certificates)
-  check(values.rejects_modified_signature,"different APK certificate rejected")
+  var other:=NativeAndroidPackage.read(pm.getPackageInfo("com.android.settings",64))
+  values.rejects_other_signer=not other.is_empty() and not Objects.deepEquals(values.incoming.certificates,other.certificates)
+  check(values.rejects_other_signer,"different installed certificate rejected")
   values.incoming.erase("certificates");values.current.erase("certificates")
  else:check(false,"native package fields available")
  values.passed=failed==0
