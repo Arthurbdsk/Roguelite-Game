@@ -1,6 +1,6 @@
 # PC 0.25.0 e atualização Android autorizada
 
-Entrega em validação. Este pedido autoriza uma atualização Android, que volta a ficar congelada depois dela. Nenhuma publicação em loja foi solicitada ou realizada.
+Entrega local concluída, com limitações de desempenho e validação física abaixo. Este pedido autoriza uma atualização Android, que volta a ficar congelada depois dela. Nenhuma publicação em loja foi solicitada ou realizada.
 
 ## Arte
 
@@ -34,4 +34,21 @@ Protocolo 2. O handshake compara uma identificação de conteúdo gerada de dado
 
 ## Validação e pendências
 
-Resultados finais, hashes, commits Android, assinatura e limites de testes serão registrados após a exportação e os ensaios mistos. O usuário fará os testes em aparelho físico e em redes distintas; emulador e travessia do relay público pela mesma conexão não comprovam esses cenários.
+Base de gameplay PC: `4276c18125e5a61f57022437569729a0afe577e0`. Android: `48775b4`, branch `codex/android-mobile`, worktree separado. Commits incorporados registrados em `data/mobile_build.json` no Android.
+
+Builds compatíveis: PC 0.25.0 e Android 0.25.0-android.2, protocolo 2, conteúdo `0.25.0+24d20eff97f22428`.
+
+- PC: `build/Hordas-0.25.0/Hordas-0.25.0.exe`; SHA-256 `e99bc71150f93164d67ce8ff9cc055dce148775ca97b735a927fb55f3c6b7fd5`.
+- Android: `../Hordas Android/build/Hordas-Android-0.25.0-2.apk`; SHA-256 `882e9524fd991a910884c9d90cdc62aa96d87d8e516563c468d7d455f4d08ab0`.
+
+40 suítes PC aprovadas, incluindo frequência, projéteis, Machado, escala, vida/fogo, designs, dados e interface do bestiário, perfis antigos e combate cooperativo. Evidências em `docs/pc25/validation.json`. Teste final do PCK público passou em diretório isolado, sem DEV, com 23 espécies e novos personagens. A tentativa inicial desse ensaio dentro da pasta do editor encontrou recursos DEV locais; a execução isolada confirmou o pacote público correto.
+
+Android: oito suítes de prévia, APK nativo, bestiário aberto por toque e instalação sobre versão anterior. Certificado original preservado, pacote `com.socialy.hordas.android`, código 2. Instalação de código 1 para 2 preservou o perfil byte por byte, e a reinstalação do APK final confirmou a preservação. Não foi usado um save pessoal de aparelho físico.
+
+Dois ensaios mistos finais passaram: três processos PC usando o PCK público mais Android nativo emulado com APK QA da mesma simulação, alternando host PC e host Android. Relay público `wss://hordas-relay.onrender.com`. Três mapas, seis armas por jogador, mortes com dono, bestiário, escolhas, reanimação por gesto mantido ADB, transformação de Demônio e recompensa persistida uma vez. Android cliente em segundo plano não interrompeu os demais. Conteúdo incompatível foi recusado pelo relay público; o cliente traduz a recusa para mensagem de compatibilidade PC/Android.
+
+Ambiente: Windows, Ryzen 5 5600/RX 6600, AVD Hordas_API35 Android 15/API35 x86_64, 2 CPU/2 GB, Compatibility/OpenGL ES, tela horizontal 2340×1080. Uma máquina e uma conexão de internet. O usuário fará os testes em aparelho físico e em redes distintas. Travessia do relay público nessa configuração não comprova esses cenários.
+
+Carga curta nativa Android: 200 inimigos, quatro donos simulados, seis armas e quatro passivas nível 8, nos três mapas. Foram medidos 5,42 / 5,85 / 6,00 FPS e p95 de 224 / 206 / 197 ms. A execução e as contagens passaram, mas o desempenho foi insuficiente. Esse ensaio usa 2 s de aquecimento, amostras de 5/5/10 s e desativa descobertas; não comprova estabilidade longa nem desempenho de celular. Não considerar desempenho mobile aprovado. Resultados brutos em `docs/pc25/crossplay/native-load-final.json`.
+
+Limites: não há migração de host ou reconexão automática. Suspender o Android anfitrião encerra a sala. Os novos designs originais estão integrados para avaliação dentro do jogo; não são assets oficiais Tiny RPG. Android volta a ficar congelado após esta entrega. Não houve publicação em lojas ou novas releases públicas.

@@ -10,14 +10,14 @@
     "test": "bestiary_data25",
     "passed": true,
     "evidence": [
-      "BESTIARY_DATA25_PASS checks=144 canonical stats, legacy saves, sightings, owner kills, pools, phases, dedup"
+      "BESTIARY_DATA25_PASS checks=150 canonical stats, legacy saves, sightings, owner kills, pools, phases, dedup"
     ]
   },
   {
     "test": "bestiary_ui25",
     "passed": true,
     "evidence": [
-      "BESTIARY_UI25_PASS checks=102 menus, unknowns, phases, animation, scroll, narrow layout and plain font"
+      "BESTIARY_UI25_PASS checks=105 menus, unknowns, phases, animation, scroll, narrow layout and plain font"
     ]
   },
   {

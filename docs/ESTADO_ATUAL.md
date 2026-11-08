@@ -1,6 +1,6 @@
 # Estado atual
 
-PC 0.25.0: novos Shadow/Carrasco, bestiário, estatísticas individuais e cooperativo com vida/velocidade do solo e geração reduzida em 20%. Consulte [o relatório](DESIGNS_BESTIARIO_CROSSPLAY_0_25.md). Executável: `build/Hordas-0.25.0/Hordas-0.25.0.exe`. Android está sendo atualizado por autorização expressa e voltará a ficar congelado após a entrega.
+PC 0.25.0: novos Shadow/Carrasco, bestiário, estatísticas individuais e cooperativo com vida/velocidade do solo e geração reduzida em 20%. Consulte [o relatório](DESIGNS_BESTIARIO_CROSSPLAY_0_25.md). Executável: `build/Hordas-0.25.0/Hordas-0.25.0.exe`. Android 0.25.0-android.2 entregue por autorização expressa e novamente congelado. Protocolo 2, conteúdo `0.25.0+24d20eff97f22428`. Performance sob carga no emulador foi insuficiente; aparelho real e redes distintas ficam para o usuário.
 
 O texto abaixo preserva o histórico dos envios anteriores, até a versão 0.9.0.
 
