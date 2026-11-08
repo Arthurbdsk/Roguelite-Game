@@ -26,6 +26,15 @@ func setup(owner):
  elif mode=="updates026":updates_test(request)
  elif mode=="early026":early_test()
  elif mode=="inspect_apk":inspect_apk()
+ elif mode=="scroll011":
+  var fixture=load("res://scripts/mobile/scroll_qa011.gd").new();add_child(fixture);fixture.setup(game,request)
+ elif mode=="visual011":
+  var fixture=load("res://scripts/mobile/visual_qa011.gd").new();var result:Dictionary=fixture.capture(game)
+  var reference:Dictionary=JSON.parse_string(FileAccess.get_file_as_string("res://data/mobile/pc_visual_reference.json"))
+  result.passed=JSON.parse_string(JSON.stringify(result.characters))==reference.characters;check(result.passed,"actual sprite pixels, frame bounds, offsets and colliders match released PC")
+  var f=FileAccess.open("user://visual011.json",FileAccess.WRITE);f.store_string(JSON.stringify(result));f.close();print("NATIVE_VISUAL011_"+("PASS" if result.passed else "FAIL"))
+  fixture.board(game);await get_tree().process_frame;await RenderingServer.frame_post_draw
+  get_viewport().get_texture().get_image().save_png("user://visual011.png")
  elif mode=="network":network(request)
  else:load_test(request)
 func load_test(request:Dictionary):

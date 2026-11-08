@@ -53,6 +53,7 @@ func render(interface,which:String,data:Dictionary)->bool:
   "endless_choice":endless()
   "mobile_privacy","mobile_terms":legal(which)
   _:return false
+ MobileScrolling.prepare(ui.menu)
  restore();return true
 func title():
  var v:=page("Hordas Android")

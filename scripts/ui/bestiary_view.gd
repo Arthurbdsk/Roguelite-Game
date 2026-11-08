@@ -71,6 +71,7 @@ func build():
  var detail_scroll:=scroll(row);detail_scroll.name="CreatureDetails";details=column(detail_scroll);details.name="CreatureSheet"
  if narrow:list_scroll.visible=not narrow_detail;detail_scroll.visible=narrow_detail
  detail()
+ if mobile():MobileScrolling.prepare(self)
 func detail():
  var counts:Dictionary=game.profile.bestiary_counts(selected);var known:bool=counts.seen>0
  var entry:Dictionary=EnemyCatalog.entry(game,selected,phase)

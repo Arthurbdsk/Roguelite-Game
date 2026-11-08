@@ -26,15 +26,10 @@ func setup(g,ui):
   if spec[0]=="Instalar atualização":install_button=b
  service.changed.connect(refresh);refresh()
  if OS.has_feature("android"):
-  set_process_input(true)
+  MobileScrolling.prepare(self)
 func refresh():
  var r:Dictionary=service.release
  info.text="Instalada: %s\nDisponível: %s\nDownload: %s MB\n%s\n\n%s\n\nMultiplayer: %s"%[service.installed(),r.get("version","não verificada"),str(int(r.get("size",0))/1048576),r.get("notes",""),service.status,r.get("compatible_versions","Use PC e Android com o mesmo conteúdo desta entrega.")]
  bar.value=service.progress;download_button.disabled=service.busy or not service.available();install_button.disabled=not service.install_ready
  install_button.text="Instalar atualização" if service.platform()=="android" else "Reiniciar e atualizar"
  if bootstrap_button!=null:bootstrap_button.disabled=not service.bootstrap_possible()
-
-func _input(event):
- if event is InputEventScreenDrag:
-  var scroll=get_child(0) as ScrollContainer
-  scroll.scroll_vertical-=int(event.relative.y)

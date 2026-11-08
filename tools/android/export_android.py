@@ -3,6 +3,7 @@ from pathlib import Path
 import argparse, hashlib, json, os, subprocess, sys
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
 from gameplay_manifest import check
+from check_visual_assets import check as check_visual_assets
 ROOT=Path(__file__).resolve().parents[2]
 parser=argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--android-request',action='store_true',help='Explicit Android work, required')
@@ -12,6 +13,7 @@ if not args.android_request:raise SystemExit('Android is frozen by default. An e
 branch=subprocess.check_output(['git','branch','--show-current'],cwd=ROOT,text=True).strip()
 if branch!='codex/android-mobile':raise SystemExit('Use the isolated codex/android-mobile worktree.')
 check(ROOT)
+check_visual_assets(ROOT)
 private=Path.home()/'.android/hordas-signing/signing.json'
 if not private.exists():raise SystemExit('Original signing configuration required outside the repository. Do not regenerate an update key.')
 signing=json.loads(private.read_text(encoding='utf8'))

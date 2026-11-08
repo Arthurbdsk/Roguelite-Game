@@ -1,6 +1,6 @@
 # Hordas Android
 
-Entrega atual 0.25.2-android.4, compatível com PC 0.25.2, protocolo 2, conteúdo 0.25.2+6ba5d9724f77d754. APK local build/Hordas-Android-0.25.2-4.apk. Instale por cima sem desinstalar para preservar o progresso.
+Android atual: 0.26.2-android.11. Rolagem por toque corrigida e sprites com as mesmas proporções do PC 0.26.2. [Correções, causa e testes](docs/CORRECAO_ANDROID_0_26_2_11.md). Manutenção somente sob pedido explícito; PC não foi alterado nesta entrega.
 
 Dano, vida, resistência e geração iguais ao PC. Removida a redução exclusiva de spawn no solo Android. Somente Orc comum e Soldado ficam 20% menores visualmente; demais criaturas voltaram ao tamanho do PC. [Correção, auditoria nativa e limitações](docs/ANDROID_0_25_4.md).
 

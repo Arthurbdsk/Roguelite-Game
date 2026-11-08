@@ -36,6 +36,7 @@ func make_keys():
   for letter in value:
    var character:String=letter.to_lower() if lower and not code_mode else letter
    key(row,character,func():append(character))
+ MobileScrolling.prepare(keys.get_parent())
 func append(character:String):
  if not is_instance_valid(field):close();return
  field.text=(field.text+character).left(field.max_length);field.caret_column=field.text.length();field.text_changed.emit(field.text);update_preview()
