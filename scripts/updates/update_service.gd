@@ -47,6 +47,7 @@ func prepare_user_install():
  install_ready=true;status="Instalação preparada em sua conta. Use Reiniciar e atualizar.";changed.emit()
 func check():
  if busy:return
+ request.timeout=30
  phase="manifest";busy=true;install_ready=false;status="Verificando atualização...";changed.emit();request.body_size_limit=262144;request.download_file=""
  if start_request(endpoint+("&" if endpoint.contains("?") else "?")+"check="+str(int(Time.get_unix_time_from_system())),262144,true)!=OK:fail("Sem conexão. Você pode jogar normalmente.")
 func fail(message:String):busy=false;pending_validation=false;install_ready=false;status=message;changed.emit()
@@ -88,6 +89,7 @@ func validate_download()->bool:
  return f.get_16()==0x5a4d if platform()=="pc" else f.get_32()==0x04034b50
 func download():
  if busy or not available():return
+ request.timeout=900
  var dir:=DirAccess.open("user://updates")
  if dir==null or dir.get_space_left()<int(release.size)*3:fail("Espaço insuficiente para baixar e manter uma cópia recuperável.");return
  pending_validation=false;install_ready=false;progress=0;busy=true;phase="download";status="Baixando atualização...";request.body_size_limit=int(release.size);request.download_file=path;changed.emit()
@@ -134,11 +136,11 @@ func install_android():
  if ProjectSettings.get_setting("updates/distribution","direct")!="direct":fail("Atualize pela loja onde instalou o jogo.");return
  if not Engine.has_singleton("AndroidRuntime"):fail("Instalador Android indisponível.");return
  var activity=Engine.get_singleton("AndroidRuntime").getActivity();var pm=activity.getPackageManager();var apk:=ProjectSettings.globalize_path(path)
- var incoming=pm.getPackageArchiveInfo(apk,64);var current=pm.getPackageInfo(activity.getPackageName(),64)
- if incoming==null or incoming.packageName!=current.packageName or incoming.signatures.size()!=current.signatures.size():fail("APK incompatível.");return
- if str(incoming.versionName)!=str(release.version) or int(incoming.versionCode)<int(current.versionCode):fail("O APK não corresponde a uma versão mais recente.");return
- for i in current.signatures.size():
-  if not current.signatures[i].equals(incoming.signatures[i]):fail("Assinatura do APK incompatível.");return
+ var incoming:=NativeAndroidPackage.read(pm.getPackageArchiveInfo(apk,64));var current:=NativeAndroidPackage.read(pm.getPackageInfo(activity.getPackageName(),64))
+ if incoming.is_empty() or current.is_empty() or incoming.package!=current.package:fail("APK incompatível ou metadados indisponíveis.");return
+ if incoming.version!=str(release.version) or incoming.code<current.code:fail("O APK não corresponde a uma versão mais recente.");return
+ var Objects=JavaClassWrapper.wrap("java.util.Objects")
+ if not Objects.deepEquals(incoming.certificates,current.certificates):fail("Assinatura do APK incompatível.");return
  var Intent=JavaClassWrapper.wrap("android.content.Intent");var Uri=JavaClassWrapper.wrap("android.net.Uri")
  var sdk=JavaClassWrapper.wrap("android.os.Build$VERSION")
  if int(sdk.SDK_INT)>=26 and not pm.canRequestPackageInstalls():

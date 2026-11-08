@@ -25,6 +25,7 @@ func setup(owner):
  elif mode=="parity252":parity_test()
  elif mode=="updates026":updates_test(request)
  elif mode=="early026":early_test()
+ elif mode=="inspect_apk":inspect_apk()
  elif mode=="network":network(request)
  else:load_test(request)
 func load_test(request:Dictionary):
@@ -180,3 +181,18 @@ func early_test():
   game.elapsed=0;game.state="running";var e=game.spawn_enemy(id,Vector2(1100,730));visuals[id]=e.sprite.get_parent().scale.x;check(e.sprite.get_parent().scale==Vector2.ONE,"PC proportions "+id);game.clear_run()
  var f=FileAccess.open("user://early026.json",FileAccess.WRITE);f.store_string(JSON.stringify({"passed":failed==0,"rows":rows,"visuals":visuals,"identity":GameCompatibility.identity()}));f.close();print("EARLY_ANDROID026_"+("PASS" if failed==0 else "FAIL"))
  game.show_title()
+func inspect_apk():
+ var activity=Engine.get_singleton("AndroidRuntime").getActivity();var pm=activity.getPackageManager()
+ var incoming=pm.getPackageArchiveInfo(OS.get_user_data_dir()+"/inspect.apk",64);var current=pm.getPackageInfo(activity.getPackageName(),64)
+ var values:Dictionary={"incoming":NativeAndroidPackage.read(incoming),"current":NativeAndroidPackage.read(current),"installed":game.updates.installed()}
+ if not values.incoming.is_empty() and not values.current.is_empty():
+  var Objects=JavaClassWrapper.wrap("java.util.Objects")
+  values.signatures_equal=Objects.deepEquals(values.incoming.certificates,values.current.certificates)
+  check(values.signatures_equal,"original APK certificate matches installed signer")
+  JavaClassWrapper.wrap("java.lang.reflect.Array").call("set",values.current.certificates,0,JavaClassWrapper.wrap("android.content.pm.Signature").Signature("00"))
+  values.rejects_modified_signature=not Objects.deepEquals(values.incoming.certificates,values.current.certificates)
+  check(values.rejects_modified_signature,"different APK certificate rejected")
+  values.incoming.erase("certificates");values.current.erase("certificates")
+ else:check(false,"native package fields available")
+ values.passed=failed==0
+ var f=FileAccess.open("user://apk-inspection.json",FileAccess.WRITE);f.store_string(JSON.stringify(values));f.close();print("APK_INSPECTION "+JSON.stringify(values));game.show_title()
