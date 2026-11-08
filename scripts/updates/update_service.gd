@@ -103,10 +103,12 @@ func install():
  if OS.create_process(folder+"Updater.exe",[folder+"request.json"])<=0:fail("Não foi possível iniciar o atualizador.");return
  game.bestiary.flush();game.profile.save();get_tree().quit()
 func install_android():
+ if ProjectSettings.get_setting("updates/distribution","direct")!="direct":fail("Atualize pela loja onde instalou o jogo.");return
  if not Engine.has_singleton("AndroidRuntime"):fail("Instalador Android indisponível.");return
  var activity=Engine.get_singleton("AndroidRuntime").getActivity();var pm=activity.getPackageManager();var apk:=ProjectSettings.globalize_path(path)
  var incoming=pm.getPackageArchiveInfo(apk,64);var current=pm.getPackageInfo(activity.getPackageName(),64)
  if incoming==null or incoming.packageName!=current.packageName or incoming.signatures.size()!=current.signatures.size():fail("APK incompatível.");return
+ if str(incoming.versionName)!=str(release.version) or int(incoming.versionCode)<=int(current.versionCode):fail("O APK não corresponde a uma versão mais recente.");return
  for i in current.signatures.size():
   if not current.signatures[i].equals(incoming.signatures[i]):fail("Assinatura do APK incompatível.");return
  var Intent=JavaClassWrapper.wrap("android.content.Intent");var Uri=JavaClassWrapper.wrap("android.net.Uri")

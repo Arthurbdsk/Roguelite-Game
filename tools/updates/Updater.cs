@@ -54,8 +54,9 @@ class Updater {
    using(var response=(HttpWebResponse)request.GetResponse()) {
     if(response.ResponseUri.Scheme!="https"||response.ContentLength>limit)throw new Exception("Resposta invalida");
     using(var input=response.GetResponseStream())using(var output=File.Create(destination)){
-     byte[] buffer=new byte[65536];int read;long total=0;
-     while((read=input.Read(buffer,0,buffer.Length))>0){total+=read;if(total>limit)throw new Exception("Arquivo grande demais");output.Write(buffer,0,read);File.WriteAllText(destination+".progress",total.ToString());}
+     byte[] buffer=new byte[65536];int read;long total=0;var timer=Stopwatch.StartNew();long lastProgress=0;
+     while((read=input.Read(buffer,0,buffer.Length))>0){total+=read;if(total>limit)throw new Exception("Arquivo grande demais");output.Write(buffer,0,read);if(timer.ElapsedMilliseconds-lastProgress>=250){File.WriteAllText(destination+".progress",total.ToString());lastProgress=timer.ElapsedMilliseconds;}}
+     File.WriteAllText(destination+".progress",total.ToString());
     }
    }
    File.WriteAllText(destination+".result","200");return 0;
