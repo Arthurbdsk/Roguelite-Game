@@ -1,0 +1,34 @@
+[
+  {
+    "test": "mobile_touch",
+    "passed": true
+  },
+  {
+    "test": "mobile_keyboard",
+    "passed": true
+  },
+  {
+    "test": "mobile_lifecycle",
+    "passed": true
+  },
+  {
+    "test": "mobile_ui",
+    "passed": true
+  },
+  {
+    "test": "bestiary_data25",
+    "passed": true
+  },
+  {
+    "test": "multiplayer25",
+    "passed": true
+  },
+  {
+    "test": "network_foundation",
+    "passed": true
+  },
+  {
+    "test": "permanent_coop9",
+    "passed": true
+  }
+]

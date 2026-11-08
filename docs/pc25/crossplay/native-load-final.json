@@ -1,0 +1,50 @@
+{
+  "engine": "4.7.2-stable (official)",
+  "failures": 0,
+  "passed": true,
+  "results": [
+    {
+      "draw_calls": 569.0,
+      "enemies": 200,
+      "fps": 5.41637888159235,
+      "map": "courtyard",
+      "median_ms": 184.216003417969,
+      "memory_bytes": 0,
+      "nodes": 728.0,
+      "p95_ms": 224.082992553711,
+      "p99_ms": 236.923004150391,
+      "players": 4,
+      "samples": 26,
+      "seconds": 4.800255
+    },
+    {
+      "draw_calls": 555.0,
+      "enemies": 200,
+      "fps": 5.8519736986337,
+      "map": "library",
+      "median_ms": 169.964996337891,
+      "memory_bytes": 0,
+      "nodes": 760.0,
+      "p95_ms": 206.279998779297,
+      "p99_ms": 219.264999389648,
+      "players": 4,
+      "samples": 29,
+      "seconds": 4.955593
+    },
+    {
+      "draw_calls": 538.0,
+      "enemies": 200,
+      "fps": 5.99684365368867,
+      "map": "fields",
+      "median_ms": 168.397003173828,
+      "memory_bytes": 0,
+      "nodes": 886.0,
+      "p95_ms": 196.981994628906,
+      "p99_ms": 208.559005737305,
+      "players": 4,
+      "samples": 59,
+      "seconds": 9.838509
+    }
+  ],
+  "scenario": "Seed18018, 200 enemies, four simulated actors, six weapons8, four passives8, default mobile visuals. Emulator only."
+}

@@ -98,11 +98,15 @@ func _ready() -> void:
 		sprite.position.y = -float(sprite.texture.get_height()) * 0.5 + 4
 	if elite and tiny_kind.is_empty():
 		sprite.scale = Vector2(1.2, 1.2)
-	add_child(sprite)
+	var visual_root:=Node2D.new()
+	visual_root.name="EnemyVisual"
+	visual_root.scale=Vector2.ONE*PlatformTuning.enemy_visual_multiplier()
+	add_child(visual_root)
+	visual_root.add_child(sprite)
 	sprite.scale*=1.1
 	sprite.position*=1.1
 	if data.damage_resistance>0 and not tiny_kind.begins_with("original_"):
-		var badge:=Sprite2D.new();badge.texture=load(GameIcons.path("permanent:armor","res://assets/permanent/armor.png"));badge.texture_filter=CanvasItem.TEXTURE_FILTER_NEAREST;badge.position=Vector2(0,-28 if not tiny_kind.is_empty() else -sprite.texture.get_height()-8);badge.scale=Vector2.ONE*10/badge.texture.get_width();add_child(badge)
+		var badge:=Sprite2D.new();badge.texture=load(GameIcons.path("permanent:armor","res://assets/permanent/armor.png"));badge.texture_filter=CanvasItem.TEXTURE_FILTER_NEAREST;badge.position=Vector2(0,-28 if not tiny_kind.is_empty() else -sprite.texture.get_height()-8);badge.scale=Vector2.ONE*10/badge.texture.get_width();visual_root.add_child(badge)
 
 func tick(delta: float) -> void:
 	if not alive:
@@ -264,6 +268,7 @@ func _draw() -> void:
 	if hp < max_hp and data.behavior != "boss":
 		var bar_y:float=-sprite.texture.get_height()+1 if tiny_kind.is_empty() else -22
 		if tiny_kind.begins_with("original_"):bar_y=-float(TinyCharacters.data(tiny_kind).get("visible_height",18))*sprite.scale.y-6
+		bar_y*=PlatformTuning.enemy_visual_multiplier()
 		draw_rect(Rect2(-11,bar_y,22,2), Color("12191d"))
 		draw_rect(Rect2(-11,bar_y,22 * hp / max_hp,2), Color("b65f42"))
 

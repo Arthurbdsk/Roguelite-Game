@@ -1,6 +1,6 @@
 # Estado atual
 
-PC 0.25.0: novos Shadow/Carrasco, bestiário, estatísticas individuais e cooperativo com vida/velocidade do solo e geração reduzida em 20%. Consulte [o relatório](DESIGNS_BESTIARIO_CROSSPLAY_0_25.md). Executável: `build/Hordas-0.25.0/Hordas-0.25.0.exe`. Android está sendo atualizado por autorização expressa e voltará a ficar congelado após a entrega.
+PC 0.25.1 e Android 0.25.1-android.3: coop com dano 1,7x e quantidade 2x para quatro jogadores, progressão linear para dois e três, vida/velocidade do solo. Android solo com geração contínua 40% menor e inimigos visualmente 20% menores. Solo PC e regras de colisão online preservados. Protocolo 2, conteúdo `0.25.1+f69263393c14aee1`. [Entrega e testes](BALANCEAMENTO_0_25_1.md). Android volta a ficar congelado após esta atualização autorizada. Testes em celular físico e redes distintas ficam com o usuário.
 
 O texto abaixo preserva o histórico dos envios anteriores, até a versão 0.9.0.
 

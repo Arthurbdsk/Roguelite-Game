@@ -8,7 +8,7 @@ const exec=promisify(execFile),root=resolve(dirname(fileURLToPath(import.meta.ur
 if(!process.argv.includes('--android-request'))throw Error('Explicit Android request required');
 const androidHost=process.argv.includes('--android-host'),session=String(Date.now()),label=androidHost?'android-host':'pc-host',out=resolve(root,'build/update25');await mkdir(out,{recursive:true});
 const adb=resolve(process.env.USERPROFILE,'AppData/Local/HordasAndroidToolchain/sdk/platform-tools/adb.exe'),godot=resolve(process.env.USERPROFILE,'Downloads/Godot_v4.7.2-stable_win64_console.exe');
-const pc=resolve(root,'../Jogo Teste/build/Hordas-0.25.0/Hordas-0.25.0.exe'),harness=resolve(root,'tests/crossplay25_pc.gd'),fixture=resolve(root,'scripts/mobile/crossplay25_qa.gd'),roomFile=resolve(out,`room-${session}.json`);
+const pc=resolve(root,'../Jogo Teste/build/Hordas-0.25.1/Hordas-0.25.1.exe'),harness=resolve(root,'tests/crossplay25_pc.gd'),fixture=resolve(root,'scripts/mobile/crossplay25_qa.gd'),roomFile=resolve(out,`room-${session}.json`);
 const children=[],tasks=[];let touched=false,backgrounded=false;
 const delay=ms=>new Promise(r=>setTimeout(r,ms));
 const a=(args,options={})=>exec(adb,['-s','emulator-5554',...args],{timeout:30000,maxBuffer:16*1024*1024,...options});

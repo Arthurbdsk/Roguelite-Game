@@ -1,6 +1,10 @@
 extends Node
 class Accepted extends RoomConnection:
  func send_message(_packet:Dictionary)->bool:return true
+class Meter extends HordeDirector:
+ func spawn(_id:String,_elite:bool=false)->bool:
+  total_spawned+=1
+  return true
 var game
 var mode:String="load"
 var failed:int=0
@@ -17,6 +21,7 @@ func setup(owner):
  print("ANDROID_QA_READY "+JSON.stringify({"mode":mode,"user_dir":OS.get_user_data_dir(),"compatibility":ProjectSettings.get_setting("network/compatible_game_version")}))
  if mode=="cross25":
   var fixture=load("res://scripts/mobile/crossplay25_qa.gd").new();add_child(fixture);fixture.setup(game,request)
+ elif mode=="balance251":balance_test()
  elif mode=="network":network(request)
  else:load_test(request)
 func load_test(request:Dictionary):
@@ -87,3 +92,38 @@ func receive(packet:Dictionary):
     "background":game.mobile_suspend(true);print("ANDROID_QA_BACKGROUND_LEFT")
 func release_revive_later():
  await get_tree().create_timer(6.5).timeout;game.mobile.revive_held=false
+
+func balance_test():
+ game.set_physics_process(false);game.start_run()
+ check(OS.has_feature("android"),"native Android")
+ check(is_equal_approx(game.director.rate(),54.0),"solo 54 enemies per minute")
+ var meter=Meter.new();meter.setup(game);meter.cooldown=0
+ for i in 3600:meter.tick(1.0/60)
+ check(absi(meter.total_spawned-54)<=1,"real director debt produces 54 enemies in simulated minute")
+ var species:int=0
+ for id in EnemyCatalog.ids(game):
+  var e=game.spawn_enemy(id,Vector2(1100,730));check(e!=null,id)
+  if e==null:continue
+  species+=1
+  check(is_equal_approx(e.sprite.get_parent().scale.x,.8),"smaller "+id)
+  check(is_equal_approx(e.get_child(0).shape.radius,e.radius),"collision "+id)
+  if e is Devourer:e.meals=3;e.growth_visual();check(is_equal_approx(e.sprite.get_parent().scale.x,.8),"growth keeps visual multiplier")
+  if e is HordeBoss:e.form=2;e.apply_visual_form();check(is_equal_approx(e.sprite.get_parent().scale.x,.8),"boss phase keeps visual multiplier")
+  game.clear_run();game.state="running"
+ game.coop.active=true;game.coop.hosting=true
+ var scales:Array=[]
+ for count in [2,3,4]:
+  game.coop.initial_size=count
+  var scale:Dictionary=game.enemy_scale();scales.append(scale)
+  check(is_equal_approx(scale.damage,1+(.7/3)*(count-1)),"cooperative damage")
+  check(is_equal_approx(game.director.rate(),90*(1+(count-1)/3.0)),"online never receives solo reduction")
+ game.coop.active=false
+ game.state="running"
+ var i:int=0
+ for id in ["ghoul","shadow","executioner","devourer"]:
+  var e=game.spawn_enemy(id,game.player.position+Vector2(-120+i*80,-35));i+=1
+ await RenderingServer.frame_post_draw
+ get_viewport().get_texture().get_image().save_png("user://balance251.png")
+ var result:Dictionary={"passed":failed==0,"failures":failed,"android_native":true,"species":species,"simulated_minute_spawns":meter.total_spawned,"solo_rate":54,"visual_multiplier":.8,"coop_scales":scales,"identity":GameCompatibility.identity()}
+ var f=FileAccess.open("user://balance251-result.json",FileAccess.WRITE);f.store_string(JSON.stringify(result));f.close()
+ print("ANDROID_BALANCE251_"+("PASS" if failed==0 else "FAIL")+" "+JSON.stringify(result))

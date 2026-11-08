@@ -1,12 +1,10 @@
 # Hordas Android
 
-Entrega 0.25.0-android.2, baseada no PC 0.25.0, commit `4276c18125e5a61f57022437569729a0afe577e0`. APK local: `build/Hordas-Android-0.25.0-2.apk`. Instale por cima da versão anterior, sem desinstalar, para manter o progresso.
+Entrega atual 0.25.1-android.3, compatível com PC 0.25.1, protocolo 2, conteúdo 0.25.1+f69263393c14aee1. Arquivo local: build/Hordas-Android-0.25.1-3.apk. Instale por cima da versão anterior, sem desinstalar, para preservar o progresso.
 
-Compatível com o PC desta entrega, protocolo 2 e conteúdo `0.25.0+24d20eff97f22428`. Inclui Shadow e Carrasco novos, bestiário e multiplayer com vida/velocidade do solo e 20% menos geração total. Use joystick e os botões de interação à direita. Nome e código podem ser preenchidos pelo teclado de toque.
+Coop com quatro jogadores: 1,7 vezes o dano e 2 vezes a geração, vida/velocidade do solo. Android solo com 40% menos geração contínua e inimigos 20% menores visualmente. PC solo preservado. [Entrega, testes e limites](docs/ANDROID_0_25_3.md).
 
-[Entrega, testes e limitações](docs/ANDROID_0_25_2.md). O emulador apresentou desempenho insuficiente sob carga de 200 inimigos e quatro jogadores com build máxima. Aparelho real e redes distintas serão testados pelo usuário. Não há publicação nova em lojas ou GitHub Releases.
-
-Android volta a ficar congelado. [Política de atualização sob demanda](docs/ANDROID_POLICY.md). Exportação manual exclusivamente autorizada: `python tools/android/export_android.py --android-request`. A chave original fica fora do repositório; APK QA é separado e não deve ser distribuído como jogo público.
+Android volta a ficar congelado. [Política de manutenção](docs/ANDROID_POLICY.md). Não houve publicação em loja ou GitHub Releases. Exportação manual somente por pedido autorizado, via python tools/android/export_android.py --android-request. Chaves fora do repositório; o APK QA separado não é a entrega pública.
 
 ## Histórico da base de PC
 
