@@ -3,5 +3,9 @@
   "platforms": [
     "android"
   ],
-  "request": "authorized-2026-11-08-0262-android10"
+  "request": "authorized-2026-11-08-0262-final-retire-experiments",
+  "retire_android_revisions": [
+    7,
+    8
+  ]
 }
