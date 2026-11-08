@@ -1,6 +1,6 @@
 # Hordas
 
-Versão atual PC 0.25.1: cooperativo com até 1,7 vezes o dano e 2 vezes a geração de inimigos com quatro jogadores. Vida e velocidade do solo preservadas. Executável `build/Hordas-0.25.1/Hordas-0.25.1.exe`. Android 0.25.1-android.3 compatível, protocolo 2, conteúdo `0.25.1+f69263393c14aee1`. [Ajustes e validação](docs/BALANCEAMENTO_0_25_1.md).
+Versão atual PC 0.25.2, compatível com Android 0.25.2-android.4. Armas, dano, vida, resistência e geração iguais entre plataformas, conferidos em execução. Somente Orc comum e Soldado ficam menores visualmente no Android. Executável build/Hordas-0.25.2/Hordas-0.25.2.exe. [Correção e testes](docs/PARIDADE_0_25_2.md).
 
 Os registros abaixo descrevem entregas anteriores.
 
