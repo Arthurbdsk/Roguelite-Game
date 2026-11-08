@@ -8,10 +8,10 @@ func run():
  g.coop.connection.queue_free();g.coop.connection=AcceptedConnection.new();g.coop.add_child(g.coop.connection);g.coop.connection.peer_id="a";g.coop.connection.host_id="a";g.coop.hosting=true
  g.coop.begin({"run":"upgrades9","challenge":5,"players":[{"id":"a","name":"A","skills":{}},{"id":"b","name":"B","skills":{"damage":999,"experience":5,"gold":1,"revive":1}},{"id":"c","name":"C","skills":{}},{"id":"d","name":"D","skills":{}}]})
  g.director.phase="complete"
- var s:Dictionary=g.enemy_scale();assert(is_equal_approx(s.health,1.25));assert(is_equal_approx(s.damage,2.5*1.25));assert(is_equal_approx(s.count,2.72*1.25));assert(is_equal_approx(s.speed,1))
+ var s:Dictionary=g.enemy_scale();assert(is_equal_approx(s.health,1.25));assert(is_equal_approx(s.damage,1.7*1.25));assert(is_equal_approx(s.count,2*1.25));assert(is_equal_approx(s.speed,1))
  var count:int=0
  for amount in g.wave_composition({"ghoul":12}).values():count+=amount
- assert(count==41)
+ assert(count==30)
  assert(g.coop.actors.b.mastery.damage_multiplier==1.25)
  for i in 20:g.coop.on_gold(1)
  assert(g.coop.actors.a.mastery.gold_bonus==5 and g.coop.actors.b.mastery.gold_bonus==1)

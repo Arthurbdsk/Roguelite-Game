@@ -2,10 +2,10 @@ class_name CoopRules
 extends Resource
 
 @export var health_bonus: float = 0.0
-@export var damage_bonus: float = 0.5
+@export var damage_bonus: float = 0.7 / 3.0
 @export var speed_bonus: float = 0.0
-@export var count_bonus: float = 0.8
-@export var multiplayer_spawn_multiplier:float=0.8
+@export var count_bonus: float = 1.0 / 3.0
+@export var multiplayer_spawn_multiplier:float=1.0
 @export var revive_seconds: float = 5
 @export var revive_range: float = 34
 @export var revive_health: float = 0.4

@@ -5,9 +5,9 @@
 [resource]
 script = ExtResource("1")
 health_bonus = 0.0
-damage_bonus = 0.5
+damage_bonus = 0.2333333333333333
 speed_bonus = 0.0
-count_bonus = 0.8
+count_bonus = 0.3333333333333333
 revive_seconds = 5.0
 revive_range = 34.0
 revive_health = 0.4

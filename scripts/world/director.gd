@@ -42,7 +42,7 @@ func composition()->Dictionary:
    weights[v.base]-=portion;weights[id]=portion
  return weights
 func rate()->float:
- return game.balance.continuous_per_minute*(1+game.balance.continuous_stage_rate*game.horde_progress.stage())*game.enemy_scale().count
+ return game.balance.continuous_per_minute*(1+game.balance.continuous_stage_rate*game.horde_progress.stage())*game.enemy_scale().count*PlatformTuning.solo_spawn_multiplier(game)
 func draw_species()->String:
  var weights:Dictionary=composition();var total:float=0
  for weight in weights.values():total+=weight
