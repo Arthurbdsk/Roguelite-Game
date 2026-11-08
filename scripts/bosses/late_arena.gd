@@ -31,9 +31,11 @@ func begin_encounter(id:String)->bool:
  game.announce(active_boss.data.title,3)
  return true
 func damage(kind:String,boss)->float:
- if boss.data.id=="guardian":return float(game.campaign.config.guardian_damage)*game.enemy_scale().damage
- var base:float=game.boss_balance.demon_charge_damage if kind=="dash" else (game.boss_balance.fire_damage if kind=="fire" else game.boss_balance.lightning_damage)
- return base*game.boss_balance.second_damage_multiplier*float(game.campaign.config.horror_damage_ratio_to_demon_phase2)*game.enemy_scale().damage
+ return base_damage(game,boss.data.id,kind)*game.enemy_scale().damage
+static func base_damage(world,species:String,kind:String)->float:
+ if species=="guardian":return float(world.campaign.config.guardian_damage)
+ var base:float=world.boss_balance.demon_charge_damage if kind=="dash" else (world.boss_balance.fire_damage if kind=="fire" else world.boss_balance.lightning_damage)
+ return base*world.boss_balance.second_damage_multiplier*float(world.campaign.config.horror_damage_ratio_to_demon_phase2)
 func clear_attacks(boss):
  patterns.clear_owner(boss.serial)
  areas=areas.filter(func(a):return a.owner!=boss.serial);shots=shots.filter(func(s):return s.owner!=boss.serial)

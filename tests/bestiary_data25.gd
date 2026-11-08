@@ -16,6 +16,8 @@ func run():
   check(is_equal_approx(e.data.damage_resistance,entry.reduction),"catalog matches reduction "+id)
   for phase in entry.phases.size():
    var variant:Dictionary=EnemyCatalog.entry(g,id,phase);check(variant.hp>0 and variant.speed>=0 and not variant.attacks.is_empty(),"real phase attributes "+id)
+   if id=="demon":check(("ring" in variant.powers)==(phase==3),"Demon ring only belongs to its second form")
+   if id=="horror":check(("summon" in variant.powers)==(phase==0) and ("crystals" in variant.powers)==(phase==1),"Horror phase powers match combat cycle")
    check(EnemyCatalog.preview(g,id,phase).texture!=null,"preview available "+id)
   g.clear_run();g.state="running"
  g.profile.data.bestiary_stats.clear();g.bestiary.begin("solo-test")
