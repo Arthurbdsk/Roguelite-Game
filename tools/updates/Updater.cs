@@ -31,6 +31,7 @@ class Updater {
    try {var old=Process.GetProcessById(Convert.ToInt32(r["pid"]));if(!old.WaitForExit(60000))throw new Exception("Jogo ainda aberto");}catch(ArgumentException){}
    Directory.CreateDirectory(root);
    foreach(var other in Process.GetProcessesByName("Hordas")){try{if(!other.HasExited&&String.Equals(other.MainModule.FileName,target,StringComparison.OrdinalIgnoreCase))throw new IOException("Feche as outras instancias do jogo antes de atualizar");}catch(System.ComponentModel.Win32Exception){}}
+   File.WriteAllText(Path.Combine(work,"result.txt"),"APPLYING");
    if(File.Exists(target))File.Copy(target,backup,true);else File.Copy((string)r["old"],backup,true);
    string next=Path.Combine(root,"Hordas.next.exe");File.Copy(download,next,true);
    if(File.Exists(target))File.Replace(next,target,null);else File.Move(next,target);
