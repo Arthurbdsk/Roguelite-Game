@@ -34,3 +34,10 @@ if result.returncode==0:body['sha']=json.loads(result.stdout)['sha']
 (work/'put.json').write_text(json.dumps(body))
 subprocess.run(['gh','api','repos/'+repo+'/contents/stable.json','-X','PUT','--input',str(work/'put.json')],check=True)
 print('SIGNED_CHANNEL_PUBLISHED')
+
+for revision in request.get('retire_android_revisions',[]):
+ assert revision in [7,8]
+ tag='update-android-0.26.2-android.'+str(revision)
+ note=work/('retired-'+str(revision)+'.txt')
+ note.write_text('Revisao experimental substituida. A checagem nativa do instalador foi corrigida na revisao final 10. Instale o APK final sobre esta versao, sem desinstalar, para preservar o progresso. Use a aba Atualizacoes a partir da versao final.\nhttps://github.com/'+repo+'/releases/tag/update-android-0.26.2-android.10')
+ subprocess.run(['gh','release','edit',tag,'--prerelease','--title','Experimental substituida: Android 0.26.2 revisao '+str(revision),'--notes-file',str(note)],check=True)
