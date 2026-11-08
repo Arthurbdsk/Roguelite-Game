@@ -19,7 +19,8 @@ if not Path(signing['keystore']).is_file():raise SystemExit('Original keystore i
 env={**os.environ,'GODOT_ANDROID_KEYSTORE_RELEASE_PATH':signing['keystore'],'GODOT_ANDROID_KEYSTORE_RELEASE_USER':signing['alias'],'GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD':signing['password']}
 base=Path.home()/'AppData/Local/HordasAndroidToolchain'
 java=next((base/'java').iterdir());env['JAVA_HOME']=str(java)
-target=ROOT/'build'/('Hordas-Android-0.26.2-7'+('-QA' if args.qa else '')+'.apk')
+build_info=json.loads((ROOT/'data/mobile_build.json').read_text(encoding='utf8'))
+target=ROOT/'build'/('Hordas-Android-'+build_info['base_pc_version']+'-'+str(build_info['android_version_code'])+('-QA' if args.qa else '')+'.apk')
 target.parent.mkdir(exist_ok=True)
 godot=Path.home()/'Downloads/Godot_v4.7.2-stable_win64_console.exe'
 for p in ['assets/tiny_rpg/soldier.png','assets/tiny_rpg/orc.png','assets/fonts/AurusenthialGothic.ttf']:
@@ -33,6 +34,6 @@ verify=subprocess.run([str(base/'sdk/build-tools/35.0.1/apksigner.bat'),'verify'
 if verify.returncode:raise SystemExit('APK signature verification failed: '+verify.stderr)
 (ROOT/'build'/('android-signature-qa.txt' if args.qa else 'android-signature.txt')).write_text(verify.stdout,encoding='utf8')
 meta=json.loads((ROOT/'data/mobile_build.json').read_text(encoding='utf8'))
-meta.update({'file':target.name,'size_bytes':target.stat().st_size,'sha256':hashlib.sha256(target.read_bytes()).hexdigest(),'qa':args.qa,'signature_verified':True,'application_id':'com.socialy.hordas.qa' if args.qa else 'com.socialy.hordas.android'})
+meta.update({'file':target.name,'source_commit':subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),'size_bytes':target.stat().st_size,'sha256':hashlib.sha256(target.read_bytes()).hexdigest(),'qa':args.qa,'signature_verified':True,'application_id':'com.socialy.hordas.qa' if args.qa else 'com.socialy.hordas.android'})
 target.with_suffix('.json').write_text(json.dumps(meta,indent=2),encoding='utf8')
 print(json.dumps(meta,indent=2))

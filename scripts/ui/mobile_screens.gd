@@ -56,7 +56,7 @@ func render(interface,which:String,data:Dictionary)->bool:
  restore();return true
 func title():
  var v:=page("Hordas Android")
- text(v,"Android %s | Base PC 0.26.1 | Rede 2 | Ouro: %d"%[ProjectSettings.get_setting("application/config/version"),game.profile.data.gold],13)
+ text(v,"Android %s | Base PC %s | Rede %d | Ouro: %d"%[ProjectSettings.get_setting("application/config/version"),GameCompatibility.identity().get_slice("+",0),GameCompatibility.PROTOCOL,game.profile.data.gold],13)
  var grid:=GridContainer.new();grid.columns=2;grid.add_theme_constant_override("h_separation",10);grid.add_theme_constant_override("v_separation",8);grid.size_flags_vertical=Control.SIZE_EXPAND_FILL;v.add_child(grid)
  button(grid,"Jogar",game.open_map_select)
  button(grid,"Cooperativo online",game.open_online)
