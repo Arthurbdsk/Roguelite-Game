@@ -1,0 +1,49 @@
+{
+  "passed": true,
+  "device": "Android 15 API35 emulator",
+  "input": "real Android DOWN/MOVE/UP and new tap",
+  "results": [
+    {
+      "blocked": false,
+      "choices": 0,
+      "contacts": 0,
+      "context": "solo",
+      "joystick": [
+        438,
+        846
+      ],
+      "levels": 2,
+      "passed": true,
+      "phase": "complete",
+      "screen": "running"
+    },
+    {
+      "blocked": false,
+      "choices": 0,
+      "contacts": 0,
+      "context": "host",
+      "joystick": [
+        438,
+        846
+      ],
+      "levels": 2,
+      "passed": true,
+      "phase": "complete",
+      "screen": "running"
+    },
+    {
+      "blocked": false,
+      "choices": 1,
+      "contacts": 0,
+      "context": "client",
+      "joystick": [
+        438,
+        846
+      ],
+      "levels": 1,
+      "passed": true,
+      "phase": "complete",
+      "screen": "running"
+    }
+  ]
+}

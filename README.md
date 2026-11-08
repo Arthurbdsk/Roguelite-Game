@@ -1,6 +1,6 @@
 # Hordas Android
 
-Android atual: 0.26.2-android.11. Rolagem por toque corrigida e sprites com as mesmas proporções do PC 0.26.2. [Correções, causa e testes](docs/CORRECAO_ANDROID_0_26_2_11.md). Manutenção somente sob pedido explícito; PC não foi alterado nesta entrega.
+Android atual: 0.26.2-android.12. A escolha de melhoria aguarda soltar os dedos e exige um toque novo. Rolagem e proporções do PC mantidas. [Correção e testes](docs/CORRECAO_ANDROID_0_26_2_12.md). PC não alterado.
 
 Dano, vida, resistência e geração iguais ao PC. Removida a redução exclusiva de spawn no solo Android. Somente Orc comum e Soldado ficam 20% menores visualmente; demais criaturas voltaram ao tamanho do PC. [Correção, auditoria nativa e limitações](docs/ANDROID_0_25_4.md).
 

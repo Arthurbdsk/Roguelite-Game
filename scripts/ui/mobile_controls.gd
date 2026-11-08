@@ -1,5 +1,6 @@
 class_name MobileControls
 extends CanvasLayer
+signal choice_input_changed
 
 class Surface extends Control:
  var controls
@@ -19,6 +20,35 @@ var stick_radius:float=44
 var buttons:Dictionary={}
 var available:Dictionary={}
 var context_clock:float=0
+var contacts:Dictionary={}
+var mouse_down:bool=false
+var accept_down:bool=false
+var choice_active:bool=false
+var choice_blocked:bool=false
+var choice_epoch:int=0
+func enter_screen(which:String):
+ if which!="upgrading" and not choice_active:return
+ choice_epoch+=1;choice_active=which=="upgrading"
+ choice_blocked=choice_active and (not contacts.is_empty() or mouse_down or accept_down)
+ choice_input_changed.emit()
+func cancel_contacts():
+ contacts.clear();mouse_down=false;accept_down=false;choice_blocked=false;reset();choice_input_changed.emit()
+func choice_barrier(event:InputEvent)->bool:
+ var was_blocked:bool=choice_blocked
+ if event is InputEventScreenTouch:
+  if event.pressed and not event.canceled:contacts[event.index]=true
+  else:contacts.erase(event.index)
+ elif event is InputEventMouseButton and event.button_index==MOUSE_BUTTON_LEFT and event.device>=0:mouse_down=event.pressed
+ var accept:bool=(event is InputEventKey or event is InputEventJoypadButton) and event.is_action("ui_accept")
+ if accept:accept_down=event.is_pressed()
+ if not choice_active:return false
+ var canceled:bool=event is InputEventScreenTouch and event.canceled
+ if was_blocked and contacts.is_empty() and not mouse_down and not accept_down:
+  choice_blocked=false;choice_input_changed.emit()
+ elif canceled:choice_input_changed.emit()
+ if canceled or (was_blocked and (event is InputEventScreenTouch or event is InputEventScreenDrag or event is InputEventMouse or event is InputEventKey or event is InputEventJoypadButton)):
+  get_viewport().set_input_as_handled();return true
+ return false
 func setup(owner_game):
  game=owner_game;layer=40
  surface=Surface.new();surface.controls=self;surface.mouse_filter=Control.MOUSE_FILTER_IGNORE;surface.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);add_child(surface)
@@ -71,6 +101,7 @@ func _process(delta):
 func movement(fallback:Vector2)->Vector2:return direction if joystick_finger>=0 else fallback
 func _input(event:InputEvent):
  if not active:return
+ if choice_barrier(event):return
  if event is InputEventScreenTouch:
   if not event.pressed or event.canceled:
    if fingers.has(event.index):

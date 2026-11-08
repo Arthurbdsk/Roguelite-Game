@@ -1,6 +1,6 @@
 {
-  "mobile_version": "0.26.2-android.11",
-  "android_version_code": 11,
+  "mobile_version": "0.26.2-android.12",
+  "android_version_code": 12,
   "base_pc_version": "0.26.2",
   "base_pc_commit": "01f01f009d398cd4c06208ba75533a14e52f2ca7",
   "incorporated_pc_commits": [
@@ -20,13 +20,13 @@
     "099ee58984e269850d571356e3180d5c4c69ea4d",
     "01f01f009d398cd4c06208ba75533a14e52f2ca7"
   ],
-  "previous_mobile_commit": "b38ca3f1db52a9184cb772e826569d49085d6752",
+  "previous_mobile_commit": "5e137fe0231d18e613a5d7d508a15c612f7d9747",
   "protocol": 2,
   "compatible_game_version": "0.26.2",
   "compatibility_id": "0.26.2+6c3b0b65ed77fe5a",
   "application_id": "com.socialy.hordas.android",
   "authorized_update": "2026-11-08",
   "maintenance": "Frozen after this delivery; new explicit Android request required.",
-  "authorized_changes": "Android touch scrolling and exact published-PC sprite proportions; PC runtime unchanged.",
+  "authorized_changes": "Android release barrier and fresh press for level-up selection; PC and gameplay unchanged.",
   "visual_reference_pc_executable_sha256": "820ab40246435ec1a30e85237a7cbd4c78ade1423ed78f0085b659d1b8ce8ac3"
 }

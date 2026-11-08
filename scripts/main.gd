@@ -610,7 +610,7 @@ func _notification(what: int) -> void:
   request_quit()
 
 func mobile_suspend(disconnect_online:bool):
- mobile_backgrounded=true;mobile.reset();player.velocity=Vector2.ZERO
+ mobile_backgrounded=true;mobile.cancel_contacts();player.velocity=Vector2.ZERO
  if is_instance_valid(mobile_keyboard):mobile_keyboard.close()
  for action in ["move_left","move_right","move_up","move_down","revive"]:Input.action_release(action)
  var network_open:bool=coop.active or coop.connection.connected or not coop.connection.code.is_empty() or coop.connection.warmup!=null
@@ -625,7 +625,7 @@ func mobile_suspend(disconnect_online:bool):
  if persistence_enabled:profile.save()
  if music!=null:music.player.stream_paused=true
 func mobile_resume():
- mobile_backgrounded=false;mobile.reset()
+ mobile_backgrounded=false;mobile.cancel_contacts()
  if music!=null:music.player.stream_paused=false
 func mobile_back():
  mobile.reset()

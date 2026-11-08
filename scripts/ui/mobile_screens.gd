@@ -124,10 +124,11 @@ func settings():
   text(list,"Último trecho: %d FPS | p95: %d ms"%[roundi(measured.fps),roundi(measured.p95_ms)],13)
 func upgrades(data):
  var v:=page("Subiu de nível",game.coop.close_menu if game.coop.active else Callable())
+ var hint:=text(v,"",12);hint.name="ChoiceTouchHint";hint.custom_minimum_size.y=18
  var h:=row(v);h.size_flags_vertical=Control.SIZE_EXPAND_FILL
  var choices:=scroll(h,"ChoiceScroll");choices.custom_minimum_size.x=318;choices.name="UpgradeList"
  for offer in data.get("offers",[]):
-  var b:=button(choices,"",func():game.choose_upgrade(offer.id));b.custom_minimum_size.y=106
+  var b:=MobileChoiceButton.new();b.custom_minimum_size=Vector2(44,106);b.size_flags_horizontal=Control.SIZE_EXPAND_FILL;b.add_theme_font_size_override("font_size",14);choices.add_child(b);b.setup(game,offer.id,hint)
   var inset:=MarginContainer.new();inset.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
   for edge in ["left","right","top","bottom"]:inset.add_theme_constant_override("margin_"+edge,8)
   inset.mouse_filter=Control.MOUSE_FILTER_IGNORE;b.add_child(inset);var r:=row(inset);r.mouse_filter=Control.MOUSE_FILTER_IGNORE;icon(r,offer.get("icon",""));var c:=column(r);c.mouse_filter=Control.MOUSE_FILTER_IGNORE

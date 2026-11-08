@@ -187,6 +187,7 @@ func render(which: String, data: Dictionary = {}) -> void:
  menu.visible = which != "running"
  hud.visible = which in ["running", "paused", "upgrading", "result"]
  if game.mobile!=null and game.mobile.active:
+  game.mobile.enter_screen(which)
   game.mobile.reset()
   if mobile_screens.render(self,which,data):return
  match which:

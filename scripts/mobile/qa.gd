@@ -28,6 +28,8 @@ func setup(owner):
  elif mode=="inspect_apk":inspect_apk()
  elif mode=="scroll011":
   var fixture=load("res://scripts/mobile/scroll_qa011.gd").new();add_child(fixture);fixture.setup(game,request)
+ elif mode=="choice012":
+  var fixture=load("res://scripts/mobile/choice_qa012.gd").new();add_child(fixture);fixture.setup(game,request)
  elif mode=="visual011":
   var fixture=load("res://scripts/mobile/visual_qa011.gd").new();var result:Dictionary=fixture.capture(game)
   var reference:Dictionary=JSON.parse_string(FileAccess.get_file_as_string("res://data/mobile/pc_visual_reference.json"))
